@@ -4,4 +4,4 @@ KSA Compliance app for E-invoice
 
 #### License
 
-mit
+Copyright (c) 2023 LavaLoon

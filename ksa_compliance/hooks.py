@@ -1,9 +1,9 @@
 app_name = "ksa_compliance"
 app_title = "KSA Compliance"
-app_publisher = "maged"
+app_publisher = "Lavaloon"
 app_description = "KSA Compliance app for E-invoice"
-app_email = "maged@lavaloon.com"
-app_license = "mit"
+app_email = "info@lavaloon.com"
+app_license = "Copyright (c) 2023 LavaLoon"
 # required_apps = []
 
 # Includes in <head>
@@ -46,7 +46,7 @@ app_license = "mit"
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# "Role": "home_page"
 # }
 
 # Generators
@@ -60,8 +60,8 @@ app_license = "mit"
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "ksa_compliance.utils.jinja_methods",
-#	"filters": "ksa_compliance.utils.jinja_filters"
+# "methods": "ksa_compliance.utils.jinja_methods",
+# "filters": "ksa_compliance.utils.jinja_filters"
 # }
 
 # Installation
@@ -103,11 +103,11 @@ app_license = "mit"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# "Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -115,7 +115,7 @@ app_license = "mit"
 # Override standard doctype classes
 
 # override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
+# "ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -123,32 +123,32 @@ app_license = "mit"
 # Hook on document methods and events
 
 # doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
+# "*": {
+# "on_update": "method",
+# "on_cancel": "method",
+# "on_trash": "method"
+# }
 # }
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
-#	"all": [
-#		"ksa_compliance.tasks.all"
-#	],
-#	"daily": [
-#		"ksa_compliance.tasks.daily"
-#	],
-#	"hourly": [
-#		"ksa_compliance.tasks.hourly"
-#	],
-#	"weekly": [
-#		"ksa_compliance.tasks.weekly"
-#	],
-#	"monthly": [
-#		"ksa_compliance.tasks.monthly"
-#	],
+# "all": [
+# "ksa_compliance.tasks.all"
+# ],
+# "daily": [
+# "ksa_compliance.tasks.daily"
+# ],
+# "hourly": [
+# "ksa_compliance.tasks.hourly"
+# ],
+# "weekly": [
+# "ksa_compliance.tasks.weekly"
+# ],
+# "monthly": [
+# "ksa_compliance.tasks.monthly"
+# ],
 # }
 
 # Testing
@@ -160,14 +160,14 @@ app_license = "mit"
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "ksa_compliance.event.get_events"
+# "frappe.desk.doctype.event.event.get_events": "ksa_compliance.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-#	"Task": "ksa_compliance.task.get_dashboard_data"
+# "Task": "ksa_compliance.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -193,29 +193,29 @@ app_license = "mit"
 # --------------------
 
 # user_data_fields = [
-#	{
-#		"doctype": "{doctype_1}",
-#		"filter_by": "{filter_by}",
-#		"redact_fields": ["{field_1}", "{field_2}"],
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_2}",
-#		"filter_by": "{filter_by}",
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_3}",
-#		"strict": False,
-#	},
-#	{
-#		"doctype": "{doctype_4}"
-#	}
+# {
+# "doctype": "{doctype_1}",
+# "filter_by": "{filter_by}",
+# "redact_fields": ["{field_1}", "{field_2}"],
+# "partial": 1,
+# },
+# {
+# "doctype": "{doctype_2}",
+# "filter_by": "{filter_by}",
+# "partial": 1,
+# },
+# {
+# "doctype": "{doctype_3}",
+# "strict": False,
+# },
+# {
+# "doctype": "{doctype_4}"
+# }
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"ksa_compliance.auth.validate"
+# "ksa_compliance.auth.validate"
 # ]
