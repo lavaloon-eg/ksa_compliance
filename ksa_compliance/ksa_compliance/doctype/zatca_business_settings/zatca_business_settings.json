@@ -1,14 +1,16 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{company}-{country}-{currency}",
  "creation": "2024-01-11 15:31:56.241248",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "tab_break_ljdo",
   "company",
-  "auto_create_e_invoice",
+  "country",
   "enable_zatca_integration",
-  "real_time_sync_with_zatca",
+  "sync_with_zatca",
   "currency",
   "column_break_kjzc",
   "company_address",
@@ -18,23 +20,22 @@
   "city",
   "postal_code",
   "district",
+  "seller_id_tab",
   "seller_id_section",
   "seller_name",
   "vat_registration_number",
-  "other_ids"
+  "other_ids",
+  "integration_tab",
+  "otp"
  ],
  "fields": [
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
-  },
-  {
-   "default": "0",
-   "fieldname": "auto_create_e_invoice",
-   "fieldtype": "Check",
-   "label": "Auto Create E-invoice"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -43,37 +44,34 @@
    "label": "Enable ZATCA Integration"
   },
   {
-   "default": "0",
-   "fieldname": "real_time_sync_with_zatca",
-   "fieldtype": "Check",
-   "label": "Real-Time Sync with ZATCA"
-  },
-  {
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address",
-   "options": "Address"
+   "options": "Address",
+   "reqd": 1
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "seller_id_section",
-   "fieldtype": "Section Break",
-   "label": "Seller ID"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "seller_name",
    "fieldtype": "Data",
-   "label": "Seller Name"
+   "label": "Seller Name",
+   "reqd": 1
   },
   {
    "fieldname": "vat_registration_number",
    "fieldtype": "Data",
-   "label": "Vat Registration Number"
+   "label": "Vat Registration Number",
+   "reqd": 1
   },
   {
    "fieldname": "other_ids",
@@ -126,14 +124,49 @@
    "fieldtype": "Data",
    "label": "District",
    "read_only": 1
+  },
+  {
+   "fieldname": "seller_id_tab",
+   "fieldtype": "Tab Break",
+   "label": "Seller ID"
+  },
+  {
+   "fetch_from": "company.country",
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_with_zatca",
+   "fieldtype": "Select",
+   "label": "Sync with ZATCA",
+   "options": "Live\nBatches"
+  },
+  {
+   "fieldname": "tab_break_ljdo",
+   "fieldtype": "Tab Break",
+   "label": "Seller Details"
+  },
+  {
+   "fieldname": "integration_tab",
+   "fieldtype": "Tab Break",
+   "label": "Integration"
+  },
+  {
+   "fieldname": "otp",
+   "fieldtype": "Data",
+   "label": "OTP"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-14 13:12:50.986492",
+ "modified": "2024-01-16 12:13:26.134568",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -151,5 +184,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "company"
 }
