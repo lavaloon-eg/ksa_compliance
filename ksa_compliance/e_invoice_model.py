@@ -5,7 +5,7 @@ ZATCA_DATA_TYPES = {bool, str, int, float, dict}
 
 
 class InputModelAttribute:
-    def __init__(self, attr_type: type, required: bool, min_len: int = None, max_len: int = None):
+    def __init__(self, attr_type: type, required: bool, min_len: int = 0, max_len: int = 1000):
         self.attr_type = attr_type
         self.required = required
         self.min_len = min_len
@@ -30,8 +30,8 @@ class MappingModel:
     def construct(self):
         for schema_key, schema_value in self._schema.items():
             field_required = schema_value.required
-            min_len = schema_value.min_len or 0
-            max_len = schema_value.max_len or 0
+            min_len = schema_value.min_len
+            max_len = schema_value.max_len
             field_name = schema_key
 
             if not self._validate_required(fieldname=field_name, required=field_required):
