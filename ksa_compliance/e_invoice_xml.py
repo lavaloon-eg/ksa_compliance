@@ -58,15 +58,16 @@ class BusinessSettingsInputModel():
 
 
 class BusinessSettingsOutputModel(MappingModel):
-    party_identification = InputModelAttribute(attr_type=str, required=True, min_len=1, max_len=1000)
-    street_name = InputModelAttribute(attr_type=str, required=True, min_len=0, max_len=172)
-    additional_street_name = InputModelAttribute(attr_type=str, required=False, min_len=0, max_len=172)
+    # Any parameter won't be passed to InputModelAttribute it will be assigned with its default value
+    party_identification = InputModelAttribute(attr_type=list, required=True, min_len=1, max_len=1000, list_of=str)
+    street_name = InputModelAttribute(attr_type=str, required=True, max_len=172)
+    additional_street_name = InputModelAttribute(attr_type=str, required=False, max_len=172)
     building_number = InputModelAttribute(attr_type=str, required=True)
     additional_number = InputModelAttribute(attr_type=str, required=False)
-    city_name = InputModelAttribute(attr_type=str, required=True, min_len=0, max_len=172)
+    city_name = InputModelAttribute(attr_type=str, required=True, max_len=172)
     postal_code = InputModelAttribute(attr_type=str, required=True)
-    province = InputModelAttribute(attr_type=str, required=False, min_len=0, max_len=172)
-    district = InputModelAttribute(attr_type=str, required=True, min_len=0, max_len=172)
+    province = InputModelAttribute(attr_type=str, required=False, max_len=172)
+    district = InputModelAttribute(attr_type=str, required=True, max_len=172)
 
 
 @frappe.whitelist(allow_guest=True)
