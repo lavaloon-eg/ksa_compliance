@@ -130,6 +130,12 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # }
 # }
 
+doc_events = {
+    "Sales Invoice": {
+        "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 

@@ -9,15 +9,17 @@ class Einvoice:
     # if batch doc = none validate business settings else pass
 
     # Any parameter won't be passed to InputModelAttribute it will be assigned with its default value
-    def __init__(self, sales_invoice_additional_fields_doc, sales_invoice_doc, customer_address_details_doc,
-                 customer_info_doc,
-                 invoice_type: str, batch_doc=None):
+    def __init__(self, sales_invoice_additional_fields_doc, invoice_type: str, batch_doc=None):
+        print(sales_invoice_additional_fields_doc, invoice_type)
         self.additional_fields = sales_invoice_additional_fields_doc
-        self.sales_invoice_doc = sales_invoice_doc
-        self.customer_address_details_doc = customer_address_details_doc
-        self.customer_info_doc = customer_info_doc
+
+        sales_invoice_doc = frappe.get_doc("Sales Invoice", sales_invoice_additional_fields_doc.get("sales_invoice"))
+        frappe.get_doc("Sales Invoice Additional Fields")
+        # self.sales_invoice_doc = sales_invoice_doc
+        # self.customer_address_details_doc = customer_address_details_doc
+        # self.customer_info_doc = customer_info_doc
         self.batch_doc = batch_doc
-        self.invoice_type = invoice_type
+        # self.invoice_type = invoice_type
         self.result = {}
         self.error_dic = {}
 

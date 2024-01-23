@@ -1,0 +1,196 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{sales_invoice}-AdditionalFields",
+ "creation": "2024-01-23 15:33:17.438354",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_jlnr",
+  "amended_from",
+  "sales_invoice",
+  "uuid",
+  "invoice_type_code",
+  "invoice_type_transaction",
+  "tax_currency",
+  "invoice_counter",
+  "previous_invoice_hash",
+  "qr_code",
+  "crypto_graphic_stamp",
+  "buyer_address_tab",
+  "column_break_jofi",
+  "buyer_street_name",
+  "buyer_additional_street_name",
+  "buyer_building_number",
+  "buyer_additional_number",
+  "buyer_city",
+  "buyer_postal_code",
+  "buyer_provincestate",
+  "buyer_district",
+  "buyer_country_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_jlnr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Invoice Additional Fields",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "uuid",
+   "fieldtype": "Data",
+   "label": "UUID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_type_code",
+   "fieldtype": "Data",
+   "label": "Invoice Type Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_type_transaction",
+   "fieldtype": "Data",
+   "label": "Invoice Type Transaction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_currency",
+   "fieldtype": "Data",
+   "label": "Tax Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_counter",
+   "fieldtype": "Data",
+   "label": "Invoice Counter",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_invoice_hash",
+   "fieldtype": "Data",
+   "label": "Previous Invoice Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Data",
+   "label": "QR Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "crypto_graphic_stamp",
+   "fieldtype": "Text",
+   "label": "Crypto Graphic Stamp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_address_tab",
+   "fieldtype": "Tab Break",
+   "label": "Buyer Address"
+  },
+  {
+   "fieldname": "buyer_street_name",
+   "fieldtype": "Data",
+   "label": "Street Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_additional_street_name",
+   "fieldtype": "Data",
+   "label": "Additional Street Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_building_number",
+   "fieldtype": "Data",
+   "label": "Building Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_additional_number",
+   "fieldtype": "Data",
+   "label": "Additional Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_city",
+   "fieldtype": "Data",
+   "label": "City",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_provincestate",
+   "fieldtype": "Data",
+   "label": "Province/State",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_district",
+   "fieldtype": "Data",
+   "label": "District",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_country_code",
+   "fieldtype": "Data",
+   "label": "Country Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jofi",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-01-23 17:33:57.363989",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "Sales Invoice Additional Fields",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
