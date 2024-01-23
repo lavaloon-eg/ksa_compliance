@@ -25,45 +25,66 @@ class Einvoice:
 
         # TODO: special validations handling
         party_types = ("CRN", "MOM", "MLS", "700", "SAG", "OTH")
-        self.party_identification = self.get_dict_value(field_name="party_identification",
-                                                        source_doc=self.business_settings_doc,
-                                                        required=True, xml_name="party_identification")
+        self.get_dict_value(field_name="party_identification",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="party_identification")
 
-        self.street_name = self.get_text_value(field_name="street_name", source_doc=self.business_settings_doc,
-                                               attribute_type=str, required=True, xml_name="street_name",
-                                               min_length=1, max_length=127)
+        self.get_text_value(field_name="street_name",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="street_name",
+                            min_length=1,
+                            max_length=127)
 
-        self.building_number = self.get_text_value(field_name="building_number", source_doc=self.business_settings_doc,
-                                                   attribute_type=str, required=True, xml_name="building_number")
+        self.get_text_value(field_name="building_number",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="building_number")
 
-        self.city_name = self.get_text_value(field_name="city_name", source_doc=self.business_settings_doc,
-                                             attribute_type=str, required=True, xml_name="city_name")
+        self.get_text_value(field_name="city_name",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="city_name")
 
-        self.postal_code = self.get_text_value(field_name="postal_code", source_doc=self.business_settings_doc,
-                                               attribute_type=str, required=True, xml_name="postal_code")
+        self.get_text_value(field_name="postal_code",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="postal_code")
 
-        self.city_subdivision_name = self.get_text_value(field_name="city_subdivision_name",
-                                                         source_doc=self.business_settings_doc,
-                                                         attribute_type=str, required=True,
-                                                         xml_name="city_subdivision_name", min_length=1,
-                                                         max_length=127)
+        self.get_text_value(field_name="city_subdivision_name",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="city_subdivision_name",
+                            min_length=1,
+                            max_length=127)
 
-        self.identification_code = self.get_text_value(field_name="identification_code",
-                                                       source_doc=self.business_settings_doc, attribute_type=str,
-                                                       required=True, xml_name="identification_code")
+        self.get_text_value(field_name="identification_code",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="identification_code")
 
-        self.company_id = self.get_text_value(field_name="VatRegistrationNumber", source_doc=self.business_settings_doc,
-                                              attribute_type=str, required=False, xml_name="company_id")
+        self.get_text_value(field_name="VatRegistrationNumber",
+                            source_doc=self.business_settings_doc,
+                            required=False,
+                            xml_name="company_id")
 
-        self.registration_name = self.get_text_value(field_name="registration_name",
-                                                     source_doc=self.business_settings_doc, attribute_type=str,
-                                                     required=False, xml_name="registration_name", min_length=1)
-        self.vat_number = self.get_text_value(field_name="vat_number", source_doc=self.business_settings_doc,
-                                              attribute_type=str, required=True, xml_name="vat_number")
+        self.get_text_value(field_name="registration_name",
+                            source_doc=self.business_settings_doc,
+                            required=False,
+                            xml_name="registration_name",
+                            min_length=1)
+        self.get_text_value(field_name="vat_number",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="vat_number")
 
-        self.seller_name = self.get_text_value(field_name="seller_name", source_doc=self.business_settings_doc,
-                                               attribute_type=str, required=True, xml_name="seller_name",
-                                               min_length=1, max_length=1000)
+        self.get_text_value(field_name="seller_name",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="seller_name",
+                            min_length=1,
+                            max_length=1000)
         # End Business Settings fields
 
     def get_text_value(self, field_name: str, source_doc, required: bool, xml_name: str = None,
