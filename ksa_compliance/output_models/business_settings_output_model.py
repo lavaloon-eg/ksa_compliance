@@ -9,14 +9,22 @@ class Einvoice:
     # if batch doc = none validate business settings else pass
 
     # Any parameter won't be passed to InputModelAttribute it will be assigned with its default value
-    def __init__(self, sales_invoice_additional_fields_doc, invoice_type: str, batch_doc=None):
+    def __init__(self, sales_invoice_additional_fields_doc, sales_invoice_doc, customer_address_details_doc,
+                 customer_info_doc,
+                 invoice_type: str, batch_doc=None):
         self.additional_fields = sales_invoice_additional_fields_doc
+        self.sales_invoice_doc = sales_invoice_doc
+        self.customer_address_details_doc = customer_address_details_doc
+        self.customer_info_doc = customer_info_doc
         self.batch_doc = batch_doc
         self.invoice_type = invoice_type
         self.result = {}
         self.error_dic = {}
 
-        self.sales_invoice_doc = self.get_sales_invoice_by_id(invoice_id=self.additional_fields['sales_invoice_id'])
+        # self.sales_invoice_doc = self.get_sales_invoice_by_id(invoice_id=self.additional_fields['sales_invoice_id'])
+        # self.customer_address_details_doc = self.get_customer_address_details(
+        # invoice_id=self.additional_fields['sales_invoice_id'])
+        # self.customer_info_doc = self.get_customer_info(invoice_id=self.additional_fields['sales_invoice_id'])
         # TODO: Set the appropriate filters for business settings
         self.business_settings_doc = self.get_business_settings_doc(
             business_settings_id=self.additional_fields['business_settings_id'])
@@ -28,67 +36,222 @@ class Einvoice:
         self.get_dict_value(field_name="party_identification",
                             source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="party_identification")
+                            xml_name="party_identification",
+                            rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"])
 
         self.get_text_value(field_name="street_name",
                             source_doc=self.business_settings_doc,
                             required=True,
                             xml_name="street_name",
                             min_length=1,
-                            max_length=127)
+                            max_length=127,
+                            rules=["BR-KSA-09", "BR-KSA-F-06", "BR-08", "BT-35", "BG-5"])
+
+        self.get_text_value(field_name="additional_street_name",
+                            source_doc=self.business_settings_doc,
+                            required=False,
+                            xml_name="additional_street_name",
+                            min_length=0,
+                            max_length=127,
+                            rules=["BR-KSA-F-06", "BR-08", "BT-36", "BG-5"])
 
         self.get_text_value(field_name="building_number",
                             source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="building_number")
+                            xml_name="building_number",
+                            rules=["BR-KSA-09", "BR-KSA-37", "BR-08", "KSA-17", "BG-5"])
+
+        self.get_text_value(field_name="additional_address_number",
+                            source_doc=self.business_settings_doc,
+                            required=False,
+                            xml_name="plot_identification",
+                            rules=["BR-08", "KSA-23", "BG-5"])
 
         self.get_text_value(field_name="city_name",
                             source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="city_name")
+                            xml_name="city_name",
+                            rules=["BR-KSA-09", "BR-KSA-F-06", "BR-08", "BT-37", "BG-5"])
 
         self.get_text_value(field_name="postal_code",
                             source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="postal_code")
+                            xml_name="postal_zone",
+                            rules=["BR-KSA-09", "BR-KSA-66", "BR-08", "BT-38", "BG-5"])
 
-        self.get_text_value(field_name="city_subdivision_name",
+        self.get_text_value(field_name="province_state",
+                            source_doc=self.business_settings_doc,
+                            required=False,
+                            xml_name="CountrySubentity",
+                            min_length=0,
+                            max_length=127,
+                            rules=["BR-KSA-F-06", "BR-08", "BT-39", "BG-5"])
+
+        self.get_text_value(field_name="district",
                             source_doc=self.business_settings_doc,
                             required=True,
                             xml_name="city_subdivision_name",
                             min_length=1,
-                            max_length=127)
+                            max_length=127,
+                            rules=["BR-KSA-09", "BR-KSA-F-06", "BR-08", "KSA-3", "BG-5"])
 
-        self.get_text_value(field_name="identification_code",
-                            source_doc=self.business_settings_doc,
-                            required=True,
-                            xml_name="identification_code")
+        # Field country code will be hardcoded in xml with value "SA"
 
         self.get_text_value(field_name="VatRegistrationNumber",
                             source_doc=self.business_settings_doc,
-                            required=False,
-                            xml_name="company_id")
-
-        self.get_text_value(field_name="registration_name",
-                            source_doc=self.business_settings_doc,
-                            required=False,
-                            xml_name="registration_name",
-                            min_length=1)
-        self.get_text_value(field_name="vat_number",
-                            source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="vat_number")
+                            xml_name="company_id",
+                            rules=["BR-KSA-39", "BR-KSA-40", "BT-31", "BG-5"])
 
         self.get_text_value(field_name="seller_name",
                             source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="seller_name",
+                            xml_name="registration_name",
                             min_length=1,
-                            max_length=1000)
+                            max_length=1000,
+                            rules=["BR-KSA-F-06", "BR-06", "BT-27", "BG-5"])
+
         # End Business Settings fields
+        # Start Sales Invoice fields
+
+        # TODO
+        self.get_dict_value(field_name="other_buyer_identification",
+                            source_doc=self.sales_invoice_doc,
+                            required=True,
+                            xml_name="PartyIdentification",
+                            rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"])
+
+        if type == "standard":
+            self.get_text_value(field_name="buyer_street_name",
+                                source_doc=self.sales_invoice_doc,
+                                required=True,
+                                xml_name="street_name",
+                                min_length=1,
+                                max_length=127,
+                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-50", "BG-8"])
+        elif type == "simplified":
+            self.get_text_value(field_name="buyer_street_name",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="street_name",
+                                min_length=0,
+                                max_length=127,
+                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-50", "BG-8"])
+
+        self.get_text_value(field_name="buyer_additional_street_name",
+                            source_doc=self.sales_invoice_doc,
+                            required=False,
+                            xml_name="additional_street_name",
+                            min_length=0,
+                            max_length=127,
+                            rules=["BR-KSA-F-06", "BT-51", "BG-8"])
+
+        # TODO
+        # self.get_text_value(field_name="buyer_building_number",
+        #                     source_doc=self.sales_invoice_doc,
+        #                     required=True,
+        #                     xml_name="building_number",
+        #                     rules=["KSA-18", "BG-8"])
+
+        self.get_text_value(field_name="buyer_additional_address_number",
+                            source_doc=self.sales_invoice_doc,
+                            required=False,
+                            xml_name="plot_identification",
+                            rules=["KSA-19", "BG-8"])
+
+        if type == "Standard":
+            self.get_text_value(field_name="buyer_city_name",
+                                source_doc=self.sales_invoice_doc,
+                                required=True,
+                                xml_name="city_name",
+                                min_length=1,
+                                max_length=127,
+                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-52", "BG-8"])
+        elif type == "simplified":
+            self.get_text_value(field_name="buyer_city_name",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="city_name",
+                                min_length=0,
+                                max_length=127,
+                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-52", "BG-8"])
+
+        if type == "Standard":
+            pass
+            # TODO
+            # self.get_text_value(field_name="postal_code",
+            #                     source_doc=self.business_settings_doc,
+            #                     required=True,
+            #                     xml_name="postal_zone",
+            #                     rules=["BR-KSA-09", "BR-KSA-66", "BR-08", "BT-38", "BG-5"])
+        elif type == "Simplified":
+            self.get_text_value(field_name="buyer_postal_code",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="postal_zone",
+                                rules=["BR-10", "BT-53", "BG-8"])
+
+        self.get_text_value(field_name="buyer_province_state",
+                            source_doc=self.sales_invoice_doc,
+                            required=False,
+                            xml_name="CountrySubentity",
+                            min_length=0,
+                            max_length=127,
+                            rules=["BR-KSA-F-06", "BT-54", "BG-8"])
+
+        if type == "Standard":
+            pass
+            # TODO
+            # self.get_text_value(field_name="buyer_district",
+            #                     source_doc=self.business_settings_doc,
+            #                     required=True,
+            #                     xml_name="city_subdivision_name",
+            #                     min_length=1,
+            #                     max_length=127,
+            #                     rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"])
+        elif type == "Simplified":
+            self.get_text_value(field_name="buyer_district",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="city_subdivision_name",
+                                min_length=0,
+                                max_length=127,
+                                rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"])
+
+        if type == "Standard":
+            self.get_text_value(field_name="buyer_district",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="city_subdivision_name",
+                                min_length=0,
+                                max_length=127,
+                                rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"])
+
+        elif type == "Simplified":
+            self.get_text_value(field_name="buyer_district",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="city_subdivision_name",
+                                min_length=0,
+                                max_length=127,
+                                rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"])
+
+        if type == "Standard":
+            self.get_text_value(field_name="buyer_country_code",
+                                source_doc=self.sales_invoice_doc,
+                                required=True,
+                                xml_name="identification_code",
+                                rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"])
+
+        elif type == "Simplified":
+            self.get_text_value(field_name="buyer_country_code",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="identification_code",
+                                rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"])
 
     def get_text_value(self, field_name: str, source_doc, required: bool, xml_name: str = None,
-                       min_length: int = 0, max_length: int = 5000):
+                       min_length: int = 0, max_length: int = 5000, rules: list = None):
 
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
@@ -101,7 +264,7 @@ class Einvoice:
             return
 
         if not min_length <= len(field_value) <= max_length:
-            self.error_dic[field_name] = f'Invalid {field_name} field size {len(field_value)}'
+            self.error_dic[field_name] = f'Invalid {field_name} field size value {len(field_value)}'
             return
 
         field_name = xml_name if xml_name else field_name
@@ -109,7 +272,7 @@ class Einvoice:
         return field_value
 
     def get_int_value(self, field_name: str, source_doc, required: bool, min_value: int,
-                      max_value: int, xml_name: str = None, ):
+                      max_value: int, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
@@ -129,7 +292,7 @@ class Einvoice:
         return field_value
 
     def get_float_value(self, field_name: str, source_doc, required: bool, min_value: int,
-                        max_value: int, xml_name: str = None):
+                        max_value: int, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
@@ -151,7 +314,7 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_dict_value(self, field_name: str, source_doc, required: bool, xml_name: str = None):
+    def get_dict_value(self, field_name: str, source_doc, required: bool, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
@@ -166,7 +329,7 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_list_value(self, field_name: str, source_doc, required: bool, xml_name: str = None):
+    def get_list_value(self, field_name: str, source_doc, required: bool, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
@@ -211,3 +374,9 @@ class Einvoice:
 
     def get_business_settings_doc(self, business_settings_id: str):
         return frappe.get_doc("ZATCA Business Settings", business_settings_id)
+
+    def get_customer_address_details(self, invoice_id):
+        pass
+
+    def get_customer_info(self, invoice_id):
+        pass
