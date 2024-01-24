@@ -1,5 +1,4 @@
 import frappe
-from ksa_compliance.output_models.e_invoice_model import MappingModel, InputModelAttribute
 
 
 def get_sales_invoice_by_id(invoice_id: str):
