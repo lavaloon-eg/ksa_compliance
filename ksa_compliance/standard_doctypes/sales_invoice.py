@@ -2,12 +2,7 @@ import frappe
 
 
 def create_sales_invoice_additional_fields_doctype(self, method):
-    print(self, method)
-    print(type(self))
-    print(self.as_dict())
     customer_address_doc = frappe.get_doc("Address", self.customer_address)
-    print(customer_address_doc.as_dict())
-    print("\n\n\n" + "ss" + "\n\n\n")
 
     sales_invoice_additional_fields_dict = {
         "doctype": "Sales Invoice Additional Fields",
@@ -23,4 +18,3 @@ def create_sales_invoice_additional_fields_doctype(self, method):
     }
     additional_fields_doc = frappe.get_doc(sales_invoice_additional_fields_dict)
     additional_fields_doc.save()
-    return
