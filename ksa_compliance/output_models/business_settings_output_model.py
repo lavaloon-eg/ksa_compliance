@@ -3,13 +3,13 @@ from ksa_compliance.output_models.e_invoice_model import MappingModel, InputMode
 
 
 def get_sales_invoice_by_id(invoice_id: str):
-    return frappe.get_doc("Sales Invoice", invoice_id)
+    return frappe.get_doc("Sales Invoice", invoice_id).as_dict()
 
 
 def get_business_settings_doc(company_id: str):
     company_doc = frappe.get_doc("Company", company_id)
     business_settings_id = company_id + '-' + company_doc.get("country") + '-' + company_doc.get("default_currency")
-    return frappe.get_doc("ZATCA Business Settings", business_settings_id)
+    return frappe.get_doc("ZATCA Business Settings", business_settings_id).as_dict()
 
 
 class Einvoice:
@@ -21,7 +21,7 @@ class Einvoice:
     # Any parameter won't be passed to InputModelAttribute it will be assigned with its default value
     def __init__(self, sales_invoice_additional_fields_doc, invoice_type: str = "Simplified", batch_doc=None):
 
-        self.additional_fields_doc = sales_invoice_additional_fields_doc
+        self.additional_fields_doc = sales_invoice_additional_fields_doc.as_dict()
         self.batch_doc = batch_doc
         self.result = {}
         self.error_dic = {}
@@ -30,9 +30,6 @@ class Einvoice:
             invoice_id=sales_invoice_additional_fields_doc.get("sales_invoice"))
 
         self.business_settings_doc = get_business_settings_doc(company_id=self.sales_invoice_doc.get("company"))
-        print(self.sales_invoice_doc.as_dict())
-        print(self.business_settings_doc.as_dict())
-        print(self.additional_fields_doc.as_dict())
 
         # Start Business Settings fields
 
@@ -235,17 +232,17 @@ class Einvoice:
                                 xml_name="identification_code",
                                 rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"])
 
-    def get_text_value(self, field_name: str, source_doc, required: bool, xml_name: str = None,
+    def get_text_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
                        min_length: int = 0, max_length: int = 5000, rules: list = None):
-
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
 
-        field_value = source_doc.get(field_name).trim() if source_doc.get(field_name) else None
-
+        field_value = source_doc.get(field_name).strip() if source_doc.get(field_name) else None
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
+            return
+        if field_value is None:
             return
 
         if not min_length <= len(field_value) <= max_length:
@@ -256,16 +253,17 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_int_value(self, field_name: str, source_doc, required: bool, min_value: int,
+    def get_int_value(self, field_name: str, source_doc: dict, required: bool, min_value: int,
                       max_value: int, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
 
         field_value = source_doc.get(field_name, None)
-
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
+            return
+        if field_value is None:
             return
 
         if not min_value <= field_value <= max_value:
@@ -276,21 +274,21 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_float_value(self, field_name: str, source_doc, required: bool, min_value: int,
+    def get_float_value(self, field_name: str, source_doc: dict, required: bool, min_value: int,
                         max_value: int, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
 
         field_value = source_doc.get(field_name, None)
-
-        # Try to parse
-        field_value = float(field_value) if type(field_value) is int else field_value
-
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
+        if field_value is None:
+            return
 
+            # Try to parse
+        field_value = float(field_value) if type(field_value) is int else field_value
         if not min_value <= field_value <= max_value:
             self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
             return
@@ -299,7 +297,8 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_dict_value(self, field_name: str, source_doc, required: bool, xml_name: str = None, rules: list = None):
+    def get_dict_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+                       rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
@@ -307,6 +306,8 @@ class Einvoice:
         field_value = source_doc.get(field_name)
         if required and (field_value is None or {}):
             self.error_dic[field_name] = f"Missing field value: {field_name}."
+            return
+        if field_value is None or {}:
             return
 
         if field_name == 'party_identification':
@@ -320,15 +321,17 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_list_value(self, field_name: str, source_doc, required: bool, xml_name: str = None, rules: list = None):
+    def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+                       rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
 
         field_value = source_doc.get(field_name, None)
-
         if required and (field_value is None or []):
             self.error_dic[field_name] = f"Missing field value: {field_name}."
+            return
+        if field_value is None or []:
             return
 
         field_name = xml_name if xml_name else field_name

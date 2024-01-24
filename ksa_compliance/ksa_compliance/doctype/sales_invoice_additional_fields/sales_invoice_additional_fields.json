@@ -595,57 +595,68 @@
   {
    "fieldname": "invoice_line_allowance_amount_currency",
    "fieldtype": "Data",
-   "label": "Invoice Line Allowance Amount Currency"
+   "label": "Invoice Line Allowance Amount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_allowance_amount",
    "fieldtype": "Int",
-   "label": "Invoice Line Allowance Amount"
+   "label": "Invoice Line Allowance Amount",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_allowance_base_amount",
    "fieldtype": "Int",
-   "label": "Invoice Line Allowance Base Amount"
+   "label": "Invoice Line Allowance Base Amount",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_allowance_base_amount_currency",
    "fieldtype": "Data",
-   "label": "Invoice Line Allowance Base Amount Currency"
+   "label": "Invoice Line Allowance Base Amount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_indicator",
    "fieldtype": "Data",
-   "label": "Invoice Line Charge Indicator"
+   "label": "Invoice Line Charge Indicator",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_percentage",
    "fieldtype": "Percent",
-   "label": "Invoice Line Charge Percentage"
+   "label": "Invoice Line Charge Percentage",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_amount",
    "fieldtype": "Int",
-   "label": "Invoice Line Charge Amount"
+   "label": "Invoice Line Charge Amount",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_amount_currency",
    "fieldtype": "Data",
-   "label": "Invoice Line Charge Amount Currency"
+   "label": "Invoice Line Charge Amount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_base_amount",
    "fieldtype": "Int",
-   "label": "Invoice Line Charge Base Amount"
+   "label": "Invoice Line Charge Base Amount",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_base_amount_reason",
    "fieldtype": "Data",
-   "label": "Invoice Line Charge Base Amount Reason"
+   "label": "Invoice Line Charge Base Amount Reason",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_line_charge_base_amount_reason_code",
    "fieldtype": "Data",
-   "label": "Invoice Line Charge Base Amount Reason Code"
+   "label": "Invoice Line Charge Base Amount Reason Code",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_mryd",
@@ -654,22 +665,26 @@
   {
    "fieldname": "vat_line_amount",
    "fieldtype": "Int",
-   "label": "VAT Line Amount"
+   "label": "VAT Line Amount",
+   "read_only": 1
   },
   {
    "fieldname": "vat_line_amount_currency",
    "fieldtype": "Data",
-   "label": "VAT Line Amount Currency"
+   "label": "VAT Line Amount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "line_amount_inclusive_vat",
    "fieldtype": "Int",
-   "label": "Line Amount Inclusive VAT"
+   "label": "Line Amount Inclusive VAT",
+   "read_only": 1
   },
   {
    "fieldname": "line_amount_inclusive_vat_currency",
    "fieldtype": "Data",
-   "label": "Line Amount Inclusive VAT Currency"
+   "label": "Line Amount Inclusive VAT Currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_rkes",
@@ -678,22 +693,26 @@
   {
    "fieldname": "prepayment_vat_category_taxable_amount",
    "fieldtype": "Int",
-   "label": "Prepayment VAT Category Taxable Amount"
+   "label": "Prepayment VAT Category Taxable Amount",
+   "read_only": 1
   },
   {
    "fieldname": "prepayment_vat_category_taxable_amount_currency",
    "fieldtype": "Data",
-   "label": "Prepayment VAT Category Taxable Amount Currency"
+   "label": "Prepayment VAT Category Taxable Amount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "prepayment_vat_category_tax_amount",
    "fieldtype": "Int",
-   "label": "Prepayment VAT Category Tax Amount"
+   "label": "Prepayment VAT Category Tax Amount",
+   "read_only": 1
   },
   {
    "fieldname": "prepayment_vat_category_tax_amount_currency",
    "fieldtype": "Data",
-   "label": "Prepayment VAT Category Tax Amount Currency"
+   "label": "Prepayment VAT Category Tax Amount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_tlsr",
@@ -702,17 +721,20 @@
   {
    "fieldname": "prepayment_vat_category_code",
    "fieldtype": "Data",
-   "label": "Prepayment VAT Category Code"
+   "label": "Prepayment VAT Category Code",
+   "read_only": 1
   },
   {
    "fieldname": "prepayment_vat_rate",
    "fieldtype": "Int",
-   "label": "Prepayment VAT Rate"
+   "label": "Prepayment VAT Rate",
+   "read_only": 1
   },
   {
    "fieldname": "item_price_discount_currency",
    "fieldtype": "Data",
-   "label": "Item Price Discount Currency"
+   "label": "Item Price Discount Currency",
+   "read_only": 1
   },
   {
    "fieldname": "buyer_id_section",
@@ -740,7 +762,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-24 14:08:18.842111",
+ "modified": "2024-01-24 15:58:37.935792",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
