@@ -2,6 +2,17 @@ import frappe
 from ksa_compliance.output_models.e_invoice_model import MappingModel, InputModelAttribute
 
 
+def get_sales_invoice_by_id(invoice_id: str):
+    return frappe.get_doc("Sales Invoice", invoice_id)
+
+
+def get_business_settings_doc(company_id: str):
+    co = frappe.get_doc("Company", company_id)
+    print(co.as_dict())
+    co.get("company")+'-'+co.get("country")+'-'+co.get("currency")
+    return
+
+
 class Einvoice:
     # TODO:
     # get Sales Invoice Doc
@@ -10,25 +21,24 @@ class Einvoice:
 
     # Any parameter won't be passed to InputModelAttribute it will be assigned with its default value
     def __init__(self, sales_invoice_additional_fields_doc, invoice_type: str, batch_doc=None):
+
         print(sales_invoice_additional_fields_doc, invoice_type)
         self.additional_fields = sales_invoice_additional_fields_doc
 
-        sales_invoice_doc = frappe.get_doc("Sales Invoice", sales_invoice_additional_fields_doc.get("sales_invoice"))
-        frappe.get_doc("Sales Invoice Additional Fields")
-        # self.sales_invoice_doc = sales_invoice_doc
-        # self.customer_address_details_doc = customer_address_details_doc
-        # self.customer_info_doc = customer_info_doc
         self.batch_doc = batch_doc
         # self.invoice_type = invoice_type
         self.result = {}
         self.error_dic = {}
 
-        # self.sales_invoice_doc = self.get_sales_invoice_by_id(invoice_id=self.additional_fields['sales_invoice_id'])
-        # self.customer_address_details_doc = self.get_customer_address_details(
-        # invoice_id=self.additional_fields['sales_invoice_id'])
-        # self.customer_info_doc = self.get_customer_info(invoice_id=self.additional_fields['sales_invoice_id'])
+        self.sales_invoice_doc = get_sales_invoice_by_id(
+            invoice_id=sales_invoice_additional_fields_doc.get("sales_invoice"))
+
+        print(self.sales_invoice_doc.as_dict())
+        sl = self.sales_invoice_doc
+        print(sl.get("company")+'-'+sl.get("country")+'-'+sl.get("currency"))
+        asd
         # TODO: Set the appropriate filters for business settings
-        self.business_settings_doc = self.get_business_settings_doc(
+        self.business_settings_doc = get_business_settings_doc(
             business_settings_id=self.additional_fields['business_settings_id'])
 
         # Start Business Settings fields
@@ -370,12 +380,6 @@ class Einvoice:
             self.result.pop(att_key)
             self.error_dic[att_key] = "Invalid data type, expecting a list of tuples"
             return False
-
-    def get_sales_invoice_by_id(self, invoice_id: str):
-        return frappe.get_doc("Sales Invoice", invoice_id)
-
-    def get_business_settings_doc(self, business_settings_id: str):
-        return frappe.get_doc("ZATCA Business Settings", business_settings_id)
 
     def get_customer_address_details(self, invoice_id):
         pass
