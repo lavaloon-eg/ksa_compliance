@@ -12,3 +12,4 @@ class SalesInvoiceAdditionalFields(Document):
         print(e_invoice.result, e_invoice.error_dic)
         frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
         frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
+        sad

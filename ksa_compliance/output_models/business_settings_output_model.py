@@ -1,5 +1,4 @@
 import frappe
-from ksa_compliance.output_models.e_invoice_model import MappingModel, InputModelAttribute
 
 
 def get_sales_invoice_by_id(invoice_id: str):
@@ -28,8 +27,11 @@ class Einvoice:
 
         self.sales_invoice_doc = get_sales_invoice_by_id(
             invoice_id=sales_invoice_additional_fields_doc.get("sales_invoice"))
-
         self.business_settings_doc = get_business_settings_doc(company_id=self.sales_invoice_doc.get("company"))
+
+        print(self.business_settings_doc)
+        print(self.additional_fields_doc)
+        print(self.sales_invoice_doc)
 
         # Start Business Settings fields
 
@@ -232,6 +234,122 @@ class Einvoice:
                                 xml_name="identification_code",
                                 rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"])
 
+        if invoice_type == "Standard":
+            # TODO: handle conditional
+            self.get_text_value(field_name="buyer_vat_registration_number",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="company_id",
+                                rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"])
+
+        elif invoice_type == "Simplified":
+            self.get_text_value(field_name="buyer_vat_registration_number",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="company_id",
+                                rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"])
+
+        if invoice_type == "Standard":
+            self.get_text_value(field_name="customer_name",
+                                source_doc=self.sales_invoice_doc,
+                                required=True,
+                                xml_name="registration_name",
+                                min_length=1,
+                                max_length=1000,
+                                rules=["BR-KSA-25", "BR-KSA-42", "BR-KSA-71", "BR-KSA-F-06", "BT-44", "BG-7"])
+
+        elif invoice_type == "Simplified":
+            # TODO: handle conditional
+            self.get_text_value(field_name="customer_name",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="registration_name",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-25", "BR-KSA-42", "BR-KSA-71", "BR-KSA-F-06", "BT-44", "BG-7"])
+
+        # TODO: Add Supply Date
+        if invoice_type == "Standard":
+            pass
+        elif invoice_type == "Simplified":
+            pass
+
+        # TODO: Add end Supply Date
+        if invoice_type == "Standard":
+            pass
+        elif invoice_type == "Simplified":
+            pass
+
+        self.get_text_value(field_name="payment_means_type_code",
+                            source_doc=self.additional_fields_doc,
+                            required=False,
+                            xml_name="PaymentMeansCode",
+                            rules=["BR-KSA-16", "BR-49", "BR-CL-16", "BT-81", "BG-16"])
+
+        self.get_text_value(field_name="payment_means_type_code",
+                            source_doc=self.additional_fields_doc,
+                            required=False,
+                            xml_name="PaymentMeansCode",
+                            rules=["BR-KSA-16", "BR-49", "BR-CL-16", "BT-81", "BG-16"])
+
+        if self.sales_invoice_doc.get("is_debit_note") or self.sales_invoice_doc.get("is_return"):
+            # TODO: handle conditional view and mandatory in sales invoice doctype
+            self.get_text_value(field_name="custom_return_reason",
+                                source_doc=self.sales_invoice_doc,
+                                required=True,
+                                xml_name="PaymentMeansCode",
+                                min_length=1,
+                                max_length=1000,
+                                rules=["BR-KSA-17", "BR-KSA-F-06", "KSA-10"])
+
+        # TODO: payment mode return Payment by credit?
+        # if self.sales_invoice_doc.get("mode_of_payment") == "Credit":
+
+        # TODO: field from 49 to 58
+
+        self.get_text_value(field_name="reason_for_allowance",
+                            source_doc=self.additional_fields_doc,
+                            required=False,
+                            xml_name="allowance_charge_reason",
+                            min_length=0,
+                            max_length=1000,
+                            rules=["BR-KSA-F-06", "BT-97", "BG-20"])
+
+        self.get_text_value(field_name="code_for_allowance_reason",
+                            source_doc=self.additional_fields_doc,
+                            required=False,
+                            xml_name="allowance_charge_reason_code",
+                            min_length=0,
+                            max_length=1000,
+                            rules=["BR-KSA-F-06", "BT-97", "BG-20"])
+
+        #     TAX ID Scheme is Hardcoded
+        self.get_text_value(field_name="code_for_allowance_reason",
+                            source_doc=self.additional_fields_doc,
+                            required=False,
+                            xml_name="allowance_charge_reason_code",
+                            min_length=0,
+                            max_length=1000,
+                            rules=["BR-KSA-F-06", "BT-97", "BG-20"])
+        #     TODO: validate Document level charge indicator is Hardcoded, conditional fields from 63 to 72
+
+        # TODO: Add Conditional Case
+        self.get_float_value(field_name='charge_percentage',
+                             source_doc=self.additional_fields_doc,
+                             required=False,
+                             xml_name="multiplier_factor_numeric",
+                             min_value=0,
+                             max_value=100,
+                             rules=["BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05", "BT-101", "BG-21"])
+
+        # TODO: Add Conditional Case
+        self.get_float_value(field_name='charge_amount',
+                             source_doc=self.additional_fields_doc,
+                             required=False,
+                             xml_name="amount",
+                             rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-36", "BR-DEC-05", "BT-99", "BG-21"])
+
+
     def get_text_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
                        min_length: int = 0, max_length: int = 5000, rules: list = None):
         if required and field_name not in source_doc:
@@ -274,8 +392,8 @@ class Einvoice:
         self.result[field_name] = field_value
         return field_value
 
-    def get_float_value(self, field_name: str, source_doc: dict, required: bool, min_value: int,
-                        max_value: int, xml_name: str = None, rules: list = None):
+    def get_float_value(self, field_name: str, source_doc: dict, required: bool, min_value: int = 0,
+                        max_value: int = 99999999999999, xml_name: str = None, rules: list = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
