@@ -36,6 +36,7 @@
   "invoice_note",
   "contract_id",
   "supply_end_date",
+  "payment_means_type_code",
   "currency_for_allowance",
   "base_allowance_amount",
   "allowance_vat_category_code",
@@ -757,12 +758,18 @@
    "fieldname": "buyer_address_details_section",
    "fieldtype": "Section Break",
    "label": "Buyer Address Details"
+  },
+  {
+   "fieldname": "payment_means_type_code",
+   "fieldtype": "Data",
+   "label": "Payment Means Type Code",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-24 15:58:37.935792",
+ "modified": "2024-01-24 17:05:18.091860",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
