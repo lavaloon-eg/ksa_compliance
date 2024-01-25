@@ -10,18 +10,41 @@
     <cbc:UUID>{{ invoice.uuid }}</cbc:UUID>
     <cbc:IssueDate>{{ invoice.issue_date }}</cbc:IssueDate>
     <cbc:IssueTime>{{ invoice.issue_time }}</cbc:IssueTime>
+
+    <!-- TODO: Discussion for name of Invoice type transactions-->
     <cbc:InvoiceTypeCode name="0200000">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
-    <!-- TODO: Invoice type transactions -->
     <!-- Note unstructured text -->
     <cbc:Note>This is a note</cbc:Note>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>{{ invoice.tax_currency_code }}</cbc:TaxCurrencyCode>
-    <!-- TODO: Discussion -->
+
+    <!-- TODO: Discussion if it sales order or purchase order -->
+    {% if invoice.po_no %}
+    <cac:OrderReference>
+        <cbc:ID>{{ invoice.po_no }}</cbc:ID> <!-- Purchase Order-->
+    </cac:OrderReference>
+    {% endif %}
+
+    <!--Return against invoice ID-->
+    {% if invoice.is_return or invoice.is_debit_note %}
+    <cac:BillingReference>
+        <cac:InvoiceDocumentReference>
+            <cbc:ID>{{ invoice.return_against }}</cbc:ID>
+        </cac:InvoiceDocumentReference>
+    </cac:BillingReference>
+    {% endif %}
+
+    <!-- Contract ID -->
+    {% if invoice.contract_id %}
+    <cac:ContractDocumentReference>
+        <cbc:ID>{{ invoice.contract_id }}</cbc:ID>
+    </cac:ContractDocumentReference>
+    {% endif %}
+
+    <!-- TODO: Discussion GENERATED FIELDS-->
     <cac:AdditionalDocumentReference>
         <cbc:ID>ICV</cbc:ID>
         <cbc:UUID>23</cbc:UUID>
-    </cac:AdditionalDocumentReference>
-    <cac:AdditionalDocumentReference>
         <cbc:ID>PIH</cbc:ID>
         <cac:Attachment>
             <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">
@@ -30,7 +53,7 @@
         </cac:Attachment>
     </cac:AdditionalDocumentReference>
 
-
+    <!-- TODO: Cryptographic stamp-->
     <cac:Signature>
         <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
         <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod>
@@ -132,13 +155,17 @@
     {% if invoice.sales_order_id %}
     <cac:Delivery>
         <cbc:ActualDeliveryDate>2022-09-07</cbc:ActualDeliveryDate>
+        <cbc:LastDeliveryDate>2022-09-07</cbc:LastDeliveryDate>
     </cac:Delivery>
     {% endif %}
+
+    <!-- TODO: Pre-paid -->
     {% if invoice.is_pos %}
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
     </cac:PaymentMeans>
     {% endif %}
+
     <!-- TODO: Discussion -->
     {% if invoice.charge_indicator %}
     <cac:AllowanceCharge>
@@ -212,13 +239,13 @@
             <cbc:Name>{{ item.item_name }}</cbc:Name>
             {% if item.buyer_item_identification %}
             <cac:BuyersItemIdentification>
-                <cbc:ID> {{ item.buyer_item_identification }}</cbc:ID>
+                <cbc:ID>{{ item.buyer_item_identification }}</cbc:ID>
             </cac:BuyersItemIdentification>
             {% endif %}
 
             {% if item.seller_item_identification %}
             <cac:SellersItemIdentification>
-                <cbc:ID> {{ item.seller_item_identification }}</cbc:ID>
+                <cbc:ID>{{ item.seller_item_identification }}</cbc:ID>
             </cac:SellersItemIdentification>
             {% endif %}
 
@@ -239,7 +266,7 @@
         </cac:Item>
         <cac:Price>
             <cbc:PriceAmount currencyID="SAR">{{ item.price_list_rate or item.rate }}</cbc:PriceAmount>
-           <cbc:BaseQuantity unitCode="C62">{{ item.qty }}</cbc:BaseQuantity>
+            <cbc:BaseQuantity unitCode="C62">{{ item.qty }}</cbc:BaseQuantity>
             {% if invoice.charge_indicator %}
             <cac:AllowanceCharge>
                 <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
