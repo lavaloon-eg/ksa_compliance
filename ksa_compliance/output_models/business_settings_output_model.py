@@ -389,7 +389,12 @@ class Einvoice:
                             rules=["BR-KSA-09", "BR-KSA-F-06", "BR-08", "KSA-3", "BG-5"],
                             parent="seller_details")
 
-        # Field country code will be hardcoded in xml with value "SA"
+        self.get_text_value(field_name="country",
+                            source_doc=self.business_settings_doc,
+                            required=True,
+                            xml_name="country",
+                            rules=["BG-5", "BT-40", "BR-08", "BR-09", "BR-CL-14"],
+                            parent="seller_details")
 
         self.get_text_value(field_name="vat_registration_number",
                             source_doc=self.business_settings_doc,

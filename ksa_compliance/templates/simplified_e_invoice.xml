@@ -85,7 +85,7 @@
 
             <cac:PartyTaxScheme>
                 <!-- Vat Registration Number -->
-                <cbc:CompanyID>{{business_settings.vat_registration_number}}</cbc:CompanyID>
+                <cbc:CompanyID>{{business_settings.company_id}}</cbc:CompanyID>
                 <!-- TODO: Discussion-->
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
@@ -93,7 +93,7 @@
             </cac:PartyTaxScheme>
 
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName>{{ business_settings.seller_name }}</cbc:RegistrationName>
+                <cbc:RegistrationName>{{ business_settings.registration_name }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingSupplierParty>
