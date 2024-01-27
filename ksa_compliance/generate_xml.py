@@ -37,8 +37,11 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
     # render XML Template
     invoice_xml = frappe.render_template(
         f"ksa_compliance/templates/{template}",
-        context={"invoice": data.get("invoice"), "seller": data.get("seller"), "buyer": data.get("buyer"),
-                 "business_settings": data.get("business_settings")},
+        context={
+            "invoice": data.get("invoice"),
+            "seller_details": data.get("seller_details"),
+            "buyer_details": data.get("buyer_details"),
+            "business_settings": data.get("business_settings")},
         is_path=True
     )
     invoice_xml = invoice_xml.replace("&", "&amp;")

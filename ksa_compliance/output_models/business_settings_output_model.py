@@ -618,6 +618,13 @@ class Einvoice:
                             rules=["BT-3", "BR-04", "BR-CL-01", "BR-KSA-05"],
                             parent="invoice")
 
+        self.get_text_value(field_name="invoice_type_transaction",
+                            source_doc=self.additional_fields_doc,
+                            required=True,
+                            xml_name="invoice_type_transaction",
+                            rules=["KSA-2", "BR-KSA-06", "BR-KSA-07", "BR-KSA-31"],
+                            parent="invoice")
+
         self.get_text_value(field_name="currency",
                             source_doc=self.sales_invoice_doc,
                             required=True,
@@ -625,10 +632,10 @@ class Einvoice:
                             rules=["BT-5", "BR-05", "BR-CL-04", "BR-KSA-CL-02"],
                             parent="invoice")
         # Default "SAR"
-        self.get_text_value(field_name="currency",
+        self.get_text_value(field_name="tax_currency",
                             source_doc=self.sales_invoice_doc,
                             required=True,
-                            xml_name="tax_currency_code",
+                            xml_name="tax_currency",
                             rules=["BT-6", "BR-CL-05", "BR-KSA-EN16931-02", "BR-KSA-68"],
                             parent="invoice")
 

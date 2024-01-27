@@ -11,12 +11,11 @@
     <cbc:IssueDate>{{ invoice.issue_date }}</cbc:IssueDate>
     <cbc:IssueTime>{{ invoice.issue_time }}</cbc:IssueTime>
 
-    <!-- TODO: Discussion for name of Invoice type transactions-->
-    <cbc:InvoiceTypeCode name="0200000">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
+    <cbc:InvoiceTypeCode name="{{ invoice.invoice_type_transaction }}">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
     <!-- Note unstructured text -->
     <cbc:Note>This is a note</cbc:Note>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
-    <cbc:TaxCurrencyCode>{{ invoice.tax_currency_code }}</cbc:TaxCurrencyCode>
+    <cbc:TaxCurrencyCode>{{ invoice.tax_currency }}</cbc:TaxCurrencyCode>
 
     <!-- TODO: Discussion if it sales order or purchase order -->
     {% if invoice.po_no %}
@@ -62,25 +61,25 @@
     <cac:AccountingSupplierParty>
         <cac:Party>
             <!-- Additional seller IDs -->
-            {% for it in seller.party_identifications %}
+            {% for it in seller_details.party_identifications %}
             <cac:PartyIdentification>
                 <cbc:ID schemeID="{{it.code}}">{{it.value}}</cbc:ID>
             </cac:PartyIdentification>
             {% endfor %}
             <cac:PostalAddress>
-                <cbc:StreetName>{{ seller.street_name }}</cbc:StreetName>
-                <cbc:BuildingNumber>{{ seller.building_number }}</cbc:BuildingNumber>
-                {% if seller.address_additional_number %}
-                <cbc:PlotIdentification>{{ seller.address_additional_number }}</cbc:PlotIdentification>
+                <cbc:StreetName>{{ seller_details.street_name }}</cbc:StreetName>
+                <cbc:BuildingNumber>{{ seller_details.building_number }}</cbc:BuildingNumber>
+                {% if seller_details.address_additional_number %}
+                <cbc:PlotIdentification>{{ seller_details.address_additional_number }}</cbc:PlotIdentification>
                 {% endif %}
-                <cbc:CitySubdivisionName>{{ seller.city_subdivision_name }}</cbc:CitySubdivisionName>
-                <cbc:CityName>{{ seller.city_name }}</cbc:CityName>
-                <cbc:PostalZone>{{ seller.postal_zone }}</cbc:PostalZone>
-                {% if seller.province %}
-                <cbc:CountrySubentity>{{ seller.province }}</cbc:CountrySubentity>
+                <cbc:CitySubdivisionName>{{ seller_details.city_subdivision_name }}</cbc:CitySubdivisionName>
+                <cbc:CityName>{{ seller_details.city_name }}</cbc:CityName>
+                <cbc:PostalZone>{{ seller_details.postal_zone }}</cbc:PostalZone>
+                {% if seller_details.province %}
+                <cbc:CountrySubentity>{{ seller_details.province }}</cbc:CountrySubentity>
                 {% endif %}
                 <cac:Country>
-                    <cbc:IdentificationCode>{{ seller.country_code }}</cbc:IdentificationCode>
+                    <cbc:IdentificationCode>{{ seller_details.country_code }}</cbc:IdentificationCode>
                 </cac:Country>
             </cac:PostalAddress>
 
@@ -101,51 +100,51 @@
     <!-- Buyer info -->
     <cac:AccountingCustomerParty>
         <cac:Party>
-            {% if buyer.party_identifications %}
-            {% for it in buyer.party_identifications %}
+            {% if buyer_details.party_identifications %}
+            {% for it in buyer_details.party_identifications %}
             <cac:PartyIdentification>
                 <cbc:ID schemeID="{{ it.code }}">{{ it.value }}</cbc:ID>
             </cac:PartyIdentification>
             {% endfor %}
             {% endif %}
             <cac:PostalAddress>
-                <cbc:StreetName>{{ buyer.street_name }}</cbc:StreetName>
-                {% if buyer.building_number %}
-                <cbc:BuildingNumber>{{ buyer.building_number }}</cbc:BuildingNumber>
+                <cbc:StreetName>{{ buyer_details.street_name }}</cbc:StreetName>
+                {% if buyer_details.building_number %}
+                <cbc:BuildingNumber>{{ buyer_details.building_number }}</cbc:BuildingNumber>
                 {% endif %}
-                {% if buyer.address_additional_number %}
-                <cbc:PlotIdentification>{{ buyer.address_additional_number }}</cbc:PlotIdentification>
+                {% if buyer_details.address_additional_number %}
+                <cbc:PlotIdentification>{{ buyer_details.address_additional_number }}</cbc:PlotIdentification>
                 {% endif %}
-                {% if buyer.city_subdivision_name %}
-                <cbc:CitySubdivisionName>{{ buyer.city_subdivision_name }}</cbc:CitySubdivisionName>
+                {% if buyer_details.city_subdivision_name %}
+                <cbc:CitySubdivisionName>{{ buyer_details.city_subdivision_name }}</cbc:CitySubdivisionName>
                 {% endif %}
-                {% if buyer.city_name %}
-                <cbc:CityName>{{ buyer.city_name }}</cbc:CityName>
+                {% if buyer_details.city_name %}
+                <cbc:CityName>{{ buyer_details.city_name }}</cbc:CityName>
                 {% endif %}
-                {% if buyer.postal_zone %}
-                <cbc:PostalZone>{{ buyer.postal_zone }}</cbc:PostalZone>
+                {% if buyer_details.postal_zone %}
+                <cbc:PostalZone>{{ buyer_details.postal_zone }}</cbc:PostalZone>
                 {% endif %}
-                {% if buyer.province %}
-                <cbc:CountrySubentity>{{ buyer.province }}</cbc:CountrySubentity>
+                {% if buyer_details.province %}
+                <cbc:CountrySubentity>{{ buyer_details.province }}</cbc:CountrySubentity>
                 {% endif %}
-                {% if buyer.country_code %}
+                {% if buyer_details.country_code %}
                 <cac:Country>
-                    <cbc:IdentificationCode>{{ buyer.country_code }}</cbc:IdentificationCode>
+                    <cbc:IdentificationCode>{{ buyer_details.country_code }}</cbc:IdentificationCode>
                 </cac:Country>
                 {% endif %}
             </cac:PostalAddress>
-            {% if buyer.vat_id %}
+            {% if buyer_details.vat_id %}
             <cac:PartyTaxScheme>
                 <cac:TaxScheme>
                     <!-- Vat Registration Number -->
-                    <cbc:CompanyID>{{ buyer.vat_id }}</cbc:CompanyID>
+                    <cbc:CompanyID>{{ buyer_details.vat_id }}</cbc:CompanyID>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
             {% endif %}
-            {% if buyer.buyer_name %}
+            {% if buyer_details.buyer_name %}
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName>{{ buyer.buyer_name }}</cbc:RegistrationName>
+                <cbc:RegistrationName>{{ buyer_details.buyer_name }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
             {% endif %}
         </cac:Party>
