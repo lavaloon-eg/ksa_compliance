@@ -392,7 +392,7 @@ class Einvoice:
         self.get_text_value(field_name="country",
                             source_doc=self.business_settings_doc,
                             required=True,
-                            xml_name="country",
+                            xml_name="country_code",
                             rules=["BG-5", "BT-40", "BR-08", "BR-09", "BR-CL-14"],
                             parent="seller_details")
 
@@ -638,7 +638,7 @@ class Einvoice:
                             parent="invoice")
         # Default "SAR"
         self.get_text_value(field_name="tax_currency",
-                            source_doc=self.sales_invoice_doc,
+                            source_doc=self.additional_fields_doc,
                             required=True,
                             xml_name="tax_currency",
                             rules=["BT-6", "BR-CL-05", "BR-KSA-EN16931-02", "BR-KSA-68"],
