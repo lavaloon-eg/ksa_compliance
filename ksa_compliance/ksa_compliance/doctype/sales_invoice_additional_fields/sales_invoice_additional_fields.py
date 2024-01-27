@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from ksa_compliance.output_models.business_settings_output_model import Einvoice
+from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.generate_xml import generate_xml_file
 
 import uuid
