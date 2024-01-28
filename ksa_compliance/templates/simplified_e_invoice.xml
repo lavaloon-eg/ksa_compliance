@@ -11,7 +11,8 @@
     <cbc:IssueDate>{{ invoice.issue_date }}</cbc:IssueDate>
     <cbc:IssueTime>{{ invoice.issue_time }}</cbc:IssueTime>
 
-    <cbc:InvoiceTypeCode name="{{ invoice.invoice_type_transaction }}">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
+    <cbc:InvoiceTypeCode name="{{ invoice.invoice_type_transaction }}">{{ invoice.invoice_type_code }}
+    </cbc:InvoiceTypeCode>
     <!-- Note unstructured text -->
     <cbc:Note>This is a note</cbc:Note>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
@@ -165,24 +166,49 @@
     </cac:PaymentMeans>
     {% endif %}
 
-    <!-- TODO: Discussion -->
-    {% if invoice.charge_indicator %}
+    <!--TODO: Implement Allowances -->
+    {% if invoice.allowance_indicator %}
     <cac:AllowanceCharge>
-        <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-        <cbc:AllowanceChargeReason>discount</cbc:AllowanceChargeReason>
-        <cbc:Amount currencyID="SAR">0.00</cbc:Amount>
+        <cbc:ChargeIndicator>"false"</cbc:ChargeIndicator>
+        <cbc:MultiplierFactorNumeric>20</cbc:MultiplierFactorNumeric>
+        <cbc:Amount currencyID="SAR">20.24</cbc:Amount>
+        <cbc:BaseAmount currencyID="SAR">200</cbc:BaseAmount>
         <cac:TaxCategory>
-            <cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
-            <cbc:Percent>15</cbc:Percent>
+            <cbc:ID>S</cbc:ID>
+            <cbc:Percent>20</cbc:Percent>
             <cac:TaxScheme>
-                <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+                <cbc:ID>VAT</cbc:ID>
             </cac:TaxScheme>
         </cac:TaxCategory>
+        <cbc:AllowanceChargeReason>"Reason of Allowance</cbc:AllowanceChargeReason>
+        <cbc:AllowanceChargeReasonCode>95</cbc:AllowanceChargeReasonCode>
+
     </cac:AllowanceCharge>
     {% endif %}
 
+    <!--TODO: Implement Charges -->
+    {% if invoice.charge_indicator %}
+    <cac:AllowanceCharge>
+        <cbc:ChargeIndicator>"true"</cbc:ChargeIndicator>
+        <cbc:MultiplierFactorNumeric>20</cbc:MultiplierFactorNumeric>
+        <cbc:Amount currencyID="SAR">20.24</cbc:Amount>
+        <cbc:BaseAmount currencyID="SAR">200</cbc:BaseAmount>
+        <cac:TaxCategory>
+            <cbc:ID>S</cbc:ID>
+            <cbc:Percent>15</cbc:Percent>
+            <cac:TaxScheme>
+                <cbc:ID>VAT</cbc:ID>
+            </cac:TaxScheme>
+        </cac:TaxCategory>
+        <cbc:AllowanceChargeReason>"Reason of Charge</cbc:AllowanceChargeReason>
+        <cbc:AllowanceChargeReasonCode>CG</cbc:AllowanceChargeReasonCode>
+    </cac:AllowanceCharge>
+    {% endif %}
+
+    <!-- Taxes -->
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+        <!-- Sales Taxes and Charges Child -->
         <cac:TaxSubtotal>
             <cbc:TaxableAmount currencyID="SAR">{{ invoice.total }}</cbc:TaxableAmount>
             <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
@@ -200,30 +226,31 @@
     </cac:TaxTotal>
 
     <cac:LegalMonetaryTotal>
-        <cbc:PayableAmount currencyID="SAR">{{ invoice.outstanding_amount }}</cbc:PayableAmount>
-        <cbc:TaxInclusiveAmount currencyID="SAR">{{ invoice.grand_total }}</cbc:TaxInclusiveAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total }}</cbc:LineExtensionAmount>
+        <cbc:AllowanceTotalAmount currencyID="{{ invoice.currency_code }}">{{ invoice.discount_amount }}
+        </cbc:AllowanceTotalAmount>
+        <cbc:ChargeTotalAmount currencyID="{{ invoice.currency_code }}">0.00</cbc:ChargeTotalAmount>
+        <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total }}
+        </cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total }}
+        </cbc:TaxInclusiveAmount>
         {% if invoice.is_pos %} <!-- TODO: Discussion -->
-        <cbc:PrepaidAmount currencyID="SAR">0.00</cbc:PrepaidAmount>
+        <cbc:PrepaidAmount currencyID="{{ invoice.currency_code }}">0.00</cbc:PrepaidAmount>
         {% endif %}
         {% if invoice.rounding_adjustment %}
-        <cbc:PayableRoundingAmount currencyID="SAR">{{ invoice.rounding_adjustment }}</cbc:PayableRoundingAmount>
+        <cbc:PayableRoundingAmount currencyID="{{ invoice.currency_code }}">{{ invoice.rounding_adjustment }}
+        </cbc:PayableRoundingAmount>
         {% endif %}
-
-        <!-- TODO -->
-        <cbc:PayableAmount currencyID="SAR">{{ invoice.outstanding_amount }}</cbc:PayableAmount>
-        <cbc:LineExtensionAmount currencyID="SAR">{{ invoice.total }}</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="SAR">{{ invoice.total }}</cbc:TaxExclusiveAmount>
-        <cbc:AllowanceTotalAmount currencyID="SAR">0.00</cbc:AllowanceTotalAmount>
-
+        <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.outstanding_amount }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
 
     <!-- Invoice item lines -->
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
-        <cbc:ID>1</cbc:ID>
+        <cbc:ID>{{ item.idx }}</cbc:ID>
         <cbc:Note>Scratch on box</cbc:Note>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="SAR">{{ item.amount }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ item.amount }}</cbc:LineExtensionAmount>
         <!--TODO: Implement Allowance Charge-->
         <!--TODO: Implement in python code-->
         {%- for data in invoice.tax_data %}
