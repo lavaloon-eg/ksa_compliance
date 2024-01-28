@@ -422,6 +422,7 @@ class Einvoice:
         if xml_name == 'party_identifications':
             party_list = ["CRN", "MOM", "MLS", "700", "SAG", "OTH"]
             if field_value:
+                field_value = {it.type_code: it.value for it in field_value if it.value}
                 valid = self.validate_scheme_with_order(field_value=field_value, ordered_list=party_list)
                 if not valid:
                     self.error_dic[field_name] = f"Wrong ordered for field: {field_name}."

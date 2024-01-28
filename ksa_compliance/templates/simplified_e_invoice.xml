@@ -62,9 +62,9 @@
     <cac:AccountingSupplierParty>
         <cac:Party>
             <!-- Additional seller IDs -->
-            {% for it in seller_details.party_identifications %}
+            {% for key, val in seller_details.party_identifications.items() %}
             <cac:PartyIdentification>
-                <cbc:ID schemeID="{{it.code}}">{{it.value}}</cbc:ID>
+                <cbc:ID schemeID="{{key}}">{{val}}</cbc:ID>
             </cac:PartyIdentification>
             {% endfor %}
             <cac:PostalAddress>
@@ -143,7 +143,7 @@
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
             {% endif %}
-            {% if buyer_details.buyer_name %}
+            {% if buyer_details.registration_name %}
             <cac:PartyLegalEntity>
                 <cbc:RegistrationName>{{ buyer_details.registration_name }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
