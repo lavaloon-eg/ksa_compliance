@@ -7,3 +7,9 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+
+* XML Templates:
+  * Create Tax invoice template. 
+  * Create Simplified tax invoice template.
+  * Add a method to generate XML regarding invoice type.
+* Create E-Invoicing-Sync page to run the sync batch.
