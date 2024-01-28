@@ -1,5 +1,6 @@
 frappe.ui.form.on("ZATCA Business Settings", {
   setup: function (frm) {
+    add_other_ids_if_new(frm);
     filter_company_address(frm);
   },
   company: function (frm) {
@@ -26,4 +27,38 @@ function filter_company_address(frm) {
       }
     },
   });
+}
+
+function add_other_ids_if_new(frm) {
+  // TODO: update permissions for child doctype
+  if (frm.is_new()) {
+    var seller_id_list = [];
+    seller_id_list.push(
+      {
+        type_name: "Commercial Registration Number",
+        type_code: "CRN",
+      },
+      {
+        type_name: "MOMRAH License",
+        type_code: "MOM",
+      },
+      {
+        type_name: "MHRSD License",
+        type_code: "MLS",
+      },
+      {
+        type_name: "700 Number",
+        type_code: "700",
+      },
+      {
+        type_name: "MISA License",
+        type_code: "SAG",
+      },
+      {
+        type_name: "Other OD",
+        type_code: "OTH",
+      }
+    );
+    frm.set_value("other_ids", seller_id_list);
+  }
 }

@@ -33,10 +33,12 @@
   "buyer_district",
   "buyer_country_code",
   "invoice_tab",
+  "document_level_section",
   "invoice_note",
   "contract_id",
   "supply_end_date",
   "payment_means_type_code",
+  "allowance_indicator",
   "currency_for_allowance",
   "base_allowance_amount",
   "allowance_vat_category_code",
@@ -44,6 +46,7 @@
   "reason_for_allowance",
   "code_for_allowance_reason",
   "column_break_urzl",
+  "charge_indicator",
   "charge_percentage",
   "charge_amount",
   "currency_charge_amount",
@@ -764,12 +767,31 @@
    "fieldtype": "Data",
    "label": "Payment Means Type Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "document_level_section",
+   "fieldtype": "Section Break",
+   "label": "Document Level"
+  },
+  {
+   "default": "0",
+   "fieldname": "allowance_indicator",
+   "fieldtype": "Check",
+   "label": "Allowance Indicator",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "charge_indicator",
+   "fieldtype": "Check",
+   "label": "Charge Indicator",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-24 17:05:18.091860",
+ "modified": "2024-01-28 17:20:42.479141",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
