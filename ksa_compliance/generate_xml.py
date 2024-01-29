@@ -46,7 +46,7 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
     )
     invoice_xml = invoice_xml.replace("&", "&amp;")
     invoice_xml = invoice_xml.replace("\n", "")
-    xml_filename = generate_einvoice_xml_fielname(data['business_settings']['company_id'])
+    xml_filename = generate_einvoice_xml_fielname(data['business_settings'], data["invoice"])
     file = frappe.get_doc(
         {
             "doctype": "File",
@@ -59,8 +59,12 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
     file.insert()
 
 
-def generate_einvoice_xml_fielname(vat_registration_number):
-    vat_registration_number = (vat_registration_number if vat_registration_number.startswith(
-        "SA") else "SA" + vat_registration_number)
-    progressive_name = frappe.model.naming.make_autoname(vat_registration_number + "_.#####")
+def generate_einvoice_xml_fielname(business_settings, invoice):
+    vat_registration_number = business_settings["company_id"]
+    invoice_date = invoice["issue_date"].replace("-", "")
+    invoice_time = invoice["issue_time"].replace(":", "")
+    invoice_number = invoice["id"]
+    file_name = vat_registration_number + "_" + invoice_date + "T" + invoice_time + "_" + invoice_number
+    progressive_name = frappe.model.naming.make_autoname(file_name)
+    progressive_name = progressive_name[:len(file_name)]
     return progressive_name + ".xml"
