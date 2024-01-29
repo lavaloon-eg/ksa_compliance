@@ -4,6 +4,22 @@
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
          xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
 
+    <!-- TODO: Cryptographic stamp-->
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+            <ext:ExtensionURI>urn:oasis:names:specification:ubl:dsig:enveloped:xades</ext:ExtensionURI>
+            <ext:ExtensionContent>
+                <sig:UBLDocumentSignatures
+                        xmlns:sig="urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2"
+                        xmlns:sac="urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2"
+                        xmlns:sbc="urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2">
+                    <sac:SignatureInformation>
+                    </sac:SignatureInformation>
+                </sig:UBLDocumentSignatures>
+            </ext:ExtensionContent>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+
     <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
 
     <cbc:ID>{{ invoice.id }}</cbc:ID>
@@ -16,7 +32,7 @@
     <!-- Note unstructured text -->
     <cbc:Note>This is a note</cbc:Note>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
-    <cbc:TaxCurrencyCode>{{ invoice.tax_currency }}</cbc:TaxCurrencyCode>
+    <cbc:TaxCurrencyCode>{{ invoice.tax_currency or 'SAR'}}</cbc:TaxCurrencyCode>
 
     <!-- TODO: Discussion if it sales order or purchase order -->
     {% if invoice.po_no %}
@@ -53,11 +69,6 @@
         </cac:Attachment>
     </cac:AdditionalDocumentReference>
 
-    <!-- TODO: Cryptographic stamp-->
-    <cac:Signature>
-        <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
-        <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod>
-    </cac:Signature>
     <!-- Seller info -->
     <cac:AccountingSupplierParty>
         <cac:Party>
@@ -209,14 +220,16 @@
 
     <!-- Taxes -->
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 }}
+        </cbc:TaxAmount>
         <!-- Sales Taxes and Charges Child -->
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="SAR">{{ invoice.total }}</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+            <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 }}
+            </cbc:TaxAmount>
             <cac:TaxCategory>
                 <cbc:ID>S</cbc:ID>
-                <cbc:Percent>20</cbc:Percent>
+                <cbc:Percent>{{ invoice.total_taxes_and_charges_percent or 0}}</cbc:Percent>
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
@@ -224,18 +237,18 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR'}}">{{ invoice.total_taxes_and_charges }}
+        </cbc:TaxAmount>
     </cac:TaxTotal>
 
     <cac:LegalMonetaryTotal>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total }}</cbc:LineExtensionAmount>
-        <cbc:AllowanceTotalAmount currencyID="{{ invoice.currency_code }}">{{ invoice.discount_amount }}
-        </cbc:AllowanceTotalAmount>
+        {% if invoice.discount_amount %}
+        <cbc:AllowanceTotalAmount currencyID="{{ invoice.currency_code }}">{{ invoice.discount_amount }}</cbc:AllowanceTotalAmount>
+        {% endif %}
         <cbc:ChargeTotalAmount currencyID="{{ invoice.currency_code }}">0.00</cbc:ChargeTotalAmount>
-        <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total }}
-        </cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total }}
-        </cbc:TaxInclusiveAmount>
+        <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total }}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total }}</cbc:TaxInclusiveAmount>
         {% if invoice.is_pos %} <!-- TODO: Discussion -->
         <cbc:PrepaidAmount currencyID="{{ invoice.currency_code }}">0.00</cbc:PrepaidAmount>
         {% endif %}
@@ -250,19 +263,11 @@
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
         <cbc:ID>{{ item.idx }}</cbc:ID>
-        <cbc:Note>Scratch on box</cbc:Note>
+        <!-- This is the name as note -->
+        <cbc:Note>{{ item.item_name }}</cbc:Note>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ item.amount }}</cbc:LineExtensionAmount>
-        <!--TODO: Implement Allowance Charge-->
-        <!--TODO: Implement in python code-->
-        {%- for data in invoice.tax_data %}
-        <cac:TaxTotal>
-            {% if item.tax_amount %}
-            <cbc:TaxAmount currencyID="SAR">{{ item.tax_amount }}</cbc:TaxAmount>
-            {% endif %}
-            <cbc:RoundingAmount currencyID="SAR">{{ item.total_amount }}</cbc:RoundingAmount>
-        </cac:TaxTotal>
-        {% endfor %}
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount or item.amount }}
+        </cbc:LineExtensionAmount>
         <cac:Item>
             <cbc:Name>{{ item.item_name }}</cbc:Name>
             {% if item.buyer_item_identification %}
@@ -284,25 +289,32 @@
             {% endif %}
 
             <ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
-                <cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
-                <cbc:Percent>20</cbc:Percent>
+                <cbc:ID schemeID="UN/ECE 5305">S</cbc:ID>
+                {% if item.tax_percent %}
+                <cbc:Percent>{{ item.tax_percent }}</cbc:Percent>
+                {% else %}
+                <!--TODO: Add Exemption reason here-->
+                <cbc:Percent>{{ 0.00 }}</cbc:Percent>
+                {% endif %}
                 <TaxScheme>
-                    <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+                    <cbc:ID schemeID="UN/ECE 5153">VAT</cbc:ID>
                 </TaxScheme>
             </ClassifiedTaxCategory>
 
         </cac:Item>
-        <cac:Price>
-            <cbc:PriceAmount currencyID="SAR">{{ item.price_list_rate or item.rate }}</cbc:PriceAmount>
-            <cbc:BaseQuantity unitCode="C62">{{ item.qty }}</cbc:BaseQuantity>
-            {% if invoice.charge_indicator %}
-            <cac:AllowanceCharge>
-                <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-                <cbc:AllowanceChargeReason>discount</cbc:AllowanceChargeReason>
-                <cbc:Amount currencyID="SAR">0.00</cbc:Amount>
-                <cbc:BaseAmount currencyID="SAR">{{ item.price_list_rate or item.rate }}</cbc:BaseAmount>
-            </cac:AllowanceCharge>
+        <cac:TaxTotal>
+            {% if item.tax_amount %}
+            <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ item.tax_amount }}</cbc:TaxAmount>
+            {% else %}
+            <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ 0.00 }}</cbc:TaxAmount>
             {% endif %}
+            <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ item.total_amount or item.net_amount }}</cbc:RoundingAmount>
+        </cac:TaxTotal>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ item.price_list_rate or item.rate }}
+            </cbc:PriceAmount>
+            <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
+            <!--TODO: Implement Allowances -->
         </cac:Price>
     </cac:InvoiceLine>
     {% endfor %}
