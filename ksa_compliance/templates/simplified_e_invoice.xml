@@ -62,11 +62,13 @@
     <cac:AccountingSupplierParty>
         <cac:Party>
             <!-- Additional seller IDs -->
+            {% if seller_details.party_identifications %}
             {% for key, val in seller_details.party_identifications.items() %}
             <cac:PartyIdentification>
                 <cbc:ID schemeID="{{key}}">{{val}}</cbc:ID>
             </cac:PartyIdentification>
             {% endfor %}
+            {% endif %}
             <cac:PostalAddress>
                 <cbc:StreetName>{{ seller_details.street_name }}</cbc:StreetName>
                 <cbc:BuildingNumber>{{ seller_details.building_number }}</cbc:BuildingNumber>
