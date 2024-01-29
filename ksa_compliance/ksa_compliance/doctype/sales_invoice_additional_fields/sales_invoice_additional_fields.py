@@ -1,5 +1,7 @@
 # Copyright (c) 2024, Lavaloon and contributors
 # For license information, please see license.txt
+import hashlib
+import os
 
 import frappe
 from frappe.model.document import Document
@@ -11,9 +13,11 @@ import uuid
 
 class SalesInvoiceAdditionalFields(Document):
     def before_insert(self):
+        self.set_invoice_counter_value()
+        self.set_pih()
         self.generate_uuid()
-        self.set_invoice_type_code("Simplified")  # TODO: Evaluate invoice type
         self.set_tax_currency()  # Set as "SAR" as a default tax currency value
+        self.set_invoice_type_code("Simplified")  # TODO: Evaluate invoice type
 
     def on_submit(self):
         # Construct the EInvoice output data
@@ -43,6 +47,34 @@ class SalesInvoiceAdditionalFields(Document):
 
     def set_tax_currency(self):
         self.tax_currency = "SAR"
+
+    def set_invoice_counter_value(self):
+        additional_field_records = frappe.db.get_list(self.doctype, filters={"docstatus": ["!=", 2]})
+        if additional_field_records:
+            self.invoice_counter = len(additional_field_records) + 1
+        else:
+            self.invoice_counter = 1
+
+    def set_pih(self):
+        if self.invoice_counter == 1:
+            self.previous_invoice_hash = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
+        else:
+            psi_id = frappe.db.get_value(self.doctype, filters={"invoice_counter": self.invoice_counter - 1},
+                                         fieldname="sales_invoice")
+            attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),
+                                         filters={"attached_to_name": ("in", psi_id),
+                                                  "attached_to_doctype": "Sales Invoice"})
+            site = frappe.local.site
+            for attachment in attachments:
+                if attachment.file_name and attachment.file_name.endswith(".xml"):
+                    xml_filename = attachment.file_name
+
+            cwd = os.getcwd()
+            file_name = cwd + '/' + site + "/public/files/" + xml_filename
+            with open(file_name, "rb") as f:
+                data = f.read()
+                sha256hash = hashlib.sha256(data).hexdigest()
+            self.previous_invoice_hash = sha256hash
 
 
 def construct_einvoice_data(additional_fields_doc):

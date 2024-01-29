@@ -845,7 +845,7 @@ class Einvoice:
         self.get_text_value(field_name="previous_invoice_hash",
                             source_doc=self.additional_fields_doc,
                             required=True,
-                            xml_name="previous_invoice_hash",
+                            xml_name="pih",
                             rules=["KSA-13", "BR-KSA-26", "BR-KSA-61"],
                             parent="invoice")
 
