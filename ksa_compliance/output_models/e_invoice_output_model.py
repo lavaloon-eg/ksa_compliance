@@ -1,3 +1,5 @@
+import json
+
 import frappe
 from frappe.utils import get_date_str, get_time_str
 
@@ -10,6 +12,26 @@ def get_business_settings_doc(company_id: str):
     company_doc = frappe.get_doc("Company", company_id)
     business_settings_id = company_id + '-' + company_doc.get("country") + '-' + company_doc.get("default_currency")
     return frappe.get_doc("ZATCA Business Settings", business_settings_id).as_dict()
+
+
+def append_tax_details_into_item_lines(invoice_id, item_lines):
+    item_wise_tax_details = frappe.db.sql("""
+                SELECT item_wise_tax_detail  
+                FROM `tabSales Taxes and Charges` 
+                WHERE parent = %(invoice_id)s
+            """, {"invoice_id": invoice_id}, as_dict=1) or []
+
+    if item_wise_tax_details:
+        items_taxes = item_wise_tax_details[0]["item_wise_tax_detail"]
+        if isinstance(items_taxes, str):
+            items_taxes = json.loads(items_taxes)
+        for item in item_lines:
+            if item["item_code"] in items_taxes:
+                item["tax_percent"] = items_taxes[item["item_code"]][0]
+                item["tax_amount"] = items_taxes[item["item_code"]][1]
+                item["total_amount"] = items_taxes[item["item_code"]][1] + item["amount"]
+
+    return item_lines
 
 
 class Einvoice:
@@ -901,16 +923,17 @@ class Einvoice:
         item_lines = []
         for item in self.sales_invoice_doc.get("items"):
             new_item = {}
-            req_fields = ["idx", "qty", "uom", "item_name", "net_amount", "amount", "price_list_rate", "rate"]
+            req_fields = ["idx", "qty", "uom", "item_code", "item_name", "net_amount", "amount", "price_list_rate",
+                          "rate"]
             for it in req_fields:
-                if it not in ["item_name", "uom"]:
+                if it not in ["item_name", "uom", "item_code"]:
                     new_item[it] = self.get_float_value(
                         field_name=it,
                         source_doc=item,
                         required=True,
                         xml_name=it
                     )
-                elif it in ["item_name", "uom"]:
+                elif it in ["item_name", "uom", "item_code"]:
                     new_item[it] = self.get_text_value(
                         field_name=it,
                         source_doc=item,
@@ -919,5 +942,10 @@ class Einvoice:
                     )
             item_lines.append(new_item)
 
+        # Add tax amount and tax percent on each item line
+        item_lines = append_tax_details_into_item_lines(self.sales_invoice_doc.name, item_lines)
+        # Add invoice total taxes and charges percentage field
+        self.result["invoice"]["total_taxes_and_charges_percent"] = sum(
+            it.rate for it in self.sales_invoice_doc.get("taxes", []))
         self.result["invoice"]["item_lines"] = item_lines
         # --------------------------- END Getting Invoice's item lines ------------------------------
