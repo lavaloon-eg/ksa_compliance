@@ -452,7 +452,7 @@ class Einvoice:
                 self.result[parent][field_name] = field_value
         return field_value
 
-    def get_dict_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+    def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
                        rules: list = None, parent: str = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
@@ -468,9 +468,8 @@ class Einvoice:
         if xml_name == 'party_identifications':
             party_list = ["CRN", "MOM", "MLS", "700", "SAG", "OTH"]
             if field_value:
-                field_value = {it.type_code: it.value for it in field_value if it.value}
-                valid = self.validate_scheme_with_order(field_value=field_value, ordered_list=party_list)
-                if not valid:
+                field_value = self.validate_scheme_with_order(field_value=field_value, ordered_list=party_list)
+                if not field_value:
                     self.error_dic[field_name] = f"Wrong ordered for field: {field_name}."
                     return
 
@@ -482,30 +481,30 @@ class Einvoice:
                 self.result[parent] = {}
                 if field_value:
                     self.result[parent][field_name] = field_value
+
         return field_value
 
-    def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
-                       rules: list = None, parent: str = None):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
-        field_value = source_doc.get(field_name, None)
-        if required and (field_value is None or []):
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
-            return
-        if field_value is None or []:
-                    return
-
-        field_name = xml_name if xml_name else field_name
-        if parent:
-            if self.result.get(parent):
-                self.result[parent][field_name] = field_value
-            else:
-                self.result[parent] = {}
-                if field_value:
-                    self.result[parent][field_name] = field_value
-        return field_value
+    # def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+    #                    rules: list = None, parent: str = None):
+    #     if required and field_name not in source_doc:
+    #         self.error_dic[field_name] = f"Missing field"
+    #         return
+    #
+    #     field_value = source_doc.get(field_name, None)
+    #     if required and (field_value is None or []):
+    #         self.error_dic[field_name] = f"Missing field value: {field_name}."
+    #         return
+    #     if field_value is None or []:
+    #         return
+    #
+    #     field_name = xml_name if xml_name else field_name
+    #     if parent:
+    #         if self.result.get(parent):
+    #             self.result[parent][field_name] = field_value
+    #         else:
+    #             self.result[parent] = {}
+    #             self.result[parent][field_name] = field_value
+    #     return field_value
 
     # TODO: Complete the implementation
     def validate_scheme_with_order(self, field_value: dict, ordered_list: list):
@@ -537,7 +536,7 @@ class Einvoice:
 
     def get_business_settings_and_seller_details(self):
         # TODO: special validations handling
-        self.get_dict_value(field_name="other_ids",
+        self.get_list_value(field_name="other_ids",
                             source_doc=self.business_settings_doc,
                             required=True,
                             xml_name="party_identifications",
@@ -635,7 +634,7 @@ class Einvoice:
 
     def get_buyer_details(self, invoice_type):
         # --------------------------- START Buyer Details fields ------------------------------
-        self.get_dict_value(field_name="other_buyer_identification",  # TODO: Fix Add to doctype customer and additional
+        self.get_list_value(field_name="other_buyer_identification",  # TODO: Fix Add to doctype customer and additional
                             source_doc=self.sales_invoice_doc,
                             required=True,
                             xml_name="PartyIdentification",
