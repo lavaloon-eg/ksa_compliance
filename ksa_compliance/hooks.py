@@ -33,6 +33,8 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+doctype_js = {"Customer": "public/js/customer.js"}
+
 # Svg Icons
 # ------------------
 # include app icons in desk
