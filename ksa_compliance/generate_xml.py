@@ -57,6 +57,7 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
         }
     )
     file.insert()
+    return invoice_xml
 
 
 def generate_einvoice_xml_fielname(business_settings, invoice):
