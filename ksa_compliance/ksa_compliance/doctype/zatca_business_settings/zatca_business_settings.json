@@ -9,6 +9,7 @@
   "tab_break_ljdo",
   "company",
   "country",
+  "country_code",
   "enable_zatca_integration",
   "sync_with_zatca",
   "currency",
@@ -138,8 +139,9 @@
   {
    "fetch_from": "company.country",
    "fieldname": "country",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Country",
+   "options": "Country",
    "read_only": 1,
    "reqd": 1
   },
@@ -163,6 +165,13 @@
    "fieldname": "otp",
    "fieldtype": "Data",
    "label": "OTP",
+   "read_only": 1
+  },
+    {
+   "fetch_from": "country.code",
+   "fieldname": "country_code",
+   "fieldtype": "Data",
+   "label": "Country Code",
    "read_only": 1
   },
   {
@@ -196,6 +205,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
+ "modified": "2024-01-30 19:33:20.661928",
  "modified": "2024-01-31 02:44:19.359229",
  "modified_by": "Administrator",
  "module": "KSA Compliance",

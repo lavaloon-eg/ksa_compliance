@@ -69,6 +69,7 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
         }
     )
     file.insert()
+    return invoice_xml
 
     base64_invoice, invoice_hash_bytes = hashing_invoice(data["invoice"]["id"])
     digital_signature = generate_digital_signature(invoice_hash_bytes)  # TODO: Need investigation to implement
