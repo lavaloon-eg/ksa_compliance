@@ -353,7 +353,7 @@ class Einvoice:
         return field_value
 
     def get_float_value(self, field_name: str, source_doc: dict, required: bool, min_value: int = 0,
-                        max_value: int = 99999999999999, xml_name: str = None, rules: list = None, parent: str = None):
+                        max_value: int = 999999999999, xml_name: str = None, rules: list = None, parent: str = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
@@ -394,6 +394,30 @@ class Einvoice:
 
         # Try to parse
         field_value = get_date_str(field_value)
+
+        field_name = xml_name if xml_name else field_name
+        if parent:
+            if self.result.get(parent):
+                self.result[parent][field_name] = field_value
+            else:
+                self.result[parent] = {}
+                self.result[parent][field_name] = field_value
+        return field_value
+
+    def get_float_child_value(self, field_name: str, field_value: float, required: bool, min_value: int = 0,
+                              max_value: int = 999999999999, xml_name: str = None, rules: list = None,
+                              parent: str = None):
+        if field_value is None and required:
+            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            return
+        if field_value is None:
+            return
+
+        # Try to parse
+        field_value = float(field_value) if type(field_value) is int else field_value
+        if not min_value <= field_value <= max_value:
+            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
+            return
 
         field_name = xml_name if xml_name else field_name
         if parent:
@@ -458,7 +482,6 @@ class Einvoice:
                 self.result[parent] = {}
                 if field_value:
                     self.result[parent][field_name] = field_value
-
         return field_value
 
     def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
@@ -472,7 +495,7 @@ class Einvoice:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
         if field_value is None or []:
-            return
+                    return
 
         field_name = xml_name if xml_name else field_name
         if parent:
@@ -480,26 +503,31 @@ class Einvoice:
                 self.result[parent][field_name] = field_value
             else:
                 self.result[parent] = {}
-                self.result[parent][field_name] = field_value
+                if field_value:
+                    self.result[parent][field_name] = field_value
         return field_value
 
     # TODO: Complete the implementation
     def validate_scheme_with_order(self, field_value: dict, ordered_list: list):
         rem_ordered_list = ordered_list
+        res = {}
 
-        for scheme_id, scheme_value in field_value.items():
-            if scheme_id not in ordered_list:
-                self.error_dic['party_identification'] = f"Invalid scheme ID: {scheme_id} for Seller Additional IDs"
+        for value in field_value:
+            type_code = value.get('type_code')
+            value = value.get('value')
+            if type_code not in ordered_list:
+                self.error_dic['party_identification'] = f"Invalid scheme ID: {type_code} for Seller Additional IDs"
                 return False
-            elif scheme_id not in rem_ordered_list:
+            elif type_code not in rem_ordered_list:
                 self.error_dic['party_identification'] = (
                     f"Invalid scheme ID Order: "
                     f"for {field_value} in Additional IDs")
                 return False
-            else:
-                index = rem_ordered_list.index(scheme_id)
+            elif value is not None:
+                res[type_code] = value
+                index = rem_ordered_list.index(type_code)
                 rem_ordered_list = rem_ordered_list[index:]
-        return True
+        return res
 
     def get_customer_address_details(self, invoice_id):
         pass
@@ -917,7 +945,28 @@ class Einvoice:
                              xml_name="outstanding_amount",
                              rules=["BG-22", "BT-115", "BR-15", "BR-CO-16", "BR-DEC-18"],
                              parent="invoice")
-        # --------------------------- END Invoice Basic info ------------------------------
+        self.get_float_value(field_name="net_amount",
+                             source_doc=self.sales_invoice_doc,
+                             required=True,
+                             xml_name="VAT_category_taxable_amount",
+                             rules=["BR-KSA-F-04", "BR-45", "BR-DEC-19", "BR-S-08", "BR-E-08", "BR-Z-08", "BR-O-08",
+                                    "BR-CO-18", "BT-116", "BG-23"],
+                             parent="invoice")
+        try:
+            self.get_float_child_value(field_name="taxes_rate",
+                                       field_value=self.sales_invoice_doc.taxes[0].rate,
+                                       # handle child element in a better way
+                                       required=False,
+                                       xml_name="taxable_amount",
+                                       min_value=0,
+                                       max_value=100,
+                                       rules=["BR-KSA-12", "BR-KSA-DEC-02", "BR-S-06", "BR-Z-06", "BR-E-06", "BT-96",
+                                              "BG-20"],
+                                       parent="invoice")
+        except:
+            self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
+
+            # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------
         # TODO : Add Rules for fields
         item_lines = []
