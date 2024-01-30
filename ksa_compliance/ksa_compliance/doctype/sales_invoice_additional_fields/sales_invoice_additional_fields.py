@@ -49,7 +49,8 @@ class SalesInvoiceAdditionalFields(Document):
         self.tax_currency = "SAR"
 
     def set_invoice_counter_value(self):
-        additional_field_records = frappe.db.get_list(self.doctype, filters={"docstatus": ["!=", 2]})
+        additional_field_records = frappe.db.get_list(self.doctype,
+                                                      filters={"docstatus": ["!=", 2], "invoice_counter": ["is", "set"]})
         if additional_field_records:
             self.invoice_counter = len(additional_field_records) + 1
         else:
