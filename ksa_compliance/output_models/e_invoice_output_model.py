@@ -483,8 +483,8 @@ class Einvoice:
                     self.result[parent][field_name] = field_value
 
         return field_value
-
-    # def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+    # remove get dict if not needed
+    # def get_dict_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
     #                    rules: list = None, parent: str = None):
     #     if required and field_name not in source_doc:
     #         self.error_dic[field_name] = f"Missing field"
