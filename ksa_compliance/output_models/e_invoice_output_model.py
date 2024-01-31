@@ -338,7 +338,7 @@ class Einvoice:
 
         if field_value is None:
             return
-
+        field_value = int(field_value)
         if not min_value <= field_value <= max_value:
             self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
             return
@@ -607,7 +607,7 @@ class Einvoice:
                             rules=["BR-KSA-09", "BR-KSA-F-06", "BR-08", "KSA-3", "BG-5"],
                             parent="seller_details")
 
-        self.get_text_value(field_name="country",
+        self.get_text_value(field_name="country_code",
                             source_doc=self.business_settings_doc,
                             required=True,
                             xml_name="country_code",
@@ -862,12 +862,14 @@ class Einvoice:
                             rules=["BT-6", "BR-CL-05", "BR-KSA-EN16931-02", "BR-KSA-68"],
                             parent="invoice")
 
-        self.get_text_value(field_name="invoice_counter",
-                            source_doc=self.additional_fields_doc,
-                            required=True,
-                            xml_name="invoice_counter_value",
-                            rules=["KSA-16", "BR-KSA-33", "BR-KSA-34"],
-                            parent="invoice")
+        self.get_int_value(field_name="invoice_counter",
+                           source_doc=self.additional_fields_doc,
+                           required=True,
+                           xml_name="invoice_counter_value",
+                           min_value=0,
+                           max_value=999999999999,
+                           rules=["KSA-16", "BR-KSA-33", "BR-KSA-34"],
+                           parent="invoice")
 
         self.get_text_value(field_name="previous_invoice_hash",
                             source_doc=self.additional_fields_doc,

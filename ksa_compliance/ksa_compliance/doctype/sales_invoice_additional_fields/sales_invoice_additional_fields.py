@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.generate_xml import generate_xml_file
+from ksa_compliance.enpoints import request_reporting_api
 
 import uuid
 
@@ -20,14 +21,21 @@ class SalesInvoiceAdditionalFields(Document):
         self.set_invoice_type_code("Simplified")  # TODO: Evaluate invoice type
 
     def on_submit(self):
-        # Construct the EInvoice output data
         e_invoice = construct_einvoice_data(self)
         frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
         frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
-        generate_xml_file(e_invoice.result)
+        invoice_xml = generate_xml_file(e_invoice.result)
+        response = request_reporting_api(invoice_xml, uuid=self.get("uuid"))
+        integration_dict = {"doctype": "ZATCA Integration Log",
+                            "invoice_reference": self.get("sales_invoice"),
+                            "invoice_additional_fields_reference": self.get("name"),
+                            "zatca_message": str(response)
+                            }
+        integration_doc = frappe.get_doc(integration_dict)
+        integration_doc.insert()
 
     def generate_uuid(self):
-        self.uuid = uuid.uuid4()
+        self.uuid = str(uuid.uuid1())
 
     def set_invoice_type_code(self, invoice_type):
         """
@@ -50,7 +58,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     def set_invoice_counter_value(self):
         additional_field_records = frappe.db.get_list(self.doctype,
-                                                      filters={"docstatus": ["!=", 2], "invoice_counter": ["is", "set"]})
+                                                      filters={"docstatus": ["!=", 2],
+                                                               "invoice_counter": ["is", "set"]})
         if additional_field_records:
             self.invoice_counter = len(additional_field_records) + 1
         else:
