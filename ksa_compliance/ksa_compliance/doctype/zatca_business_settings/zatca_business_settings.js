@@ -6,6 +6,34 @@ frappe.ui.form.on("ZATCA Business Settings", {
   company: function (frm) {
     filter_company_address(frm);
   },
+    create_csr: function(frm) {
+        frappe.call({
+            method: "ksa_compliance.generate_xml.generate_csr",
+            args: {
+                business_settings_id: frm.doc.name
+            },
+            callback: function (r) {
+                if (!r.exc) {
+                    frm.save();
+                    frappe.msgprint("CSR Generated Successfully.")
+                }
+            },
+        });
+    },
+    create_csid: function (frm) {
+            frappe.call({
+                method: "ksa_compliance.generate_xml.create_CSID",
+                args: {
+                    business_settings_id: frm.doc.name
+                },
+                callback: function (r) {
+                    if (!r.exc) {
+                        frm.save();
+                        frappe.msgprint("CSID Generated Successfully.")
+                    }
+                },
+            });
+        },
 });
 
 function filter_company_address(frm) {

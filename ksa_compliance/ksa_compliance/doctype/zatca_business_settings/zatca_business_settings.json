@@ -26,7 +26,12 @@
   "vat_registration_number",
   "other_ids",
   "integration_tab",
-  "otp"
+  "create_csr",
+  "create_csid",
+  "otp",
+  "compliance_request_id",
+  "basic_auth",
+  "sdk_root"
  ],
  "fields": [
   {
@@ -157,12 +162,41 @@
   {
    "fieldname": "otp",
    "fieldtype": "Data",
-   "label": "OTP"
+   "label": "OTP",
+   "read_only": 1
+  },
+  {
+   "description": "Button to Generate CSR",
+   "fieldname": "create_csr",
+   "fieldtype": "Button",
+   "label": "create CSR"
+  },
+  {
+   "fieldname": "basic_auth",
+   "fieldtype": "Long Text",
+   "label": "Basic Auth",
+   "read_only": 1
+  },
+  {
+   "fieldname": "create_csid",
+   "fieldtype": "Button",
+   "label": "Create CSID"
+  },
+  {
+   "fieldname": "sdk_root",
+   "fieldtype": "Data",
+   "label": "SDK Root"
+  },
+  {
+   "fieldname": "compliance_request_id",
+   "fieldtype": "Data",
+   "label": "Compliance Request ID",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-16 12:13:26.134568",
+ "modified": "2024-01-31 02:44:19.359229",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
