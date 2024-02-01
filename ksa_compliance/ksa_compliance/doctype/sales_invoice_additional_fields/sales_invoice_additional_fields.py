@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.generate_xml import generate_xml_file
-from ksa_compliance.enpoints import request_reporting_api
+from ksa_compliance.endpoints import request_reporting_api
 
 import uuid
 
@@ -23,17 +23,19 @@ class SalesInvoiceAdditionalFields(Document):
 
     def on_submit(self):
         e_invoice = construct_einvoice_data(self)
-        frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
-        frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
-        invoice_xml = generate_xml_file(e_invoice.result)
-        response = request_reporting_api(invoice_xml, uuid=self.get("uuid"))
-        integration_dict = {"doctype": "ZATCA Integration Log",
-                            "invoice_reference": self.get("sales_invoice"),
-                            "invoice_additional_fields_reference": self.get("name"),
-                            "zatca_message": str(response)
-                            }
-        integration_doc = frappe.get_doc(integration_dict)
-        integration_doc.insert()
+        business_setting_doc = e_invoice.business_settings_doc
+        if business_setting_doc.sync_with_zatca.lower() == "live":
+            frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
+            frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
+            invoice_xml = generate_xml_file(e_invoice.result)
+            response = request_reporting_api(invoice_xml, uuid=self.get("uuid"))
+            integration_dict = {"doctype": "ZATCA Integration Log",
+                                "invoice_reference": self.get("sales_invoice"),
+                                "invoice_additional_fields_reference": self.get("name"),
+                                "zatca_message": str(response)
+                                }
+            integration_doc = frappe.get_doc(integration_dict)
+            integration_doc.insert()
 
     def generate_uuid(self):
         self.uuid = str(uuid.uuid1())
@@ -52,7 +54,7 @@ class SalesInvoiceAdditionalFields(Document):
         """
         # Basic Simplified or Tax invoice
         self.invoice_type_transaction = "0200000" if invoice_type.lower() == "simplified" else "0100000"
-        self.invoice_type_code = "338"  # for Simplified Tax invoice
+        self.invoice_type_code = "388"  # for Simplified Tax invoice
 
     def set_tax_currency(self):
         self.tax_currency = "SAR"
@@ -75,17 +77,18 @@ class SalesInvoiceAdditionalFields(Document):
             attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),
                                          filters={"attached_to_name": ("in", psi_id),
                                                   "attached_to_doctype": "Sales Invoice"})
-            site = frappe.local.site
-            for attachment in attachments:
-                if attachment.file_name and attachment.file_name.endswith(".xml"):
-                    xml_filename = attachment.file_name
+            if attachments:  # Means that the invoice XML had been generated and saved
+                site = frappe.local.site
+                for attachment in attachments:
+                    if attachment.file_name and attachment.file_name.endswith(".xml"):
+                        xml_filename = attachment.file_name
 
-            cwd = os.getcwd()
-            file_name = cwd + '/' + site + "/public/files/" + xml_filename
-            with open(file_name, "rb") as f:
-                data = f.read()
-                sha256hash = hashlib.sha256(data).hexdigest()
-            self.previous_invoice_hash = sha256hash
+                cwd = os.getcwd()
+                file_name = cwd + '/' + site + "/public/files/" + xml_filename
+                with open(file_name, "rb") as f:
+                    data = f.read()
+                    sha256hash = hashlib.sha256(data).hexdigest()
+                self.previous_invoice_hash = sha256hash
 
     def set_calculated_invoice_values(self):
         sinv = frappe.get_doc("Sales Invoice", self.sales_invoice)

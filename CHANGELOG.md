@@ -13,3 +13,4 @@ to a section with the version name.
   * Create Simplified tax invoice template.
   * Add a method to generate XML regarding invoice type.
 * Create E-Invoicing-Sync page to run the sync batch.
+  * Initiate the batch flow to Sync E-invoices Individually.
