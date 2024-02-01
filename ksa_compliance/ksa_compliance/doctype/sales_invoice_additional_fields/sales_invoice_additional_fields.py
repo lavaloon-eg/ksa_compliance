@@ -19,6 +19,7 @@ class SalesInvoiceAdditionalFields(Document):
         self.generate_uuid()
         self.set_tax_currency()  # Set as "SAR" as a default tax currency value
         self.set_invoice_type_code("Simplified")  # TODO: Evaluate invoice type
+        self.set_calculated_invoice_values()
 
     def on_submit(self):
         e_invoice = construct_einvoice_data(self)
@@ -85,6 +86,17 @@ class SalesInvoiceAdditionalFields(Document):
                 data = f.read()
                 sha256hash = hashlib.sha256(data).hexdigest()
             self.previous_invoice_hash = sha256hash
+
+    def set_calculated_invoice_values(self):
+        sinv = frappe.get_doc("Sales Invoice", self.sales_invoice)
+        self.set_sum_of_charges(sinv.taxes)
+
+    def set_sum_of_charges(self, taxes: list):
+        total = 0
+        if taxes:
+            for item in taxes:
+                total = total + item.tax_amount
+        self.sum_of_charges = total
 
 
 def construct_einvoice_data(additional_fields_doc):

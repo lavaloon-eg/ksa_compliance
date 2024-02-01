@@ -56,8 +56,6 @@ class Einvoice:
         # Get E-Invoice Fields
         self.get_e_invoice_details()  # TODO: Implement the rest of fields
 
-        print(self.sales_invoice_doc)
-
         # TODO: Delivery (Supply start and end dates)
         # TODO: Allowance Charge (Discount)
         # FIXME: IF invoice is pre-paid
