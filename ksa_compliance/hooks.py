@@ -231,3 +231,9 @@ doc_events = {
 # auth_hooks = [
 # "ksa_compliance.auth.validate"
 # ]
+
+fixtures = [
+    {"dt": 'Print Format',
+     "filters":
+     [['name', "=", 'ksa_format']]},
+]

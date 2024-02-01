@@ -1,0 +1,33 @@
+[
+ {
+  "absolute_value": 0,
+  "align_labels_right": 0,
+  "css": null,
+  "custom_format": 0,
+  "default_print_language": null,
+  "disabled": 0,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Print Format",
+  "font": null,
+  "font_size": 14,
+  "format_data": "[{\"fieldname\": \"print_heading_template\", \"fieldtype\": \"Custom HTML\", \"options\": \"{% set company_doc = frappe.get_doc(\\\"Company\\\", doc.company) %}\\n{% set business_doc = frappe.get_doc(\\\"ZATCA Business Settings\\\", doc.company ~ \\\"-\\\" ~ company_doc.country ~ \\\"-\\\" ~ doc.currency) %}\\n{% set seller_address = business_doc.street ~ ' ' ~ business_doc.city ~ ' ' ~ business_doc.country %}\\n\\n<div class=\\\"text-center\\\">\\n\\t<h3>\\u0627\\u0644\\u0641\\u0627\\u062a\\u0648\\u0631\\u0647 \\u0636\\u0631\\u064a\\u0628\\u064a\\u0647 \\u0627\\u0644\\u0645\\u0628\\u0633\\u0637\\u0647</h3>\\n\\t<p>{{ doc.name }} : \\u0631\\u0642\\u0645 \\u0627\\u0644\\u0641\\u0627\\u062a\\u0648\\u0631\\u0647 </p>\\n\\t<p>{{ business_doc.seller_name }}</p>\\n\\t<p>{{ seller_address }}</p>\\n</div>\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"fieldname\": \"_custom_html\", \"print_hide\": 0, \"label\": \"Custom HTML\", \"fieldtype\": \"HTML\", \"options\": \"<div dir=\\\"rtl\\\">\\n\\t<p>\\u062a\\u0627\\u0631\\u064a\\u062e : {{ doc.posting_time }}</p>\\n\\t<p>\\u0631\\u0642\\u0645 \\u062a\\u0633\\u062c\\u064a\\u0644 \\u0636\\u0631\\u064a\\u0628\\u0629 \\u0627\\u0644\\u0642\\u064a\\u0645\\u0629 \\u0627\\u0644\\u0645\\u0636\\u0627\\u0641\\u0629 : {{ doc.name }}</p>\\n</div>\"}, {\"fieldname\": \"_custom_html\", \"print_hide\": 0, \"label\": \"Custom HTML\", \"fieldtype\": \"HTML\", \"options\": \"<table class=\\\"table text-center\\\" dir=\\\"rtl\\\">\\n    <thead>\\n        <tr>\\n            <th>\\u0627\\u0644\\u0645\\u0646\\u062a\\u062c\\u0627\\u062a</th>\\n            <th>\\u0627\\u0644\\u0643\\u0645\\u064a\\u0629</th>\\n            <th>\\u0633\\u0639\\u0631 \\u0627\\u0644\\u0648\\u062d\\u062f\\u0647</th>\\n            <th>\\u0636\\u0631\\u064a\\u0628\\u0629 \\u0627\\u0644\\u0642\\u064a\\u0645\\u0629 \\u0627\\u0644\\u0645\\u0636\\u0627\\u0641\\u0629</th>\\n            <th>\\u0627\\u0644\\u0633\\u0639\\u0631 \\u0634\\u0627\\u0645\\u0644 \\u0636\\u0631\\u064a\\u0628\\u0629 \\u0627\\u0644\\u0642\\u064a\\u0645\\u0629 \\u0627\\u0644\\u0645\\u0636\\u0627\\u0641\\u0629</th>\\n        </tr>\\n    </thead>\\n    <tbody>\\n        {% for item in doc.items %}\\n            <tr>\\n                <td>{{ item.item_name }}</td>\\n                <td>{{ item.qty }}</td>\\n                <td>{{ item.amount }}</td>\\n                <td>{{ item.custom_tax_total }}</td>\\n                <td>{{ item.custom_total_after_tax }}</td>\\n            </tr>\\n        {% endfor %}\\n    </tbody>\\n</table>\\n\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"fieldname\": \"_custom_html\", \"print_hide\": 0, \"label\": \"Custom HTML\", \"fieldtype\": \"HTML\", \"options\": \"<div class=\\\"\\\">\\n    <table class=\\\"table\\\" dir=\\\"rtl\\\">\\n        <tr>\\n            <td>\\n                <p>\\u0627\\u062c\\u0645\\u0627\\u0644\\u064a \\u0627\\u0644\\u0645\\u0628\\u0644\\u063a \\u0627\\u0644\\u062e\\u0627\\u0636\\u0639 \\u0644\\u0644\\u0636\\u0631\\u064a\\u0628\\u0629 : </p>\\n            </td>\\n            <td>\\n                <p>{{ doc.net_total }}</p>\\n            </td>\\n        </tr>\\n        <tr>\\n            <td>\\n                <p>\\u0636\\u0631\\u064a\\u0628\\u0629 \\u0627\\u0644\\u0642\\u064a\\u0645\\u0629 \\u0627\\u0644\\u0645\\u0636\\u0627\\u0641\\u0629 : </p>\\n            </td>\\n            <td>\\n                <p>{{ doc.total_taxes_and_charges }}</p>\\n            </td>\\n        </tr>\\n        <tr>\\n            <td>\\n                <p>\\u0627\\u0644\\u0645\\u062c\\u0645\\u0648\\u0639 \\u0645\\u0639 \\u0627\\u0644\\u0636\\u0631\\u064a\\u0628\\u0629 : </p>\\n            </td>\\n            <td>\\n                <p>{{ doc.grand_total }}</p>\\n            </td>\\n        </tr>\\n    </table>\\n</div>\\n\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"fieldname\": \"_custom_html\", \"print_hide\": 0, \"label\": \"Custom HTML\", \"fieldtype\": \"HTML\", \"options\": \"<style>\\n  .qr-code-container {\\n    text-align: center;\\n    margin-top: 30%;\\n  }\\n\\n  .qr-code-image {\\n    max-height: 300px;\\n    height: auto;\\n  }\\n</style>\\n\\n<div class=\\\"qr-code-container\\\">\\n  <img class=\\\"qr-code-image img-fluid\\\" src=\\\"{{ doc.custom_qr_image }}\\\" alt=\\\"QR Code\\\">\\n</div>\"}]",
+  "html": null,
+  "line_breaks": 0,
+  "margin_bottom": 15.0,
+  "margin_left": 15.0,
+  "margin_right": 15.0,
+  "margin_top": 15.0,
+  "modified": "2024-02-01 15:03:59.179030",
+  "module": "Accounts",
+  "name": "ksa_format",
+  "page_number": "Hide",
+  "print_format_builder": 1,
+  "print_format_builder_beta": 0,
+  "print_format_type": "Jinja",
+  "raw_commands": null,
+  "raw_printing": 0,
+  "show_section_headings": 0,
+  "standard": "No"
+ }
+]
