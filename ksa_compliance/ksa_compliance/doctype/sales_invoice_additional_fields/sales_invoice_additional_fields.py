@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.generate_xml import generate_xml_file
-from ksa_compliance.endpoints import request_reporting_api
+from ksa_compliance.endpoints import request_reporting_api, request_clearance_api
 
 import uuid
 
@@ -24,18 +24,14 @@ class SalesInvoiceAdditionalFields(Document):
     def on_submit(self):
         e_invoice = construct_einvoice_data(self)
         business_setting_doc = e_invoice.business_settings_doc
+        customer_id = e_invoice.sales_invoice_doc.customer
         if business_setting_doc.sync_with_zatca.lower() == "live":
             frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
             frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
             invoice_xml = generate_xml_file(e_invoice.result)
-            response = request_reporting_api(invoice_xml, uuid=self.get("uuid"))
-            integration_dict = {"doctype": "ZATCA Integration Log",
-                                "invoice_reference": self.get("sales_invoice"),
-                                "invoice_additional_fields_reference": self.get("name"),
-                                "zatca_message": str(response)
-                                }
-            integration_doc = frappe.get_doc(integration_dict)
-            integration_doc.insert()
+            self.send_xml_via_api(invoice_xml=invoice_xml,
+                                  business_type=business_setting_doc.type_of_business_transactions,
+                                  customer_id=customer_id)
 
     def generate_uuid(self):
         self.uuid = str(uuid.uuid1())
@@ -94,12 +90,47 @@ class SalesInvoiceAdditionalFields(Document):
         sinv = frappe.get_doc("Sales Invoice", self.sales_invoice)
         self.set_sum_of_charges(sinv.taxes)
 
+    def send_xml_via_api(self, invoice_xml, business_type: str, customer_id: str):
+        if customer_has_registration(customer_id=customer_id):
+            business_type = 'Standard Tax Invoices'
+        else:
+            business_type = 'Simplified Tax Invoices'
+        if business_type == 'Simplified Tax Invoices':
+            response = request_reporting_api(invoice_xml, uuid=self.get("uuid"))
+            integration_dict = {"doctype": "ZATCA Integration Log",
+                                "invoice_reference": self.get("sales_invoice"),
+                                "invoice_additional_fields_reference": self.get("name"),
+                                "zatca_message": str(response)
+                                }
+            integration_doc = frappe.get_doc(integration_dict)
+            integration_doc.insert()
+        elif business_type == 'Standard Tax Invoices':
+            response = request_clearance_api(invoice_xml, uuid=self.get("uuid"))
+            integration_dict = {"doctype": "ZATCA Integration Log",
+                                "invoice_reference": self.get("sales_invoice"),
+                                "invoice_additional_fields_reference": self.get("name"),
+                                "zatca_message": str(response)
+                                }
+            integration_doc = frappe.get_doc(integration_dict)
+            integration_doc.insert()
+        else:
+
+            pass
+
     def set_sum_of_charges(self, taxes: list):
         total = 0
         if taxes:
             for item in taxes:
                 total = total + item.tax_amount
         self.sum_of_charges = total
+
+
+def customer_has_registration(customer_id: str):
+    customer_doc = frappe.get_doc("Customer", customer_id)
+    if customer_doc.custom_vat_registration_number in (None, "") and all(
+            ide.value in (None, "") for ide in customer_doc.additional_ids):
+        return False
+    return True
 
 
 def construct_einvoice_data(additional_fields_doc):
