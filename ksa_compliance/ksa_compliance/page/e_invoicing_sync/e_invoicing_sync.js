@@ -26,7 +26,28 @@ function initialize(page, batch_date) {
 
 function sync_invoices(batch_date) {
     // calling server side method to sync the invoices.
-    if (!batch_date)
-        frappe.throw(__("Select a date first."))
+    let submitBtn = document.getElementsByClassName("btn-sm")[0];
+    submitBtn.disabled = true;
+    if (!batch_date) {
+        submitBtn.disabled = false;
+        frappe.throw(__("Select a date first."));
+    }
+    //show_alert with indicator
+    frappe.show_alert({
+        message:__("Start Invoices Syncing...."),
+        indicator:'green'
+    }, 3);
+    frappe.call({
+        method: "ksa_compliance.ksa_compliance.page.e_invoicing_sync.e_invoicing_sync.add_batch_to_background_queue",
+        args: {
+            "check_date": batch_date
+        },
+        callback: function(r) {
+            if (!r.exc) {
+                frappe.msgprint("Syncing End.....");
+            }
+        }
+    });
+    submitBtn.disabled = true;
     console.log(batch_date);
 }
