@@ -1,12 +1,13 @@
 # Copyright (c) 2024, Lavaloon and contributors
 # For license information, please see license.txt
+import base64
 import hashlib
 import os
 
 import frappe
 from frappe.model.document import Document
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
-from ksa_compliance.generate_xml import generate_xml_file
+from ksa_compliance.generate_xml import generate_xml_file, generate_xml
 from ksa_compliance.endpoints import request_reporting_api
 
 import uuid
@@ -26,8 +27,8 @@ class SalesInvoiceAdditionalFields(Document):
         if business_setting_doc.sync_with_zatca.lower() == "live":
             frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
             frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
-            invoice_xml = generate_xml_file(e_invoice.result)
-            response = request_reporting_api(invoice_xml, uuid=self.get("uuid"))
+            invoice_hash, signed_invoice_xml = generate_xml_file(e_invoice.result)
+            response = request_reporting_api(invoice_hash, signed_invoice_xml, uuid=self.get("uuid"))
             integration_dict = {"doctype": "ZATCA Integration Log",
                                 "invoice_reference": self.get("sales_invoice"),
                                 "invoice_additional_fields_reference": self.get("name"),
@@ -86,8 +87,12 @@ class SalesInvoiceAdditionalFields(Document):
                 file_name = cwd + '/' + site + "/public/files/" + xml_filename
                 with open(file_name, "rb") as f:
                     data = f.read()
-                    sha256hash = hashlib.sha256(data).hexdigest()
-                self.previous_invoice_hash = sha256hash
+            else:
+                einvoice = construct_einvoice_data(self)
+                data = generate_xml(einvoice.result).encode("utf-8")
+
+            sha256hash = hashlib.sha256(data).hexdigest()
+            self.previous_invoice_hash = sha256hash
 
 
 def construct_einvoice_data(additional_fields_doc):

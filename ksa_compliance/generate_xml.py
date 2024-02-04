@@ -14,8 +14,7 @@ import json
 from frappe.utils.logger import get_logger
 
 
-@frappe.whitelist(allow_guest=True)
-def generate_xml(input_data: dict = None):
+def generate_xml(input_data: dict = None, invoice_type: str = "Simplified"):
     """
     For postman testing purpose
     """
@@ -23,13 +22,13 @@ def generate_xml(input_data: dict = None):
     if not isinstance(data, dict):
         data = json.loads(data)
 
-    invoice_type = data.get("invoice_type")
     template = "simplified_e_invoice.xml" if invoice_type.lower() == "simplified" else "standard_e_invoice.xml"
 
     # render XML Template
     invoice_xml = frappe.render_template(
         f"ksa_compliance/templates/{template}",
-        context={"invoice": data.get("invoice"), "seller": data.get("seller"), "buyer": data.get("buyer"),
+        context={"invoice": data.get("invoice"), "seller_details": data.get("seller_details"),
+                 "buyer_details": data.get("buyer_details"),
                  "business_settings": data.get("business_settings")},
         is_path=True
     )
@@ -76,8 +75,10 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
     base64_properties_hash, properties_hash_bytes = populate_signed_properties_output(file.file_name,
                                                                                       encoded_hashed_certificate,
                                                                                       cert_bytes)
-    generate_signed_xml_file(data["invoice"]["id"], file.file_name, base64_invoice, digital_signature,
-                             cert_bytes, base64_properties_hash)
+    signed_invoice_xml = generate_signed_xml_file(data["invoice"]["id"], file.file_name, base64_invoice,
+                                                  digital_signature, cert_bytes, base64_properties_hash)
+
+    return base64_invoice, signed_invoice_xml
 
 
 def generate_einvoice_xml_fielname(business_settings, invoice):
@@ -340,6 +341,8 @@ def generate_signed_xml_file(invoice_id, file_name, base64_invoice, digital_sign
         file.insert()
     except Exception as e:
         pass
+
+    return invoice_xml
 
 
 def hashing_invoice(invoice_id):

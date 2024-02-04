@@ -45,8 +45,8 @@ def sync_e_invoices(check_date):
         einvoice = construct_einvoice_data(adf_doc)
         frappe.log_error("ZATCA Result LOG", message=einvoice.result)
         frappe.log_error("ZATCA Error LOG", message=einvoice.error_dic)
-        invoice_xml = generate_xml_file(einvoice.result)
-        response = request_reporting_api(invoice_xml, uuid=adf_doc.get("uuid"))
+        invoice_hash, signed_invoice_xml = generate_xml_file(einvoice.result)
+        response = request_reporting_api(invoice_hash, signed_invoice_xml, uuid=adf_doc.get("uuid"))
         log_status = get_integration_log_status(response.status_code)
         response = response.json()
         integration_dict = {"doctype": "ZATCA Integration Log",

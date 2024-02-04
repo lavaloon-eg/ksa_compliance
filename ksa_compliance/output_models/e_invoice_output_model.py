@@ -1,7 +1,7 @@
 import json
 
 import frappe
-from frappe.utils import get_date_str, get_time_str
+from frappe.utils import get_date_str, get_time_str, get_time
 
 
 def get_sales_invoice_by_id(invoice_id: str):
@@ -441,7 +441,8 @@ class Einvoice:
             return
 
         # Try to parse
-        field_value = get_time_str(field_value)
+        field_value = get_time(field_value)
+        field_value = field_value.strftime("%H:%M:%S%z")
 
         field_name = xml_name if xml_name else field_name
         if parent:
