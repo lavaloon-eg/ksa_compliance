@@ -20,11 +20,13 @@ class SalesInvoiceAdditionalFields(Document):
         self.set_tax_currency()  # Set as "SAR" as a default tax currency value
         self.set_invoice_type_code("Simplified")  # TODO: Evaluate invoice type
         self.set_calculated_invoice_values()
+        self.set_buyer_details(sl_id=self.get("sales_invoice"))
 
-    def on_submit(self):
+    def after_submit(self):
         e_invoice = construct_einvoice_data(self)
         business_setting_doc = e_invoice.business_settings_doc
         customer_id = e_invoice.sales_invoice_doc.customer
+
         if business_setting_doc.sync_with_zatca.lower() == "live":
             frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
             frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
@@ -86,6 +88,17 @@ class SalesInvoiceAdditionalFields(Document):
                     sha256hash = hashlib.sha256(data).hexdigest()
                 self.previous_invoice_hash = sha256hash
 
+    def set_buyer_details(self, sl_id: str):
+        sl = frappe.get_doc("Sales Invoice", sl_id)
+        customer_doc = frappe.get_doc("Customer", sl.get("customer"))
+
+        self.buyer_vat_registration_number = customer_doc.custom_vat_registration_number
+
+        obi = self.get("other_buyer_ids")
+        for item in customer_doc.get("custom_additional_ids"):
+            self.append("other_buyer_ids",
+                        {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
+
     def set_calculated_invoice_values(self):
         sinv = frappe.get_doc("Sales Invoice", self.sales_invoice)
         self.set_sum_of_charges(sinv.taxes)
@@ -108,7 +121,7 @@ class SalesInvoiceAdditionalFields(Document):
             response = request_clearance_api(invoice_xml, uuid=self.get("uuid"))
             integration_dict = {"doctype": "ZATCA Integration Log",
                                 "invoice_reference": self.get("sales_invoice"),
-                                "invoice_additional_fields_reference": self.get("name"),
+                                "invoice_additional_fields_reference": self.name,
                                 "zatca_message": str(response)
                                 }
             integration_doc = frappe.get_doc(integration_dict)

@@ -54,6 +54,6 @@ function add_other_ids_if_new(frm) {
         type_code: "OTH",
       }
     );
-    frm.set_value("additional_ids", buyer_id_list);
+    frm.set_value("custom_additional_ids", buyer_id_list);
   }
 }
