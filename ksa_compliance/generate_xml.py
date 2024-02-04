@@ -6,7 +6,6 @@ import re
 import requests
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
-from path import Path
 from subprocess import call
 
 import frappe
@@ -94,6 +93,7 @@ def generate_einvoice_xml_fielname(business_settings, invoice):
 
 @frappe.whitelist(allow_guest=True)
 def generate_csr(business_settings_id):
+    from path import Path
     logger = get_logger("csr-generation")
     try:
         settings = frappe.get_doc('ZATCA Business Settings', business_settings_id)
@@ -130,6 +130,7 @@ def generate_csr(business_settings_id):
 
 @frappe.whitelist(allow_guest=True)
 def create_CSID(business_settings_id):
+    from path import Path
     try:
         settings = frappe.get_doc("ZATCA Business Settings", business_settings_id)
         cwd = os.getcwd()
@@ -193,6 +194,7 @@ def get_latest_generated_csr_file(folder_path='.'):
 
 
 def populate_signed_properties_output(file_name, encoded_cert, bytes_cert):
+    from path import Path
     import xml.etree.ElementTree as ET
 
     certificate = x509.load_pem_x509_csr(bytes_cert, default_backend())
@@ -242,6 +244,7 @@ def populate_signed_properties_output(file_name, encoded_cert, bytes_cert):
 
 def generate_signed_xml_file(invoice_id, file_name, base64_invoice, digital_signature, encoded_cert,
                              base64_properties_hash):
+    from path import Path
     import xml.etree.ElementTree as ET
 
     cwd = os.getcwd()
@@ -408,6 +411,7 @@ def sign_invoice(xml_filename, business_setting_id):
 
 
 def generate_digital_signature(invoice_hash_bytes):
+    from path import Path
     from ecdsa import SigningKey
     cwd = os.getcwd()
     site = frappe.local.site
@@ -422,6 +426,7 @@ def generate_digital_signature(invoice_hash_bytes):
 
 
 def generate_hashing_certificate():
+    from path import Path
     cwd = os.getcwd()
     site = frappe.local.site
     new_path = f"{cwd}/{site}"
