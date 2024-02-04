@@ -4,21 +4,6 @@
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
          xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
 
-    <!-- TODO: Cryptographic stamp-->
-    <ext:UBLExtensions>
-        <ext:UBLExtension>
-            <ext:ExtensionURI>urn:oasis:names:specification:ubl:dsig:enveloped:xades</ext:ExtensionURI>
-            <ext:ExtensionContent>
-                <sig:UBLDocumentSignatures
-                        xmlns:sig="urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2"
-                        xmlns:sac="urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2"
-                        xmlns:sbc="urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2">
-                    <sac:SignatureInformation>
-                    </sac:SignatureInformation>
-                </sig:UBLDocumentSignatures>
-            </ext:ExtensionContent>
-        </ext:UBLExtension>
-    </ext:UBLExtensions>
 
     <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
 

@@ -43,7 +43,7 @@ class SalesInvoiceAdditionalFields(Document):
         """
         # Basic Simplified or Tax invoice
         self.invoice_type_transaction = "0200000" if invoice_type.lower() == "simplified" else "0100000"
-        self.invoice_type_code = "338"  # for Simplified Tax invoice
+        self.invoice_type_code = "388"  # for Simplified Tax invoice
 
     def set_tax_currency(self):
         self.tax_currency = "SAR"
