@@ -164,8 +164,7 @@
   {
    "fieldname": "otp",
    "fieldtype": "Data",
-   "label": "OTP",
-   "read_only": 1
+   "label": "OTP"
   },
     {
    "fetch_from": "country.code",
