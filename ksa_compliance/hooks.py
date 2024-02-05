@@ -34,7 +34,7 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 doctype_js = {"Customer": "public/js/customer.js",
-              "Sales Invoice Item": "public/js/sales_invoice.js"}
+              "Sales Invoice": "public/js/sales_invoice_item.js"}
 
 # Svg Icons
 # ------------------
