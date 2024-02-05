@@ -102,6 +102,7 @@ class SalesInvoiceAdditionalFields(Document):
     def set_calculated_invoice_values(self):
         sinv = frappe.get_doc("Sales Invoice", self.sales_invoice)
         self.set_sum_of_charges(sinv.taxes)
+        self.set_sum_of_allowances(sales_invoice_doc=sinv)
 
     def send_xml_via_api(self, invoice_xml, business_type: str, customer_id: str):
         if customer_has_registration(customer_id=customer_id):
@@ -136,6 +137,10 @@ class SalesInvoiceAdditionalFields(Document):
             for item in taxes:
                 total = total + item.tax_amount
         self.sum_of_charges = total
+
+    def set_sum_of_allowances(self, sales_invoice_doc):
+        self.sum_of_allowances = sales_invoice_doc.get("total") - sales_invoice_doc.get("net_total")
+        print("test")
 
 
 def customer_has_registration(customer_id: str):

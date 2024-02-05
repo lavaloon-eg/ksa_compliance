@@ -49,12 +49,8 @@
   "sum_of_allowances",
   "column_break_bcho",
   "sum_of_charges",
-  "section_break_hpil",
-  "column_break_iuvw",
-  "amount_due_for_payment",
   "section_break_tsfk",
   "column_break_mest",
-  "vat_category_taxable_amount",
   "vat_exemption_reason_code",
   "vat_exemption_reason_text",
   "section_break_flxd",
@@ -75,9 +71,6 @@
   "invoice_line_charge_base_amount_reason",
   "invoice_line_charge_base_amount_reason_code",
   "section_break_mryd",
-  "vat_line_amount",
-  "line_amount_inclusive_vat",
-  "column_break_rkes",
   "prepayment_vat_category_taxable_amount",
   "prepayment_vat_category_tax_amount"
  ],
@@ -290,22 +283,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_hpil",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "vat_category_taxable_amount",
-   "fieldtype": "Int",
-   "label": "VAT Category Taxable Amount",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amount_due_for_payment",
-   "fieldtype": "Int",
-   "label": "Amount Due for Payment",
-   "read_only": 1
-  },
-  {
    "fieldname": "vat_exemption_reason_code",
    "fieldtype": "Data",
    "label": "VAT Exemption Reason Code",
@@ -376,10 +353,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_iuvw",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_mrvb",
    "fieldtype": "Section Break"
   },
@@ -426,22 +399,6 @@
   {
    "fieldname": "section_break_mryd",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "vat_line_amount",
-   "fieldtype": "Float",
-   "label": "VAT Line Amount",
-   "read_only": 1
-  },
-  {
-   "fieldname": "line_amount_inclusive_vat",
-   "fieldtype": "Float",
-   "label": "Line Amount Inclusive VAT",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_rkes",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "prepayment_vat_category_taxable_amount",
@@ -506,7 +463,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-29 14:31:25.417857",
+ "modified": "2024-02-05 15:29:00.309013",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
