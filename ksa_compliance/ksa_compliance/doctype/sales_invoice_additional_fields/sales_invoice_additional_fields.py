@@ -28,14 +28,14 @@ class SalesInvoiceAdditionalFields(Document):
             frappe.log_error("ZATCA Result LOG", message=e_invoice.result)
             frappe.log_error("ZATCA Error LOG", message=e_invoice.error_dic)
             invoice_hash, signed_invoice_xml = generate_xml_file(e_invoice.result)
-            response = request_reporting_api(invoice_hash, signed_invoice_xml, uuid=self.get("uuid"))
-            integration_dict = {"doctype": "ZATCA Integration Log",
-                                "invoice_reference": self.get("sales_invoice"),
-                                "invoice_additional_fields_reference": self.get("name"),
-                                "zatca_message": str(response)
-                                }
-            integration_doc = frappe.get_doc(integration_dict)
-            integration_doc.insert()
+            # response = request_reporting_api(invoice_hash, signed_invoice_xml, uuid=self.get("uuid"))
+            # integration_dict = {"doctype": "ZATCA Integration Log",
+            #                     "invoice_reference": self.get("sales_invoice"),
+            #                     "invoice_additional_fields_reference": self.get("name"),
+            #                     "zatca_message": str(response)
+            #                     }
+            # integration_doc = frappe.get_doc(integration_dict)
+            # integration_doc.insert()
 
     def generate_uuid(self):
         self.uuid = str(uuid.uuid1())

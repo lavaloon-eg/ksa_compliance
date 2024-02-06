@@ -11,6 +11,7 @@ from subprocess import call
 import frappe
 import json
 from frappe.utils.logger import get_logger
+from ksa_compliance.createxml import *
 
 
 def generate_xml(input_data: dict = None, invoice_type: str = "Simplified"):
@@ -39,23 +40,21 @@ def generate_xml(input_data: dict = None, invoice_type: str = "Simplified"):
 
 def generate_xml_file(data, invoice_type: str = "Simplified"):
     """
-    For Generating cycle
+    For Compliance
     """
+    invoice_xml = xml_tags()
+    invoice_xml, invoice_uuid = build_sales_invoice_data(invoice_xml, data.get("invoice"))
+    invoice_xml = build_invoice_type_code(invoice_xml, invoice_type)
+    invoice_xml = build_doc_reference_compliance(invoice_xml, data.get("invoice"), invoice_type)
+    invoice_xml = build_additional_references(invoice_xml, data.get("invoice"))
+    invoice_xml = build_seller_data(invoice_xml, data.get("seller_details"))
+    invoice_xml = build_customer_data(invoice_xml, data.get("buyer_details"))
+    invoice_xml = build_delivery_and_payment_means_for_compliance(invoice_xml, data.get("invoice"), invoice_type)
+    invoice_xml = build_tax_data(invoice_xml, data.get("invoice"))
+    invoice_xml = build_item_data(invoice_xml, data.get("invoice"))
 
-    template = "simplified_e_invoice.xml" if invoice_type.lower() == "simplified" else "standard_e_invoice.xml"
+    clear_xml = ET.tostring(invoice_xml, encoding="utf-8")
 
-    # render XML Template
-    invoice_xml = frappe.render_template(
-        f"ksa_compliance/templates/{template}",
-        context={
-            "invoice": data.get("invoice"),
-            "seller_details": data.get("seller_details"),
-            "buyer_details": data.get("buyer_details"),
-            "business_settings": data.get("business_settings")},
-        is_path=True
-    )
-    invoice_xml = invoice_xml.replace("&", "&amp;")
-    invoice_xml = invoice_xml.replace("\n", "")
     xml_filename = generate_einvoice_xml_fielname(data['business_settings'], data["invoice"])
     file = frappe.get_doc(
         {
@@ -63,21 +62,21 @@ def generate_xml_file(data, invoice_type: str = "Simplified"):
             "file_name": xml_filename,
             "attached_to_doctype": "Sales Invoice",
             "attached_to_name": data["invoice"]["id"],
-            "content": invoice_xml,
+            "content": clear_xml,
         }
     )
     file.insert()
 
-    base64_invoice, invoice_hash_bytes = hashing_invoice(data["invoice"]["id"])
+    base64_invoice, invoice_hash_bytes = hash_invoice(file.file_name)
     digital_signature = generate_digital_signature(invoice_hash_bytes)  # TODO: Need investigation to implement
     encoded_hashed_certificate, cert_bytes = generate_hashing_certificate()
-    base64_properties_hash, properties_hash_bytes = populate_signed_properties_output(file.file_name,
-                                                                                      encoded_hashed_certificate,
-                                                                                      cert_bytes)
-    signed_invoice_xml = generate_signed_xml_file(data["invoice"]["id"], file.file_name, base64_invoice,
-                                                  digital_signature, cert_bytes, base64_properties_hash)
+    # base64_properties_hash, properties_hash_bytes = populate_signed_properties_output(file.file_name,
+    #                                                                                   encoded_hashed_certificate,
+    #                                                                                   cert_bytes)
+    # signed_invoice_xml = generate_signed_xml_file(data["invoice"]["id"], file.file_name, base64_invoice,
+    #                                               digital_signature, cert_bytes, base64_properties_hash)
 
-    return base64_invoice, signed_invoice_xml
+    return None, clear_xml
 
 
 def generate_einvoice_xml_fielname(business_settings, invoice):
@@ -195,19 +194,23 @@ def get_latest_generated_csr_file(folder_path='.'):
 
 def populate_signed_properties_output(file_name, encoded_cert, bytes_cert):
     from path import Path
-    import xml.etree.ElementTree as ET
+    import lxml.etree as ET
 
     certificate = x509.load_pem_x509_csr(bytes_cert, default_backend())
     final_required_data = extract_info_from_certificate(certificate)
     cwd = os.getcwd()
     site = frappe.local.site
+    new_path = f"{cwd}/{site}/public/files"
+
+    Path(new_path).chdir()
+
     file_url = f"{cwd}/{site}/public/files/{file_name}"
     tree = ET.parse(file_url)
-    root = tree.getroot()
-    for child in root:
-        if child.tag.find("UBLExtensions") or child.tag.find("Signature") or child.tag.find("QR"):
-            root.remove(child)
+    xslt = ET.parse("invoice.xsl")
+    transform = ET.XSLT(xslt)
+    new_tree = transform(tree)
 
+    root = tree.getroot()
     # Start Population
     ubl_extensions = ET.SubElement(root, "ext:UBLExtensions")
     ubl_extension = ET.SubElement(ubl_extensions, "ext:UBLExtension")
@@ -348,32 +351,63 @@ def generate_signed_xml_file(invoice_id, file_name, base64_invoice, digital_sign
     return invoice_xml
 
 
-def hashing_invoice(invoice_id):
+def hash_invoice(file_name):
     # Remove The following tags from the XML file (UBLExtension, QR, Signature)
+    from path import Path
     from lxml import etree as ET
 
     cwd = os.getcwd()
     site = frappe.local.site
 
-    attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),
-                                 filters={"attached_to_name": ("in", invoice_id),
-                                          "attached_to_doctype": "Sales Invoice"})
-
-    for attachment in attachments:
-        if attachment.file_name and attachment.file_name.endswith(".xml"):
-            file_url = attachment.file_url
-
-    file_url = f"{cwd}/{site}/public/{file_url}"
+    new_path = f"{cwd}/{site}/public/files"
+    file_url = f"{new_path}/{file_name}"
+    li = ["cbc", "ext", "cac"]
     tree = ET.parse(file_url)
-    root = tree.getroot()
+    Path(new_path).chdir()
+    xslt = ET.parse("invoice.xsl")
+    transform = ET.XSLT(xslt)
+    new_dom = transform(tree)
 
-    # Hash the new invoice body using SHA-256 and note the invoice is already Canonicalized using C14N
-    canonical_xml = ET.tostring(root, method="c14n", exclusive=True, with_comments=False, xml_declaration=False)
+    canonical_xml = ET.tostring(new_dom, method="c14n", exclusive=True, with_comments=False, xml_declaration=False,
+                                inclusive_ns_prefixes=li)
+
+    # To dump XML file for testing
+    dump_xml(f"dumped-{file_name}", canonical_xml)
+    Path(cwd).chdir()
 
     invoice_hash = hashlib.sha256(canonical_xml)  # Hash the invoice using SHA 256
     invoice_hash_bytes = invoice_hash.digest()  # Extract invoice bytes from hashed invoice
-    base64_invoice_hash = base64.b64encode(invoice_hash_bytes).decode("utf-8")  # Encode the invoice using base64
-    return base64_invoice_hash, invoice_hash_bytes
+    return invoice_hash, invoice_hash_bytes
+
+
+def generate_digital_signature(invoice_hash_bytes):
+    from path import Path
+    from ecdsa import SigningKey
+    cwd = os.getcwd()
+    site = frappe.local.site
+    new_path = f"{cwd}/{site}"
+    Path(new_path).chdir()
+    with open("privatekey.pem", "rb") as file:
+        privkey = SigningKey.from_pem(file.read())
+
+    digital_signature = privkey.sign(invoice_hash_bytes)
+    Path(cwd).chdir()
+    return base64.b64encode(digital_signature).decode("utf-8")
+
+
+def generate_hashing_certificate():
+    from path import Path
+    cwd = os.getcwd()
+    site = frappe.local.site
+    new_path = f"{cwd}/{site}"
+    Path(new_path).chdir()
+    with open("taxpayer.csr", "rb") as file:
+        cert_bytes = file.read()
+
+    ce = x509.load_pem_x509_csr(cert_bytes, default_backend())
+    base64_cert_hash = base64.b64encode(ce.tbs_certrequest_bytes).decode("utf-8")
+    Path(cwd).chdir()
+    return base64_cert_hash, cert_bytes
 
 
 def sign_invoice(xml_filename, business_setting_id):
@@ -410,34 +444,32 @@ def sign_invoice(xml_filename, business_setting_id):
         frappe.throw("An error occurred sign invoice : " + str(e))
 
 
-def generate_digital_signature(invoice_hash_bytes):
-    from path import Path
-    from ecdsa import SigningKey
-    cwd = os.getcwd()
-    site = frappe.local.site
-    new_path = f"{cwd}/{site}"
-    Path(new_path).chdir()
-    with open("privatekey.pem", "rb") as file:
-        privkey = SigningKey.from_pem(file.read())
+def extract_info_from_certificate(certificate):
+    final_data = {}
+    subjects = certificate.subject
+    for attr in subjects:
+        final_data[attr.oid._name] = attr.value
 
-    digital_signature = privkey.sign(invoice_hash_bytes)
-    Path(cwd).chdir()
-    return base64.b64encode(digital_signature).decode("utf-8")
+    extensions = certificate.extensions  # To get serial number, uuid, address, title (invoice type), and industry
+    for ext in extensions:
+        if ext.oid == x509.ExtensionOID.SUBJECT_ALTERNATIVE_NAME:
+            for alt_name in ext.value:
+                for sub_extension in alt_name.value:
+                    final_data[sub_extension.oid._name] = sub_extension.value
+
+    return final_data
 
 
-def generate_hashing_certificate():
-    from path import Path
-    cwd = os.getcwd()
-    site = frappe.local.site
-    new_path = f"{cwd}/{site}"
-    Path(new_path).chdir()
-    with open("taxpayer.csr", "rb") as file:
-        cert_bytes = file.read()
+def dump_xml(file_name, xml_content):
+    with open(f"{file_name}.xml", "wb") as file:
+        file.write(xml_content)
 
-    ce = x509.load_pem_x509_csr(cert_bytes, default_backend())
-    base64_cert_hash = base64.b64encode(ce.tbs_certrequest_bytes).decode("utf-8")
-    Path(cwd).chdir()
-    return base64_cert_hash, cert_bytes
+
+def remove_xpath(root, xpath, namespaces=None):
+    elements = root.xpath(xpath, namespaces=namespaces)
+    for ele in elements:
+        print(ele)
+        ele.getparent().remove(ele)
 
 
 def clean_up_private_key_string(private_key_string):
@@ -485,19 +517,3 @@ def _execute_in_shell(cmd, verbose=False, low_priority=False, check_exit_code=Fa
     if failed:
         raise Exception("Command failed")
     return err, out
-
-
-def extract_info_from_certificate(certificate):
-    final_data = {}
-    subjects = certificate.subject
-    for attr in subjects:
-        final_data[attr.oid._name] = attr.value
-
-    extensions = certificate.extensions  # To get serial number, uuid, address, title (invoice type), and industry
-    for ext in extensions:
-        if ext.oid == x509.ExtensionOID.SUBJECT_ALTERNATIVE_NAME:
-            for alt_name in ext.value:
-                for sub_extension in alt_name.value:
-                    final_data[sub_extension.oid._name] = sub_extension.value
-
-    return final_data
