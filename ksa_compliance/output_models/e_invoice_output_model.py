@@ -100,7 +100,7 @@ class Einvoice:
 
         # <----- start document level allowance ----->
         # fields from 49 to 58  document level allowance
-        self.get_bool_value(field_name="document_level_allowance_indicator",
+        self.get_bool_value(field_name="allowance_indicator",
                             source_doc=self.additional_fields_doc,
                             required=False,
                             xml_name="multiplier_factor_numeric",
@@ -109,132 +109,302 @@ class Einvoice:
                             rules=["BR-KSA-F-02", "BG-20"],
                             parent="invoice")
 
-        self.get_float_value(field_name="document_level_allowance_percentage",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="charge_indicator",
-                             min_value=0,
-                             max_value=100,
-                             rules=["BR-KSA-DEC-01", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
-                                    "BT-94", "BG-20"],
-                             parent="invoice")
-        self.get_float_value(field_name="document_level_allowance_amount",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="amount",
-                             min_value=0,
-                             max_value=100,
-                             rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-31", "BR-DEC-01",
-                                    "BT-92", "BT-92"],
-                             parent="invoice")
-        self.get_float_value(field_name="document_level_allowance_base_amount",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="amount",
-                             rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
-                                    "BR-DEC-02", "BT-93", "BG-20"],
-                             parent="invoice")
-        self.get_text_value(field_name="document_level_allowance_vat_category_code",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="ID",
-                            rules=["BR-KSA-18", "BR-32", "BR-O-13", "BR-CL-18", "BT-95", "BG-20"],
-                            parent="invoice")
-        self.get_float_value(field_name="document_level_allowance_vat_rate",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="ID",
-                             min_value=0,
-                             max_value=100,
-                             rules=["BR-KSA-12", "BR-KSA-DEC-02", "BR-S-06", "BR-Z-06",
-                                    "BR-E-06", "BT-96", "BG-20"],
-                             parent="invoice")
-        self.get_text_value(field_name="reason_for_allowance",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="allowance_charge_reason",
-                            min_length=0,
-                            max_length=1000,
-                            rules=["BR-KSA-F-06", "BT-97", "BG-20"],
-                            parent="invoice")
-        self.get_text_value(field_name="code_for_allowance_reason",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="allowance_charge_reason_code",
-                            min_length=0,
-                            max_length=1000,
-                            rules=["BR-KSA-F-06", "BT-98", "BG-20"],
-                            parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_float_value(field_name="document_level_allowance_percentage",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="charge_indicator",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-DEC-01", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BT-94", "BG-20"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="document_level_allowance_percentage",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="charge_indicator",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-DEC-01", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BT-94", "BG-20"],
+                                 parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_float_value(field_name="document_level_allowance_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="amount",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-31", "BR-DEC-01",
+                                        "BT-92", "BT-92"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="document_level_allowance_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="amount",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-31", "BR-DEC-01",
+                                        "BT-92", "BT-92"],
+                                 parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_float_value(field_name="document_level_allowance_base_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="amount",
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BR-DEC-02", "BT-93", "BG-20"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="document_level_allowance_base_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="amount",
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BR-DEC-02", "BT-93", "BG-20"],
+                                 parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_text_value(field_name="document_level_allowance_vat_category_code",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="ID",
+                                rules=["BR-KSA-18", "BR-32", "BR-O-13", "BR-CL-18", "BT-95", "BG-20"],
+                                parent="invoice")
+        else:
+            self.get_text_value(field_name="document_level_allowance_vat_category_code",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="ID",
+                                rules=["BR-KSA-18", "BR-32", "BR-O-13", "BR-CL-18", "BT-95", "BG-20"],
+                                parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_float_value(field_name="document_level_allowance_vat_rate",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="percent",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-12", "BR-KSA-DEC-02", "BR-S-06", "BR-Z-06",
+                                        "BR-E-06", "BT-96", "BG-20"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="document_level_allowance_vat_rate",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="percent",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-12", "BR-KSA-DEC-02", "BR-S-06", "BR-Z-06",
+                                        "BR-E-06", "BT-96", "BG-20"],
+                                 parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_text_value(field_name="reason_for_allowance",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="allowance_charge_reason",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-F-06", "BT-97", "BG-20"],
+                                parent="invoice")
+        else:
+            self.get_text_value(field_name="reason_for_allowance",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="allowance_charge_reason",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-F-06", "BT-97", "BG-20"],
+                                parent="invoice")
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_text_value(field_name="code_for_allowance_reason",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="allowance_charge_reason_code",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-F-06", "BT-98", "BG-20"],
+                                parent="invoice")
+        else:
+            self.get_text_value(field_name="code_for_allowance_reason",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="allowance_charge_reason_code",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-F-06", "BT-98", "BG-20"],
+                                parent="invoice")
+        # <----- end document level allowance ----->
 
         # Fields from 62 : 71 document level charge
+        # <----- start document level charge ----->
 
         self.get_bool_value(field_name="charge_indicator",
                             source_doc=self.additional_fields_doc,
                             required=False,
-                            xml_name="multiplier_factor_numeric",
+                            xml_name="charge_indicator",
                             min_length=0,
                             max_length=5,
                             rules=["BR-KSA-F-02", "BG-21"],
                             parent="invoice")
 
-        self.get_float_value(field_name="charge_percentage",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="charge_indicator",
-                             min_value=0,
-                             max_value=100,
-                             rules=["BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
-                                    "BT-101", "BG-21"],
-                             parent="invoice")
-        self.get_float_value(field_name="charge_amount",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="amount",
-                             min_value=0,
-                             max_value=100,
-                             rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-36", "BR-DEC-05",
-                                    "BT-99", "BG-21"],
-                             parent="invoice")
-        self.get_float_value(field_name="charge_base_amount",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="base_amount",
-                             rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
-                                    "BR-DEC-06", "BT-100", "BG-21"],
-                             parent="invoice")
-        self.get_text_value(field_name="charge_vat_category_code",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="ID",
-                            rules=["BR-KSA-18", "BR-37", "BR-CL-18", "BT-102", "BG-21"],
-                            parent="invoice")
-        self.get_float_value(field_name="charge_vat_rate",
-                             source_doc=self.additional_fields_doc,
-                             required=False,
-                             xml_name="ID",
-                             min_value=0,
-                             max_value=100,
-                             rules=["BR-KSA-13", "BR-KSA-DEC-02", "BR-S-07", "BR-Z-07",
-                                    "BR-E-07", "BT-103", "BG-21"],
-                             parent="invoice")
-        self.get_text_value(field_name="reason_for_charge",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="allowance_charge_reason",
-                            min_length=0,
-                            max_length=1000,
-                            rules=["BR-KSA-21", "BR-KSA-F-06", "BT-104", "BG-21"],
-                            parent="invoice")
-        self.get_text_value(field_name="reason_for_charge_code",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="allowance_charge_reason_code",
-                            min_length=0,
-                            max_length=1000,
-                            rules=["BR-KSA-19", "BR-KSA-F-06", "BT-105", "BG-21"],
-                            parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_float_value(field_name="charge_percentage",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="MultiplierFactorNumeric",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BT-101", "BG-21"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="charge_percentage",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="MultiplierFactorNumeric",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BT-101", "BG-21"],
+                                 parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_float_value(field_name="charge_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="amount",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-36", "BR-DEC-05",
+                                        "BT-99", "BG-21"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="charge_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="amount",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-36", "BR-DEC-05",
+                                        "BT-99", "BG-21"],
+                                 parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_float_value(field_name="charge_base_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="base_amount",
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BR-DEC-06", "BT-100", "BG-21"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="charge_base_amount",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="base_amount",
+                                 rules=["BR-KSA-F-04", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
+                                        "BR-DEC-06", "BT-100", "BG-21"],
+                                 parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_text_value(field_name="charge_vat_category_code",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="ID",
+                                rules=["BR-KSA-18", "BR-37", "BR-CL-18", "BT-102", "BG-21"],
+                                parent="invoice")
+        else:
+            self.get_text_value(field_name="charge_vat_category_code",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="ID",
+                                rules=["BR-KSA-18", "BR-37", "BR-CL-18", "BT-102", "BG-21"],
+                                parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_float_value(field_name="charge_vat_rate",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="Percent",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-13", "BR-KSA-DEC-02", "BR-S-07", "BR-Z-07",
+                                        "BR-E-07", "BT-103", "BG-21"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="charge_vat_rate",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="Percent",
+                                 min_value=0,
+                                 max_value=100,
+                                 rules=["BR-KSA-13", "BR-KSA-DEC-02", "BR-S-07", "BR-Z-07",
+                                        "BR-E-07", "BT-103", "BG-21"],
+                                 parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_text_value(field_name="reason_for_charge",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="allowance_charge_reason",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-21", "BR-KSA-F-06", "BT-104", "BG-21"],
+                                parent="invoice")
+        else:
+            self.get_text_value(field_name="reason_for_charge",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="allowance_charge_reason",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-21", "BR-KSA-F-06", "BT-104", "BG-21"],
+                                parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_text_value(field_name="reason_for_charge_code",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="allowance_charge_reason_code",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-19", "BR-KSA-F-06", "BT-105", "BG-21"],
+                                parent="invoice")
+        else:
+            self.get_text_value(field_name="reason_for_charge_code",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="allowance_charge_reason_code",
+                                min_length=0,
+                                max_length=1000,
+                                rules=["BR-KSA-19", "BR-KSA-F-06", "BT-105", "BG-21"],
+                                parent="invoice")
 
-        # <----- end document level allowance ----->
+        # <----- end document level charge ----->
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_float_value(field_name="sum_of_allowances",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="AllowanceTotalAmount",
+                                 rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="sum_of_allowances",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="AllowanceTotalAmount",
+                                 rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
+                                 parent="invoice")
+        if self.additional_fields_doc.charge_indicator:
+            self.get_float_value(field_name="sum_of_charges",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="ChargeTotalAmount",
+                                 rules=["BR-KSA-F-04", "BR-CO-12", "BR-DEC-11", "BT-108", "BG-22"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="sum_of_charges",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="ChargeTotalAmount",
+                                 rules=["BR-KSA-F-04", "BR-CO-12", "BR-DEC-11", "BT-108", "BG-22"],
+                                 parent="invoice")
 
         #     TODO: validate Document level charge indicator is Hardcoded, conditional fields from 63 to 72
 
@@ -483,28 +653,13 @@ class Einvoice:
                     self.result[parent][field_name] = field_value
 
         return field_value
-    # remove get dict if not needed
-    # def get_dict_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
-    #                    rules: list = None, parent: str = None):
-    #     if required and field_name not in source_doc:
-    #         self.error_dic[field_name] = f"Missing field"
-    #         return
-    #
-    #     field_value = source_doc.get(field_name, None)
-    #     if required and (field_value is None or []):
-    #         self.error_dic[field_name] = f"Missing field value: {field_name}."
-    #         return
-    #     if field_value is None or []:
-    #         return
-    #
-    #     field_name = xml_name if xml_name else field_name
-    #     if parent:
-    #         if self.result.get(parent):
-    #             self.result[parent][field_name] = field_value
-    #         else:
-    #             self.result[parent] = {}
-    #             self.result[parent][field_name] = field_value
-    #     return field_value
+
+    def has_any_other_buyer_id(self):
+        buyer_id_list = self.additional_fields_doc.other_buyer_ids
+        for item in buyer_id_list:
+            if item.value not in (None, ""):
+                return True
+        return False
 
     # TODO: Complete the implementation
     def validate_scheme_with_order(self, field_value: dict, ordered_list: list):
@@ -634,13 +789,30 @@ class Einvoice:
 
     def get_buyer_details(self, invoice_type):
         # --------------------------- START Buyer Details fields ------------------------------
-        self.get_list_value(field_name="other_buyer_identification",  # TODO: Fix Add to doctype customer and additional
-                            source_doc=self.sales_invoice_doc,
-                            required=True,
-                            xml_name="PartyIdentification",
-                            rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
-                            parent="buyer_details")
 
+        if invoice_type == "Standard":
+            if self.additional_fields_doc.buyer_vat_registration_number is None or "":
+                self.get_list_value(field_name="other_buyer_identification",
+                                    # TODO: Fix Add to doctype customer and additional
+                                    source_doc=self.sales_invoice_doc,
+                                    required=True,
+                                    xml_name="PartyIdentification",
+                                    rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
+                                    parent="buyer_details")
+            else:
+                self.get_list_value(field_name="other_buyer_identification",
+                                    source_doc=self.sales_invoice_doc,
+                                    required=False,
+                                    xml_name="PartyIdentification",
+                                    rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
+                                    parent="buyer_details")
+        if invoice_type == "Simplified":
+            self.get_list_value(field_name="other_buyer_identification",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="PartyIdentification",
+                                rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
+                                parent="buyer_details")
         if invoice_type == "Standard":
             self.get_text_value(field_name="buyer_street_name",
                                 source_doc=self.additional_fields_doc,
@@ -669,12 +841,21 @@ class Einvoice:
                             rules=["BR-KSA-F-06", "BT-51", "BG-8"],
                             parent="buyer_details")
 
-        self.get_text_value(field_name="buyer_building_number",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="building_number",
-                            rules=["KSA-18", "BG-8"],
-                            parent="buyer_details")
+        if invoice_type == "Standard":
+            self.get_text_value(field_name="buyer_building_number",
+                                source_doc=self.additional_fields_doc,
+                                required=True,
+                                xml_name="building_number",
+                                rules=["KSA-18", "BG-8"],
+                                parent="buyer_details")
+
+        elif invoice_type == "Simplified":
+            self.get_text_value(field_name="buyer_building_number",
+                                source_doc=self.additional_fields_doc,
+                                required=False,
+                                xml_name="building_number",
+                                rules=["KSA-18", "BG-8"],
+                                parent="buyer_details")
 
         self.get_text_value(field_name="buyer_additional_number",
                             # TODO: add additional number field for address if needed
@@ -728,7 +909,6 @@ class Einvoice:
                             parent="buyer_details")
 
         if invoice_type == "Standard":
-            # TODO: handle the condition for this
             self.get_text_value(field_name="buyer_district",
                                 source_doc=self.additional_fields_doc,
                                 required=False,
@@ -765,13 +945,20 @@ class Einvoice:
                                 parent="buyer_details")
 
         if invoice_type == "Standard":
-            # TODO: handle conditional
-            self.get_text_value(field_name="buyer_vat_registration_number",
-                                source_doc=self.additional_fields_doc,
-                                required=True,
-                                xml_name="company_id",
-                                rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
-                                parent="buyer_details")
+            if self.has_any_other_buyer_id():
+                self.get_text_value(field_name="buyer_vat_registration_number",
+                                    source_doc=self.additional_fields_doc,
+                                    required=False,
+                                    xml_name="company_id",
+                                    rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
+                                    parent="buyer_details")
+            else:
+                self.get_text_value(field_name="buyer_vat_registration_number",
+                                    source_doc=self.additional_fields_doc,
+                                    required=True,
+                                    xml_name="company_id",
+                                    rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
+                                    parent="buyer_details")
 
         elif invoice_type == "Simplified":
             self.get_text_value(field_name="buyer_vat_registration_number",
@@ -932,7 +1119,12 @@ class Einvoice:
                              xml_name="grand_total",
                              rules=["BG-22", "BT-112", "BR-14", "BR-CO-15", "BR-DEC-14", "BR-KSA-F-04"],
                              parent="invoice")
-
+        self.get_float_value(field_name="total_advance",
+                             source_doc=self.sales_invoice_doc,
+                             required=False,
+                             xml_name="prepaid_amount",
+                             rules=["BR-KSA-73", "BR-DEC-16", "BT-113", "BG-22"],
+                             parent="invoice")
         self.get_float_value(field_name="rounding_adjustment",
                              source_doc=self.sales_invoice_doc,
                              required=False,
@@ -956,16 +1148,14 @@ class Einvoice:
         try:
             self.get_float_child_value(field_name="taxes_rate",
                                        field_value=self.sales_invoice_doc.taxes[0].rate,
-                                       # handle child element in a better way
                                        required=False,
-                                       xml_name="taxable_amount",
-                                       min_value=0,
-                                       max_value=100,
-                                       rules=["BR-KSA-12", "BR-KSA-DEC-02", "BR-S-06", "BR-Z-06", "BR-E-06", "BT-96",
-                                              "BG-20"],
+                                       xml_name="Percent",
+                                       rules=["BR-KSA-DEC-02", "BR-48", "BR-CO-18", "BT-119", "BG-23"],
                                        parent="invoice")
         except:
             self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
+
+            # VAT exemption reason to be added in customizations
 
             # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------
@@ -973,16 +1163,27 @@ class Einvoice:
         item_lines = []
         for item in self.sales_invoice_doc.get("items"):
             new_item = {}
+            has_discount = False
             req_fields = ["idx", "qty", "uom", "item_code", "item_name", "net_amount", "amount", "price_list_rate",
-                          "rate"]
+                          "rate", "discount_percentage", "discount_amount"]
+            if isinstance(item.discount_amount, float) and item.discount_amount > 0:
+                has_discount = True
             for it in req_fields:
                 if it not in ["item_name", "uom", "item_code"]:
-                    new_item[it] = self.get_float_value(
-                        field_name=it,
-                        source_doc=item,
-                        required=True,
-                        xml_name=it
-                    )
+                    if it in ["discount_percentage", "discount_amount"] and not has_discount:
+                        new_item[it] = self.get_float_value(
+                            field_name=it,
+                            source_doc=item,
+                            required=False,
+                            xml_name=it
+                        )
+                    else:
+                        new_item[it] = self.get_float_value(
+                            field_name=it,
+                            source_doc=item,
+                            required=True,
+                            xml_name=it
+                        )
                 elif it in ["item_name", "uom", "item_code"]:
                     new_item[it] = self.get_text_value(
                         field_name=it,

@@ -18,12 +18,12 @@ class SalesInvoiceAdditionalFields(Document):
         self.set_pih()
         self.generate_uuid()
         self.set_tax_currency()  # Set as "SAR" as a default tax currency value
-        self.set_invoice_type_code("Simplified")  # TODO: Evaluate invoice type
         self.set_calculated_invoice_values()
         self.set_buyer_details(sl_id=self.get("sales_invoice"))
+        self.set_invoice_type_code()
 
-    def after_submit(self):
-        e_invoice = construct_einvoice_data(self)
+    def on_submit(self):
+        e_invoice = self.construct_einvoice_data()
         business_setting_doc = e_invoice.business_settings_doc
         customer_id = e_invoice.sales_invoice_doc.customer
 
@@ -35,10 +35,23 @@ class SalesInvoiceAdditionalFields(Document):
                                   business_type=business_setting_doc.type_of_business_transactions,
                                   customer_id=customer_id)
 
+    def construct_einvoice_data(self):
+        business_settings_doc = get_business_settings_doc(self.get("sales_invoice"))
+        if business_settings_doc.get("type_of_business_transactions") == 'Standard Tax Invoices':
+            return Einvoice(sales_invoice_additional_fields_doc=self, invoice_type="Standard")
+
+        elif business_settings_doc.get("type_of_business_transactions") == "Simplified Tax Invoices":
+            return Einvoice(sales_invoice_additional_fields_doc=self, invoice_type="Simplified")
+        else:
+            if self.buyer_vat_registration_number is not None or "":
+                return Einvoice(sales_invoice_additional_fields_doc=self, invoice_type="Standard")
+            else:
+                return Einvoice(sales_invoice_additional_fields_doc=self, invoice_type="Simplified")
+
     def generate_uuid(self):
         self.uuid = str(uuid.uuid1())
 
-    def set_invoice_type_code(self, invoice_type):
+    def set_invoice_type_code(self):
         """
         A code of the invoice subtype and invoices transactions.
         The invoice transaction code must exist and respect the following structure:
@@ -51,8 +64,16 @@ class SalesInvoiceAdditionalFields(Document):
         - B (position 7) = Self billed invoice. Self-billing is not allowed (KSA-2, position 7 cannot be ""1"") for export invoices (KSA-2, position 5 = 1).
         """
         # Basic Simplified or Tax invoice
-        self.invoice_type_transaction = "0200000" if invoice_type.lower() == "simplified" else "0100000"
-        self.invoice_type_code = "388"  # for Simplified Tax invoice
+        self.invoice_type_transaction = "0100000" if self.buyer_vat_registration_number is None or "" else "0200000"
+
+        is_debit, is_credit = frappe.db.get_value("Sales Invoice", self.get("sales_invoice"),
+                                                  ["is_debit_note", "is_return"])
+        if is_debit:
+            self.invoice_type_code = "383"
+        elif is_credit:
+            self.invoice_type_code = "381"
+        else:
+            self.invoice_type_code = "383"
 
     def set_tax_currency(self):
         self.tax_currency = "SAR"
@@ -94,7 +115,6 @@ class SalesInvoiceAdditionalFields(Document):
 
         self.buyer_vat_registration_number = customer_doc.custom_vat_registration_number
 
-        obi = self.get("other_buyer_ids")
         for item in customer_doc.get("custom_additional_ids"):
             self.append("other_buyer_ids",
                         {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
@@ -151,5 +171,9 @@ def customer_has_registration(customer_id: str):
     return True
 
 
-def construct_einvoice_data(additional_fields_doc):
-    return Einvoice(sales_invoice_additional_fields_doc=additional_fields_doc, invoice_type="Simplified")
+def get_business_settings_doc(invoice_id: str):
+    company_id = frappe.db.get_value("Sales Invoice", invoice_id,
+                                     ["company"])
+    company_doc = frappe.get_doc("Company", company_id)
+    business_settings_id = company_id + '-' + company_doc.get("country") + '-' + company_doc.get("default_currency")
+    return frappe.get_doc("ZATCA Business Settings", business_settings_id).as_dict()
