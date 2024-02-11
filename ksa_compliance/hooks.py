@@ -237,5 +237,5 @@ fixtures = [
      "filters":
          [['name', "in",
            ['ZATCA Simplified Sales Invoice', 'ZATCA Simplified Credit Invoice', 'ZATCA Simplified Debit Invoice',
-            'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit   Invoice']]]},
+            'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit Invoice']]]},
 ]
