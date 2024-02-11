@@ -1,7 +1,7 @@
 [project]
 name = "ksa_compliance"
 authors = [
-    { name = "maged", email = "maged@lavaloon.com"}
+    { name = "LavaLoon", email = "info@lavaloon.com"}
 ]
 description = "KSA Compliance app for E-invoice"
 requires-python = ">=3.10"
