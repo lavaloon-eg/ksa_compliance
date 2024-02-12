@@ -104,8 +104,6 @@ class Einvoice:
                             source_doc=self.additional_fields_doc,
                             required=False,
                             xml_name="multiplier_factor_numeric",
-                            min_length=0,
-                            max_length=5,
                             rules=["BR-KSA-F-02", "BG-20"],
                             parent="invoice")
 
@@ -244,8 +242,6 @@ class Einvoice:
                             source_doc=self.additional_fields_doc,
                             required=False,
                             xml_name="charge_indicator",
-                            min_length=0,
-                            max_length=5,
                             rules=["BR-KSA-F-02", "BG-21"],
                             parent="invoice")
 
@@ -415,8 +411,6 @@ class Einvoice:
                             source_doc=self.additional_fields_doc,
                             required=False,
                             xml_name="ID",
-                            min_length=0,
-                            max_length=127,
                             rules=["BR-KSA-F-06", "BR-61", "BT-84", "BG-17"],
                             parent="invoice")
 
@@ -469,20 +463,16 @@ class Einvoice:
         return field_value
 
     def get_bool_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
-                       min_length: int = 0, max_length: int = 5, rules: list = None, parent: str = None):
+                       rules: list = None, parent: str = None):
         if required and field_name not in source_doc:
             self.error_dic[field_name] = f"Missing field"
             return
 
-        field_value = source_doc.get(field_name).strip() if source_doc.get(field_name) else None
+        field_value = source_doc.get(field_name) if source_doc.get(field_name) else None
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
         if field_value is None:
-            return
-
-        if not min_length <= len(field_value) <= max_length:
-            self.error_dic[field_name] = f'Invalid {field_name} field size value {len(field_value)}'
             return
 
         field_name = xml_name if xml_name else field_name
