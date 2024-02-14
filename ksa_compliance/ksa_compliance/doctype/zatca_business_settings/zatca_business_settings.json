@@ -12,6 +12,7 @@
   "country_code",
   "enable_zatca_integration",
   "sync_with_zatca",
+  "type_of_business_transactions",
   "currency",
   "column_break_kjzc",
   "company_address",
@@ -167,11 +168,18 @@
    "fieldtype": "Data",
    "label": "Country Code",
    "read_only": 1
+  },
+  {
+   "default": "Let the system decide (both)",
+   "fieldname": "type_of_business_transactions",
+   "fieldtype": "Select",
+   "label": "Type of Business Transactions",
+   "options": "Let the system decide (both)\nSimplified Tax Invoices\nStandard Tax Invoices"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-30 19:33:20.661928",
+ "modified": "2024-02-01 16:48:25.607843",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",

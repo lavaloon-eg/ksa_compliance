@@ -33,7 +33,8 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-doctype_js = {"Customer": "public/js/customer.js"}
+doctype_js = {"Customer": "public/js/customer.js",
+              "Sales Invoice": "public/js/sales_invoice_item.js"}
 
 # Svg Icons
 # ------------------
@@ -135,6 +136,9 @@ doctype_js = {"Customer": "public/js/customer.js"}
 doc_events = {
     "Sales Invoice": {
         "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
+    },
+    "Sales Invoice Item": {
+        "on_insert": "ksa_compliance.standard_doctypes.sales_invoice_item.calculate_tax_amount"
     }
 }
 
@@ -227,3 +231,11 @@ doc_events = {
 # auth_hooks = [
 # "ksa_compliance.auth.validate"
 # ]
+
+fixtures = [
+    {"dt": 'Print Format',
+     "filters":
+         [['name', "in",
+           ['ZATCA Simplified Sales Invoice', 'ZATCA Simplified Credit Invoice', 'ZATCA Simplified Debit Invoice',
+            'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit Invoice']]]},
+]
