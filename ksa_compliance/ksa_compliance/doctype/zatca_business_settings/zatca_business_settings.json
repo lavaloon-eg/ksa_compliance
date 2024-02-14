@@ -8,6 +8,9 @@
  "field_order": [
   "tab_break_ljdo",
   "company",
+  "company_unit",
+  "company_unit_serial",
+  "company_category",
   "country",
   "country_code",
   "enable_zatca_integration",
@@ -28,7 +31,21 @@
   "vat_registration_number",
   "other_ids",
   "integration_tab",
-  "otp"
+  "configuration_section",
+  "lava_zatca_path",
+  "column_break_cjdg",
+  "fatoora_server_url",
+  "onboarding_section",
+  "create_csr",
+  "csr",
+  "compliance_request_id",
+  "security_token",
+  "secret",
+  "column_break_okfu",
+  "get_production_csid",
+  "production_request_id",
+  "production_security_token",
+  "production_secret"
  ],
  "fields": [
   {
@@ -158,11 +175,6 @@
    "label": "Integration"
   },
   {
-   "fieldname": "otp",
-   "fieldtype": "Data",
-   "label": "OTP"
-  },
-  {
    "fetch_from": "country.code",
    "fieldname": "country_code",
    "fieldtype": "Data",
@@ -175,11 +187,118 @@
    "fieldtype": "Select",
    "label": "Type of Business Transactions",
    "options": "Let the system decide (both)\nSimplified Tax Invoices\nStandard Tax Invoices"
+  },
+  {
+   "description": "Generate a CSR and make a compliance CSID request through ZATCA.",
+   "fieldname": "create_csr",
+   "fieldtype": "Button",
+   "label": "Onboard"
+  },
+  {
+   "fieldname": "compliance_request_id",
+   "fieldtype": "Data",
+   "label": "Compliance Request ID",
+   "read_only": 1
+  },
+  {
+   "description": "The path to the executable for lava-zatca CLI, e.g. <pre style=\"display:inline;\">/home/frappe/lava-zatca/bin/lava-zatca</pre>",
+   "fieldname": "lava_zatca_path",
+   "fieldtype": "Data",
+   "label": "Lava Zatca Path"
+  },
+  {
+   "fetch_from": "company_address.address_title",
+   "fetch_if_empty": 1,
+   "fieldname": "company_unit",
+   "fieldtype": "Data",
+   "label": "Company Unit",
+   "reqd": 1
+  },
+  {
+   "description": "Format: <pre style=\"display:inline;\">1-...|2-...|3-...</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-001|2-001|3-001</pre>",
+   "fieldname": "company_unit_serial",
+   "fieldtype": "Data",
+   "label": "Company Unit Serial",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.domain",
+   "fetch_if_empty": 1,
+   "fieldname": "company_category",
+   "fieldtype": "Data",
+   "label": "Company Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "csr",
+   "fieldtype": "Small Text",
+   "label": "CSR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "security_token",
+   "fieldtype": "Small Text",
+   "label": "Security Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "secret",
+   "fieldtype": "Password",
+   "label": "Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_okfu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Use the compliance request from onboarding to get a production CSID from ZATCA, using which invoices can be submitted to ZATCA through reporting or clearance APIs.",
+   "fieldname": "get_production_csid",
+   "fieldtype": "Button",
+   "label": "Get Production CSID"
+  },
+  {
+   "fieldname": "production_security_token",
+   "fieldtype": "Small Text",
+   "label": "Production Security Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_secret",
+   "fieldtype": "Password",
+   "label": "Production Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "onboarding_section",
+   "fieldtype": "Section Break",
+   "label": "Onboarding"
+  },
+  {
+   "description": "The URL for the ZATCA server to use. Use <pre style=\"display:inline;\">https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/</pre> for the ZATCA sandbox (testing)",
+   "fieldname": "fatoora_server_url",
+   "fieldtype": "Data",
+   "label": "Fatoora Server URL"
+  },
+  {
+   "fieldname": "production_request_id",
+   "fieldtype": "Data",
+   "label": "Production Request ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cjdg",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-01 16:48:25.607843",
+ "modified": "2024-02-14 17:32:11.370200",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
