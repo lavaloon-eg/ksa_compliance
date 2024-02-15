@@ -166,7 +166,7 @@ class SalesInvoiceAdditionalFields(Document):
 def customer_has_registration(customer_id: str):
     customer_doc = frappe.get_doc("Customer", customer_id)
     if customer_doc.custom_vat_registration_number in (None, "") and all(
-            ide.value in (None, "") for ide in customer_doc.additional_ids):
+            ide.value in (None, "") for ide in customer_doc.custom_additional_ids):
         return False
     return True
 
