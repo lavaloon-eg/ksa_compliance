@@ -1165,6 +1165,8 @@ class Einvoice:
                             field_name=it,
                             source_doc=item,
                             required=False,
+                            min_value=-999999999,
+                            max_value=999999999,
                             xml_name=it
                         )
                     else:
@@ -1172,6 +1174,8 @@ class Einvoice:
                             field_name=it,
                             source_doc=item,
                             required=True,
+                            min_value=-999999999,
+                            max_value=999999999,
                             xml_name=it
                         )
                 elif it in ["item_name", "uom", "item_code"]:
