@@ -160,7 +160,6 @@ class SalesInvoiceAdditionalFields(Document):
 
     def set_sum_of_allowances(self, sales_invoice_doc):
         self.sum_of_allowances = sales_invoice_doc.get("total") - sales_invoice_doc.get("net_total")
-        print("test")
 
 
 def customer_has_registration(customer_id: str):
