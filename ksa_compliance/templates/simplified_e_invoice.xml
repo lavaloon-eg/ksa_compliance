@@ -202,7 +202,7 @@
     <!--TODO: Implement Charges -->
     {% if invoice.charge_indicator %}
     <cac:AllowanceCharge>
-        <cbc:ChargeIndicator>"true"</cbc:ChargeIndicator>
+        <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
         <cbc:MultiplierFactorNumeric>20</cbc:MultiplierFactorNumeric>
         <cbc:Amount currencyID="SAR">20.24</cbc:Amount>
         <cbc:BaseAmount currencyID="SAR">200</cbc:BaseAmount>
