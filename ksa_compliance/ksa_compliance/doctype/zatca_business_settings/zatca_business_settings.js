@@ -6,11 +6,21 @@ frappe.ui.form.on("ZATCA Business Settings", {
     company: function (frm) {
         filter_company_address(frm);
     },
+    check_lava_zatca: function (frm) {
+        frappe.call({
+            freeze: true,
+            freeze_message: __('Please wait...'),
+            method: "ksa_compliance.zatca_cli.version",
+            args: {
+                zatca_path: frm.doc.lava_zatca_path,
+            }
+        })
+    },
     create_csr: function (frm) {
         frappe.prompt(__('OTP'), ({value}) => {
             frappe.call({
                 freeze: true,
-                freeze_message: 'Please wait...',
+                freeze_message: __('Please wait...'),
                 method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.onboard",
                 args: {
                     business_settings_id: frm.doc.name,

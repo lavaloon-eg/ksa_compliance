@@ -33,6 +33,7 @@
   "integration_tab",
   "configuration_section",
   "lava_zatca_path",
+  "check_lava_zatca",
   "column_break_cjdg",
   "fatoora_server_url",
   "onboarding_section",
@@ -294,11 +295,17 @@
   {
    "fieldname": "column_break_cjdg",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.lava_zatca_path",
+   "fieldname": "check_lava_zatca",
+   "fieldtype": "Button",
+   "label": "Check Lava-ZATCA"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-14 17:32:11.370200",
+ "modified": "2024-02-18 18:38:54.842041",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
