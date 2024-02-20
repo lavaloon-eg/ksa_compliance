@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.1.0
+
 * XML Templates:
   * Create Tax invoice template. 
   * Create Simplified tax invoice template.
