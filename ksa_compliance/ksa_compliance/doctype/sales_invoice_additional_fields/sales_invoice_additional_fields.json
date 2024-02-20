@@ -14,6 +14,7 @@
   "invoice_type_transaction",
   "tax_currency",
   "invoice_counter",
+  "invoice_hash",
   "previous_invoice_hash",
   "qr_code",
   "crypto_graphic_stamp",
@@ -115,7 +116,7 @@
   },
   {
    "fieldname": "invoice_counter",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "label": "Invoice Counter",
    "read_only": 1
   },
@@ -127,7 +128,7 @@
   },
   {
    "fieldname": "qr_code",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "QR Code",
    "read_only": 1
   },
@@ -268,13 +269,13 @@
   },
   {
    "fieldname": "sum_of_allowances",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "Sum of Allowances",
    "read_only": 1
   },
   {
    "fieldname": "sum_of_charges",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "Sum of Charges",
    "read_only": 1
   },
@@ -458,12 +459,17 @@
    "fieldtype": "Check",
    "label": "Charge Indicator",
    "read_only": 1
+  },
+  {
+   "fieldname": "invoice_hash",
+   "fieldtype": "Data",
+   "label": "Invoice Hash"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-06 15:47:31.422460",
+ "modified": "2024-02-20 13:40:20.556778",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

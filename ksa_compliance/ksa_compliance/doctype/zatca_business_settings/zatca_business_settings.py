@@ -1,6 +1,5 @@
-# Copyright (c) 2024, Lavaloon and contributors
+# Copyright (c) 2024, LavaLoon and contributors
 # For license information, please see license.txt
-import logging
 from typing import Optional, NoReturn, cast
 
 # import frappe
@@ -8,41 +7,73 @@ import frappe
 # noinspection PyProtectedMember
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.logger import get_logger
 from result import is_err
 
 import ksa_compliance.zatca_api as api
 import ksa_compliance.zatca_cli as cli
-
-logger = get_logger('zatca')
-logger.setLevel(logging.INFO)
+from ksa_compliance import logger
+from ksa_compliance.invoice import InvoiceMode
 
 
 class ZATCABusinessSettings(Document):
-    # Seller Details tab
-    company: str
-    company_unit: str
-    company_unit_serial: str
-    company_category: str
-    country: str
-    country_code: str
-    company_address: str
-    building_number: Optional[str]
-    street: str
-    district: Optional[str]
-    city: str
-    vat_registration_number: str
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
 
-    # Integration tab
-    lava_zatca_path: Optional[str]
-    fatoora_server_url: Optional[str]
-    csr: Optional[str]
-    security_token: Optional[str]
-    secret: Optional[str]
-    compliance_request_id: Optional[str]
-    production_request_id: Optional[str]
-    production_security_token: Optional[str]
-    production_secret: Optional[str]
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
+
+        additional_street: DF.Data | None
+        building_number: DF.Data | None
+        city: DF.Data | None
+        company: DF.Link
+        company_address: DF.Link
+        company_category: DF.Data
+        company_unit: DF.Data
+        company_unit_serial: DF.Data
+        compliance_request_id: DF.Data | None
+        country: DF.Link
+        country_code: DF.Data | None
+        csr: DF.SmallText | None
+        currency: DF.Link
+        district: DF.Data | None
+        enable_zatca_integration: DF.Check
+        fatoora_server_url: DF.Data | None
+        lava_zatca_path: DF.Data | None
+        other_ids: DF.Table[AdditionalSellerIDs]
+        postal_code: DF.Data | None
+        production_request_id: DF.Data | None
+        production_secret: DF.Password | None
+        production_security_token: DF.SmallText | None
+        secret: DF.Password | None
+        security_token: DF.SmallText | None
+        seller_name: DF.Data
+        street: DF.Data | None
+        sync_with_zatca: DF.Literal["Live", "Batches"]
+        type_of_business_transactions: DF.Literal[
+            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        vat_registration_number: DF.Data
+
+    # end: auto-generated types
+
+    @property
+    def is_live_sync(self) -> bool:
+        return self.sync_with_zatca.lower() == 'live'
+
+    @property
+    def invoice_mode(self) -> InvoiceMode:
+        return InvoiceMode.from_literal(self.type_of_business_transactions)
+
+    @property
+    def cert_path(self) -> str:
+        return f'{self.vat_registration_number}.pem'
+
+    @property
+    def private_key_path(self) -> str:
+        return f'{self.vat_registration_number}.privkey'
 
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,
@@ -86,7 +117,24 @@ class ZATCABusinessSettings(Document):
         self.production_secret = csid_result.ok_value.secret
         self.save()
 
+        with open(self.cert_path, 'wb+') as cert:
+            cert.write(b'-----BEGIN CERTIFICATE-----\n')
+            cert.write(csid_result.ok_value.security_token.encode('utf-8'))
+            cert.write(b'\n-----END CERTIFICATE-----')
+
         frappe.msgprint(_("Production CSID generated successfully"), title=_('Success'))
+
+    @staticmethod
+    def for_invoice(invoice_id: str) -> Optional['ZATCABusinessSettings']:
+        company_id = frappe.db.get_value("Sales Invoice", invoice_id, ["company"])
+        if not company_id:
+            return None
+
+        business_settings_id = frappe.db.get_value('ZATCA Business Settings', filters={'company': company_id})
+        if not business_settings_id:
+            return None
+
+        return cast(ZATCABusinessSettings, frappe.get_doc("ZATCA Business Settings", business_settings_id))
 
     def _generate_csr(self) -> cli.CsrResult:
         config = frappe.render_template(

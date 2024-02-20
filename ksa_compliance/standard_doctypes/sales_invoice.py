@@ -17,4 +17,7 @@ def create_sales_invoice_additional_fields_doctype(self, method):
             "buyer_country_code": customer_address_doc.get("country"),
         }
         si_additional_fields_doc.update(address_info)
+
+    # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
+    si_additional_fields_doc.insert()
     si_additional_fields_doc.submit()

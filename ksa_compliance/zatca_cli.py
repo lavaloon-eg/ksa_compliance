@@ -1,19 +1,16 @@
 import json
-import logging
 import os.path
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from json import JSONDecodeError
-from typing import cast, List, NoReturn
+from typing import cast, List, NoReturn, Optional
 
 import frappe
 # noinspection PyProtectedMember
 from frappe import _
-from frappe.utils.logger import get_logger
 
-logger = get_logger('zatca')
-logger.setLevel(logging.INFO)
+from ksa_compliance import logger
 
 
 @dataclass
@@ -22,10 +19,21 @@ class ZatcaResult:
     is_success: bool
     msg: str
     errors: List[str]
+    data: Optional[dict]
 
     @property
     def is_failure(self):
         return not self.is_success
+
+    def throw_if_failure(self):
+        if self.is_failure:
+            content = self.msg
+            if self.errors:
+                content += "<ul>"
+            for e in self.errors:
+                content += f"<li>{e}</li>"
+            content += "</ul>"
+            frappe.throw(content)
 
 
 @dataclass
@@ -41,10 +49,19 @@ class CsrResult:
     """The path to the private key file"""
 
 
+@dataclass
+class SigningResult:
+    """Result for an invoice signing invocation to lava-zatca CLI"""
+    signed_invoice_xml: str
+    invoice_hash: str
+    qr_code: str
+
+
 @frappe.whitelist()
 def version(zatca_path: str) -> NoReturn:
     """Shows a desk dialog with the version of the Lava ZATCA CLI if found, or an error otherwise"""
     result = run_command(zatca_path, ['-v'])
+    result.throw_if_failure()
     frappe.msgprint(result.msg, _("Lava Zatca"))
 
 
@@ -62,9 +79,23 @@ def generate_csr(lava_zatca_path: str, vat_registration_number: str, config: str
     private_key_path = f'{vat_registration_number}.privkey'
     result = run_command(lava_zatca_path, ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path])
     logger.info(result.msg)
+    result.throw_if_failure()
     with open(csr_path, 'rt') as file:
         csr = file.read()
     return CsrResult(csr, csr_path, private_key_path)
+
+
+def sign_invoice(lava_zatca_path: str, invoice_xml: str, cert_path: str, private_key_path: str) -> SigningResult:
+    invoice_path = write_temp_file(invoice_xml, "invoice.xml")
+    signed_invoice_path = get_temp_path('signed_invoice.xml')
+    result = run_command(lava_zatca_path,
+                         ['sign', '-o', signed_invoice_path, '-c', cert_path, '-k', private_key_path,
+                          invoice_path])
+    logger.info(result.msg)
+    result.throw_if_failure()
+    with open(signed_invoice_path, 'rt') as file:
+        signed_invoice = file.read()
+    return SigningResult(signed_invoice, result.data['hash'], result.data['qrCode'])
 
 
 def run_command(zatca_path: str, args: List[str]) -> ZatcaResult:
@@ -94,20 +125,18 @@ def run_command(zatca_path: str, args: List[str]) -> ZatcaResult:
         result = {'msg': 'An unexpected error occurred', 'errors': [str(e)]}
 
     if proc.returncode != 0:
-        msg = cast(str, result['msg'])
-        if result['errors']:
-            msg += "<ul>"
-        for e in result['errors']:
-            msg += f"<li>{e}</li>"
-        msg += "</ul>"
-        frappe.throw(msg)
+        return ZatcaResult(is_success=False, msg=result['msg'], errors=result.get('errors', []), data=None)
 
-    return ZatcaResult(is_success=True, msg=result['msg'], errors=[])
+    return ZatcaResult(is_success=True, msg=result['msg'], errors=[], data=result.get('data'))
 
 
 def write_temp_file(content: str, name: str) -> str:
     """Writes the given text [content] into a temporary file named [name]"""
-    path = os.path.join(tempfile.gettempdir(), name)
+    path = get_temp_path(name)
     with open(path, 'wt+') as file:
         file.write(content)
     return path
+
+
+def get_temp_path(name: str) -> str:
+    return os.path.join(tempfile.gettempdir(), name)

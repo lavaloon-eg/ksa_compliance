@@ -1,14 +1,14 @@
+import base64
 from dataclasses import dataclass
-from typing import cast, List, Dict, Callable, TypeVar
+from typing import cast, List, Dict, Callable, TypeVar, Optional
 from urllib.parse import urljoin
 
 import requests
-from frappe.utils.logger import get_logger
 from requests import HTTPError, Response, JSONDecodeError
 from requests.auth import HTTPBasicAuth
 from result import Result, Ok, Err
 
-logger = get_logger('zatca')
+from ksa_compliance import logger
 
 
 @dataclass
@@ -24,6 +24,33 @@ class ComplianceResult:
         """Create a [ComplianceResult] from JSON [data]"""
         return ComplianceResult(request_id=data['requestID'], disposition_message=data['dispositionMessage'],
                                 security_token=data['binarySecurityToken'], secret=data['secret'])
+
+
+@dataclass
+class WarningOrError:
+    category: str
+    code: str
+    message: str
+
+    @staticmethod
+    def from_json(data: dict) -> 'WarningOrError':
+        return WarningOrError(category=data['category'], code=data['code'], message=data['message'])
+
+
+@dataclass
+class ReportOrClearInvoiceResult:
+    invoice_hash: str
+    status: str
+    cleared_invoice: Optional[str]
+    warnings: List[WarningOrError]
+    errors: List[WarningOrError]
+
+    @staticmethod
+    def from_json(data: dict) -> 'ReportOrClearInvoiceResult':
+        return ReportOrClearInvoiceResult(invoice_hash=data['invoiceHash'], status=data['status'],
+                                          cleared_invoice=data.get('clearedInvoice'),
+                                          warnings=[WarningOrError.from_json(w) for w in data['warnings']],
+                                          errors=[WarningOrError.from_json(e) for e in data['errors']])
 
 
 def get_compliance_csid(server: str, csr: str, otp: str) -> Result[ComplianceResult, str]:
@@ -46,6 +73,40 @@ def get_production_csid(server: str, compliance_request_id: str, otp: str, secur
     body = {'compliance_request_id': compliance_request_id}
     auth = HTTPBasicAuth(security_token, secret)
     return api_call(server, 'production/csids', headers, body, ComplianceResult.from_json, auth=auth)
+
+
+def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
+                   secret: str) -> Result[ReportOrClearInvoiceResult, str]:
+    """Reports a simplified invoice to ZATCA"""
+    b64_xml = base64.b64encode(invoice_xml.encode()).decode()
+    body = {
+        "invoiceHash": invoice_hash,
+        "uuid": invoice_uuid,
+        "invoice": b64_xml
+    }
+    headers = {
+        "Accept-Version": "V2",
+    }
+
+    return api_call(server, "invoices/reporting/single", headers, body, ReportOrClearInvoiceResult.from_json,
+                    auth=HTTPBasicAuth(security_token, secret))
+
+
+def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
+                  secret: str) -> Result[ReportOrClearInvoiceResult, str]:
+    """Reports a simplified invoice to ZATCA"""
+    b64_xml = base64.b64encode(invoice_xml.encode()).decode()
+    body = {
+        "invoiceHash": invoice_hash,
+        "uuid": invoice_uuid,
+        "invoice": b64_xml
+    }
+    headers = {
+        "Accept-Version": "V2",
+    }
+
+    return api_call(server, "invoices/clearances/single", headers, body, ReportOrClearInvoiceResult.from_json,
+                    auth=HTTPBasicAuth(security_token, secret))
 
 
 TOk = TypeVar('TOk')

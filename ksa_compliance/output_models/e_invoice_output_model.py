@@ -1,17 +1,16 @@
+from __future__ import annotations
 import json
+from typing import cast
 
 import frappe
-from frappe.utils import get_date_str, get_time_str
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from frappe.model.document import Document
+from frappe.utils import get_date_str, get_time
 
-
-def get_sales_invoice_by_id(invoice_id: str):
-    return frappe.get_doc("Sales Invoice", invoice_id).as_dict()
-
-
-def get_business_settings_doc(company_id: str):
-    company_doc = frappe.get_doc("Company", company_id)
-    business_settings_id = company_id + '-' + company_doc.get("country") + '-' + company_doc.get("default_currency")
-    return frappe.get_doc("ZATCA Business Settings", business_settings_id).as_dict()
+from ksa_compliance.invoice import InvoiceType
+from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
+from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import (
+    ZATCABusinessSettings)
 
 
 def append_tax_details_into_item_lines(invoice_id, item_lines):
@@ -37,15 +36,18 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
 class Einvoice:
     # TODO: if batch doc = none validate business settings else pass
 
-    def __init__(self, sales_invoice_additional_fields_doc, invoice_type: str = "Simplified", batch_doc=None):
+    def __init__(self,
+                 sales_invoice_additional_fields_doc: 'sales_invoice_additional_fields.SalesInvoiceAdditionalFields',
+                 invoice_type: InvoiceType = "Simplified", batch_doc=None):
 
-        self.additional_fields_doc = sales_invoice_additional_fields_doc.as_dict()
+        self.additional_fields_doc = sales_invoice_additional_fields_doc
         self.batch_doc = batch_doc
         self.result = {}
         self.error_dic = {}
 
-        self.sales_invoice_doc = get_sales_invoice_by_id(sales_invoice_additional_fields_doc.get("sales_invoice"))
-        self.business_settings_doc = get_business_settings_doc(self.sales_invoice_doc.get("company"))
+        self.sales_invoice_doc = cast(SalesInvoice, frappe.get_doc("Sales Invoice",
+                                                                   sales_invoice_additional_fields_doc.sales_invoice))
+        self.business_settings_doc = ZATCABusinessSettings.for_invoice(self.sales_invoice_doc.name)
 
         # Get Business Settings and Seller Fields
         self.get_business_settings_and_seller_details()
@@ -435,12 +437,8 @@ class Einvoice:
 
     # --------------------------- START helper functions ------------------------------
 
-    def get_text_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+    def get_text_value(self, field_name: str, source_doc: Document, required: bool, xml_name: str = None,
                        min_length: int = 0, max_length: int = 5000, rules: list = None, parent: str = None):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
         field_value = source_doc.get(field_name).strip() if source_doc.get(field_name) else None
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
@@ -462,12 +460,8 @@ class Einvoice:
 
         return field_value
 
-    def get_bool_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+    def get_bool_value(self, field_name: str, source_doc: Document, required: bool, xml_name: str = None,
                        rules: list = None, parent: str = None):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
         field_value = source_doc.get(field_name) if source_doc.get(field_name) else None
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
@@ -485,13 +479,9 @@ class Einvoice:
 
         return field_value
 
-    def get_int_value(self, field_name: str, source_doc: dict, required: bool, min_value: int,
+    def get_int_value(self, field_name: str, source_doc: Document, required: bool, min_value: int,
                       max_value: int, xml_name: str = None, rules: list = None, parent: str = None):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
-        field_value = source_doc.get(field_name, None)
+        field_value = cast(any, source_doc.get(field_name, None))
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
@@ -512,13 +502,9 @@ class Einvoice:
                 self.result[parent][field_name] = field_value
         return field_value
 
-    def get_float_value(self, field_name: str, source_doc: dict, required: bool, min_value: int = 0,
+    def get_float_value(self, field_name: str, source_doc: Document, required: bool, min_value: int = 0,
                         max_value: int = 999999999999, xml_name: str = None, rules: list = None, parent: str = None):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
-        field_value = source_doc.get(field_name, None)
+        field_value = cast(any, source_doc.get(field_name, None))
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
@@ -541,10 +527,6 @@ class Einvoice:
         return field_value
 
     def get_date_value(self, field_name, source_doc, required, xml_name, rules, parent):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
         field_value = source_doc.get(field_name, None)
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
@@ -588,36 +570,31 @@ class Einvoice:
                 self.result[parent][field_name] = field_value
         return field_value
 
-    def get_time_value(self, field_name, source_doc, required, xml_name, rules, parent):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
+    def get_time_value(self, field_name, source_doc, required, xml_name, rules, parent) -> str | None:
         field_value = source_doc.get(field_name, None)
-        if required and field_value is None:
+        if required and not field_value:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
-        if field_value is None:
+        if not field_value:
             return
 
-        # Try to parse
-        field_value = get_time_str(field_value)
+        # We can't use frappe.utils.get_time_str because it results in invalid formats if any component is
+        # single-digit, e.g. 00:04:05 is represented as 0:4:5. ZATCA tries to parse an ISO date/time format
+        # created from the date and time joined with a T (e.g. 2024-02-20T00:04:05), and it fails to parse the
+        # format produced by get_time_str
+        formatted_value = get_time(field_value).strftime('%H:%M:%S')
 
         field_name = xml_name if xml_name else field_name
         if parent:
             if self.result.get(parent):
-                self.result[parent][field_name] = field_value
+                self.result[parent][field_name] = formatted_value
             else:
                 self.result[parent] = {}
-                self.result[parent][field_name] = field_value
-        return field_value
+                self.result[parent][field_name] = formatted_value
+        return formatted_value
 
-    def get_list_value(self, field_name: str, source_doc: dict, required: bool, xml_name: str = None,
+    def get_list_value(self, field_name: str, source_doc: Document, required: bool, xml_name: str = None,
                        rules: list = None, parent: str = None):
-        if required and field_name not in source_doc:
-            self.error_dic[field_name] = f"Missing field"
-            return
-
         field_value = source_doc.get(field_name)
         if required and (not field_value or {}):
             self.error_dic[field_name] = f"Missing field value: {field_name}."
@@ -1142,7 +1119,7 @@ class Einvoice:
                                        xml_name="Percent",
                                        rules=["BR-KSA-DEC-02", "BR-48", "BR-CO-18", "BT-119", "BG-23"],
                                        parent="invoice")
-        except:
+        except Exception:
             self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
 
             # VAT exemption reason to be added in customizations
