@@ -1,6 +1,6 @@
 app_name = "ksa_compliance"
 app_title = "KSA Compliance"
-app_publisher = "Lavaloon"
+app_publisher = "LavaLoon"
 app_description = "KSA Compliance app for E-invoice"
 app_email = "info@lavaloon.com"
 app_license = "Copyright (c) 2023 LavaLoon"
@@ -239,3 +239,7 @@ fixtures = [
            ['ZATCA Simplified Sales Invoice', 'ZATCA Simplified Credit Invoice', 'ZATCA Simplified Debit Invoice',
             'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit Invoice']]]},
 ]
+
+# Auto generate type annotations for doctypes
+# Reference: https://github.com/frappe/frappe/pull/21776
+export_python_type_annotations = True
