@@ -205,27 +205,11 @@ class SalesInvoiceAdditionalFields(Document):
             self.invoice_counter = 1
 
     def set_pih(self):
-        if self.invoice_counter == 1:
-            self.previous_invoice_hash = \
-                "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
-        else:
-            psi_id = frappe.db.get_value(self.doctype, filters={"invoice_counter": self.invoice_counter - 1},
-                                         fieldname="sales_invoice")
-            attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),
-                                         filters={"attached_to_name": ("in", psi_id),
-                                                  "attached_to_doctype": "Sales Invoice"})
-            if attachments:  # Means that the invoice XML had been generated and saved
-                site = frappe.local.site
-                for attachment in attachments:
-                    if attachment.file_name and attachment.file_name.endswith(".xml"):
-                        xml_filename = attachment.file_name
-                        break
-
-                file_name = "private/files/" + xml_filename
-                with open(file_name, "rb") as f:
-                    data = f.read()
-                    sha256hash = hashlib.sha256(data).hexdigest()
-                self.previous_invoice_hash = sha256hash
+        # Review: It makes sense that for the first invoice, there's no previous hash. But we need to double check
+        if self.invoice_counter > 1:
+            self.previous_invoice_hash = frappe.db.get_value(self.doctype,
+                                                             filters={"invoice_counter": self.invoice_counter - 1},
+                                                             fieldname="invoice_hash")
 
     def set_buyer_details(self, sl_id: str):
         sl = cast(SalesInvoice, frappe.get_doc("Sales Invoice", sl_id))
