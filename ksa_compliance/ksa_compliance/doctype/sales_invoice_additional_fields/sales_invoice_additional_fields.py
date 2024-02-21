@@ -205,8 +205,11 @@ class SalesInvoiceAdditionalFields(Document):
             self.invoice_counter = 1
 
     def set_pih(self):
-        # Review: It makes sense that for the first invoice, there's no previous hash. But we need to double check
-        if self.invoice_counter > 1:
+        if self.invoice_counter == 1:
+            # The first invoice uses a previous invoice hash equivalent to b64(sha256(0))
+            self.previous_invoice_hash = \
+                "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
+        else:
             self.previous_invoice_hash = frappe.db.get_value(self.doctype,
                                                              filters={"invoice_counter": self.invoice_counter - 1},
                                                              fieldname="invoice_hash")
