@@ -139,4 +139,4 @@ def write_temp_file(content: str, name: str) -> str:
 
 
 def get_temp_path(name: str) -> str:
-    return os.path.join(tempfile.gettempdir(), name)
+    return os.path.join(tempfile.gettempdir(), tempfile.gettempprefix() + name)

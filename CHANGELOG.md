@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Use a temporary prefix with temp file names to avoid clashes
+
 ## 0.1.1
 
 * Fix certificate extraction from production CSID
