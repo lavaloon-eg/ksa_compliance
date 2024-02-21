@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.1.1
+
+* Fix certificate extraction from production CSID
+* Fix previous invoice hash
+
 ## 0.1.0
 
 * XML Templates:
