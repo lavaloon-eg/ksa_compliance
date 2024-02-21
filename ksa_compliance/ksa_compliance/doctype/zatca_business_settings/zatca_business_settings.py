@@ -1,5 +1,6 @@
 # Copyright (c) 2024, LavaLoon and contributors
 # For license information, please see license.txt
+import base64
 from typing import Optional, NoReturn, cast
 
 # import frappe
@@ -119,7 +120,7 @@ class ZATCABusinessSettings(Document):
 
         with open(self.cert_path, 'wb+') as cert:
             cert.write(b'-----BEGIN CERTIFICATE-----\n')
-            cert.write(csid_result.ok_value.security_token.encode('utf-8'))
+            cert.write(base64.b64decode(csid_result.ok_value.security_token))
             cert.write(b'\n-----END CERTIFICATE-----')
 
         frappe.msgprint(_("Production CSID generated successfully"), title=_('Success'))
