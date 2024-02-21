@@ -1,4 +1,8 @@
 frappe.ui.form.on("Customer", {
+  setup: function(frm){
+    frm.set_df_property('custom_additional_ids', 'cannot_delete_rows', 1);
+    frm.set_df_property('custom_additional_ids', 'cannot_add_rows', 1);
+  },
   refresh: function (frm) {
     add_other_ids_if_new(frm);
   },
