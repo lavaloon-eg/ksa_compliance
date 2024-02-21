@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Make the temp prefix is random
+
 ## 0.1.2
 
 * Use a temporary prefix with temp file names to avoid clashes
