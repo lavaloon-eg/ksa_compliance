@@ -441,13 +441,13 @@ class Einvoice:
                        min_length: int = 0, max_length: int = 5000, rules: list = None, parent: str = None):
         field_value = source_doc.get(field_name).strip() if source_doc.get(field_name) else None
         if required and field_value is None:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if field_value is None:
             return
 
         if not min_length <= len(field_value) <= max_length:
-            self.error_dic[field_name] = f'Invalid {field_name} field size value {len(field_value)}'
+            self.error_dic[field_name] = f'Invalid {field_name} field size value {len(field_value)}.{rules}'
             return
 
         field_name = xml_name if xml_name else field_name
@@ -464,7 +464,7 @@ class Einvoice:
                        rules: list = None, parent: str = None):
         field_value = source_doc.get(field_name) if source_doc.get(field_name) else None
         if required and field_value is None:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if field_value is None:
             return
@@ -483,14 +483,14 @@ class Einvoice:
                       max_value: int, xml_name: str = None, rules: list = None, parent: str = None):
         field_value = cast(any, source_doc.get(field_name, None))
         if required and field_value is None:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
 
         if field_value is None:
             return
         field_value = int(field_value)
         if not min_value <= field_value <= max_value:
-            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
+            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}.{rules}'
             return
 
         field_name = xml_name if xml_name else field_name
@@ -506,7 +506,7 @@ class Einvoice:
                         max_value: int = 999999999999, xml_name: str = None, rules: list = None, parent: str = None):
         field_value = cast(any, source_doc.get(field_name, None))
         if required and field_value is None:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if field_value is None:
             return
@@ -514,7 +514,7 @@ class Einvoice:
         # Try to parse
         field_value = float(field_value) if type(field_value) is int else field_value
         if not min_value <= field_value <= max_value:
-            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
+            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}.{rules}'
             return
 
         field_name = xml_name if xml_name else field_name
@@ -529,7 +529,7 @@ class Einvoice:
     def get_date_value(self, field_name, source_doc, required, xml_name, rules, parent):
         field_value = source_doc.get(field_name, None)
         if required and field_value is None:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if field_value is None:
             return
@@ -550,7 +550,7 @@ class Einvoice:
                               max_value: int = 999999999999, xml_name: str = None, rules: list = None,
                               parent: str = None):
         if field_value is None and required:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if field_value is None:
             return
@@ -558,7 +558,7 @@ class Einvoice:
         # Try to parse
         field_value = float(field_value) if type(field_value) is int else field_value
         if not min_value <= field_value <= max_value:
-            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
+            self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}.{rules}'
             return
 
         field_name = xml_name if xml_name else field_name
@@ -573,7 +573,7 @@ class Einvoice:
     def get_time_value(self, field_name, source_doc, required, xml_name, rules, parent) -> str | None:
         field_value = source_doc.get(field_name, None)
         if required and not field_value:
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if not field_value:
             return
@@ -597,7 +597,7 @@ class Einvoice:
                        rules: list = None, parent: str = None):
         field_value = source_doc.get(field_name)
         if required and (not field_value or {}):
-            self.error_dic[field_name] = f"Missing field value: {field_name}."
+            self.error_dic[field_name] = f"Missing field value: {field_name}.{rules}"
             return
         if field_value is None or {}:
             return
@@ -607,7 +607,7 @@ class Einvoice:
             if field_value:
                 field_value = self.validate_scheme_with_order(field_value=field_value, ordered_list=party_list)
                 if not field_value:
-                    self.error_dic[field_name] = f"Wrong ordered for field: {field_name}."
+                    self.error_dic[field_name] = f"Wrong ordered for field: {field_name}.{rules}"
                     return
 
         field_name = xml_name if xml_name else field_name
