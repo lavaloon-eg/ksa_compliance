@@ -1,4 +1,5 @@
 import base64
+import dataclasses
 import traceback
 from dataclasses import dataclass
 from typing import cast, List, Dict, Callable, TypeVar, Optional
@@ -45,6 +46,9 @@ class ReportOrClearInvoiceResult:
     cleared_invoice: Optional[str]
     warnings: List[WarningOrError]
     errors: List[WarningOrError]
+
+    def to_json(self) -> dict:
+        return dataclasses.asdict(self)
 
     @staticmethod
     def from_json(data: dict) -> 'ReportOrClearInvoiceResult':
@@ -183,7 +187,7 @@ def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, st
         if e.response.text:
             logger.info(f'Response: {e.response.json()}')
 
-        return Err(error_builder(e.response, None))
+        return Err(error_builder(e.response, e))
     except Exception as e:
         logger.error('An unexpected exception occurred', exc_info=e)
         if response:

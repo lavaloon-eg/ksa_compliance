@@ -23,6 +23,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
     ZATCABusinessSettings)
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
+from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult
 
 
 class SalesInvoiceAdditionalFields(Document):
@@ -252,10 +253,13 @@ class SalesInvoiceAdditionalFields(Document):
 
         status = ''
         if is_err(result):
-            zatca_message = result.err_value.response or result.err_value.error
+            # The IDE gets confused resolving types, so we help it along
+            error = cast(ReportOrClearInvoiceError, result.err_value)
+            zatca_message = error.response or error.error
         else:
-            zatca_message = json.dumps(result.ok_value)
-            status = result.ok_value.status
+            value = cast(ReportOrClearInvoiceResult, result.ok_value)
+            zatca_message = json.dumps(value.to_json(), indent=2)
+            status = value.status
 
         integration_doc = cast(ZATCAIntegrationLog, frappe.get_doc({
             "doctype": "ZATCA Integration Log",
