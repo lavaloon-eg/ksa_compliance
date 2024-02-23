@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.2.0
+
 * Use a hard-coded private key if the configured URL is for the sandbox environment
 * Do not use ':' in XML filenames (from timestamp)
 * Various fixes to simplified invoice format to pass validation
