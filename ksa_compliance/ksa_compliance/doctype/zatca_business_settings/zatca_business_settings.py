@@ -1,6 +1,7 @@
 # Copyright (c) 2024, LavaLoon and contributors
 # For license information, please see license.txt
 import base64
+import os
 from typing import Optional, NoReturn, cast
 
 # import frappe
@@ -74,7 +75,29 @@ class ZATCABusinessSettings(Document):
 
     @property
     def private_key_path(self) -> str:
+        if self.is_sandbox_server:
+            return self._sandbox_private_key_path
+
         return f'{self.vat_registration_number}.privkey'
+
+    @property
+    def is_sandbox_server(self) -> bool:
+        return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal')
+
+    @property
+    def _sandbox_private_key_path(self) -> str:
+        """
+        Returns the path of the sandbox private key
+
+        The sandbox environment returns a fixed certificate that corresponds to this private key. If we try to sign
+        with the real private key, signature validation will fail
+        """
+        key = "MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA=="
+        path = 'sandbox_private_key.pem'
+        if not os.path.isfile(path):
+            with open(path, 'wb') as f:
+                f.write(key.encode('utf-8'))
+        return path
 
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,
