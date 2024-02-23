@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 from __future__ import annotations
 
-import hashlib
 import json
 import uuid
 from typing import cast
@@ -22,6 +21,7 @@ from ksa_compliance.generate_xml import generate_xml_file, generate_einvoice_xml
 from ksa_compliance.invoice import InvoiceMode, InvoiceType
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import (
     ZATCABusinessSettings)
+from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 
 
@@ -52,7 +52,6 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        crypto_graphic_stamp: DF.Text | None
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -85,6 +84,8 @@ class SalesInvoiceAdditionalFields(Document):
         supply_end_date: DF.Data | None
         tax_currency: DF.Data | None
         uuid: DF.Data | None
+        validation_errors: DF.SmallText | None
+        validation_messages: DF.SmallText | None
         vat_exemption_reason_code: DF.Data | None
         vat_exemption_reason_text: DF.SmallText | None
 
@@ -134,11 +135,16 @@ class SalesInvoiceAdditionalFields(Document):
         frappe.log_error("ZATCA Result LOG", message=json.dumps(einvoice.result, indent=2))
         frappe.log_error("ZATCA Error LOG", message=json.dumps(einvoice.error_dic, indent=2))
 
-        invoice_xml = generate_xml_file(einvoice.result)
+        invoice_xml = generate_xml_file(einvoice.result, invoice_type)
         result = cli.sign_invoice(settings.lava_zatca_path, invoice_xml, settings.cert_path,
                                   settings.private_key_path)
+        validation_result = cli.validate_invoice(settings.lava_zatca_path, result.signed_invoice_path,
+                                                 settings.cert_path, self.previous_invoice_hash)
+
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
+        self.validation_messages = '\n'.join(validation_result.messages)
+        self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
         self.save()
 
         xml_filename = generate_einvoice_xml_fielname(settings.vat_registration_number,
@@ -152,8 +158,8 @@ class SalesInvoiceAdditionalFields(Document):
                 "attached_to_doctype": "Sales Invoice Additional Fields",
                 "attached_to_name": self.name,
                 "content": result.signed_invoice_xml,
+                "is_private": True,
             }))
-        file.is_private = True
         file.insert()
 
     def send_to_zatca(self, settings: ZATCABusinessSettings) -> None:
@@ -181,7 +187,8 @@ class SalesInvoiceAdditionalFields(Document):
         export invoices (KSA-2, position 5 = 1).
         """
         # Basic Simplified or Tax invoice
-        self.invoice_type_transaction = "0100000" if self.buyer_vat_registration_number is None or "" else "0200000"
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
+        self.invoice_type_transaction = "0100000" if self.get_invoice_type(settings) == 'Standard' else '0200000'
 
         is_debit, is_credit = frappe.db.get_value("Sales Invoice", self.sales_invoice,
                                                   ["is_debit_note", "is_return"])
@@ -190,7 +197,7 @@ class SalesInvoiceAdditionalFields(Document):
         elif is_credit:
             self.invoice_type_code = "381"
         else:
-            self.invoice_type_code = "383"
+            self.invoice_type_code = "388"
 
     def set_tax_currency(self):
         self.tax_currency = "SAR"
@@ -231,34 +238,32 @@ class SalesInvoiceAdditionalFields(Document):
 
     def send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
                          settings: ZATCABusinessSettings):
+        secret = settings.get_password('production_secret')
         if invoice_type == 'Standard':
             result = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
                                        invoice_uuid=self.uuid, invoice_hash=invoice_hash,
                                        security_token=settings.production_security_token,
-                                       secret=settings.production_secret)
+                                       secret=secret)
         else:
             result = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
                                         invoice_uuid=self.uuid, invoice_hash=invoice_hash,
                                         security_token=settings.production_security_token,
-                                        secret=settings.production_secret)
+                                        secret=secret)
 
-        # TODO: This is questionable. It's better to update the document itself to reflect the result. Not sure whether
-        #   we also need to store the raw response
         status = ''
         if is_err(result):
-            zatca_message = result.err_value
+            zatca_message = result.err_value.response or result.err_value.error
         else:
             zatca_message = json.dumps(result.ok_value)
             status = result.ok_value.status
 
-        integration_dict = {
+        integration_doc = cast(ZATCAIntegrationLog, frappe.get_doc({
             "doctype": "ZATCA Integration Log",
             "invoice_reference": self.sales_invoice,
             "invoice_additional_fields_reference": self.name,
             "zatca_message": zatca_message,
             "zatca_status": status,
-        }
-        integration_doc = frappe.get_doc(integration_dict)
+        }))
         integration_doc.insert()
 
     def set_sum_of_charges(self, taxes: list):
@@ -269,7 +274,7 @@ class SalesInvoiceAdditionalFields(Document):
         self.sum_of_charges = total
 
     def set_sum_of_allowances(self, sales_invoice_doc):
-        self.sum_of_allowances = sales_invoice_doc.get("total") - sales_invoice_doc.get("net_total")
+        self.sum_of_allowances = sales_invoice_doc.total - sales_invoice_doc.net_total
 
     def get_signed_xml(self) -> str | None:
         attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),
@@ -289,9 +294,9 @@ class SalesInvoiceAdditionalFields(Document):
 
         file = cast(File, frappe.get_doc("File", name))
         content = file.get_content()
-        if isinstance(content, bytes):
-            return content.decode('utf-8')
-        return content
+        if isinstance(content, str):
+            return content
+        return content.decode('utf-8')
 
 
 def customer_has_registration(customer_id: str):

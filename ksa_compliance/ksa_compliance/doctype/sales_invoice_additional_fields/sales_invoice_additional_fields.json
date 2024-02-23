@@ -17,7 +17,6 @@
   "invoice_hash",
   "previous_invoice_hash",
   "qr_code",
-  "crypto_graphic_stamp",
   "buyer_address_tab",
   "buyer_id_section",
   "buyer_vat_registration_number",
@@ -73,7 +72,11 @@
   "invoice_line_charge_base_amount_reason_code",
   "section_break_mryd",
   "prepayment_vat_category_taxable_amount",
-  "prepayment_vat_category_tax_amount"
+  "prepayment_vat_category_tax_amount",
+  "tab_4_tab",
+  "validation_section",
+  "validation_messages",
+  "validation_errors"
  ],
  "fields": [
   {
@@ -130,12 +133,6 @@
    "fieldname": "qr_code",
    "fieldtype": "Small Text",
    "label": "QR Code",
-   "read_only": 1
-  },
-  {
-   "fieldname": "crypto_graphic_stamp",
-   "fieldtype": "Text",
-   "label": "Crypto Graphic Stamp",
    "read_only": 1
   },
   {
@@ -464,12 +461,34 @@
    "fieldname": "invoice_hash",
    "fieldtype": "Data",
    "label": "Invoice Hash"
+  },
+  {
+   "fieldname": "tab_4_tab",
+   "fieldtype": "Tab Break",
+   "label": "Validation"
+  },
+  {
+   "fieldname": "validation_section",
+   "fieldtype": "Section Break",
+   "label": "Validation"
+  },
+  {
+   "fieldname": "validation_messages",
+   "fieldtype": "Small Text",
+   "label": "Messages",
+   "read_only": 1
+  },
+  {
+   "fieldname": "validation_errors",
+   "fieldtype": "Small Text",
+   "label": "Errors",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-20 13:40:20.556778",
+ "modified": "2024-02-21 23:21:36.333707",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

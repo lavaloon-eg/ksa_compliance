@@ -1,4 +1,5 @@
 import base64
+import traceback
 from dataclasses import dataclass
 from typing import cast, List, Dict, Callable, TypeVar, Optional
 from urllib.parse import urljoin
@@ -34,23 +35,58 @@ class WarningOrError:
 
     @staticmethod
     def from_json(data: dict) -> 'WarningOrError':
-        return WarningOrError(category=data['category'], code=data['code'], message=data['message'])
+        return WarningOrError(category=data.get('category', 'No Category'), code=data.get('code', 'No Code'),
+                              message=data.get('message', 'No Message'))
 
 
 @dataclass
 class ReportOrClearInvoiceResult:
-    invoice_hash: str
-    status: str
+    status: Optional[str]
     cleared_invoice: Optional[str]
     warnings: List[WarningOrError]
     errors: List[WarningOrError]
 
     @staticmethod
     def from_json(data: dict) -> 'ReportOrClearInvoiceResult':
-        return ReportOrClearInvoiceResult(invoice_hash=data['invoiceHash'], status=data['status'],
-                                          cleared_invoice=data.get('clearedInvoice'),
-                                          warnings=[WarningOrError.from_json(w) for w in data['warnings']],
-                                          errors=[WarningOrError.from_json(e) for e in data['errors']])
+        # The swagger documentation on  https://sandbox.zatca.gov.sa/IntegrationSandbox says the response should be
+        # like this:
+        # {
+        #   "invoiceHash": "4JFgbmivjFU/otPSMfZCJTSISc123DbdQkOKHLe1J1Q=",
+        #   "status": "REPORTED",
+        #   "warnings": null,
+        #   "errors": []
+        # }
+        #
+        # In practice, we're getting responses like this:
+        # {
+        #   "validationResults": {
+        #       "infoMessages":[],
+        #       "warningMessages":[],
+        #       "errorMessages":[],
+        #       "status":"WARNING"
+        #    },
+        #   "reportingStatus":"NOT_REPORTED"
+        #  }
+        #
+        # So we're going to try to parse both
+        status = data.get('reportingStatus') or data.get('status')
+        cleared_invoice = data.get('clearedInvoice')
+        warnings, errors = [], []
+        if data.get('warnings'):
+            warnings = [WarningOrError.from_json(w) for w in data['warnings']]
+        if data.get('validationResults') and data.get('validationResults').get('warningMessages'):
+            warnings = [WarningOrError.from_json(w) for w in data['validationResults']['warningMessages']]
+        if data.get('errors'):
+            errors = [WarningOrError.from_json(e) for e in data['errors']]
+        if data.get('validationResults') and data.get('validationResults').get('errorMessages'):
+            errors = [WarningOrError.from_json(e) for e in data['validationResults']['errorMessages']]
+        return ReportOrClearInvoiceResult(status, cleared_invoice, warnings, errors)
+
+
+@dataclass
+class ReportOrClearInvoiceError:
+    response: str
+    error: str
 
 
 def get_compliance_csid(server: str, csr: str, otp: str) -> Result[ComplianceResult, str]:
@@ -60,7 +96,7 @@ def get_compliance_csid(server: str, csr: str, otp: str) -> Result[ComplianceRes
         'OTP': otp,
     }
     body = {'csr': csr}
-    return api_call(server, 'compliance', headers, body, ComplianceResult.from_json)
+    return api_call(server, 'compliance', headers, body, ComplianceResult.from_json, try_get_csid_error)
 
 
 def get_production_csid(server: str, compliance_request_id: str, otp: str, security_token: str,
@@ -72,11 +108,12 @@ def get_production_csid(server: str, compliance_request_id: str, otp: str, secur
     }
     body = {'compliance_request_id': compliance_request_id}
     auth = HTTPBasicAuth(security_token, secret)
-    return api_call(server, 'production/csids', headers, body, ComplianceResult.from_json, auth=auth)
+    return api_call(server, 'production/csids', headers, body, ComplianceResult.from_json, try_get_csid_error,
+                    auth=auth)
 
 
 def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                   secret: str) -> Result[ReportOrClearInvoiceResult, str]:
+                   secret: str) -> Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError]:
     """Reports a simplified invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -89,12 +126,13 @@ def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_has
     }
 
     return api_call(server, "invoices/reporting/single", headers, body, ReportOrClearInvoiceResult.from_json,
+                    try_get_report_or_clear_error,
                     auth=HTTPBasicAuth(security_token, secret))
 
 
 def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                  secret: str) -> Result[ReportOrClearInvoiceResult, str]:
-    """Reports a simplified invoice to ZATCA"""
+                  secret: str) -> Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError]:
+    """Reports a standard invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
         "invoiceHash": invoice_hash,
@@ -106,14 +144,18 @@ def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash
     }
 
     return api_call(server, "invoices/clearances/single", headers, body, ReportOrClearInvoiceResult.from_json,
+                    try_get_report_or_clear_error,
                     auth=HTTPBasicAuth(security_token, secret))
 
 
 TOk = TypeVar('TOk')
+TError = TypeVar('TError')
 
 
 def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, str],
-             result_builder: Callable[[dict], TOk], auth=None) -> Result[TOk, str]:
+             result_builder: Callable[[dict], TOk],
+             error_builder: Callable[[Response | None, Exception | None], TError],
+             auth=None) -> Result[TOk, TError]:
     """
     Performs a ZATCA API call and builds a success result using [result_builder]. In case of 400 errors, the
     response is parsed and a combined error is returned.
@@ -125,36 +167,77 @@ def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, st
 
     url = urljoin(server, path)
 
+    final_headers = headers.copy()
+    final_headers.update({
+        'accept': 'application/json',
+        'accept-language': 'en'
+    })
+
+    response: Response | None = None
     try:
-        response = requests.post(url, headers=headers, json=body, auth=auth)
+        response = requests.post(url, headers=final_headers, json=body, auth=auth)
         response.raise_for_status()
         return Ok(result_builder(response.json()))
     except HTTPError as e:
-        logger.error('An HTTP error occurred', exc_info=e)
+        logger.error('An HTTP error occurred')
         if e.response.text:
-            logger.info(f'Response: {e.response.text}')
+            logger.info(f'Response: {e.response.json()}')
 
-        return Err(try_get_response_error(e.response, str(e)))
+        return Err(error_builder(e.response, None))
     except Exception as e:
         logger.error('An unexpected exception occurred', exc_info=e)
-        return Err(str(e))
+        if response:
+            logger.info(f'Response: {response.text}')
+        return Err(error_builder(response, e))
 
 
-def try_get_response_error(response: Response, default_error: str) -> str:
+def try_get_csid_error(response: Response | None, exception: Exception | None) -> str:
     """Tries to extract an error from a ZATCA response. The sandbox API isn't consistent in how it reports errors,
     so this method tries a number of approaches based on the observed error responses."""
+    if exception:
+        return ''.join(traceback.format_exception_only(exception))
+
+    if not response:
+        return "API call failed but we don't have a response or an exception. This is a bug."
+
     try:
         data = response.json()
         if response.status_code == 400:
             errors = cast(List[str], data.get('errors', []))
-            if not errors:
-                errors.append(default_error)
-            return ', '.join(errors)
+            if errors:
+                return ', '.join(errors)
 
-        if response.status_code == 500:
-            return data.get('message', default_error)
+        if response.status_code == 500 and data.get('message'):
+            return data.get['message']
 
-        return default_error
+        return response.text
     except JSONDecodeError:
         # If the response is not JSON, we return the content itself as the error
         return response.text
+
+
+def try_get_report_or_clear_error(response: Response | None, exception: Exception | None) -> ReportOrClearInvoiceError:
+    """Tries to extract an error from a ZATCA reporting/clearance response"""
+    if exception:
+        return ReportOrClearInvoiceError('', ''.join(traceback.format_exception_only(exception)))
+
+    if not response:
+        return ReportOrClearInvoiceError('',
+                                         "API call failed but we don't have a response or an exception. This is a bug.")
+
+    try:
+        data = response.json()
+        if response.status_code == 400:
+            if data.get('validationResults'):
+                if data['validationResults'].get('errorMessages'):
+                    errors = cast(List[dict], data['validationResults']['errorMessages'])
+                    return ReportOrClearInvoiceError(response.text,
+                                                     '\n'.join([e['code'] + ': ' + e['message'] for e in errors]))
+
+        if response.status_code == 500 and data.get('message'):
+            return ReportOrClearInvoiceError(response.text, data['message'])
+    except JSONDecodeError:
+        # If the response is not JSON, we return the content itself as the error
+        pass
+
+    return ReportOrClearInvoiceError(response.text, 'An unknown error occurred')

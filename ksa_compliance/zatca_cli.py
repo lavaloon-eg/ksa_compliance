@@ -53,8 +53,16 @@ class CsrResult:
 class SigningResult:
     """Result for an invoice signing invocation to lava-zatca CLI"""
     signed_invoice_xml: str
+    signed_invoice_path: str
     invoice_hash: str
     qr_code: str
+
+
+@dataclass
+class ValidationResult:
+    """Result for validating an invoice through lava-zatca CLI"""
+    messages: List[str]
+    errors_and_warnings: List[str]
 
 
 @frappe.whitelist()
@@ -86,16 +94,27 @@ def generate_csr(lava_zatca_path: str, vat_registration_number: str, config: str
 
 
 def sign_invoice(lava_zatca_path: str, invoice_xml: str, cert_path: str, private_key_path: str) -> SigningResult:
+    base_path = os.path.normpath(os.path.join(os.path.dirname(lava_zatca_path), '../'))
     invoice_path = write_temp_file(invoice_xml, "invoice.xml")
     signed_invoice_path = get_temp_path('signed_invoice.xml')
     result = run_command(lava_zatca_path,
-                         ['sign', '-o', signed_invoice_path, '-c', cert_path, '-k', private_key_path,
-                          invoice_path])
+                         ['sign', '-b', base_path, '-o', signed_invoice_path, '-c', cert_path,
+                          '-k', private_key_path, invoice_path])
     logger.info(result.msg)
     result.throw_if_failure()
     with open(signed_invoice_path, 'rt') as file:
         signed_invoice = file.read()
-    return SigningResult(signed_invoice, result.data['hash'], result.data['qrCode'])
+    return SigningResult(signed_invoice, signed_invoice_path, result.data['hash'], result.data['qrCode'])
+
+
+def validate_invoice(lava_zatca_path: str, invoice_path: str, cert_path: str,
+                     previous_invoice_hash: str) -> ValidationResult:
+    base_path = os.path.normpath(os.path.join(os.path.dirname(lava_zatca_path), '../'))
+    result = run_command(lava_zatca_path, ['validate', '-b', base_path, '-c', cert_path, '-p',
+                                           previous_invoice_hash, invoice_path])
+    logger.info(result.msg)
+    result.throw_if_failure()
+    return ValidationResult(result.data['messages'], result.data['errorsAndWarnings'])
 
 
 def run_command(zatca_path: str, args: List[str]) -> ZatcaResult:
