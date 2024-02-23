@@ -25,11 +25,7 @@ def generate_xml(input_data: dict = None):
         is_path=True
     )
 
-    # TODO: This is not good; it works because the template doesn't contain any entities currently. But it'll break if
-    #  any are added
-    invoice_xml = invoice_xml.replace("&", "&amp;")
     invoice_xml = invoice_xml.replace("\n", "")
-
     return invoice_xml
 
 
@@ -49,13 +45,11 @@ def generate_xml_file(data: dict, invoice_type: InvoiceType = "Simplified"):
             "business_settings": data.get("business_settings")},
         is_path=True
     )
-    # TODO: Fix this
-    invoice_xml = invoice_xml.replace("&", "&amp;")
-    invoice_xml = invoice_xml.replace("\n", "")
     return invoice_xml
 
 
-# TODO: What is this?
 def generate_einvoice_xml_fielname(vat_registration_number: str, issue_date: str, issue_time: str, invoice_number: str):
-    file_name = vat_registration_number + "_" + issue_date + "T" + issue_time + "_" + invoice_number + ".xml"
+    file_name = (vat_registration_number + "_" + issue_date + "T" + issue_time.replace(':',
+                                                                                       '') + "_" + invoice_number +
+                 ".xml")
     return file_name
