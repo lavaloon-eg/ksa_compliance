@@ -28,7 +28,9 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
             if item["item_code"] in items_taxes:
                 item["tax_percent"] = items_taxes[item["item_code"]][0]
                 item["tax_amount"] = items_taxes[item["item_code"]][1]
-                item["total_amount"] = items_taxes[item["item_code"]][1] + item["amount"]
+                # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
+                #  value somehow
+                item["total_amount"] = items_taxes[item["item_code"]][1] + item["net_amount"]
 
     return item_lines
 
@@ -102,12 +104,12 @@ class Einvoice:
 
         # <----- start document level allowance ----->
         # fields from 49 to 58  document level allowance
-        self.get_bool_value(field_name="allowance_indicator",
-                            source_doc=self.additional_fields_doc,
-                            required=False,
-                            xml_name="multiplier_factor_numeric",
-                            rules=["BR-KSA-F-02", "BG-20"],
-                            parent="invoice")
+        # self.get_bool_value(field_name="allowance_indicator",
+        #                     source_doc=self.additional_fields_doc,
+        #                     required=False,
+        #                     xml_name="multiplier_factor_numeric",
+        #                     rules=["BR-KSA-F-02", "BG-20"],
+        #                     parent="invoice")
 
         if self.additional_fields_doc.allowance_indicator:
             self.get_float_value(field_name="document_level_allowance_percentage",
@@ -129,6 +131,7 @@ class Einvoice:
                                  rules=["BR-KSA-DEC-01", "BR-KSA-EN16931-03", "BR-KSA-EN16931-04", "BR-KSA-EN16931-05",
                                         "BT-94", "BG-20"],
                                  parent="invoice")
+
         if self.additional_fields_doc.allowance_indicator:
             self.get_float_value(field_name="document_level_allowance_amount",
                                  source_doc=self.additional_fields_doc,
@@ -235,6 +238,22 @@ class Einvoice:
                                 max_length=1000,
                                 rules=["BR-KSA-F-06", "BT-98", "BG-20"],
                                 parent="invoice")
+
+        if self.additional_fields_doc.allowance_indicator:
+            self.get_float_value(field_name="sum_of_allowances",
+                                 source_doc=self.additional_fields_doc,
+                                 required=True,
+                                 xml_name="allowance_total_amount",
+                                 rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
+                                 parent="invoice")
+        else:
+            self.get_float_value(field_name="sum_of_allowances",
+                                 source_doc=self.additional_fields_doc,
+                                 required=False,
+                                 xml_name="allowance_total_amount",
+                                 rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
+                                 parent="invoice")
+
         # <----- end document level allowance ----->
 
         # Fields from 62 : 71 document level charge
@@ -375,32 +394,18 @@ class Einvoice:
                                 parent="invoice")
 
         # <----- end document level charge ----->
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_float_value(field_name="sum_of_allowances",
-                                 source_doc=self.additional_fields_doc,
-                                 required=True,
-                                 xml_name="AllowanceTotalAmount",
-                                 rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="sum_of_allowances",
-                                 source_doc=self.additional_fields_doc,
-                                 required=False,
-                                 xml_name="AllowanceTotalAmount",
-                                 rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
-                                 parent="invoice")
         if self.additional_fields_doc.charge_indicator:
             self.get_float_value(field_name="sum_of_charges",
                                  source_doc=self.additional_fields_doc,
                                  required=True,
-                                 xml_name="ChargeTotalAmount",
+                                 xml_name="charge_total_amount",
                                  rules=["BR-KSA-F-04", "BR-CO-12", "BR-DEC-11", "BT-108", "BG-22"],
                                  parent="invoice")
         else:
             self.get_float_value(field_name="sum_of_charges",
                                  source_doc=self.additional_fields_doc,
                                  required=False,
-                                 xml_name="ChargeTotalAmount",
+                                 xml_name="charge_total_amount",
                                  rules=["BR-KSA-F-04", "BR-CO-12", "BR-DEC-11", "BT-108", "BG-22"],
                                  parent="invoice")
 
@@ -440,10 +445,11 @@ class Einvoice:
     def get_text_value(self, field_name: str, source_doc: Document, required: bool, xml_name: str = None,
                        min_length: int = 0, max_length: int = 5000, rules: list = None, parent: str = None):
         field_value = source_doc.get(field_name).strip() if source_doc.get(field_name) else None
-        if required and field_value is None:
+        if required and not field_value:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
-        if field_value is None:
+
+        if not field_value:
             return
 
         if not min_length <= len(field_value) <= max_length:
@@ -503,19 +509,20 @@ class Einvoice:
         return field_value
 
     def get_float_value(self, field_name: str, source_doc: Document, required: bool, min_value: int = 0,
-                        max_value: int = 999999999999, xml_name: str = None, rules: list = None, parent: str = None):
-        field_value = cast(any, source_doc.get(field_name, None))
+                        max_value: int = 999999999999, xml_name: str = None, rules: list = None, parent: str = None) -> float:
+        field_value = cast(any, source_doc.get(field_name))
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
-            return
+            return 0.0
+
         if field_value is None:
-            return
+            return 0.0
 
         # Try to parse
         field_value = float(field_value) if type(field_value) is int else field_value
         if not min_value <= field_value <= max_value:
             self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
-            return
+            return field_value
 
         field_name = xml_name if xml_name else field_name
         if parent:
@@ -1032,19 +1039,22 @@ class Einvoice:
                             rules=["KSA-13", "BR-KSA-26", "BR-KSA-61"],
                             parent="invoice")
 
-        self.get_text_value(field_name="qr_code",
-                            source_doc=self.additional_fields_doc,
-                            required=True,
-                            xml_name="qr_code",
-                            rules=["KSA-14", "BR-KSA-27"],
-                            parent="invoice")
-        self.get_text_value(field_name="crypto_graphic_stamp",
-                            source_doc=self.additional_fields_doc,
-                            required=True,
-                            xml_name="crypto_graphic_stamp",
-                            rules=[" KSA-15", "Digital Identity Standards", "BR-KSA-28", "BR-KSA-29", "BR-KSA-30",
-                                   "BR-KSA-60"],
-                            parent="invoice")
+        # QR code is a separate step after mapping
+        # self.get_text_value(field_name="qr_code",
+        #                     source_doc=self.additional_fields_doc,
+        #                     required=True,
+        #                     xml_name="qr_code",
+        #                     rules=["KSA-14", "BR-KSA-27"],
+        #                     parent="invoice")
+
+        # Stamp is a separate step after mapping
+        # self.get_text_value(field_name="crypto_graphic_stamp",
+        #                     source_doc=self.additional_fields_doc,
+        #                     required=True,
+        #                     xml_name="crypto_graphic_stamp",
+        #                     rules=[" KSA-15", "Digital Identity Standards", "BR-KSA-28", "BR-KSA-29", "BR-KSA-30",
+        #                            "BR-KSA-60"],
+        #                     parent="invoice")
 
         # TODO: Purchasing Order Exists
         # TODO: Billing Reference if the invoice is credit or debit (return against field)
