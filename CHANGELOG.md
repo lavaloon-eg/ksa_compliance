@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Use a hard-coded private key if the configured URL is for the sandbox environment
+* Do not use ':' in XML filenames (from timestamp)
+* Various fixes to simplified invoice format to pass validation
+* Add invoice validation; messages/errors show up on a validation tab on the Sales Invoice Additional Fields doctype
+* Improve API response handling
+
 ## 0.1.3
 
 * Make the temp prefix is random
