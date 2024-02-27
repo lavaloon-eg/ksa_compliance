@@ -61,6 +61,13 @@ class ZATCABusinessSettings(Document):
 
     # end: auto-generated types
 
+    def after_insert(self):
+        invoice_counting_doc = frappe.new_doc("ZATCA Invoice Counting Settings")
+        invoice_counting_doc.business_settings_reference = self.name
+        invoice_counting_doc.invoice_counter = 0
+        invoice_counting_doc.previous_invoice_hash = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
+        invoice_counting_doc.insert(ignore_permissions=True)
+
     @property
     def is_live_sync(self) -> bool:
         return self.sync_with_zatca.lower() == 'live'
