@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_jlnr",
   "amended_from",
+  "integration_status",
   "sales_invoice",
   "uuid",
   "invoice_type_code",
@@ -483,12 +484,20 @@
    "fieldtype": "Small Text",
    "label": "Errors",
    "read_only": 1
+  },
+  {
+   "default": "Ready For Batch",
+   "fieldname": "integration_status",
+   "fieldtype": "Select",
+   "label": "Integration Status",
+   "options": "\nReady For Batch\nResend\nCorrected\nApproved\nPending\nApproved with warning\nRejected\nFailed",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-21 23:21:36.333707",
+ "modified": "2024-02-27 22:15:58.238820",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

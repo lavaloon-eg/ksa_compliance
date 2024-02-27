@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Adding integration status field in sales invoice additional fields.
+* Submit Sales invoice additional field directly only if the sync mode is live.
+* Initialize e_invoicing_sync page to run the batch mode.
 * Fix error when storing ZATCA API result
 * Update invoice counter/hash logic to use locking to guarantee serialization
 * Fix buyer details street name being included in the XML if not defined (used to insert an error as the street name)

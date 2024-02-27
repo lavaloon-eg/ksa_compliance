@@ -35,8 +35,7 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -54,6 +53,7 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Approved", "Pending", "Approved with warning", "Rejected", "Failed"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -90,7 +90,6 @@ class SalesInvoiceAdditionalFields(Document):
         validation_messages: DF.SmallText | None
         vat_exemption_reason_code: DF.Data | None
         vat_exemption_reason_text: DF.SmallText | None
-
     # end: auto-generated types
 
     def get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
@@ -125,8 +124,7 @@ class SalesInvoiceAdditionalFields(Document):
         if not settings:
             return
 
-        if settings.is_live_sync:
-            self.send_to_zatca(settings)
+        self.send_to_zatca(settings)
 
     def prepare_for_zatca(self, settings: ZATCABusinessSettings):
         invoice_type = self.get_invoice_type(settings)
