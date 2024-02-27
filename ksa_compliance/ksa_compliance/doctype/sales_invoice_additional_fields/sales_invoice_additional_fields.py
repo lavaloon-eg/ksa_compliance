@@ -24,6 +24,8 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult
+from ksa_compliance.ksa_compliance.doctype.zatca_invoice_counting_settings.zatca_invoice_counting_settings import (
+    ZATCAInvoiceCountingSettings)
 
 
 class SalesInvoiceAdditionalFields(Document):
@@ -106,8 +108,12 @@ class SalesInvoiceAdditionalFields(Document):
         return invoice_type
 
     def before_insert(self):
-        self.set_invoice_counter_value()
-        self.set_pih()
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
+        invoice_counting_doc = frappe.get_doc("ZATCA Invoice Counting Settings",
+                                              {"business_settings_reference": settings.name}, for_update=True)
+
+        self.set_invoice_counter_value(invoice_counting_doc)
+        self.set_pih(invoice_counting_doc)
         self.generate_uuid()
         self.set_tax_currency()  # Set as "SAR" as a default tax currency value
         self.set_calculated_invoice_values()
@@ -147,6 +153,9 @@ class SalesInvoiceAdditionalFields(Document):
         self.validation_messages = '\n'.join(validation_result.messages)
         self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
         self.save()
+
+        # To update counting settings data
+        self.update_counting_settings_values(settings)
 
         xml_filename = generate_einvoice_xml_fielname(settings.vat_registration_number,
                                                       einvoice.result['invoice']['issue_date'],
@@ -203,24 +212,11 @@ class SalesInvoiceAdditionalFields(Document):
     def set_tax_currency(self):
         self.tax_currency = "SAR"
 
-    def set_invoice_counter_value(self):
-        additional_field_records = frappe.db.get_list(self.doctype,
-                                                      filters={"docstatus": ["!=", 2],
-                                                               "invoice_counter": ["is", "set"]})
-        if additional_field_records:
-            self.invoice_counter = len(additional_field_records) + 1
-        else:
-            self.invoice_counter = 1
+    def set_invoice_counter_value(self, counting_settings_doc: ZATCAInvoiceCountingSettings):
+        self.invoice_counter = counting_settings_doc.invoice_counter + 1
 
-    def set_pih(self):
-        if self.invoice_counter == 1:
-            # The first invoice uses a previous invoice hash equivalent to b64(sha256(0))
-            self.previous_invoice_hash = \
-                "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
-        else:
-            self.previous_invoice_hash = frappe.db.get_value(self.doctype,
-                                                             filters={"invoice_counter": self.invoice_counter - 1},
-                                                             fieldname="invoice_hash")
+    def set_pih(self, counting_settings_doc: ZATCAInvoiceCountingSettings):
+        self.previous_invoice_hash = counting_settings_doc.previous_invoice_hash
 
     def set_buyer_details(self, sl_id: str):
         sl = cast(SalesInvoice, frappe.get_doc("Sales Invoice", sl_id))
@@ -301,6 +297,13 @@ class SalesInvoiceAdditionalFields(Document):
         if isinstance(content, str):
             return content
         return content.decode('utf-8')
+
+    def update_counting_settings_values(self, settings: ZATCABusinessSettings):
+        invoice_counting_doc = frappe.get_doc("ZATCA Invoice Counting Settings",
+                                              {"business_settings_reference": settings.name}, for_update=True)
+        invoice_counting_doc.invoice_counter = self.invoice_counter
+        invoice_counting_doc.previous_invoice_hash = self.invoice_hash
+        invoice_counting_doc.save(ignore_permissions=True)
 
 
 def customer_has_registration(customer_id: str):
