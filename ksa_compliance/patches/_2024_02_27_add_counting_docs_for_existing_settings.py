@@ -6,13 +6,13 @@ def execute():
     existing_settings = frappe.db.get_all("ZATCA Business Settings", ["name", "company"])
     if existing_settings:
         for setting in existing_settings:
-            sales_invoice_ids = frappe.db.get_list("Sales Invoice", {"company": setting.company}, pluck="name")
 
             additional_doc_data = frappe.db.sql("""
-                SELECT MAX(invoice_counter) AS max_invoice_counter, invoice_hash 
-                FROM `tabSales Invoice Additional Fields`
-                WHERE sales_invoice IN %(sales_invoice_ids)s
-            """, {"sales_invoice_ids": sales_invoice_ids}, as_dict=1)
+                SELECT MAX(ad.invoice_counter) AS max_invoice_counter, ad.invoice_hash 
+                FROM `tabSales Invoice Additional Fields` AS ad
+                LEFT JOIN `tabSales Invoice` AS si
+                ON ad.sales_invoice = si.name
+            """, as_dict=1)
 
             if not frappe.db.exists("ZATCA Invoice Counting Settings", setting.name):
                 invoice_counting_doc = frappe.new_doc("ZATCA Invoice Counting Settings")

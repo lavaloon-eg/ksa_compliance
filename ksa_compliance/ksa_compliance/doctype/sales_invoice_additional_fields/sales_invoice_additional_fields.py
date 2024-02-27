@@ -24,9 +24,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult
-from ksa_compliance.ksa_compliance.doctype.zatca_invoice_counting_settings.zatca_invoice_counting_settings import (
-    ZATCAInvoiceCountingSettings)
-from frappe.utils.logger import get_logger
+from ksa_compliance import logger
 
 
 class SalesInvoiceAdditionalFields(Document):
@@ -109,13 +107,8 @@ class SalesInvoiceAdditionalFields(Document):
         return invoice_type
 
     def before_insert(self):
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        pre_invoice_counter, pre_invoice_hash = get_invoice_counting_settings(settings.name)
-
-        self.set_invoice_counter_value(pre_invoice_counter)
-        self.set_pih(pre_invoice_hash)
-        self.generate_uuid()
-        self.set_tax_currency()  # Set as "SAR" as a default tax currency value
+        self.uuid = str(uuid.uuid4())
+        self.tax_currency = "SAR"  # Set as "SAR" as a default tax currency value
         self.set_calculated_invoice_values()
         self.set_buyer_details(sl_id=self.sales_invoice)
         self.set_invoice_type_code()
@@ -137,6 +130,13 @@ class SalesInvoiceAdditionalFields(Document):
 
     def prepare_for_zatca(self, settings: ZATCABusinessSettings):
         invoice_type = self.get_invoice_type(settings)
+        counting_settings_id, pre_invoice_counter, pre_invoice_hash = frappe.db.get_values(
+            "ZATCA Invoice Counting Settings", {"business_settings_reference": settings.name},
+            ["name", "invoice_counter", "previous_invoice_hash"], for_update=True)[0]
+
+        self.invoice_counter = pre_invoice_counter + 1
+        self.previous_invoice_hash = pre_invoice_hash
+
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
         # TODO: Revisit this logging
         frappe.log_error("ZATCA Result LOG", message=json.dumps(einvoice.result, indent=2))
@@ -155,7 +155,15 @@ class SalesInvoiceAdditionalFields(Document):
         self.save()
 
         # To update counting settings data
-        self.update_counting_settings_values(settings)
+        logger.info("Start updating invoice counting settings values")
+
+        logger.info(f"Changing invoice counter from: {pre_invoice_counter} -> {self.invoice_counter}")
+        frappe.db.set_value("ZATCA Invoice Counting Settings", counting_settings_id, "invoice_counter",
+                            self.invoice_counter)
+
+        logger.info(f"Changing invoice hash from: {pre_invoice_hash} -> {self.invoice_hash}")
+        frappe.db.set_value("ZATCA Invoice Counting Settings", counting_settings_id, "previous_invoice_hash",
+                            self.invoice_hash)
 
         xml_filename = generate_einvoice_xml_fielname(settings.vat_registration_number,
                                                       einvoice.result['invoice']['issue_date'],
@@ -179,9 +187,6 @@ class SalesInvoiceAdditionalFields(Document):
             frappe.throw(_('Could not find signed XML attachment'), title=_('ZATCA Error'))
 
         self.send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings)
-
-    def generate_uuid(self):
-        self.uuid = str(uuid.uuid4())
 
     def set_invoice_type_code(self):
         """
@@ -208,15 +213,6 @@ class SalesInvoiceAdditionalFields(Document):
             self.invoice_type_code = "381"
         else:
             self.invoice_type_code = "388"
-
-    def set_tax_currency(self):
-        self.tax_currency = "SAR"
-
-    def set_invoice_counter_value(self, previous_invoice_counter: int):
-        self.invoice_counter = previous_invoice_counter + 1
-
-    def set_pih(self, previous_invoice_hash: str):
-        self.previous_invoice_hash = previous_invoice_hash
 
     def set_buyer_details(self, sl_id: str):
         sl = cast(SalesInvoice, frappe.get_doc("Sales Invoice", sl_id))
@@ -298,22 +294,6 @@ class SalesInvoiceAdditionalFields(Document):
             return content
         return content.decode('utf-8')
 
-    def update_counting_settings_values(self, settings: ZATCABusinessSettings):
-        logger = get_logger("update-invoice-counting")
-
-        logger.info("Getting previous invoice data.")
-        pre_invoice_counter, pre_invoice_hash = get_invoice_counting_settings(settings.name)
-
-        logger.info(f"Changing invoice counter from: {pre_invoice_counter} -> {self.invoice_counter}")
-        frappe.db.set_value("ZATCA Invoice Counting Settings",
-                            {"business_settings_business_settings_reference": settings.name}, "invoice_counter",
-                            self.invoice_counter)
-
-        logger.info(f"Changing invoice hash from: {pre_invoice_hash} -> {self.invoice_hash}")
-        frappe.db.set_value("ZATCA Invoice Counting Settings",
-                            {"business_settings_business_settings_reference": settings.name}, "previous_invoice_hash",
-                            self.invoice_hash)
-
 
 def customer_has_registration(customer_id: str):
     customer_doc = cast(Customer, frappe.get_doc("Customer", customer_id))
@@ -321,9 +301,3 @@ def customer_has_registration(customer_id: str):
             ide.value in (None, "") for ide in customer_doc.custom_additional_ids):
         return False
     return True
-
-
-def get_invoice_counting_settings(business_settings_id):
-    return frappe.db.get_values(
-        "ZATCA Invoice Counting Settings", {"business_settings_reference": business_settings_id},
-        ["invoice_counter", "previous_invoice_hash"], for_update=True)
