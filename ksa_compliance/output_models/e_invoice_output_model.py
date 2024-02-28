@@ -445,11 +445,11 @@ class Einvoice:
     def get_text_value(self, field_name: str, source_doc: Document, required: bool, xml_name: str = None,
                        min_length: int = 0, max_length: int = 5000, rules: list = None, parent: str = None):
         field_value = source_doc.get(field_name).strip() if source_doc.get(field_name) else None
-        if required and not field_value:
+        if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
             return
 
-        if not field_value:
+        if field_value is None:
             return
 
         if not min_length <= len(field_value) <= max_length:
