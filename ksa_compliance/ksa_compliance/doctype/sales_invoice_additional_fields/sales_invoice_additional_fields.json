@@ -490,14 +490,14 @@
    "fieldname": "integration_status",
    "fieldtype": "Select",
    "label": "Integration Status",
-   "options": "\nReady For Batch\nResend\nCorrected\nApproved\nPending\nApproved with warning\nRejected\nFailed",
+   "options": "\nReady For Batch\nResend\nCorrected\nREPORTED\nNOT_REPORTED\nCleared\nNot Cleared",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-27 22:15:58.238820",
+ "modified": "2024-02-28 22:49:36.885547",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
