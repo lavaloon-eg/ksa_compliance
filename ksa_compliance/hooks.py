@@ -147,7 +147,7 @@ doc_events = {
 
 scheduler_events = {
     "cron": {
-        "57 * * * *": [
+        "0 2 * * *": [
             "ksa_compliance.background_jobs.sync_e_invoices"
         ]
     }
