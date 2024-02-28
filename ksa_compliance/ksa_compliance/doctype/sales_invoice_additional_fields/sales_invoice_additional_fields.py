@@ -262,7 +262,7 @@ class SalesInvoiceAdditionalFields(Document):
             "zatca_status": status,
         }))
         integration_doc.insert()
-        frappe.db.set_value(self.doctype, self.name, self.integration_status, status)
+        frappe.db.set_value(self.doctype, self.name, "integration_status", status)
 
     def set_sum_of_charges(self, taxes: list):
         total = 0

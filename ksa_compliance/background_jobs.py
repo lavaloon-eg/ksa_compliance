@@ -1,6 +1,5 @@
 import frappe
 from frappe.query_builder import DocType
-from frappe.utils import getdate
 import datetime
 from ksa_compliance import logger
 
@@ -9,7 +8,7 @@ from ksa_compliance import logger
 def add_batch_to_background_queue(check_date=datetime.date.today()):
     try:
         logger.info("Start Enqueue E-Invoices")
-        frappe.enqueue("ksa_compliance.ksa_compliance.page.e_invoicing_sync.e_invoicing_sync.sync_e_invoices",
+        frappe.enqueue("ksa_compliance.background_jobs.sync_e_invoices",
                        check_date=check_date,
                        queue="long",
                        timeout=360000,

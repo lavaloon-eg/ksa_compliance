@@ -38,7 +38,7 @@ function sync_invoices(batch_date) {
         indicator:'green'
     }, 3);
     frappe.call({
-        method: "ksa_compliance.ksa_compliance.page.e_invoicing_sync.e_invoicing_sync.add_batch_to_background_queue",
+        method: "ksa_compliance.background_jobs.add_batch_to_background_queue",
         args: {
             "check_date": batch_date
         },
