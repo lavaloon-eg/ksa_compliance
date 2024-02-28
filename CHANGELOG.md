@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix error when storing ZATCA API result
+* Update invoice counter/hash logic to use locking to guarantee serialization
+* Fix buyer details street name being included in the XML if not defined (used to insert an error as the street name)
+
 ## 0.2.0
 
 * Use a hard-coded private key if the configured URL is for the sandbox environment
