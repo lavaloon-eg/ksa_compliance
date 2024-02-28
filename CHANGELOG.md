@@ -11,6 +11,7 @@ to a section with the version name.
 * Fix error when storing ZATCA API result
 * Update invoice counter/hash logic to use locking to guarantee serialization
 * Fix buyer details street name being included in the XML if not defined (used to insert an error as the street name)
+* Fix payable amount in XML to be set using grand total.
 
 ## 0.2.0
 
