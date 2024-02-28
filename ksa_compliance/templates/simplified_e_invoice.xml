@@ -81,7 +81,9 @@
             {% endfor %}
             {% endif %}
             <cac:PostalAddress>
+                {% if buyer_details.street_name %}
                 <cbc:StreetName>{{ buyer_details.street_name }}</cbc:StreetName>
+                {% endif %}
                 {% if buyer_details.building_number %}
                 <cbc:BuildingNumber>{{ buyer_details.building_number }}</cbc:BuildingNumber>
                 {% endif %}
