@@ -461,7 +461,8 @@
   {
    "fieldname": "invoice_hash",
    "fieldtype": "Data",
-   "label": "Invoice Hash"
+   "label": "Invoice Hash",
+   "read_only": 1
   },
   {
    "fieldname": "tab_4_tab",
@@ -497,7 +498,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-29 13:18:02.648750",
+ "modified": "2024-02-29 14:05:13.198697",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

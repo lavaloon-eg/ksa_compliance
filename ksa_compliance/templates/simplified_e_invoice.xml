@@ -158,6 +158,9 @@
             </cac:TaxCategory>
         </cac:TaxSubtotal>
     </cac:TaxTotal>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
+    </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total | round(2) }}</cbc:LineExtensionAmount>
         <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total | round(2) }}</cbc:TaxExclusiveAmount>
