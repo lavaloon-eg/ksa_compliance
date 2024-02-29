@@ -18,6 +18,7 @@ to a section with the version name.
 * Adding integration status field in sales invoice additional fields depends on response status code.
 * Set invoice hash in sales invoice additional fields read only.
 * E Invoicing Sync page to be shown in search bar.
+* Fix taxable amount and Line price amount in XML to be net amount.
 
 ## 0.2.0
 

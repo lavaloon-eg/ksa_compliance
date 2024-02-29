@@ -147,7 +147,7 @@
         <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
         <!-- Sales Taxes and Charges Child -->
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total | round(2) }}</cbc:TaxableAmount>
+            <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total or invoice.total | round(2) }}</cbc:TaxableAmount>
             <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
             <cac:TaxCategory>
                 <cbc:ID>S</cbc:ID>
@@ -162,7 +162,7 @@
         <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total | round(2) }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total | round(2) }}</cbc:LineExtensionAmount>
         <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total | round(2) }}</cbc:TaxExclusiveAmount>
         <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total | round(2) }}</cbc:TaxInclusiveAmount>
         <cbc:AllowanceTotalAmount currencyID="{{ invoice.currency_code }}">{{ invoice.allowance_total_amount | round(2) }}</cbc:AllowanceTotalAmount>
@@ -214,7 +214,7 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ item.price_list_rate or item.rate | round(2) }}</cbc:PriceAmount>
+            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount or item.amount | round(2) }}</cbc:PriceAmount>
             <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
         </cac:Price>
     </cac:InvoiceLine>
