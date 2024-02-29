@@ -8,10 +8,17 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Submit Sales invoice additional field directly only if the sync mode is live.
+* Initialize e_invoicing_sync page to run the batch mode.
 * Fix error when storing ZATCA API result
 * Update invoice counter/hash logic to use locking to guarantee serialization
 * Fix buyer details street name being included in the XML if not defined (used to insert an error as the street name)
 * Fix payable amount in XML to be set using grand total.
+* Adding Tax Total with Subtotal in XML To handle sending tax currency code.  
+* Adding integration status field in sales invoice additional fields depends on response status code.
+* Set invoice hash in sales invoice additional fields read only.
+* E Invoicing Sync page to be shown in search bar.
+* Fix taxable amount and Line price amount in XML to be net amount.
 
 ## 0.2.0
 
@@ -37,12 +44,12 @@ to a section with the version name.
 ## 0.1.0
 
 * XML Templates:
-  * Create Tax invoice template. 
-  * Create Simplified tax invoice template.
-  * Add a method to generate XML regarding invoice type.
+    * Create Tax invoice template.
+    * Create Simplified tax invoice template.
+    * Add a method to generate XML regarding invoice type.
 * Create E-Invoicing-Sync page to run the sync batch.
-  * Initiate the batch flow to Sync E-invoices Individually.
+    * Initiate the batch flow to Sync E-invoices Individually.
 * ZATCA Business Settings
-  * Onboarding: Compliance and production CSID support
-  * Signing and QR generation
-  * Invoice reporting and clearance support, although it currently fails with bad request
+    * Onboarding: Compliance and production CSID support
+    * Signing and QR generation
+    * Invoice reporting and clearance support, although it currently fails with bad request

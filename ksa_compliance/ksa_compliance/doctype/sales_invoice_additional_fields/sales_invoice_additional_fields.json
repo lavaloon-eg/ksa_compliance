@@ -8,6 +8,7 @@
  "field_order": [
   "section_break_jlnr",
   "amended_from",
+  "integration_status",
   "sales_invoice",
   "uuid",
   "invoice_type_code",
@@ -460,7 +461,8 @@
   {
    "fieldname": "invoice_hash",
    "fieldtype": "Data",
-   "label": "Invoice Hash"
+   "label": "Invoice Hash",
+   "read_only": 1
   },
   {
    "fieldname": "tab_4_tab",
@@ -483,12 +485,20 @@
    "fieldtype": "Small Text",
    "label": "Errors",
    "read_only": 1
+  },
+  {
+   "default": "Ready For Batch",
+   "fieldname": "integration_status",
+   "fieldtype": "Select",
+   "label": "Integration Status",
+   "options": "\nReady For Batch\nResend\nCorrected\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-21 23:21:36.333707",
+ "modified": "2024-02-29 14:05:13.198697",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

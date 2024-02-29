@@ -1,4 +1,5 @@
 import frappe
+from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 
 
 def create_sales_invoice_additional_fields_doctype(self, method):
@@ -19,5 +20,10 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         si_additional_fields_doc.update(address_info)
 
     # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
-    si_additional_fields_doc.insert()
-    si_additional_fields_doc.submit()
+    settings = ZATCABusinessSettings.for_invoice(self.name)
+    if settings.is_live_sync:
+        si_additional_fields_doc.insert()
+        si_additional_fields_doc.submit()
+    else:
+        si_additional_fields_doc.integration_status = "Ready For Batch"
+        si_additional_fields_doc.insert()

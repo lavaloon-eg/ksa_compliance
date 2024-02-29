@@ -35,8 +35,7 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -54,6 +53,7 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -90,7 +90,6 @@ class SalesInvoiceAdditionalFields(Document):
         validation_messages: DF.SmallText | None
         vat_exemption_reason_code: DF.Data | None
         vat_exemption_reason_text: DF.SmallText | None
-
     # end: auto-generated types
 
     def get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
@@ -125,8 +124,7 @@ class SalesInvoiceAdditionalFields(Document):
         if not settings:
             return
 
-        if settings.is_live_sync:
-            self.send_to_zatca(settings)
+        self.send_to_zatca(settings)
 
     def prepare_for_zatca(self, settings: ZATCABusinessSettings):
         invoice_type = self.get_invoice_type(settings)
@@ -233,17 +231,18 @@ class SalesInvoiceAdditionalFields(Document):
                          settings: ZATCABusinessSettings):
         secret = settings.get_password('production_secret')
         if invoice_type == 'Standard':
-            result = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
-                                       invoice_uuid=self.uuid, invoice_hash=invoice_hash,
-                                       security_token=settings.production_security_token,
-                                       secret=secret)
+            result, status_code = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
+                                                    invoice_uuid=self.uuid, invoice_hash=invoice_hash,
+                                                    security_token=settings.production_security_token,
+                                                    secret=secret)
         else:
-            result = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
-                                        invoice_uuid=self.uuid, invoice_hash=invoice_hash,
-                                        security_token=settings.production_security_token,
-                                        secret=secret)
+            result, status_code = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
+                                                     invoice_uuid=self.uuid, invoice_hash=invoice_hash,
+                                                     security_token=settings.production_security_token,
+                                                     secret=secret)
 
         status = ''
+        integration_status = get_integration_status(status_code)
         if is_err(result):
             # The IDE gets confused resolving types, so we help it along
             error = cast(ReportOrClearInvoiceError, result.err_value)
@@ -261,6 +260,7 @@ class SalesInvoiceAdditionalFields(Document):
             "zatca_status": status,
         }))
         integration_doc.insert()
+        frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
 
     def set_sum_of_charges(self, taxes: list):
         total = 0
@@ -301,3 +301,22 @@ def customer_has_registration(customer_id: str):
             ide.value in (None, "") for ide in customer_doc.custom_additional_ids):
         return False
     return True
+
+
+def get_integration_status(code):
+    status_map = {
+        200: "Accepted",
+        202: "Accepted with warning",
+        303: "Clearance switched off",
+        401: "Rejected",
+        400: "Rejected",
+        413: "Resend",
+        429: "Resend",
+        500: "Resend",
+        503: "Resend",
+        504: "Resend"
+    }
+    if code and code in status_map:
+        return status_map[code]
+    else:
+        return ''

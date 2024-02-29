@@ -145,7 +145,13 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+    "cron": {
+        "0 */2 * * *": [
+            "ksa_compliance.background_jobs.sync_e_invoices"
+        ]
+    }
+}
 # "all": [
 # "ksa_compliance.tasks.all"
 # ],

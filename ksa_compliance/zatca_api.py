@@ -2,7 +2,7 @@ import base64
 import dataclasses
 import traceback
 from dataclasses import dataclass
-from typing import cast, List, Dict, Callable, TypeVar, Optional
+from typing import cast, List, Dict, Callable, TypeVar, Optional, Tuple
 from urllib.parse import urljoin
 
 import requests
@@ -93,7 +93,7 @@ class ReportOrClearInvoiceError:
     error: str
 
 
-def get_compliance_csid(server: str, csr: str, otp: str) -> Result[ComplianceResult, str]:
+def get_compliance_csid(server: str, csr: str, otp: str) -> Tuple[Result[ComplianceResult, str], int]:
     """Gets a compliance CSID from ZATCA using a CSR and OTP."""
     headers = {
         'Accept-Version': 'V2',
@@ -104,7 +104,7 @@ def get_compliance_csid(server: str, csr: str, otp: str) -> Result[ComplianceRes
 
 
 def get_production_csid(server: str, compliance_request_id: str, otp: str, security_token: str,
-                        secret: str) -> Result[ComplianceResult, str]:
+                        secret: str) -> Tuple[Result[ComplianceResult, str], int]:
     """Gets a production CSID from ZATCA for a compliance request."""
     headers = {
         'Accept-Version': 'V2',
@@ -117,7 +117,7 @@ def get_production_csid(server: str, compliance_request_id: str, otp: str, secur
 
 
 def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                   secret: str) -> Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError]:
+                   secret: str) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a simplified invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -135,7 +135,7 @@ def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_has
 
 
 def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                  secret: str) -> Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError]:
+                  secret: str) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a standard invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -159,7 +159,7 @@ TError = TypeVar('TError')
 def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, str],
              result_builder: Callable[[dict], TOk],
              error_builder: Callable[[Response | None, Exception | None], TError],
-             auth=None) -> Result[TOk, TError]:
+             auth=None) -> Tuple[Result[TOk, TError], int]:
     """
     Performs a ZATCA API call and builds a success result using [result_builder]. In case of 400 errors, the
     response is parsed and a combined error is returned.
@@ -181,18 +181,19 @@ def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, st
     try:
         response = requests.post(url, headers=final_headers, json=body, auth=auth)
         response.raise_for_status()
-        return Ok(result_builder(response.json()))
+        return Ok(result_builder(response.json())), response.status_code
     except HTTPError as e:
         logger.error('An HTTP error occurred')
         if e.response.text:
             logger.info(f'Response: {e.response.json()}')
 
-        return Err(error_builder(e.response, e))
+        return Err(error_builder(e.response, e)), response.status_code
     except Exception as e:
         logger.error('An unexpected exception occurred', exc_info=e)
         if response:
             logger.info(f'Response: {response.text}')
-        return Err(error_builder(response, e))
+            return Err(error_builder(response, e)), response.status_code
+        return Err(error_builder(response, e)), 0
 
 
 def try_get_csid_error(response: Response | None, exception: Exception | None) -> str:
