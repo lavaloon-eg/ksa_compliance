@@ -53,7 +53,7 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "REPORTED", "NOT_REPORTED", "Cleared", "Not Cleared"]
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -231,17 +231,18 @@ class SalesInvoiceAdditionalFields(Document):
                          settings: ZATCABusinessSettings):
         secret = settings.get_password('production_secret')
         if invoice_type == 'Standard':
-            result = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
-                                       invoice_uuid=self.uuid, invoice_hash=invoice_hash,
-                                       security_token=settings.production_security_token,
-                                       secret=secret)
+            result, status_code = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
+                                                    invoice_uuid=self.uuid, invoice_hash=invoice_hash,
+                                                    security_token=settings.production_security_token,
+                                                    secret=secret)
         else:
-            result = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
-                                        invoice_uuid=self.uuid, invoice_hash=invoice_hash,
-                                        security_token=settings.production_security_token,
-                                        secret=secret)
+            result, status_code = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
+                                                     invoice_uuid=self.uuid, invoice_hash=invoice_hash,
+                                                     security_token=settings.production_security_token,
+                                                     secret=secret)
 
         status = ''
+        integration_status = get_integration_status(status_code)
         if is_err(result):
             # The IDE gets confused resolving types, so we help it along
             error = cast(ReportOrClearInvoiceError, result.err_value)
@@ -259,7 +260,7 @@ class SalesInvoiceAdditionalFields(Document):
             "zatca_status": status,
         }))
         integration_doc.insert()
-        frappe.db.set_value(self.doctype, self.name, "integration_status", status)
+        frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
 
     def set_sum_of_charges(self, taxes: list):
         total = 0
@@ -300,3 +301,22 @@ def customer_has_registration(customer_id: str):
             ide.value in (None, "") for ide in customer_doc.custom_additional_ids):
         return False
     return True
+
+
+def get_integration_status(code):
+    status_map = {
+        200: "Accepted",
+        202: "Accepted with warning",
+        303: "Clearance switched off",
+        401: "Rejected",
+        400: "Rejected",
+        413: "Resend",
+        429: "Resend",
+        500: "Resend",
+        503: "Resend",
+        504: "Resend"
+    }
+    if code and code in status_map:
+        return status_map[code]
+    else:
+        return ''

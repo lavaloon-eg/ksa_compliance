@@ -30,17 +30,3 @@ def sync_e_invoices(check_date=datetime.date.today()):
     for doc in additional_field_docs:
         adf_doc = frappe.get_doc("Sales Invoice Additional Fields", doc.name)
         adf_doc.submit()
-
-
-def get_integration_log_status(code):
-    status_map = {
-        200: "Approved",
-        202: "Approved with warning",
-        401: "Rejected",
-        400: "Rejected",
-        500: "Failed"
-    }
-    if code in status_map:
-        return status_map[code]
-    else:
-        return None

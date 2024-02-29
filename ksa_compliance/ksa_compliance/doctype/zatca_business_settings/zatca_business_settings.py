@@ -117,7 +117,7 @@ class ZATCABusinessSettings(Document):
         self._throw_if_api_config_missing()
 
         csr_result = self._generate_csr()
-        compliance_result = api.get_compliance_csid(self.fatoora_server_url, csr_result.csr, otp)
+        compliance_result, status_code = api.get_compliance_csid(self.fatoora_server_url, csr_result.csr, otp)
         if is_err(compliance_result):
             frappe.throw(compliance_result.err_value, title=_('Compliance API Error'))
 
@@ -138,7 +138,7 @@ class ZATCABusinessSettings(Document):
         if not self.compliance_request_id:
             frappe.throw(_("Please onboard first to generate a 'Compliance Request ID'"))
 
-        csid_result = api.get_production_csid(self.fatoora_server_url, self.compliance_request_id, otp,
+        csid_result, status_code = api.get_production_csid(self.fatoora_server_url, self.compliance_request_id, otp,
                                               self.security_token, self.get_password('secret'))
         if is_err(csid_result):
             frappe.throw(csid_result.err_value, title=_('Production CSID Error'))
