@@ -123,9 +123,12 @@
             {% endif %}
         </cac:Party>
     </cac:AccountingCustomerParty>
-    {% if invoice.is_return or invoice.is_debit_note %}
+    {% if invoice.payment_means_type_code %}
     <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>{{ invoice.payment_means_type_code }}</cbc:PaymentMeansCode>
+        {% if invoice.instruction_note %}
         <cbc:InstructionNote>{{ invoice.instruction_note | escape }}</cbc:InstructionNote>
+        {% endif %}
     </cac:PaymentMeans>
     {% endif %}
     <cac:AllowanceCharge>

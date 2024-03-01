@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import cast
+from typing import cast, Optional
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
@@ -35,7 +35,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -53,7 +54,9 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected",
+            "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -90,6 +93,7 @@ class SalesInvoiceAdditionalFields(Document):
         validation_messages: DF.SmallText | None
         vat_exemption_reason_code: DF.Data | None
         vat_exemption_reason_text: DF.SmallText | None
+
     # end: auto-generated types
 
     def get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
@@ -106,11 +110,14 @@ class SalesInvoiceAdditionalFields(Document):
         return invoice_type
 
     def before_insert(self):
+        sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
         self.uuid = str(uuid.uuid4())
         self.tax_currency = "SAR"  # Set as "SAR" as a default tax currency value
-        self.set_calculated_invoice_values()
-        self.set_buyer_details(sl_id=self.sales_invoice)
+        self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
+        self.sum_of_charges = self.compute_sum_of_charges(sales_invoice.taxes)
+        self.set_buyer_details(sales_invoice)
         self.set_invoice_type_code()
+        self.payment_means_type_code = self.get_payment_means_type_code(sales_invoice)
 
     def after_insert(self):
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
@@ -212,20 +219,23 @@ class SalesInvoiceAdditionalFields(Document):
         else:
             self.invoice_type_code = "388"
 
-    def set_buyer_details(self, sl_id: str):
-        sl = cast(SalesInvoice, frappe.get_doc("Sales Invoice", sl_id))
-        customer_doc = cast(Customer, frappe.get_doc("Customer", sl.customer))
+    def get_payment_means_type_code(self, invoice: SalesInvoice) -> Optional[str]:
+        # An invoice can have multiple modes of payment, but we currently only support one. Therefore, we retrieve the
+        # first one if any
+        if not invoice.payments:
+            return None
+
+        mode_of_payment = invoice.payments[0].mode_of_payment
+        return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
+
+    def set_buyer_details(self, sales_invoice: SalesInvoice):
+        customer_doc = cast(Customer, frappe.get_doc("Customer", sales_invoice.customer))
 
         self.buyer_vat_registration_number = customer_doc.custom_vat_registration_number
 
         for item in customer_doc.get("custom_additional_ids"):
             self.append("other_buyer_ids",
                         {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
-
-    def set_calculated_invoice_values(self):
-        sinv = cast(SalesInvoice, frappe.get_doc("Sales Invoice", self.sales_invoice))
-        self.set_sum_of_charges(sinv.taxes)
-        self.set_sum_of_allowances(sales_invoice_doc=sinv)
 
     def send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
                          settings: ZATCABusinessSettings):
@@ -262,15 +272,12 @@ class SalesInvoiceAdditionalFields(Document):
         integration_doc.insert()
         frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
 
-    def set_sum_of_charges(self, taxes: list):
-        total = 0
+    def compute_sum_of_charges(self, taxes: list) -> float:
+        total = 0.0
         if taxes:
             for item in taxes:
                 total = total + item.tax_amount
-        self.sum_of_charges = total
-
-    def set_sum_of_allowances(self, sales_invoice_doc):
-        self.sum_of_allowances = sales_invoice_doc.total - sales_invoice_doc.net_total
+        return total
 
     def get_signed_xml(self) -> str | None:
         attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),

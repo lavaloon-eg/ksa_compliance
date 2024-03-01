@@ -21,6 +21,8 @@ to a section with the version name.
 * Fix taxable amount and Line price amount in XML to be net amount.
 * Fix Credit note invoice submission issue.
 * Skip additional fields if ZATCA settings are missing or setup is incomplete
+* Add mode of payment "payment means code" custom field
+* Use payment means code when generating XML to pass credit note validation
 
 ## 0.2.0
 

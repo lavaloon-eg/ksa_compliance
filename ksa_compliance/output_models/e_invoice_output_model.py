@@ -66,7 +66,7 @@ class Einvoice:
         self.get_text_value(field_name="payment_means_type_code",
                             source_doc=self.additional_fields_doc,
                             required=False,
-                            xml_name="PaymentMeansCode",
+                            xml_name="payment_means_type_code",
                             rules=["BR-KSA-16", "BR-49", "BR-CL-16", "BT-81", "BG-16"],
                             parent="invoice")
 
