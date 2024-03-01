@@ -29,6 +29,38 @@ frappe.ui.form.on("ZATCA Business Settings", {
             });
         });
     },
+    perform_compliance_checks: function (frm) {
+        if (!frm.doc.compliance_request_id) {
+            frappe.throw(__('Please Onboard first to generate a compliance request ID'))
+            return;
+        }
+
+        frappe.prompt([
+            {
+                label: 'Customer',
+                fieldname: 'customer_id',
+                fieldtype: 'Link',
+                options: 'Customer'
+            },
+            {
+                label: 'Item',
+                fieldname: 'item_id',
+                fieldtype: 'Link',
+                options: 'Item'
+            }
+        ], values => {
+            frappe.call({
+                freeze: true,
+                freeze_message: 'Please wait...',
+                method: "ksa_compliance.compliance_checks.perform_compliance_checks",
+                args: {
+                    business_settings_id: frm.doc.name,
+                    customer_id: values.customer_id,
+                    item_id: values.item_id,
+                },
+            });
+        });
+    },
     get_production_csid: function (frm) {
         if (!frm.doc.compliance_request_id) {
             frappe.throw(__('Please Onboard first to generate a compliance request ID'))

@@ -23,6 +23,7 @@ to a section with the version name.
 * Skip additional fields if ZATCA settings are missing or setup is incomplete
 * Add mode of payment "payment means code" custom field
 * Use payment means code when generating XML to pass credit note validation
+* Add support for compliance checks
 
 ## 0.2.0
 

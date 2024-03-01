@@ -87,6 +87,10 @@ class ZATCABusinessSettings(Document):
         return f'{self.vat_registration_number}.pem'
 
     @property
+    def compliance_cert_path(self) -> str:
+        return f'{self.vat_registration_number}-compliance.pem'
+
+    @property
     def private_key_path(self) -> str:
         if self.is_sandbox_server:
             return self._sandbox_private_key_path
@@ -133,6 +137,11 @@ class ZATCABusinessSettings(Document):
         self.secret = compliance_result.ok_value.secret
         self.compliance_request_id = compliance_result.ok_value.request_id
         self.save()
+
+        with open(self.compliance_cert_path, 'wb+') as cert:
+            cert.write(b'-----BEGIN CERTIFICATE-----\n')
+            cert.write(base64.b64decode(compliance_result.ok_value.security_token))
+            cert.write(b'\n-----END CERTIFICATE-----')
 
         frappe.msgprint(_('Onboarding completed successfully'), title=_('Success'))
 

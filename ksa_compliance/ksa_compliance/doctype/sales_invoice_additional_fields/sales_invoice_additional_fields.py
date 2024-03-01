@@ -15,6 +15,7 @@ from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from result import is_err
 
+from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
 from ksa_compliance.generate_xml import generate_xml_file, generate_einvoice_xml_fielname
@@ -23,8 +24,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
     ZATCABusinessSettings)
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
-from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult
-from ksa_compliance import logger
+from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
 
 
 class SalesInvoiceAdditionalFields(Document):
@@ -95,6 +95,11 @@ class SalesInvoiceAdditionalFields(Document):
         vat_exemption_reason_text: DF.SmallText | None
 
     # end: auto-generated types
+    send_mode: ZatcaSendMode = ZatcaSendMode.Production
+
+    @property
+    def is_compliance_mode(self) -> bool:
+        return self.send_mode == ZatcaSendMode.Compliance
 
     def get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
         invoice_type: InvoiceType
@@ -128,7 +133,7 @@ class SalesInvoiceAdditionalFields(Document):
 
     def on_submit(self):
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        if not settings:
+        if not settings or not settings.has_production_csid:
             return
 
         self.send_to_zatca(settings)
@@ -147,21 +152,21 @@ class SalesInvoiceAdditionalFields(Document):
         frappe.log_error("ZATCA Result LOG", message=json.dumps(einvoice.result, indent=2))
         frappe.log_error("ZATCA Error LOG", message=json.dumps(einvoice.error_dic, indent=2))
 
+        cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
         invoice_xml = generate_xml_file(einvoice.result, invoice_type)
-        result = cli.sign_invoice(settings.lava_zatca_path, invoice_xml, settings.cert_path,
-                                  settings.private_key_path)
-        validation_result = cli.validate_invoice(settings.lava_zatca_path, result.signed_invoice_path,
-                                                 settings.cert_path, self.previous_invoice_hash)
+        result = cli.sign_invoice(settings.lava_zatca_path, invoice_xml, cert_path, settings.private_key_path)
+
+        if not self.is_compliance_mode:
+            validation_result = cli.validate_invoice(settings.lava_zatca_path, result.signed_invoice_path,
+                                                     settings.cert_path, self.previous_invoice_hash)
+            self.validation_messages = '\n'.join(validation_result.messages)
+            self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
-        self.validation_messages = '\n'.join(validation_result.messages)
-        self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
         self.save()
 
         # To update counting settings data
-        logger.info("Start updating invoice counting settings values")
-
         logger.info(f"Changing invoice counter from: {pre_invoice_counter} -> {self.invoice_counter}")
         frappe.db.set_value("ZATCA Invoice Counting Settings", counting_settings_id, "invoice_counter",
                             self.invoice_counter)
@@ -185,13 +190,13 @@ class SalesInvoiceAdditionalFields(Document):
             }))
         file.insert()
 
-    def send_to_zatca(self, settings: ZATCABusinessSettings) -> None:
+    def send_to_zatca(self, settings: ZATCABusinessSettings) -> str:
         invoice_type = self.get_invoice_type(settings)
         signed_xml = self.get_signed_xml()
         if not signed_xml:
             frappe.throw(_('Could not find signed XML attachment'), title=_('ZATCA Error'))
 
-        self.send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings)
+        return self.send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings)
 
     def set_invoice_type_code(self):
         """
@@ -238,18 +243,17 @@ class SalesInvoiceAdditionalFields(Document):
                         {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
 
     def send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
-                         settings: ZATCABusinessSettings):
-        secret = settings.get_password('production_secret')
+                         settings: ZATCABusinessSettings) -> str:
+        token = settings.security_token if self.is_compliance_mode else settings.production_security_token
+        secret = settings.get_password('secret' if self.is_compliance_mode else 'production_secret')
         if invoice_type == 'Standard':
             result, status_code = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
                                                     invoice_uuid=self.uuid, invoice_hash=invoice_hash,
-                                                    security_token=settings.production_security_token,
-                                                    secret=secret)
+                                                    security_token=token, secret=secret, mode=self.send_mode)
         else:
             result, status_code = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
                                                      invoice_uuid=self.uuid, invoice_hash=invoice_hash,
-                                                     security_token=settings.production_security_token,
-                                                     secret=secret)
+                                                     security_token=token, secret=secret, mode=self.send_mode)
 
         status = ''
         integration_status = get_integration_status(status_code)
@@ -271,6 +275,7 @@ class SalesInvoiceAdditionalFields(Document):
         }))
         integration_doc.insert()
         frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
+        return zatca_message
 
     def compute_sum_of_charges(self, taxes: list) -> float:
         total = 0.0

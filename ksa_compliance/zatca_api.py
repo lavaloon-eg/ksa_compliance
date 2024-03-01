@@ -2,6 +2,7 @@ import base64
 import dataclasses
 import traceback
 from dataclasses import dataclass
+from enum import Enum
 from typing import cast, List, Dict, Callable, TypeVar, Optional, Tuple
 from urllib.parse import urljoin
 
@@ -11,6 +12,13 @@ from requests.auth import HTTPBasicAuth
 from result import Result, Ok, Err
 
 from ksa_compliance import logger
+
+
+class ZatcaSendMode(Enum):
+    """Mode used for sending invoice XML to ZATCA. Compliance is for passing compliance checks. Production is regular
+    operation"""
+    Compliance = 'Compliance'
+    Production = 'Production'
 
 
 @dataclass
@@ -117,7 +125,7 @@ def get_production_csid(server: str, compliance_request_id: str, otp: str, secur
 
 
 def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                   secret: str) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+                   secret: str, mode: ZatcaSendMode) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a simplified invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -129,13 +137,13 @@ def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_has
         "Accept-Version": "V2",
     }
 
-    return api_call(server, "invoices/reporting/single", headers, body, ReportOrClearInvoiceResult.from_json,
-                    try_get_report_or_clear_error,
+    url = "invoices/reporting/single" if mode == ZatcaSendMode.Production else "compliance/invoices"
+    return api_call(server, url, headers, body, ReportOrClearInvoiceResult.from_json, try_get_report_or_clear_error,
                     auth=HTTPBasicAuth(security_token, secret))
 
 
 def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                  secret: str) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+                  secret: str, mode: ZatcaSendMode) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a standard invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -147,8 +155,8 @@ def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash
         "Accept-Version": "V2",
     }
 
-    return api_call(server, "invoices/clearances/single", headers, body, ReportOrClearInvoiceResult.from_json,
-                    try_get_report_or_clear_error,
+    url = "invoices/clearances/single" if mode == ZatcaSendMode.Production else "compliance/invoices"
+    return api_call(server, url, headers, body, ReportOrClearInvoiceResult.from_json, try_get_report_or_clear_error,
                     auth=HTTPBasicAuth(security_token, secret))
 
 

@@ -3,15 +3,32 @@ import frappe
 from ksa_compliance import logger
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 
+IGNORED_INVOICES = set()
+
+
+def ignore_additional_fields_for_invoice(name: str) -> None:
+    global IGNORED_INVOICES
+    IGNORED_INVOICES.add(name)
+
+
+def clear_additional_fields_ignore_list() -> None:
+    global IGNORED_INVOICES
+    IGNORED_INVOICES.clear()
+
 
 def create_sales_invoice_additional_fields_doctype(self, method):
     settings = ZATCABusinessSettings.for_invoice(self.name)
     if not settings:
-        logger.info(f"Skipping additional fields for sales invoice {self.name} because of missing ZATCA settings")
+        logger.info(f"Skipping additional fields for {self.name} because of missing ZATCA settings")
         return
 
     if not settings.has_production_csid:
-        logger.info(f"Skipping additional fields for sales invoice {self.name} because of missing production CSID")
+        logger.info(f"Skipping additional fields for {self.name} because of missing production CSID")
+        return
+
+    global IGNORED_INVOICES
+    if self.name in IGNORED_INVOICES:
+        logger.info(f"Skipping additional fields for {self.name} because it's in the ignore list")
         return
 
     si_additional_fields_doc = frappe.new_doc("Sales Invoice Additional Fields")

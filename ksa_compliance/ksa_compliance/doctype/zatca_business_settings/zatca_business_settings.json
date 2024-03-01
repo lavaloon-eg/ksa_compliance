@@ -43,6 +43,7 @@
   "security_token",
   "secret",
   "column_break_okfu",
+  "perform_compliance_checks",
   "get_production_csid",
   "production_request_id",
   "production_security_token",
@@ -301,11 +302,17 @@
    "fieldname": "check_lava_zatca",
    "fieldtype": "Button",
    "label": "Check Lava-ZATCA"
+  },
+  {
+   "description": "Use the compliance request from onboarding to perform compliance checks for the different invoice types. This is a prerequisite to retrieving a production CSID",
+   "fieldname": "perform_compliance_checks",
+   "fieldtype": "Button",
+   "label": "Perform Compliance Checks"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-18 18:38:54.842041",
+ "modified": "2024-03-01 16:54:57.111846",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
