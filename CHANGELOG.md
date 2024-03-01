@@ -20,6 +20,7 @@ to a section with the version name.
 * E Invoicing Sync page to be shown in search bar.
 * Fix taxable amount and Line price amount in XML to be net amount.
 * Fix Credit note invoice submission issue.
+* Skip additional fields if ZATCA settings are missing or setup is incomplete
 
 ## 0.2.0
 

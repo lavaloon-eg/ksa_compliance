@@ -65,7 +65,8 @@ class ZATCABusinessSettings(Document):
         invoice_counting_doc = frappe.new_doc("ZATCA Invoice Counting Settings")
         invoice_counting_doc.business_settings_reference = self.name
         invoice_counting_doc.invoice_counter = 0
-        invoice_counting_doc.previous_invoice_hash = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
+        invoice_counting_doc.previous_invoice_hash = \
+            "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
         invoice_counting_doc.insert(ignore_permissions=True)
 
     @property
@@ -75,6 +76,11 @@ class ZATCABusinessSettings(Document):
     @property
     def invoice_mode(self) -> InvoiceMode:
         return InvoiceMode.from_literal(self.type_of_business_transactions)
+
+    @property
+    def has_production_csid(self) -> bool:
+        return (bool(self.production_security_token) and bool(self.production_secret) and
+                bool(self.production_request_id))
 
     @property
     def cert_path(self) -> str:
@@ -99,7 +105,8 @@ class ZATCABusinessSettings(Document):
         The sandbox environment returns a fixed certificate that corresponds to this private key. If we try to sign
         with the real private key, signature validation will fail
         """
-        key = "MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA=="
+        key = ("MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz"
+               "+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA==")
         path = 'sandbox_private_key.pem'
         if not os.path.isfile(path):
             with open(path, 'wb') as f:
@@ -139,7 +146,7 @@ class ZATCABusinessSettings(Document):
             frappe.throw(_("Please onboard first to generate a 'Compliance Request ID'"))
 
         csid_result, status_code = api.get_production_csid(self.fatoora_server_url, self.compliance_request_id, otp,
-                                              self.security_token, self.get_password('secret'))
+                                                           self.security_token, self.get_password('secret'))
         if is_err(csid_result):
             frappe.throw(csid_result.err_value, title=_('Production CSID Error'))
 
