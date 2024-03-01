@@ -177,7 +177,7 @@ class ZATCABusinessSettings(Document):
                 'unit_name': self.company_unit or 'Main Branch',  # Review: Use default value?
                 'organization_name': self.company,
                 'country': self.country_code.upper(),
-                'invoice_type': '1100',  # Review: Hard-coded
+                'invoice_type': '0100',  # Review: Hard-coded
                 'address': self._format_address(),
                 'category': self.company_category,
             })
