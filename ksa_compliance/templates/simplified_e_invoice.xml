@@ -11,11 +11,10 @@
     <cbc:InvoiceTypeCode name="{{ invoice.invoice_type_transaction }}">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>{{ invoice.tax_currency or 'SAR'}}</cbc:TaxCurrencyCode>
-    <!--Return against invoice ID-->
     {% if invoice.is_return or invoice.is_debit_note %}
     <cac:BillingReference>
         <cac:InvoiceDocumentReference>
-            <cbc:ID>{{ invoice.return_against | escape }}</cbc:ID>
+            <cbc:ID>{{ invoice.billing_reference_id | escape }}</cbc:ID>
         </cac:InvoiceDocumentReference>
     </cac:BillingReference>
     {% endif %}
@@ -124,10 +123,9 @@
             {% endif %}
         </cac:Party>
     </cac:AccountingCustomerParty>
-    {% if invoice.is_pos %}
+    {% if invoice.is_return or invoice.is_debit_note %}
     <cac:PaymentMeans>
-        <!-- TODO: Should get from payment mode -->
-        <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
+        <cbc:InstructionNote>{{ invoice.instruction_note | escape }}</cbc:InstructionNote>
     </cac:PaymentMeans>
     {% endif %}
     <cac:AllowanceCharge>

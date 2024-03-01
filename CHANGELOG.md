@@ -19,6 +19,7 @@ to a section with the version name.
 * Set invoice hash in sales invoice additional fields read only.
 * E Invoicing Sync page to be shown in search bar.
 * Fix taxable amount and Line price amount in XML to be net amount.
+* Fix Credit note invoice submission issue.
 
 ## 0.2.0
 

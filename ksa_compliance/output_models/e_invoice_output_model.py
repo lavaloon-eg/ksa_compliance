@@ -26,11 +26,11 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
             items_taxes = json.loads(items_taxes)
         for item in item_lines:
             if item["item_code"] in items_taxes:
-                item["tax_percent"] = items_taxes[item["item_code"]][0]
-                item["tax_amount"] = items_taxes[item["item_code"]][1]
+                item["tax_percent"] = abs(items_taxes[item["item_code"]][0])
+                item["tax_amount"] = abs(items_taxes[item["item_code"]][1])
                 # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
                 #  value somehow
-                item["total_amount"] = items_taxes[item["item_code"]][1] + item["net_amount"]
+                item["total_amount"] = abs(items_taxes[item["item_code"]][1] + item["net_amount"])
 
     return item_lines
 
@@ -495,6 +495,7 @@ class Einvoice:
         if field_value is None:
             return
         field_value = int(field_value)
+        field_value = abs(field_value)
         if not min_value <= field_value <= max_value:
             self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
             return
@@ -509,7 +510,8 @@ class Einvoice:
         return field_value
 
     def get_float_value(self, field_name: str, source_doc: Document, required: bool, min_value: int = 0,
-                        max_value: int = 999999999999, xml_name: str = None, rules: list = None, parent: str = None) -> float:
+                        max_value: int = 999999999999, xml_name: str = None, rules: list = None,
+                        parent: str = None) -> float:
         field_value = cast(any, source_doc.get(field_name))
         if required and field_value is None:
             self.error_dic[field_name] = f"Missing field value: {field_name}."
@@ -520,6 +522,7 @@ class Einvoice:
 
         # Try to parse
         field_value = float(field_value) if type(field_value) is int else field_value
+        field_value = abs(field_value)
         if not min_value <= field_value <= max_value:
             self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
             return field_value
@@ -564,6 +567,7 @@ class Einvoice:
 
         # Try to parse
         field_value = float(field_value) if type(field_value) is int else field_value
+        field_value = abs(field_value)
         if not min_value <= field_value <= max_value:
             self.error_dic[field_name] = f'field value must be between {min_value} and {max_value}'
             return
@@ -1023,6 +1027,20 @@ class Einvoice:
                             rules=["BT-6", "BR-CL-05", "BR-KSA-EN16931-02", "BR-KSA-68"],
                             parent="invoice")
 
+        self.get_bool_value(field_name="is_return",
+                            source_doc=self.sales_invoice_doc,
+                            required=True,
+                            xml_name="is_return",
+                            rules=[],
+                            parent="invoice")
+
+        self.get_bool_value(field_name="is_debit_note",
+                            source_doc=self.sales_invoice_doc,
+                            required=True,
+                            xml_name="is_debit_note",
+                            rules=[],
+                            parent="invoice")
+
         self.get_int_value(field_name="invoice_counter",
                            source_doc=self.additional_fields_doc,
                            required=True,
@@ -1057,7 +1075,14 @@ class Einvoice:
         #                     parent="invoice")
 
         # TODO: Purchasing Order Exists
-        # TODO: Billing Reference if the invoice is credit or debit (return against field)
+        if self.sales_invoice_doc.get("is_debit_note") or self.sales_invoice_doc.get("is_return"):
+            self.get_text_value(field_name="return_against",
+                                source_doc=self.sales_invoice_doc,
+                                required=False,
+                                xml_name="billing_reference_id",
+                                rules=["BG-3", "BT-25", "BR-55", "BR-KSA-56", "BR-KSA-F-06"],
+                                parent="invoice")
+
         # FIXME: Contracting (contract ID)
         if self.sales_invoice_doc.get("contract_id"):
             self.get_text_value(field_name="contract_id",
