@@ -49,8 +49,8 @@ def create_sales_invoice_additional_fields_doctype(self, method):
 
     # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
     if settings.is_live_sync:
-        si_additional_fields_doc.insert()
+        si_additional_fields_doc.insert(ignore_permissions=True)
         si_additional_fields_doc.submit()
     else:
         si_additional_fields_doc.integration_status = "Ready For Batch"
-        si_additional_fields_doc.insert()
+        si_additional_fields_doc.insert(ignore_permissions=True)
