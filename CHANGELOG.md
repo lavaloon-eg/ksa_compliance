@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.3.0
+
 * Submit Sales invoice additional field directly only if the sync mode is live.
 * Initialize e_invoicing_sync page to run the batch mode.
 * Fix error when storing ZATCA API result
