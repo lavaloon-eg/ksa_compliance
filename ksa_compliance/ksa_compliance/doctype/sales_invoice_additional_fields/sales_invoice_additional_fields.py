@@ -323,3 +323,18 @@ def get_integration_status(code):
         return status_map[code]
     else:
         return ''
+
+
+@frappe.whitelist()
+def download_xml(id: str):
+    """
+    Frappe doesn't know how to display an XML field without escaping it, so we made the field hidden. The only way
+    for users to view the XML is to download it through this endpoint
+    """
+    siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
+
+    # Reference: https://frappeframework.com/docs/user/en/python-api/response
+    frappe.response.filename = siaf.name + '.xml'
+    frappe.response.filecontent = siaf.get_signed_xml()
+    frappe.response.type = "download"
+    frappe.response.display_content_as = "attachment"
