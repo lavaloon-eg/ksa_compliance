@@ -25,8 +25,7 @@ class ZATCABusinessSettings(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         additional_street: DF.Data | None
         building_number: DF.Data | None
@@ -55,10 +54,9 @@ class ZATCABusinessSettings(Document):
         seller_name: DF.Data
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
-        type_of_business_transactions: DF.Literal[
-            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
-
     # end: auto-generated types
 
     def after_insert(self):

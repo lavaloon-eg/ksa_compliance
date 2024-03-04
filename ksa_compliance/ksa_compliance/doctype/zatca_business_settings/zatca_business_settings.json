@@ -34,6 +34,7 @@
   "configuration_section",
   "lava_zatca_path",
   "check_lava_zatca",
+  "validate_generated_xml",
   "column_break_cjdg",
   "fatoora_server_url",
   "onboarding_section",
@@ -308,11 +309,18 @@
    "fieldname": "perform_compliance_checks",
    "fieldtype": "Button",
    "label": "Perform Compliance Checks"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, validates the generated ZATCA XML when creating Sales Invoice Additional Fields. This has a performance impact, so it's recommended to enable only for testing or troubleshooting problems.",
+   "fieldname": "validate_generated_xml",
+   "fieldtype": "Check",
+   "label": "Validate Generated XML"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-01 16:54:57.111846",
+ "modified": "2024-03-04 17:58:09.520798",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
