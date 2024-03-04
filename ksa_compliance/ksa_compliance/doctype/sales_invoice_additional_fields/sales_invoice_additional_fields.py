@@ -69,6 +69,7 @@ class SalesInvoiceAdditionalFields(Document):
         invoice_line_charge_percentage: DF.Percent
         invoice_type_code: DF.Data | None
         invoice_type_transaction: DF.Data | None
+        invoice_xml: DF.LongText | None
         other_buyer_ids: DF.Table[AdditionalSellerIDs]
         payment_means_type_code: DF.Data | None
         prepayment_id: DF.Data | None
@@ -93,7 +94,6 @@ class SalesInvoiceAdditionalFields(Document):
         validation_messages: DF.SmallText | None
         vat_exemption_reason_code: DF.Data | None
         vat_exemption_reason_text: DF.SmallText | None
-
     # end: auto-generated types
     send_mode: ZatcaSendMode = ZatcaSendMode.Production
 
@@ -164,31 +164,16 @@ class SalesInvoiceAdditionalFields(Document):
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
+        self.invoice_xml = result.signed_invoice_xml
         self.save()
 
         # To update counting settings data
-        logger.info(f"Changing invoice counter from: {pre_invoice_counter} -> {self.invoice_counter}")
-        frappe.db.set_value("ZATCA Invoice Counting Settings", counting_settings_id, "invoice_counter",
-                            self.invoice_counter)
-
-        logger.info(f"Changing invoice hash from: {pre_invoice_hash} -> {self.invoice_hash}")
-        frappe.db.set_value("ZATCA Invoice Counting Settings", counting_settings_id, "previous_invoice_hash",
-                            self.invoice_hash)
-
-        xml_filename = generate_einvoice_xml_fielname(settings.vat_registration_number,
-                                                      einvoice.result['invoice']['issue_date'],
-                                                      einvoice.result['invoice']['issue_time'],
-                                                      einvoice.result['invoice']['id'])
-        file = cast(File, frappe.get_doc(
-            {
-                "doctype": "File",
-                "file_name": xml_filename,
-                "attached_to_doctype": "Sales Invoice Additional Fields",
-                "attached_to_name": self.name,
-                "content": result.signed_invoice_xml,
-                "is_private": True,
-            }))
-        file.insert()
+        logger.info(f"Changing invoice counter, hash from: {pre_invoice_counter}, {pre_invoice_hash} -> "
+                    f"{self.invoice_counter}, {self.invoice_hash}")
+        frappe.db.set_value("ZATCA Invoice Counting Settings", counting_settings_id, {
+            "invoice_counter": self.invoice_counter,
+            "previous_invoice_hash": self.invoice_hash
+        })
 
     def send_to_zatca(self, settings: ZATCABusinessSettings) -> str:
         invoice_type = self.get_invoice_type(settings)
@@ -285,6 +270,12 @@ class SalesInvoiceAdditionalFields(Document):
         return total
 
     def get_signed_xml(self) -> str | None:
+        # We leave the attachment logic below intact for backward compatibility. Sales Invoice Additional Fields created
+        # before adding the XML field will have the XML as an attachment instead. We may create a patch to migrate them
+        # later
+        if self.invoice_xml:
+            return self.invoice_xml
+
         attachments = frappe.get_all("File", fields=("name", "file_name", "attached_to_name", "file_url"),
                                      filters={"attached_to_name": self.name,
                                               "attached_to_doctype": "Sales Invoice Additional Fields"})

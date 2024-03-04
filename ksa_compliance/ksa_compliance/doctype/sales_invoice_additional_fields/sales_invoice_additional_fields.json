@@ -74,6 +74,9 @@
   "section_break_mryd",
   "prepayment_vat_category_taxable_amount",
   "prepayment_vat_category_tax_amount",
+  "tab_5_tab",
+  "xml_section",
+  "invoice_xml",
   "tab_4_tab",
   "validation_section",
   "validation_messages",
@@ -493,12 +496,28 @@
    "label": "Integration Status",
    "options": "\nReady For Batch\nResend\nCorrected\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
    "read_only": 1
+  },
+  {
+   "fieldname": "tab_5_tab",
+   "fieldtype": "Tab Break",
+   "label": "XML"
+  },
+  {
+   "fieldname": "xml_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "The generated and signed invoice XML sent to ZATCA",
+   "fieldname": "invoice_xml",
+   "fieldtype": "Long Text",
+   "label": "Invoice XML",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-29 14:05:13.198697",
+ "modified": "2024-03-04 17:56:21.899750",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
