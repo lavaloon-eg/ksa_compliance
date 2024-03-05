@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.4.0
+
 * Ignore permissions when creating sales invoice additional fields
 * Skip additional fiels for invoices issued before 2024-03-01
 * Add a flag to control ZATCA XML validation and make it disabled by default
