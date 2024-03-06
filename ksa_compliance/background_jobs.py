@@ -29,15 +29,26 @@ def sync_e_invoices(check_date: Optional[datetime.datetime | datetime.date] = No
     if check_date:
         logger.info(f"{prefix}Limiting sync to >= date: {check_date}")
 
-    offset = 0
+    # We can't use a numerical offset and increment it by the number of records because of the nature of the query.
+    # We're querying for draft sales invoice additional fields then submitting them. Let's say we start with offset 0
+    # and get 100 sales invoice additional fields. We submit the 100 and increase the offset to 100. Then we query
+    # for a 100 **draft** sales invoice additional fields with offset 100, which skips a 100 draft additional sales
+    # invoice fields because the 100 that we wanted to skip are now submitted, not draft.
+    #
+    # If we kept the offset at 0, the loop would never terminate in dry_run mode because we never update status.
+    #
+    # The solution is to use the creation date itself as an offset/filter. We sort by it ascending, so after every
+    # batch we can query for fields whose creation > the last creation in the previous batch
+    offset = check_date if isinstance(check_date, datetime.datetime) else datetime.datetime.combine(check_date,
+                                                                                                    datetime.time.min)
     while True:
-        query = build_query(check_date, offset, batch_size)
+        query = build_query(offset, batch_size)
         additional_field_docs = query.run(as_dict=True)
         if not additional_field_docs:
             break
 
-        logger.info(f"{prefix}Syncing {len(additional_field_docs)} at offset {offset}")
-        offset += len(additional_field_docs)
+        logger.info(f"{prefix}Syncing {len(additional_field_docs)} after date/time {offset}")
+        offset = additional_field_docs[-1].creation
 
         for doc in additional_field_docs:
             try:
@@ -55,12 +66,11 @@ def sync_e_invoices(check_date: Optional[datetime.datetime | datetime.date] = No
     logger.info(f"{prefix}Sync Done")
 
 
-def build_query(check_date: datetime.datetime | datetime.date, offset: int, limit: int) -> QueryBuilder:
+def build_query(check_date: datetime.datetime, limit: int) -> QueryBuilder:
     batch_status = ["Ready For Batch", "Resend", "Corrected"]
     doctype = DocType("Sales Invoice Additional Fields")
-    query = (frappe.qb.from_(doctype).select(doctype.name)
-             .where((doctype.integration_status.isin(batch_status)) & (doctype.docstatus == 0)))
-    if check_date:
-        query = query.where(doctype.creation > check_date)
-    query = query.orderby(doctype.creation, order=Order.asc).offset(offset).limit(limit)
+    query = (frappe.qb.from_(doctype).select(doctype.name, doctype.creation)
+             .where((doctype.integration_status.isin(batch_status)) & (doctype.docstatus == 0))
+             .where(doctype.creation > check_date)
+             .orderby(doctype.creation, order=Order.asc).limit(limit))
     return query
