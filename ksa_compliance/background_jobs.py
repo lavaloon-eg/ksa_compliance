@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Optional, cast
 
 import frappe
 from frappe.query_builder import DocType
@@ -39,8 +39,11 @@ def sync_e_invoices(check_date: Optional[datetime.datetime | datetime.date] = No
     #
     # The solution is to use the creation date itself as an offset/filter. We sort by it ascending, so after every
     # batch we can query for fields whose creation > the last creation in the previous batch
-    offset = check_date if isinstance(check_date, datetime.datetime) else datetime.datetime.combine(check_date,
-                                                                                                    datetime.time.min)
+    if isinstance(check_date, datetime.date):
+        offset = datetime.datetime.combine(check_date, datetime.time.min)
+    else:
+        offset = cast(datetime.datetime, check_date)
+
     while True:
         query = build_query(offset, batch_size)
         additional_field_docs = query.run(as_dict=True)
