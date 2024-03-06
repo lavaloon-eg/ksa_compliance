@@ -8,6 +8,13 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Update e-invoice sync patch
+  * Change timeout to 58 minutes so that we can run it hourly
+  * Run it hourly
+  * Sort additional fields by creation (oldest first)
+  * Run in batches (of 100 by default)
+  * Add more logging
+
 ## 0.4.0
 
 * Ignore permissions when creating sales invoice additional fields
