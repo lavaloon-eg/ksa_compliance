@@ -9,6 +9,8 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Add support for precomputed invoices from POS devices
+* Ignore permissions when inserting ZATCA integration log
+* Fix item total amount in sales invoice additional fields for return invoices
 
 ## 0.5.0
 
@@ -18,8 +20,6 @@ to a section with the version name.
   * Sort additional fields by creation (oldest first)
   * Run in batches (of 100 by default)
   * Add more logging
-* Ignore permissions when inserting ZATCA integration log
-* Fix item total amount in sales invoice additional fields for return invoices
 
 ## 0.4.0
 

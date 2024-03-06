@@ -53,7 +53,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Approved\nPending\nApproved with warning\nRejected\nFailed",
+   "options": "\nPending\nResend\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
    "read_only": 1
   },
   {
@@ -70,6 +70,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.status == \"Resend\";",
    "fieldname": "resend",
    "fieldtype": "Button",
    "label": "Resend"
@@ -77,7 +78,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-29 18:19:32.823826",
+ "modified": "2024-03-06 12:36:29.015038",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Integration Log",
