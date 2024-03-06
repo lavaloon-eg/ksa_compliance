@@ -40,9 +40,9 @@ def sync_e_invoices(check_date: Optional[datetime.datetime | datetime.date] = No
     # The solution is to use the creation date itself as an offset/filter. We sort by it ascending, so after every
     # batch we can query for fields whose creation > the last creation in the previous batch
     if isinstance(check_date, datetime.date):
-        offset = datetime.datetime.combine(check_date, datetime.time.min)
+        offset = cast(Optional[datetime.datetime], datetime.datetime.combine(check_date, datetime.time.min))
     else:
-        offset = cast(datetime.datetime, check_date)
+        offset = cast(Optional[datetime.datetime], check_date)
 
     while True:
         query = build_query(offset, batch_size)
@@ -69,11 +69,12 @@ def sync_e_invoices(check_date: Optional[datetime.datetime | datetime.date] = No
     logger.info(f"{prefix}Sync Done")
 
 
-def build_query(check_date: datetime.datetime, limit: int) -> QueryBuilder:
+def build_query(check_date: Optional[datetime.datetime], limit: int) -> QueryBuilder:
     batch_status = ["Ready For Batch", "Resend", "Corrected"]
     doctype = DocType("Sales Invoice Additional Fields")
     query = (frappe.qb.from_(doctype).select(doctype.name, doctype.creation)
-             .where((doctype.integration_status.isin(batch_status)) & (doctype.docstatus == 0))
-             .where(doctype.creation > check_date)
-             .orderby(doctype.creation, order=Order.asc).limit(limit))
+             .where((doctype.integration_status.isin(batch_status)) & (doctype.docstatus == 0)))
+    if check_date:
+        query = query.where(doctype.creation > check_date)
+    query = query.orderby(doctype.creation, order=Order.asc).limit(limit)
     return query
