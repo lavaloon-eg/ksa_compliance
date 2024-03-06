@@ -24,7 +24,7 @@ to a section with the version name.
 ## 0.4.0
 
 * Ignore permissions when creating sales invoice additional fields
-* Skip additional fiels for invoices issued before 2024-03-01
+* Skip additional fields for invoices issued before 2024-03-01
 * Add a flag to control ZATCA XML validation and make it disabled by default
 * Switch signed invoice XML from an attachment to a field for performance reasons
 
