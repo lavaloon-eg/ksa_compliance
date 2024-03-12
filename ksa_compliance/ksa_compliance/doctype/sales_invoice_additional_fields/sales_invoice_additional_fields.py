@@ -258,7 +258,7 @@ class SalesInvoiceAdditionalFields(Document):
             "zatca_message": zatca_message,
             "zatca_status": status,
         }))
-        integration_doc.insert()
+        integration_doc.insert(ignore_permissions=True)
         frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
         return zatca_message
 
