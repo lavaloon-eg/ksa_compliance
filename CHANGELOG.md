@@ -8,12 +8,16 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.5.0
+
 * Update e-invoice sync patch
   * Change timeout to 58 minutes so that we can run it hourly
   * Run it hourly
   * Sort additional fields by creation (oldest first)
   * Run in batches (of 100 by default)
   * Add more logging
+* Ignore permissions when inserting ZATCA integration log
+* Fix item total amount in sales invoice additional fields for return invoices
 
 ## 0.4.0
 
