@@ -30,7 +30,7 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
                 item["tax_amount"] = abs(items_taxes[item["item_code"]][1])
                 # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
                 #  value somehow
-                item["total_amount"] = abs(items_taxes[item["item_code"]][1] + item["net_amount"])
+                item["total_amount"] = abs(items_taxes[item["item_code"]][1]) + abs(item["net_amount"])
 
     return item_lines
 
