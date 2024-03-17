@@ -169,12 +169,30 @@ class ZATCABusinessSettings(Document):
 
         frappe.msgprint(_("Production CSID generated successfully"), title=_('Success'))
 
+    @property
+    def csr_config(self) -> dict:
+        return {
+            'unit_common_name': self.company_unit,  # Review: Same as unit_name
+            'unit_serial_number': self.company_unit_serial,
+            'vat_number': self.vat_registration_number,
+            'unit_name': self.company_unit or 'Main Branch',  # Review: Use default value?
+            'organization_name': self.company,
+            'country': self.country_code.upper(),
+            'invoice_type': '0100',  # Review: Hard-coded
+            'address': self._format_address(),
+            'category': self.company_category,
+        }
+
     @staticmethod
     def for_invoice(invoice_id: str) -> Optional['ZATCABusinessSettings']:
         company_id = frappe.db.get_value("Sales Invoice", invoice_id, ["company"])
         if not company_id:
             return None
 
+        return ZATCABusinessSettings.for_company(company_id)
+
+    @staticmethod
+    def for_company(company_id: str) -> Optional['ZATCABusinessSettings']:
         business_settings_id = frappe.db.get_value('ZATCA Business Settings', filters={'company': company_id})
         if not business_settings_id:
             return None
@@ -182,19 +200,8 @@ class ZATCABusinessSettings(Document):
         return cast(ZATCABusinessSettings, frappe.get_doc("ZATCA Business Settings", business_settings_id))
 
     def _generate_csr(self) -> cli.CsrResult:
-        config = frappe.render_template(
-            'ksa_compliance/templates/csr-config.properties', is_path=True,
-            context={
-                'unit_common_name': self.company_unit,  # Review: Same as unit_name
-                'unit_serial_number': self.company_unit_serial,
-                'vat_number': self.vat_registration_number,
-                'unit_name': self.company_unit or 'Main Branch',  # Review: Use default value?
-                'organization_name': self.company,
-                'country': self.country_code.upper(),
-                'invoice_type': '0100',  # Review: Hard-coded
-                'address': self._format_address(),
-                'category': self.company_category,
-            })
+        config = frappe.render_template('ksa_compliance/templates/csr-config.properties', is_path=True,
+                                        context=self.csr_config)
 
         logger.info(f"CSR config: {config}")
         return cli.generate_csr(self.lava_zatca_path, self.vat_registration_number, config)
