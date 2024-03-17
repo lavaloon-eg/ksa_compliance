@@ -218,7 +218,7 @@
    "reqd": 1
   },
   {
-   "description": "Format: <pre style=\"display:inline;\">1-...|2-...|3-...</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-001|2-001|3-001</pre>",
+   "description": "Format: <pre style=\"display:inline;\">1-Solution Provider Name|2-Model or version|3-Serial</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-ERPNext|2-15|3-1</pre>",
    "fieldname": "company_unit_serial",
    "fieldtype": "Data",
    "label": "Company Unit Serial",
@@ -320,7 +320,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-04 17:58:09.520798",
+ "modified": "2024-03-15 04:00:50.263078",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
@@ -343,5 +343,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "company"
+ "title_field": "company",
+ "track_changes": 1
 }
