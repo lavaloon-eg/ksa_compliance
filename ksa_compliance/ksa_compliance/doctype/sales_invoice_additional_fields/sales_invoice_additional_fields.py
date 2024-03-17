@@ -14,6 +14,9 @@ from frappe import _
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from result import is_err
+import qrcode
+from io import BytesIO
+import base64
 
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
@@ -164,6 +167,8 @@ class SalesInvoiceAdditionalFields(Document):
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
+        if self.qr_code:
+            self.generate_qr_code(data=self.qr_code)
         self.invoice_xml = result.signed_invoice_xml
         self.save()
 
@@ -296,6 +301,38 @@ class SalesInvoiceAdditionalFields(Document):
         if isinstance(content, str):
             return content
         return content.decode('utf-8')
+
+    def generate_qr_code(self, data) -> None:
+        """
+        Generate a qr image for data and attached it to the sales invoice.
+
+        Args:
+        - self
+        - data (str): The data to be encoded in the QR code.
+        """
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        img_buffer = BytesIO()
+        img.save(img_buffer, format='PNG')
+        img_byte_data = img_buffer.getvalue()
+        img_file = frappe.get_doc({'doctype': 'File',
+                                   'file_name': self.sales_invoice + '-qr-image.jpg',
+                                   'attached_to_name': self.sales_invoice,
+                                   'attached_to_doctype': 'Sales Invoice',
+                                   'attached_to_field': 'custom_qr_code',
+                                   'is_private': 1,
+                                   'folder': "Home",
+                                   'content': img_byte_data}).save(ignore_permissions=True)
+        frappe.set_value('Sales Invoice', self.sales_invoice, 'custom_qr_code', img_file.file_url)
+
 
 
 def customer_has_registration(customer_id: str):
