@@ -9,12 +9,12 @@ from typing import cast, Optional
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
-# noinspection PyProtectedMember
 from frappe import _
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from result import is_err
 
+from frappe.utils import getdate, now_datetime
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
@@ -69,6 +69,7 @@ class SalesInvoiceAdditionalFields(Document):
         invoice_type_code: DF.Data | None
         invoice_type_transaction: DF.Data | None
         invoice_xml: DF.LongText | None
+        last_attempt: DF.Datetime | None
         other_buyer_ids: DF.Table[AdditionalSellerIDs]
         payment_means_type_code: DF.Data | None
         precomputed: DF.Check
@@ -274,8 +275,10 @@ class SalesInvoiceAdditionalFields(Document):
         self.add_integration_log_document(zatca_message=zatca_message, integration_status=integration_status,
                                           zatca_status=status)
         self.integration_status = integration_status
+        self.last_attempt = now_datetime()
         if integration_status == "Resend":
             frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
+            frappe.db.set_value(self.doctype, self.name, "last_attempt", now_datetime())
             # We need to commit here to keep the additional field document draft and inserting an integration log
             frappe.db.commit()
             frappe.log_error(
@@ -340,7 +343,7 @@ def customer_has_registration(customer_id: str):
     return True
 
 
-def get_integration_status(code):
+def get_integration_status(code) -> str:
     status_map = {
         200: "Accepted",
         202: "Accepted with warning",

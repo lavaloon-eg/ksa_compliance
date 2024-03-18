@@ -14,6 +14,7 @@ to a section with the version name.
 * Abort submission for sales invoice additional field document if the status is resend.
 * Update ZATCA integration log with Zatca status.
 * Autoname method for ZATCA integration log.
+* Add Last Attempt field in additional field doctype.
 
 ## 0.5.0
 
