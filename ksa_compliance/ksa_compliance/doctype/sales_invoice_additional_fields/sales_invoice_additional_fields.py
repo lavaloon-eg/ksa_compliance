@@ -274,8 +274,8 @@ class SalesInvoiceAdditionalFields(Document):
         self.add_integration_log_document(zatca_message=zatca_message, integration_status=integration_status,
                                           zatca_status=status)
         self.integration_status = integration_status
-        if integration_status == "Accepted":
-            frappe.db.set_value(self.doctype, self.name, "integration_status", "Resend")
+        if integration_status == "Resend":
+            frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
             # We need to commit here to keep the additional field document draft and inserting an integration log
             frappe.db.commit()
             frappe.log_error(
