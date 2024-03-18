@@ -54,7 +54,8 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -142,17 +143,7 @@ class SalesInvoiceAdditionalFields(Document):
         if not settings:
             frappe.throw(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
 
-        zatca_message, integration_status = self.send_to_zatca(settings)
-        if integration_status == "Resend":
-            frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
-            self.add_integration_log_document(zatca_message, integration_status)
-
-            frappe.log_error(
-                title="ZATCA Result LOG",
-                message=f"Sending invoice {self.sales_invoice}, additional reference id {self.name} fails.")
-            frappe.throw("Failed to send invoice to zatca.", alert=1)
-
-        self.add_integration_log_document(zatca_message, integration_status)
+        self.send_to_zatca(settings)
 
     def prepare_for_zatca(self, settings: ZATCABusinessSettings):
         invoice_type = self.get_invoice_type(settings)
@@ -280,7 +271,19 @@ class SalesInvoiceAdditionalFields(Document):
             zatca_message = json.dumps(value.to_json(), indent=2)
             status = value.status
 
-        return zatca_message, integration_status
+        self.add_integration_log_document(zatca_message=zatca_message, integration_status=integration_status,
+                                          zatca_status=status)
+        self.integration_status = integration_status
+        if integration_status == "Accepted":
+            frappe.db.set_value(self.doctype, self.name, "integration_status", "Resend")
+            # We need to commit here to keep the additional field document draft and inserting an integration log
+            frappe.db.commit()
+            frappe.log_error(
+                title="ZATCA Result LOG",
+                message=f"Sending invoice {self.sales_invoice}, additional reference id {self.name} fails.")
+            frappe.throw("Failed to send invoice to zatca.")
+
+        return zatca_message
 
     def compute_sum_of_charges(self, taxes: list) -> float:
         total = 0.0
@@ -317,14 +320,14 @@ class SalesInvoiceAdditionalFields(Document):
             return content
         return content.decode('utf-8')
 
-    def add_integration_log_document(self, zatca_message, integration_status):
+    def add_integration_log_document(self, zatca_message, integration_status, zatca_status):
         integration_doc = cast(ZATCAIntegrationLog, frappe.get_doc({
             "doctype": "ZATCA Integration Log",
             "invoice_reference": self.sales_invoice,
             "invoice_additional_fields_reference": self.name,
             "zatca_message": zatca_message,
             "status": integration_status,
-            "zatca_status": integration_status,
+            "zatca_status": zatca_status,
         }))
         integration_doc.insert()
 
@@ -353,7 +356,7 @@ def get_integration_status(code):
     if code and code in status_map:
         return status_map[code]
     else:
-        return ''
+        return "Resend"
 
 
 @frappe.whitelist()

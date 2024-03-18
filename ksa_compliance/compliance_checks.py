@@ -70,7 +70,7 @@ def check_invoice_compliance(settings: ZATCABusinessSettings, invoice: SalesInvo
     si_additional_fields_doc.send_mode = ZatcaSendMode.Compliance
     si_additional_fields_doc.sales_invoice = invoice.name
     si_additional_fields_doc.insert()
-    response, _ = si_additional_fields_doc.send_to_zatca(settings)
+    response = si_additional_fields_doc.send_to_zatca(settings)
     logger.info(response)
     try:
         data = json.loads(response)
