@@ -329,7 +329,7 @@ class SalesInvoiceAdditionalFields(Document):
             "status": integration_status,
             "zatca_status": zatca_status,
         }))
-        integration_doc.insert()
+        integration_doc.insert(ignore_permissions=True)
 
 
 def customer_has_registration(customer_id: str):
