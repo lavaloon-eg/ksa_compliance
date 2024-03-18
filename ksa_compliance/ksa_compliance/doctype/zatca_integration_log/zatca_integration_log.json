@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:log-{invoice_reference}",
  "creation": "2024-01-29 14:36:22.120690",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -78,11 +77,10 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-06 12:36:29.015038",
+ "modified": "2024-03-18 14:52:20.484325",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Integration Log",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
