@@ -17,5 +17,6 @@ class ZATCAInvoiceCountingSettings(Document):
 		business_settings_reference: DF.Link | None
 		invoice_counter: DF.Int
 		previous_invoice_hash: DF.Data | None
+		zatca_egs: DF.Link | None
 	# end: auto-generated types
 	pass

@@ -1,0 +1,184 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-03-15 01:37:35.019775",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_break_ljdo",
+  "business_settings",
+  "unit_common_name",
+  "unit_serial",
+  "enable_zatca_integration",
+  "sync_with_zatca",
+  "column_break_kjzc",
+  "egs_type",
+  "integration_tab",
+  "configuration_section",
+  "validate_generated_xml",
+  "onboarding_section",
+  "csr",
+  "compliance_request_id",
+  "security_token",
+  "secret",
+  "column_break_okfu",
+  "production_request_id",
+  "production_security_token",
+  "production_secret"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_break_ljdo",
+   "fieldtype": "Tab Break",
+   "label": "Configuration"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_zatca_integration",
+   "fieldtype": "Check",
+   "label": "Enable ZATCA Integration"
+  },
+  {
+   "fieldname": "sync_with_zatca",
+   "fieldtype": "Select",
+   "label": "Sync with ZATCA",
+   "options": "Live\nBatches"
+  },
+  {
+   "fieldname": "column_break_kjzc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "integration_tab",
+   "fieldtype": "Tab Break",
+   "label": "Integration"
+  },
+  {
+   "fieldname": "configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, validates the generated ZATCA XML when creating Sales Invoice Additional Fields. This has a performance impact, so it's recommended to enable only for testing or troubleshooting problems.",
+   "fieldname": "validate_generated_xml",
+   "fieldtype": "Check",
+   "label": "Validate Generated XML"
+  },
+  {
+   "fieldname": "onboarding_section",
+   "fieldtype": "Section Break",
+   "label": "Onboarding"
+  },
+  {
+   "fieldname": "csr",
+   "fieldtype": "Small Text",
+   "label": "CSR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "compliance_request_id",
+   "fieldtype": "Data",
+   "label": "Compliance Request ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "security_token",
+   "fieldtype": "Small Text",
+   "label": "Security Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "secret",
+   "fieldtype": "Password",
+   "label": "Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_okfu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "production_request_id",
+   "fieldtype": "Data",
+   "label": "Production Request ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_security_token",
+   "fieldtype": "Small Text",
+   "label": "Production Security Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_secret",
+   "fieldtype": "Password",
+   "label": "Production Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "business_settings",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Business Settings",
+   "options": "ZATCA Business Settings",
+   "reqd": 1
+  },
+  {
+   "fieldname": "egs_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "EGS Type",
+   "options": "ERPNext\nPOS Device",
+   "reqd": 1
+  },
+  {
+   "description": "EGS/device identifier. For ERPNext, enter \"ERPNext\" or similar. For POS devices, enter the POS device ID shown in LavaDo. <br>\nFrom the home screen: Settings (gear button top-left/right) -&gt; More Info and look for the device ID",
+   "fieldname": "unit_common_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Unit Common Name",
+   "reqd": 1
+  },
+  {
+   "description": "Format: <pre style=\"display:inline;\">1-Solution Provider Name|2-Model or version|3-Serial</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-ERPNext|2-15|3-1</pre> or <br><pre style=\"display:inline;\">1-Sunmi|2-Sunmi Pro v2s|3-V222201B00815</pre>",
+   "fetch_from": "business_settings.company_unit_serial",
+   "fetch_if_empty": 1,
+   "fieldname": "unit_serial",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit Serial",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-18 03:34:11.904323",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA EGS",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

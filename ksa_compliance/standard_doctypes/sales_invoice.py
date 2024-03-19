@@ -1,8 +1,15 @@
+from typing import cast
+
 import frappe
 from datetime import date
 
 from ksa_compliance import logger
+from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import \
+    SalesInvoiceAdditionalFields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
+from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
+from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
+    ZATCAPrecomputedInvoice
 
 IGNORED_INVOICES = set()
 
@@ -27,17 +34,34 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         logger.info(f"Skipping additional fields for {self.name} because of missing ZATCA settings")
         return
 
-    if not settings.has_production_csid:
-        logger.info(f"Skipping additional fields for {self.name} because of missing production CSID")
-        return
-
     global IGNORED_INVOICES
     if self.name in IGNORED_INVOICES:
         logger.info(f"Skipping additional fields for {self.name} because it's in the ignore list")
         return
 
-    si_additional_fields_doc = frappe.new_doc("Sales Invoice Additional Fields")
+    si_additional_fields_doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc("Sales Invoice Additional Fields"))
     si_additional_fields_doc.sales_invoice = self.name
+
+    precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
+    is_live_sync = settings.is_live_sync
+    if precomputed_invoice:
+        logger.info(f"Using precomputed invoice {precomputed_invoice.name} for {self.name}")
+        si_additional_fields_doc.precomputed = True
+        si_additional_fields_doc.precomputed_invoice = precomputed_invoice.name
+        si_additional_fields_doc.invoice_counter = precomputed_invoice.invoice_counter
+        si_additional_fields_doc.uuid = precomputed_invoice.invoice_uuid
+        si_additional_fields_doc.previous_invoice_hash = precomputed_invoice.previous_invoice_hash
+        si_additional_fields_doc.invoice_hash = precomputed_invoice.invoice_hash
+        si_additional_fields_doc.invoice_qr = precomputed_invoice.invoice_qr
+        si_additional_fields_doc.invoice_xml = precomputed_invoice.invoice_xml
+
+        egs_settings = ZATCAEGS.for_device(precomputed_invoice.device_id)
+        if not egs_settings:
+            logger.warning(f"Could not find EGS for device {precomputed_invoice.device_id}")
+        else:
+            # EGS Setting overrides company-wide setting
+            is_live_sync = egs_settings.is_live_sync
+
     if self.customer_address:
         customer_address_doc = frappe.get_doc("Address", self.customer_address)
         address_info = {
@@ -53,7 +77,7 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         si_additional_fields_doc.update(address_info)
 
     # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
-    if settings.is_live_sync:
+    if is_live_sync:
         si_additional_fields_doc.insert(ignore_permissions=True)
         si_additional_fields_doc.submit()
     else:

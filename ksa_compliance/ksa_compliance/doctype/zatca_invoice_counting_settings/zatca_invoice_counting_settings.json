@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "business_settings_reference",
+  "zatca_egs",
   "column_break_ptqh",
   "invoice_counter",
   "previous_invoice_hash"
@@ -42,11 +43,17 @@
    "fieldtype": "Data",
    "label": "Previous Invoice Hash",
    "read_only": 1
+  },
+  {
+   "fieldname": "zatca_egs",
+   "fieldtype": "Link",
+   "label": "ZATCA EGS",
+   "options": "ZATCA EGS"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 17:25:45.712740",
+ "modified": "2024-03-15 02:05:51.696912",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Invoice Counting Settings",

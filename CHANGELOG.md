@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add support for precomputed invoices from POS devices
+
 ## 0.5.0
 
 * Update e-invoice sync patch

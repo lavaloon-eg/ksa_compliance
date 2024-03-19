@@ -7,16 +7,19 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_jlnr",
+  "precomputed",
+  "precomputed_invoice",
   "amended_from",
   "integration_status",
   "sales_invoice",
+  "invoice_counter",
   "uuid",
+  "previous_invoice_hash",
+  "invoice_hash",
+  "column_break_daqi",
   "invoice_type_code",
   "invoice_type_transaction",
   "tax_currency",
-  "invoice_counter",
-  "invoice_hash",
-  "previous_invoice_hash",
   "qr_code",
   "buyer_address_tab",
   "buyer_id_section",
@@ -522,12 +525,29 @@
    "fieldname": "download_xml",
    "fieldtype": "Button",
    "label": "Download XML"
+  },
+  {
+   "default": "0",
+   "fieldname": "precomputed",
+   "fieldtype": "Check",
+   "label": "Precomputed"
+  },
+  {
+   "depends_on": "eval:doc.precomputed",
+   "fieldname": "precomputed_invoice",
+   "fieldtype": "Link",
+   "label": "Precomputed Invoice",
+   "options": "ZATCA Precomputed Invoice"
+  },
+  {
+   "fieldname": "column_break_daqi",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-04 19:08:51.260398",
+ "modified": "2024-03-18 03:30:10.294107",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

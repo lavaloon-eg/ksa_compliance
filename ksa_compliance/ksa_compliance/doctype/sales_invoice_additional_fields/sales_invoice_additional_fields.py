@@ -18,10 +18,11 @@ from result import is_err
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
-from ksa_compliance.generate_xml import generate_xml_file, generate_einvoice_xml_fielname
+from ksa_compliance.generate_xml import generate_xml_file
 from ksa_compliance.invoice import InvoiceMode, InvoiceType
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import (
     ZATCABusinessSettings)
+from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
@@ -35,8 +36,7 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -54,9 +54,7 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal[
-            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected",
-            "Clearance switched off"]
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -72,6 +70,8 @@ class SalesInvoiceAdditionalFields(Document):
         invoice_xml: DF.LongText | None
         other_buyer_ids: DF.Table[AdditionalSellerIDs]
         payment_means_type_code: DF.Data | None
+        precomputed: DF.Check
+        precomputed_invoice: DF.Link | None
         prepayment_id: DF.Data | None
         prepayment_issue_date: DF.Date | None
         prepayment_issue_time: DF.Data | None
@@ -115,6 +115,9 @@ class SalesInvoiceAdditionalFields(Document):
         return invoice_type
 
     def before_insert(self):
+        if self.precomputed:
+            return
+
         sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
         self.uuid = str(uuid.uuid4())
         self.tax_currency = "SAR"  # Set as "SAR" as a default tax currency value
@@ -125,6 +128,9 @@ class SalesInvoiceAdditionalFields(Document):
         self.payment_means_type_code = self.get_payment_means_type_code(sales_invoice)
 
     def after_insert(self):
+        if self.precomputed:
+            return
+
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
         if not settings:
             return
@@ -133,8 +139,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     def on_submit(self):
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        if not settings or not settings.has_production_csid:
-            return
+        if not settings:
+            frappe.throw(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
 
         self.send_to_zatca(settings)
 
@@ -181,7 +187,22 @@ class SalesInvoiceAdditionalFields(Document):
         if not signed_xml:
             frappe.throw(_('Could not find signed XML attachment'), title=_('ZATCA Error'))
 
-        return self.send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings)
+        if self.precomputed_invoice:
+            device_id = frappe.db.get_value('ZATCA Precomputed Invoice', self.precomputed_invoice, 'device_id')
+            egs = ZATCAEGS.for_device(device_id)
+            if not egs:
+                frappe.throw(f"Could not find a ZATCA EGS for device '{device_id}'")
+            token = egs.production_security_token
+            secret = egs.get_password('production_secret') if egs.production_secret else ''
+        else:
+            token = settings.security_token if self.is_compliance_mode else settings.production_security_token
+            secret = settings.get_password('secret' if self.is_compliance_mode else 'production_secret')
+
+        if not token or not secret:
+            frappe.throw(f"Missing ZATCA token/secret for {self.name}")
+
+        return self.send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings.fatoora_server_url,
+                                     token, secret)
 
     def set_invoice_type_code(self):
         """
@@ -228,15 +249,13 @@ class SalesInvoiceAdditionalFields(Document):
                         {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
 
     def send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
-                         settings: ZATCABusinessSettings) -> str:
-        token = settings.security_token if self.is_compliance_mode else settings.production_security_token
-        secret = settings.get_password('secret' if self.is_compliance_mode else 'production_secret')
+                         server_url: str, token: str, secret: str) -> str:
         if invoice_type == 'Standard':
-            result, status_code = api.clear_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
+            result, status_code = api.clear_invoice(server=server_url, invoice_xml=invoice_xml,
                                                     invoice_uuid=self.uuid, invoice_hash=invoice_hash,
                                                     security_token=token, secret=secret, mode=self.send_mode)
         else:
-            result, status_code = api.report_invoice(server=settings.fatoora_server_url, invoice_xml=invoice_xml,
+            result, status_code = api.report_invoice(server=server_url, invoice_xml=invoice_xml,
                                                      invoice_uuid=self.uuid, invoice_hash=invoice_hash,
                                                      security_token=token, secret=secret, mode=self.send_mode)
 
