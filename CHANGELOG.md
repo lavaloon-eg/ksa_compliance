@@ -14,6 +14,7 @@ to a section with the version name.
 * Update ZATCA integration log with Zatca status.
 * Autoname method for ZATCA integration log.
 * Add Last Attempt field in additional field doctype.
+* Update blank integration status in sales invoice additional fields.
 
 ## 0.6.0
 
