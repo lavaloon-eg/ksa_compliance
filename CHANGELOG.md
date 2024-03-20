@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.6.0
+
 * Add support for precomputed invoices from POS devices
 * Make precomputed invoice and sales invoice additional fields UUID unique to safeguard against bugs causing double ZATCA submissions
 
