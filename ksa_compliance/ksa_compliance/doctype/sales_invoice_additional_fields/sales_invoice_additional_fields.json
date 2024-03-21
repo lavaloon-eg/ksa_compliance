@@ -11,15 +11,15 @@
   "precomputed_invoice",
   "amended_from",
   "integration_status",
+  "last_attempt",
   "sales_invoice",
-  "invoice_counter",
   "uuid",
-  "previous_invoice_hash",
-  "invoice_hash",
-  "column_break_daqi",
   "invoice_type_code",
   "invoice_type_transaction",
   "tax_currency",
+  "invoice_counter",
+  "invoice_hash",
+  "previous_invoice_hash",
   "qr_code",
   "buyer_address_tab",
   "buyer_id_section",
@@ -495,6 +495,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Ready For Batch",
    "fieldname": "integration_status",
    "fieldtype": "Select",
@@ -543,12 +544,19 @@
   {
    "fieldname": "column_break_daqi",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "last_attempt",
+   "fieldtype": "Datetime",
+   "label": "Last Attempt",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 14:20:46.475129",
+ "modified": "2024-03-21 06:47:46.475129",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

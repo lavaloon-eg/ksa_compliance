@@ -79,6 +79,8 @@ def create_sales_invoice_additional_fields_doctype(self, method):
     # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
     if is_live_sync:
         si_additional_fields_doc.insert(ignore_permissions=True)
+        # We need to commit here to ensure saving a draft invoice in live mode before sending it to zatca to handle the Resend scenario.
+        frappe.db.commit()
         si_additional_fields_doc.submit()
     else:
         si_additional_fields_doc.integration_status = "Ready For Batch"
@@ -86,7 +88,9 @@ def create_sales_invoice_additional_fields_doctype(self, method):
 
 
 def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
-    records = frappe.db.sql("SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii JOIN `tabBooking Vehicle` bv on bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s", {'invoice': invoice_id}, as_dict=True)
+    records = frappe.db.sql(
+        "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii JOIN `tabBooking Vehicle` bv on bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
+        {'invoice': invoice_id}, as_dict=True)
     start_date = date(2024, 3, 1)
     if records:
         local_date = records[0]['local_trx_date_time'].date()
