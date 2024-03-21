@@ -16,7 +16,8 @@ to a section with the version name.
 * Add Last Attempt field in additional field doctype.
 * Update incorrect sales invoice additional fields.
   * Set blank integration status to Resend.
-  * Draft the updated documents to resend them again. 
+  * Draft the updated documents to resend them again.
+* Update NULL last attempt in sales invoice additional fields set equal to modified.
 
 ## 0.6.0
 
