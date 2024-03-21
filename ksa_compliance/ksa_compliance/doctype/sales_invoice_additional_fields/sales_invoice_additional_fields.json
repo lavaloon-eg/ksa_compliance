@@ -105,7 +105,8 @@
    "fieldname": "uuid",
    "fieldtype": "Data",
    "label": "UUID",
-   "read_only": 1
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "invoice_type_code",
@@ -555,7 +556,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-18 15:54:52.771723",
+ "modified": "2024-03-21 06:47:46.475129",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

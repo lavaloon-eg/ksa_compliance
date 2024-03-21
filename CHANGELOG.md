@@ -8,13 +8,17 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Add support for precomputed invoices from POS devices
 * Ignore permissions when inserting ZATCA integration log
 * Fix item total amount in sales invoice additional fields for return invoices
 * Abort submission for sales invoice additional field document if the status is resend.
 * Update ZATCA integration log with Zatca status.
 * Autoname method for ZATCA integration log.
 * Add Last Attempt field in additional field doctype.
+
+## 0.6.0
+
+* Add support for precomputed invoices from POS devices
+* Make precomputed invoice and sales invoice additional fields UUID unique to safeguard against bugs causing double ZATCA submissions
 
 ## 0.5.0
 
