@@ -346,7 +346,7 @@ def customer_has_registration(customer_id: str):
 def get_integration_status(code) -> str:
     status_map = {
         200: "Accepted",
-        202: "Accepted with warning",
+        202: "Accepted with warnings",
         303: "Clearance switched off",
         401: "Rejected",
         400: "Rejected",
