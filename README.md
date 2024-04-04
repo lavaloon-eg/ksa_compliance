@@ -5,4 +5,4 @@ This is a beta version that focuses on the simplified invoice; however, it has t
 
 #### License
 
-Copyright (c) 2024 LavaLoon
+Copyright (c) 2024 LavaLoon, and it's under license AGPL
