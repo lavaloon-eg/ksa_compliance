@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.7.0
+
 * Ignore permissions when inserting ZATCA integration log
 * Fix item total amount in sales invoice additional fields for return invoices
 * Abort submission for sales invoice additional field document if the status is resend.
@@ -18,6 +20,7 @@ to a section with the version name.
   * Set blank integration status to Resend.
   * Draft the updated documents to resend them again.
 * Update NULL last attempt in sales invoice additional fields set equal to modified.
+* Fix invoice submission error when lava_custom is not installed
 
 ## 0.6.0
 
