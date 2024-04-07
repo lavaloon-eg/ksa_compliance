@@ -88,13 +88,16 @@ def create_sales_invoice_additional_fields_doctype(self, method):
 
 
 def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
-    records = frappe.db.sql(
-        "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii JOIN `tabBooking Vehicle` bv on bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
-        {'invoice': invoice_id}, as_dict=True)
     start_date = date(2024, 3, 1)
-    if records:
-        local_date = records[0]['local_trx_date_time'].date()
-        return local_date >= start_date
+
+    if frappe.db.table_exists('Vehicle Booking Item Info'):
+        records = frappe.db.sql(
+            "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii "
+            "JOIN `tabBooking Vehicle` bv on bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
+            {'invoice': invoice_id}, as_dict=True)
+        if records:
+            local_date = records[0]['local_trx_date_time'].date()
+            return local_date >= start_date
 
     posting_date = frappe.db.get_value('Sales Invoice', invoice_id, 'posting_date')
     return posting_date >= start_date
