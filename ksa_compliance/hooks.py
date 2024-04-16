@@ -62,10 +62,9 @@ doctype_js = {"Customer": "public/js/customer.js",
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# "methods": "ksa_compliance.utils.jinja_methods",
-# "filters": "ksa_compliance.utils.jinja_filters"
-# }
+jinja = {
+    "methods": "ksa_compliance.qr_gen.gen_qrcode"
+}
 
 # Installation
 # ------------

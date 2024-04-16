@@ -101,3 +101,11 @@ def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
 
     posting_date = frappe.db.get_value('Sales Invoice', invoice_id, 'posting_date')
     return posting_date >= start_date
+
+
+# @property
+# def custom_qr_data(self):
+#     return self.name
+#     qr_data = frappe.get_value(doctype='Sales Invoice Additional Fields', filters={'sales_invoice': self.name},
+#                                fieldname='qr_code')
+#     return qr_data if qr_data else None
