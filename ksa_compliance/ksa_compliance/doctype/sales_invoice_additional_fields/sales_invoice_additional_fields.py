@@ -26,7 +26,10 @@ from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
-
+import base64
+from io import BytesIO
+import json
+import qrcode
 
 class SalesInvoiceAdditionalFields(Document):
     # begin: auto-generated types
@@ -54,8 +57,7 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal[
-            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -83,6 +85,7 @@ class SalesInvoiceAdditionalFields(Document):
         prepayment_vat_category_taxable_amount: DF.Float
         previous_invoice_hash: DF.Data | None
         qr_code: DF.SmallText | None
+        qr_image: DF.Data | None
         reason_for_allowance: DF.Data | None
         reason_for_charge: DF.Data | None
         reason_for_charge_code: DF.Data | None
@@ -333,6 +336,21 @@ class SalesInvoiceAdditionalFields(Document):
             "zatca_status": zatca_status,
         }))
         integration_doc.insert(ignore_permissions=True)
+
+    @property
+    def qr_image(self):
+        if self.qr_code:
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(json.dumps(self.qr_code))
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            img_buffer = BytesIO()
+            img.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_str = base64.b64encode(img_buffer.read()).decode("utf-8")
+            return img_str
+        else:
+            return "No QR image"
 
 
 def customer_has_registration(customer_id: str):
