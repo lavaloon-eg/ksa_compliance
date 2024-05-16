@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_jlnr",
+  "column_break_asoj",
   "precomputed",
   "precomputed_invoice",
   "amended_from",
@@ -21,6 +22,7 @@
   "invoice_hash",
   "previous_invoice_hash",
   "qr_code",
+  "qr_image",
   "buyer_address_tab",
   "buyer_id_section",
   "buyer_vat_registration_number",
@@ -84,7 +86,8 @@
   "tab_4_tab",
   "validation_section",
   "validation_messages",
-  "validation_errors"
+  "validation_errors",
+  "column_break_daqi"
  ],
  "fields": [
   {
@@ -551,12 +554,23 @@
    "fieldtype": "Datetime",
    "label": "Last Attempt",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_asoj",
+   "fieldtype": "Column Break",
+   "is_virtual": 1
+  },
+  {
+   "fieldname": "qr_image",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Qr Image"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-21 06:47:46.475129",
+ "modified": "2024-05-15 21:30:14.759058",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
