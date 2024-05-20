@@ -29,7 +29,7 @@ from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInv
 import base64
 from io import BytesIO
 import json
-import qrcode
+import pyqrcode
 
 class SalesInvoiceAdditionalFields(Document):
     # begin: auto-generated types
@@ -340,17 +340,14 @@ class SalesInvoiceAdditionalFields(Document):
     @property
     def qr_image(self):
         if self.qr_code:
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(self.qr_code)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
-            img_buffer = BytesIO()
-            img.save(img_buffer, format='PNG')
-            img_buffer.seek(0)
-            img_str = base64.b64encode(img_buffer.read()).decode("utf-8")
+            qr = pyqrcode.create(self.qr_code)
+            buffer = BytesIO()
+            qr.png(buffer, scale=7)
+            buffer.seek(0)
+            img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
             return img_str
         else:
-            return "No QR image"
+            return "No QR Code"
 
 
 def customer_has_registration(customer_id: str):
