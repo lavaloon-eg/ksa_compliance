@@ -17,6 +17,11 @@
     <cbc:Note>This is a note</cbc:Note>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>{{ invoice.tax_currency_code }}</cbc:TaxCurrencyCode>
+    {% if invoice.purchase_order_reference %}
+    <cac:OrderReference>
+        <cbc:ID>{{ invoice.purchase_order_reference }}</cbc:ID>
+    </cac:OrderReference>
+    {% endif %}
     <!-- TODO: Discussion -->
     <cac:AdditionalDocumentReference>
         <cbc:ID>ICV</cbc:ID>
