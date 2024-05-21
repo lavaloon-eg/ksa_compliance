@@ -339,15 +339,14 @@ class SalesInvoiceAdditionalFields(Document):
 
     @property
     def qr_image(self):
-        if self.qr_code:
-            qr = pyqrcode.create(self.qr_code)
-            with BytesIO() as buffer:
-                qr.png(buffer, scale=7)
-                buffer.seek(0)
-                img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
-            return img_str
-        else:
+        if not self.qr_code:
             return None
+        qr = pyqrcode.create(self.qr_code)
+        with BytesIO() as buffer:
+            qr.png(buffer, scale=7)
+            buffer.seek(0)
+            img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+            return img_str
 
 
 def customer_has_registration(customer_id: str):
