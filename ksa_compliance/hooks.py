@@ -136,9 +136,10 @@ doctype_js = {"Customer": "public/js/customer.js",
 doc_events = {
     "Sales Invoice": {
         "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
+        "on_change": "ksa_compliance.standard_doctypes.sales_invoice_item.calculate_tax_amount"
     },
     "Sales Invoice Item": {
-        "on_insert": "ksa_compliance.standard_doctypes.sales_invoice_item.calculate_tax_amount"
+        # "on_insert": "ksa_compliance.standard_doctypes.sales_invoice_item.calculate_tax_amount"
     }
 }
 
