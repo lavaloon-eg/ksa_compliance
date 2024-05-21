@@ -21,6 +21,7 @@ to a section with the version name.
   * Draft the updated documents to resend them again.
 * Update NULL last attempt in sales invoice additional fields set equal to modified.
 * Fix invoice submission error when lava_custom is not installed
+* Add Qr Image to sales invoice additional fields, to be used in print format.
 
 ## 0.6.0
 
