@@ -11,6 +11,11 @@
     <cbc:InvoiceTypeCode name="{{ invoice.invoice_type_transaction }}">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>{{ invoice.tax_currency or 'SAR'}}</cbc:TaxCurrencyCode>
+    {% if invoice.purchase_order_reference %}
+    <cac:OrderReference>
+        <cbc:ID>{{ invoice.purchase_order_reference | escape }}</cbc:ID>
+    </cac:OrderReference>
+    {% endif %}
     {% if invoice.is_return or invoice.is_debit_note %}
     <cac:BillingReference>
         <cac:InvoiceDocumentReference>
