@@ -101,3 +101,11 @@ def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
 
     posting_date = frappe.db.get_value('Sales Invoice', invoice_id, 'posting_date')
     return posting_date >= start_date
+
+
+def calculate_tax_amount(self):
+    if self.items:
+        for item in self.items:
+            item_tax_rate = frappe.get_value("Item Tax Template Detail", {"parent": item.item_tax_template}, ['tax_rate'])
+            item.custom_tax_total = (item.amount * item_tax_rate) / 100
+            item.custom_total_after_tax = item.amount + item.custom_tax_total
