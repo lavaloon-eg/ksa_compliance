@@ -1,0 +1,348 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{company}-{country}-{currency}",
+ "creation": "2024-01-11 15:31:56.241248",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_break_ljdo",
+  "company",
+  "company_unit",
+  "company_unit_serial",
+  "company_category",
+  "country",
+  "country_code",
+  "enable_zatca_integration",
+  "sync_with_zatca",
+  "type_of_business_transactions",
+  "currency",
+  "column_break_kjzc",
+  "company_address",
+  "street",
+  "additional_street",
+  "building_number",
+  "city",
+  "postal_code",
+  "district",
+  "seller_id_tab",
+  "seller_id_section",
+  "seller_name",
+  "vat_registration_number",
+  "other_ids",
+  "integration_tab",
+  "configuration_section",
+  "lava_zatca_path",
+  "check_lava_zatca",
+  "validate_generated_xml",
+  "column_break_cjdg",
+  "fatoora_server_url",
+  "onboarding_section",
+  "create_csr",
+  "csr",
+  "compliance_request_id",
+  "security_token",
+  "secret",
+  "column_break_okfu",
+  "perform_compliance_checks",
+  "get_production_csid",
+  "production_request_id",
+  "production_security_token",
+  "production_secret"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_zatca_integration",
+   "fieldtype": "Check",
+   "label": "Enable ZATCA Integration"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address",
+   "options": "Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "seller_id_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "seller_name",
+   "fieldtype": "Data",
+   "label": "Seller Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vat_registration_number",
+   "fieldtype": "Data",
+   "label": "Vat Registration Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_ids",
+   "fieldtype": "Table",
+   "label": "Additional IDs",
+   "options": "Additional Seller IDs"
+  },
+  {
+   "fieldname": "column_break_kjzc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company_address.address_line2",
+   "fieldname": "additional_street",
+   "fieldtype": "Data",
+   "label": "Additional Street",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company_address.pincode",
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company_address.address_line1",
+   "fieldname": "street",
+   "fieldtype": "Data",
+   "label": "Street",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company_address.custom_building_number",
+   "fieldname": "building_number",
+   "fieldtype": "Data",
+   "label": "Building Number",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company_address.city",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company_address.custom_area",
+   "fieldname": "district",
+   "fieldtype": "Data",
+   "label": "District",
+   "read_only": 1
+  },
+  {
+   "fieldname": "seller_id_tab",
+   "fieldtype": "Tab Break",
+   "label": "Seller ID"
+  },
+  {
+   "fetch_from": "company.country",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_with_zatca",
+   "fieldtype": "Select",
+   "label": "Sync with ZATCA",
+   "options": "Live\nBatches"
+  },
+  {
+   "fieldname": "tab_break_ljdo",
+   "fieldtype": "Tab Break",
+   "label": "Seller Details"
+  },
+  {
+   "fieldname": "integration_tab",
+   "fieldtype": "Tab Break",
+   "label": "Integration"
+  },
+  {
+   "fetch_from": "country.code",
+   "fieldname": "country_code",
+   "fieldtype": "Data",
+   "label": "Country Code",
+   "read_only": 1
+  },
+  {
+   "default": "Let the system decide (both)",
+   "fieldname": "type_of_business_transactions",
+   "fieldtype": "Select",
+   "label": "Type of Business Transactions",
+   "options": "Let the system decide (both)\nSimplified Tax Invoices\nStandard Tax Invoices"
+  },
+  {
+   "description": "Generate a CSR and make a compliance CSID request through ZATCA.",
+   "fieldname": "create_csr",
+   "fieldtype": "Button",
+   "label": "Onboard"
+  },
+  {
+   "fieldname": "compliance_request_id",
+   "fieldtype": "Data",
+   "label": "Compliance Request ID",
+   "read_only": 1
+  },
+  {
+   "description": "The path to the executable for lava-zatca CLI, e.g. <pre style=\"display:inline;\">/home/frappe/lava-zatca/bin/lava-zatca</pre>",
+   "fieldname": "lava_zatca_path",
+   "fieldtype": "Data",
+   "label": "Lava Zatca Path"
+  },
+  {
+   "fetch_from": "company_address.address_title",
+   "fetch_if_empty": 1,
+   "fieldname": "company_unit",
+   "fieldtype": "Data",
+   "label": "Company Unit",
+   "reqd": 1
+  },
+  {
+   "description": "Format: <pre style=\"display:inline;\">1-Solution Provider Name|2-Model or version|3-Serial</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-ERPNext|2-15|3-1</pre>",
+   "fieldname": "company_unit_serial",
+   "fieldtype": "Data",
+   "label": "Company Unit Serial",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.domain",
+   "fetch_if_empty": 1,
+   "fieldname": "company_category",
+   "fieldtype": "Data",
+   "label": "Company Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "csr",
+   "fieldtype": "Small Text",
+   "label": "CSR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "security_token",
+   "fieldtype": "Small Text",
+   "label": "Security Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "secret",
+   "fieldtype": "Password",
+   "label": "Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_okfu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Use the compliance request from onboarding to get a production CSID from ZATCA, using which invoices can be submitted to ZATCA through reporting or clearance APIs.",
+   "fieldname": "get_production_csid",
+   "fieldtype": "Button",
+   "label": "Get Production CSID"
+  },
+  {
+   "fieldname": "production_security_token",
+   "fieldtype": "Small Text",
+   "label": "Production Security Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_secret",
+   "fieldtype": "Password",
+   "label": "Production Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "onboarding_section",
+   "fieldtype": "Section Break",
+   "label": "Onboarding"
+  },
+  {
+   "description": "The URL for the ZATCA server to use. Use <pre style=\"display:inline;\">https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/</pre> for the ZATCA sandbox (testing)",
+   "fieldname": "fatoora_server_url",
+   "fieldtype": "Data",
+   "label": "Fatoora Server URL"
+  },
+  {
+   "fieldname": "production_request_id",
+   "fieldtype": "Data",
+   "label": "Production Request ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cjdg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.lava_zatca_path",
+   "fieldname": "check_lava_zatca",
+   "fieldtype": "Button",
+   "label": "Check Lava-ZATCA"
+  },
+  {
+   "description": "Use the compliance request from onboarding to perform compliance checks for the different invoice types. This is a prerequisite to retrieving a production CSID",
+   "fieldname": "perform_compliance_checks",
+   "fieldtype": "Button",
+   "label": "Perform Compliance Checks"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, validates the generated ZATCA XML when creating Sales Invoice Additional Fields. This has a performance impact, so it's recommended to enable only for testing or troubleshooting problems.",
+   "fieldname": "validate_generated_xml",
+   "fieldtype": "Check",
+   "label": "Validate Generated XML"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-15 04:00:50.263078",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Business Settings",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "company",
+ "track_changes": 1
+}

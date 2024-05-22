@@ -1,6 +1,6 @@
 app_name = "ksa_compliance"
 app_title = "KSA Compliance"
-app_publisher = "Lavaloon"
+app_publisher = "LavaLoon"
 app_description = "KSA Compliance app for E-invoice"
 app_email = "info@lavaloon.com"
 app_license = "Copyright (c) 2023 LavaLoon"
@@ -32,6 +32,9 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+
+doctype_js = {"Customer": "public/js/customer.js",
+              "Sales Invoice": "public/js/sales_invoice_item.js"}
 
 # Svg Icons
 # ------------------
@@ -130,10 +133,23 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # }
 # }
 
+doc_events = {
+    "Sales Invoice": {
+        "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
+    },
+    "Sales Invoice Item": {
+        "on_insert": "ksa_compliance.standard_doctypes.sales_invoice_item.calculate_tax_amount"
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+    "hourly_long": [
+        "ksa_compliance.background_jobs.sync_e_invoices"
+    ]
+}
 # "all": [
 # "ksa_compliance.tasks.all"
 # ],
@@ -219,3 +235,15 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # auth_hooks = [
 # "ksa_compliance.auth.validate"
 # ]
+
+fixtures = [
+    {"dt": 'Print Format',
+     "filters":
+         [['name', "in",
+           ['ZATCA Simplified Sales Invoice', 'ZATCA Simplified Credit Invoice', 'ZATCA Simplified Debit Invoice',
+            'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit Invoice']]]},
+]
+
+# Auto generate type annotations for doctypes
+# Reference: https://github.com/frappe/frappe/pull/21776
+export_python_type_annotations = True

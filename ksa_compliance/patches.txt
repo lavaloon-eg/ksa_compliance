@@ -4,3 +4,7 @@
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
+ksa_compliance.patches._2024_02_27_add_counting_docs_for_existing_settings #2024-02-27 19:38
+ksa_compliance.patches._2024_03_20_update_blank_integration_status_in_additional_field #2024-03-21 10:24
+ksa_compliance.patches._2024_03_21_uuid_indexes
+ksa_compliance.patches._2024_03_21_update_last_attempt_in_additional_fields

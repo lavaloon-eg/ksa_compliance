@@ -1,0 +1,597 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{sales_invoice}-AdditionalFields",
+ "creation": "2024-01-23 15:33:17.438354",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_jlnr",
+  "column_break_asoj",
+  "precomputed",
+  "precomputed_invoice",
+  "amended_from",
+  "integration_status",
+  "last_attempt",
+  "sales_invoice",
+  "uuid",
+  "invoice_type_code",
+  "invoice_type_transaction",
+  "tax_currency",
+  "invoice_counter",
+  "invoice_hash",
+  "previous_invoice_hash",
+  "qr_code",
+  "qr_image",
+  "buyer_address_tab",
+  "buyer_id_section",
+  "buyer_vat_registration_number",
+  "other_buyer_ids",
+  "buyer_address_details_section",
+  "column_break_jofi",
+  "buyer_street_name",
+  "buyer_additional_street_name",
+  "buyer_building_number",
+  "buyer_additional_number",
+  "buyer_city",
+  "buyer_postal_code",
+  "buyer_provincestate",
+  "buyer_district",
+  "buyer_country_code",
+  "invoice_tab",
+  "document_level_section",
+  "supply_end_date",
+  "payment_means_type_code",
+  "allowance_indicator",
+  "allowance_vat_category_code",
+  "reason_for_allowance",
+  "code_for_allowance_reason",
+  "column_break_urzl",
+  "charge_indicator",
+  "charge_vat_category_code",
+  "reason_for_charge",
+  "reason_for_charge_code",
+  "section_break_ytrn",
+  "sum_of_allowances",
+  "column_break_bcho",
+  "sum_of_charges",
+  "section_break_tsfk",
+  "column_break_mest",
+  "vat_exemption_reason_code",
+  "vat_exemption_reason_text",
+  "section_break_flxd",
+  "prepayment_id",
+  "prepayment_uuid",
+  "prepayment_issue_date",
+  "prepayment_issue_time",
+  "prepayment_type_code",
+  "section_break_mrvb",
+  "column_break_vdye",
+  "invoice_line_allowance_reason",
+  "invoice_line_allowance_reason_code",
+  "column_break_kcpm",
+  "invoice_line_charge_indicator",
+  "invoice_line_charge_percentage",
+  "invoice_line_charge_amount",
+  "invoice_line_charge_base_amount",
+  "invoice_line_charge_base_amount_reason",
+  "invoice_line_charge_base_amount_reason_code",
+  "section_break_mryd",
+  "prepayment_vat_category_taxable_amount",
+  "prepayment_vat_category_tax_amount",
+  "tab_5_tab",
+  "xml_section",
+  "invoice_xml",
+  "download_xml",
+  "tab_4_tab",
+  "validation_section",
+  "validation_messages",
+  "validation_errors",
+  "column_break_daqi"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_jlnr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Invoice Additional Fields",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "uuid",
+   "fieldtype": "Data",
+   "label": "UUID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "invoice_type_code",
+   "fieldtype": "Data",
+   "label": "Invoice Type Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_type_transaction",
+   "fieldtype": "Data",
+   "label": "Invoice Type Transaction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_currency",
+   "fieldtype": "Data",
+   "label": "Tax Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_counter",
+   "fieldtype": "Int",
+   "label": "Invoice Counter",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_invoice_hash",
+   "fieldtype": "Data",
+   "label": "Previous Invoice Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Small Text",
+   "label": "QR Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_address_tab",
+   "fieldtype": "Tab Break",
+   "label": "Buyer"
+  },
+  {
+   "fieldname": "buyer_street_name",
+   "fieldtype": "Data",
+   "label": "Street Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_additional_street_name",
+   "fieldtype": "Data",
+   "label": "Additional Street Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_building_number",
+   "fieldtype": "Data",
+   "label": "Building Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_additional_number",
+   "fieldtype": "Data",
+   "label": "Additional Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_city",
+   "fieldtype": "Data",
+   "label": "City",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_provincestate",
+   "fieldtype": "Data",
+   "label": "Province/State",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_district",
+   "fieldtype": "Data",
+   "label": "District",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_country_code",
+   "fieldtype": "Data",
+   "label": "Country Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jofi",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_tab",
+   "fieldtype": "Tab Break",
+   "label": "Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supply_end_date",
+   "fieldtype": "Data",
+   "label": "Supply End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "allowance_vat_category_code",
+   "fieldtype": "Data",
+   "label": "Allowance VAT Category Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason_for_allowance",
+   "fieldtype": "Data",
+   "label": "Reason for Allowance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "code_for_allowance_reason",
+   "fieldtype": "Data",
+   "label": "Code for Allowance Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "charge_vat_category_code",
+   "fieldtype": "Data",
+   "label": "Charge VAT Category Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason_for_charge",
+   "fieldtype": "Data",
+   "label": "Reason for Charge",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_urzl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reason_for_charge_code",
+   "fieldtype": "Data",
+   "label": "Reason for Charge Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ytrn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sum_of_allowances",
+   "fieldtype": "Float",
+   "label": "Sum of Allowances",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sum_of_charges",
+   "fieldtype": "Float",
+   "label": "Sum of Charges",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bcho",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vat_exemption_reason_code",
+   "fieldtype": "Data",
+   "label": "VAT Exemption Reason Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vat_exemption_reason_text",
+   "fieldtype": "Small Text",
+   "label": "VAT Exemption Reason Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_mest",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_flxd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "prepayment_id",
+   "fieldtype": "Data",
+   "label": "Prepayment ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "prepayment_uuid",
+   "fieldtype": "Data",
+   "label": "Prepayment UUID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "prepayment_issue_date",
+   "fieldtype": "Date",
+   "label": "Prepayment Issue Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "prepayment_issue_time",
+   "fieldtype": "Data",
+   "label": "Prepayment Issue Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "prepayment_type_code",
+   "fieldtype": "Data",
+   "label": "Prepayment Type Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vdye",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_line_allowance_reason",
+   "fieldtype": "Data",
+   "label": "Invoice Line Allowance Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_line_allowance_reason_code",
+   "fieldtype": "Data",
+   "label": "Invoice Line Allowance Reason Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_tsfk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_mrvb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_kcpm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_line_charge_indicator",
+   "fieldtype": "Data",
+   "label": "Invoice Line Charge Indicator",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_line_charge_percentage",
+   "fieldtype": "Percent",
+   "label": "Invoice Line Charge Percentage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_line_charge_amount",
+   "fieldtype": "Float",
+   "label": "Invoice Line Charge Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_line_charge_base_amount",
+   "fieldtype": "Float",
+   "label": "Invoice Line Charge Base Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_line_charge_base_amount_reason",
+   "fieldtype": "Data",
+   "label": "Invoice Line Charge Base Amount Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_line_charge_base_amount_reason_code",
+   "fieldtype": "Data",
+   "label": "Invoice Line Charge Base Amount Reason Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_mryd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "prepayment_vat_category_taxable_amount",
+   "fieldtype": "Float",
+   "label": "Prepayment VAT Category Taxable Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "prepayment_vat_category_tax_amount",
+   "fieldtype": "Float",
+   "label": "Prepayment VAT Category Tax Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buyer_id_section",
+   "fieldtype": "Section Break",
+   "label": "Buyer ID"
+  },
+  {
+   "fieldname": "buyer_vat_registration_number",
+   "fieldtype": "Data",
+   "label": "Buyer VAT Registration Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "other_buyer_ids",
+   "fieldtype": "Table",
+   "label": "Other Buyer IDs",
+   "options": "Additional Seller IDs"
+  },
+  {
+   "fieldname": "buyer_address_details_section",
+   "fieldtype": "Section Break",
+   "label": "Buyer Address Details"
+  },
+  {
+   "fieldname": "payment_means_type_code",
+   "fieldtype": "Data",
+   "label": "Payment Means Type Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "document_level_section",
+   "fieldtype": "Section Break",
+   "label": "Document Level"
+  },
+  {
+   "default": "0",
+   "fieldname": "allowance_indicator",
+   "fieldtype": "Check",
+   "label": "Allowance Indicator",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "charge_indicator",
+   "fieldtype": "Check",
+   "label": "Charge Indicator",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_hash",
+   "fieldtype": "Data",
+   "label": "Invoice Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_4_tab",
+   "fieldtype": "Tab Break",
+   "label": "Validation"
+  },
+  {
+   "fieldname": "validation_section",
+   "fieldtype": "Section Break",
+   "label": "Validation"
+  },
+  {
+   "fieldname": "validation_messages",
+   "fieldtype": "Small Text",
+   "label": "Messages",
+   "read_only": 1
+  },
+  {
+   "fieldname": "validation_errors",
+   "fieldtype": "Small Text",
+   "label": "Errors",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Ready For Batch",
+   "fieldname": "integration_status",
+   "fieldtype": "Select",
+   "label": "Integration Status",
+   "options": "\nReady For Batch\nResend\nCorrected\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_5_tab",
+   "fieldtype": "Tab Break",
+   "label": "XML"
+  },
+  {
+   "fieldname": "xml_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "The generated and signed invoice XML sent to ZATCA",
+   "fieldname": "invoice_xml",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "ignore_xss_filter": 1,
+   "label": "Invoice XML",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "download_xml",
+   "fieldtype": "Button",
+   "label": "Download XML"
+  },
+  {
+   "default": "0",
+   "fieldname": "precomputed",
+   "fieldtype": "Check",
+   "label": "Precomputed"
+  },
+  {
+   "depends_on": "eval:doc.precomputed",
+   "fieldname": "precomputed_invoice",
+   "fieldtype": "Link",
+   "label": "Precomputed Invoice",
+   "options": "ZATCA Precomputed Invoice"
+  },
+  {
+   "fieldname": "column_break_daqi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "last_attempt",
+   "fieldtype": "Datetime",
+   "label": "Last Attempt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_asoj",
+   "fieldtype": "Column Break",
+   "is_virtual": 1
+  },
+  {
+   "fieldname": "qr_image",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "Qr Image"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-05-15 21:30:14.759058",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "Sales Invoice Additional Fields",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

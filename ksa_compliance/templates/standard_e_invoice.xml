@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+         xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+
+
+    <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
+    <!--Sales invoice ID-->
+    <cbc:ID>{{ invoice.id }}</cbc:ID>
+    <cbc:UUID>{{ invoice.uuid }}</cbc:UUID>
+    <cbc:IssueDate>{{ invoice.posting_date }}</cbc:IssueDate>
+    <cbc:IssueTime>{{ invoice.posting_time }}</cbc:IssueTime>
+    <cbc:InvoiceTypeCode name="0100000">{{ invoice.invoice_type_code }}</cbc:InvoiceTypeCode>
+    <!-- TODO: Invoice type transactions -->
+    <!-- Note unstructured text -->
+    <cbc:Note>This is a note</cbc:Note>
+    <cbc:DocumentCurrencyCode>{{ invoice.currency_code }}</cbc:DocumentCurrencyCode>
+    <cbc:TaxCurrencyCode>{{ invoice.tax_currency_code }}</cbc:TaxCurrencyCode>
+    {% if invoice.purchase_order_reference %}
+    <cac:OrderReference>
+        <cbc:ID>{{ invoice.purchase_order_reference }}</cbc:ID>
+    </cac:OrderReference>
+    {% endif %}
+    <!-- TODO: Discussion -->
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>ICV</cbc:ID>
+        <cbc:UUID>23</cbc:UUID>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>PIH</cbc:ID>
+        <cac:Attachment>
+            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">
+                NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==
+            </cbc:EmbeddedDocumentBinaryObject>
+        </cac:Attachment>
+    </cac:AdditionalDocumentReference>
+
+
+    <cac:Signature>
+        <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
+        <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod>
+    </cac:Signature>
+    <!-- Seller info -->
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <!-- Additional seller IDs -->
+            {% for it in seller.party_identifications %}
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="{{it.code}}">{{it.value}}</cbc:ID>
+            </cac:PartyIdentification>
+            {% endfor %}
+            <cac:PostalAddress>
+                <cbc:StreetName>{{ seller.street_name }}</cbc:StreetName>
+                <cbc:BuildingNumber>{{ seller.building_number }}</cbc:BuildingNumber>
+                <cbc:PlotIdentification>{{ seller.address_additional_number }}</cbc:PlotIdentification>
+                <cbc:CitySubdivisionName>{{ seller.city_subdivision_name }}</cbc:CitySubdivisionName>
+                <cbc:CityName>{{ seller.city_name }}</cbc:CityName>
+                <cbc:PostalZone>{{ seller.postal_code }}</cbc:PostalZone>
+                <cbc:CountrySubentity>{{ seller.province }}</cbc:CountrySubentity>
+                <cac:Country>
+                    <cbc:IdentificationCode>{{ seller.country_code }}</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <!-- Vat Registration Number -->
+                <cbc:CompanyID>{{business_settings.vat_registration_number}}</cbc:CompanyID>
+                <!-- TODO: Discussion-->
+                <cac:TaxScheme>
+                    <cbc:ID>VAT</cbc:ID>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>{{ business_settings.seller_name }}</cbc:RegistrationName>
+            </cac:PartyLegalEntity>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <!-- Buyer info -->
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            {% for it in buyer.party_identifications %}
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="{{ it.code }}">{{ it.value }}</cbc:ID>
+            </cac:PartyIdentification>
+            {% endfor %}
+            <cac:PostalAddress>
+                <cbc:StreetName>{{ buyer.street_name }}</cbc:StreetName>
+                <cbc:BuildingNumber>{{ buyer.building_number }}</cbc:BuildingNumber>
+                <cbc:PlotIdentification>{{ buyer.address_additional_number }}</cbc:PlotIdentification>
+                <cbc:CitySubdivisionName>{{ buyer.city_subdivision_name }}</cbc:CitySubdivisionName>
+                <cbc:CityName>{{ buyer.city_name }}</cbc:CityName>
+                <cbc:PostalZone>{{ buyer.postal_code }}</cbc:PostalZone>
+                <cbc:CountrySubentity>{{ buyer.province }}</cbc:CountrySubentity>
+                <cac:Country>
+                    <cbc:IdentificationCode>{{ buyer.country_code }}</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cac:TaxScheme>
+                    <!-- Vat Registration Number -->
+                    <cbc:CompanyID>{{ buyer.vat_id }}</cbc:CompanyID>
+                    <cbc:ID>VAT</cbc:ID>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>{{ buyer.buyer_name }}</cbc:RegistrationName>
+            </cac:PartyLegalEntity>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+
+    <!-- TODO: Discussion -->
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>{{ invoice.posting_date }}</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+
+    <!-- TODO: Discussion -->
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>Cash</cbc:PaymentMeansCode>
+        <cbc:PayeeFinancialAccount>SA000000000000001</cbc:PayeeFinancialAccount>
+    </cac:PaymentMeans>
+
+    <!-- TODO: Discussion -->
+    <cac:AllowanceCharge>
+        <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+        <cbc:AllowanceChargeReason>discount</cbc:AllowanceChargeReason>
+        <cbc:Amount currencyID="SAR">0.00</cbc:Amount>
+        <cac:TaxCategory>
+            <cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+            <cbc:Percent>15</cbc:Percent>
+            <cac:TaxScheme>
+                <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+            </cac:TaxScheme>
+        </cac:TaxCategory>
+    </cac:AllowanceCharge>
+
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="SAR">{{ invoice.total }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>S</cbc:ID>
+                <cbc:Percent>20</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:ID>VAT</cbc:ID>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="SAR">{{ invoice.total_taxes_and_charges }}</cbc:TaxAmount>
+    </cac:TaxTotal>
+
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="SAR">{{ invoice.total }}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="SAR">{{ invoice.total }}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="SAR">{{ invoice.grand_total }}</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="SAR">0.00</cbc:AllowanceTotalAmount>
+        <cbc:PayableAmount currencyID="SAR">{{ invoice.grand_total }}</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+
+    <!-- Invoice item lines -->
+    {% for item in invoice.item_lines %}
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:Note>Scratch on box</cbc:Note>
+        <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="SAR">{{ item.amount }}</cbc:LineExtensionAmount>
+        <!--TODO: Implement in python code-->
+        {%- for data in invoice.tax_data %}
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="SAR">{{ item.tax_amount }}
+            </cbc:TaxAmount>
+            <cbc:RoundingAmount currencyID="SAR">{{ item.total_amount }}</cbc:RoundingAmount>
+        </cac:TaxTotal>
+        {% endfor %}
+        <cac:Item>
+            <cbc:Description languageID="EN">{{ html2text(item.description or '') or item.item_name }}</cbc:Description>
+            <cbc:Name>{{ item.item_code }}</cbc:Name>
+            <cac:SellersItemIdentification>
+                <cbc:ID>JB007</cbc:ID>
+            </cac:SellersItemIdentification>
+            <cac:StandardItemIdentification>
+                <cbc:ID schemeID="GTIN" schemeAgencyID="9">{{ item.idx }}</cbc:ID>
+            </cac:StandardItemIdentification>
+
+            <ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                <cbc:ID schemeID="UN/ECE 5305" schemeAgencyID="6">S</cbc:ID>
+                <cbc:Percent>15</cbc:Percent>
+                <TaxScheme>
+                    <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">VAT</cbc:ID>
+                </TaxScheme>
+            </ClassifiedTaxCategory>
+
+        </cac:Item>
+
+        <cac:Price>
+            <cbc:PriceAmount currencyID="SAR">{{ item.price_list_rate or item.rate }}
+            </cbc:PriceAmount>
+            <cbc:BaseQuantity unitCode="C62">{{ item.qty }}</cbc:BaseQuantity>
+        </cac:Price>
+    </cac:InvoiceLine>
+    {% endfor %}
+</Invoice>

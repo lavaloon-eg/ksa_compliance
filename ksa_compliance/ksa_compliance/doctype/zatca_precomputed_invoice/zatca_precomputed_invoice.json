@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-18 02:56:06.239025",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "device_id",
+  "sales_invoice",
+  "invoice_counter",
+  "invoice_uuid",
+  "download_xml",
+  "column_break_isjc",
+  "previous_invoice_hash",
+  "invoice_hash",
+  "invoice_qr",
+  "invoice_xml"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "invoice_counter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Invoice Counter",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "invoice_uuid",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Invoice UUID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "previous_invoice_hash",
+   "fieldtype": "Data",
+   "label": "Previous Invoice Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_hash",
+   "fieldtype": "Data",
+   "label": "Invoice Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_qr",
+   "fieldtype": "Small Text",
+   "label": "Invoice QR",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_xml",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "ignore_xss_filter": 1,
+   "label": "Invoice XML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "download_xml",
+   "fieldtype": "Button",
+   "label": "Download XML"
+  },
+  {
+   "fieldname": "column_break_isjc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-21 08:58:02.883012",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Precomputed Invoice",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

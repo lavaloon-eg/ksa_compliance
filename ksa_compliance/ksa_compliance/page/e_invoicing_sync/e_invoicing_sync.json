@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2024-01-24 15:21:46.916126",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2024-02-29 14:08:56.224384",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "e-invoicing-sync",
+ "owner": "Administrator",
+ "page_name": "e-invoicing-sync",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "EInvoicing Sync"
+}

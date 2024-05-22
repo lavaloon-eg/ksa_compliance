@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:business_settings_reference",
+ "creation": "2024-02-27 16:43:30.925017",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "business_settings_reference",
+  "zatca_egs",
+  "column_break_ptqh",
+  "invoice_counter",
+  "previous_invoice_hash"
+ ],
+ "fields": [
+  {
+   "description": "Business Settings ID Reference",
+   "fieldname": "business_settings_reference",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "ZATCA Business Settings Reference",
+   "options": "ZATCA Business Settings",
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_ptqh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Number of invoices for each business settings doc.",
+   "fieldname": "invoice_counter",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Invoice Counter",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Previous invoice hash for each business settings doc",
+   "fieldname": "previous_invoice_hash",
+   "fieldtype": "Data",
+   "label": "Previous Invoice Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "zatca_egs",
+   "fieldtype": "Link",
+   "label": "ZATCA EGS",
+   "options": "ZATCA EGS"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-15 02:05:51.696912",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Invoice Counting Settings",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

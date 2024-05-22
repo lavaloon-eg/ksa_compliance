@@ -1,7 +1,7 @@
 [project]
 name = "ksa_compliance"
 authors = [
-    { name = "maged", email = "maged@lavaloon.com"}
+    { name = "LavaLoon", email = "info@lavaloon.com"}
 ]
 description = "KSA Compliance app for E-invoice"
 requires-python = ">=3.10"
@@ -9,6 +9,8 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
+    "result",
+    "pyqrcode~=1.2.1"
 ]
 
 [build-system]

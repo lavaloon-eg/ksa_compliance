@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-29 14:36:22.120690",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_reference",
+  "column_break_zzuv",
+  "invoice_additional_fields_reference",
+  "section_break_iwip",
+  "e_invoice_file",
+  "status",
+  "zatca_status",
+  "resend",
+  "zatca_message"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_reference",
+   "fieldtype": "Link",
+   "label": "Invoice Reference",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_zzuv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_additional_fields_reference",
+   "fieldtype": "Link",
+   "label": "Invoice Additional Fields Reference",
+   "options": "Sales Invoice Additional Fields",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_iwip",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "e_invoice_file",
+   "fieldtype": "Attach",
+   "label": "E-invoice File",
+   "read_only": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nPending\nResend\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
+   "read_only": 1
+  },
+  {
+   "fieldname": "zatca_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "ZATCA Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "zatca_message",
+   "fieldtype": "Long Text",
+   "label": "ZATCA Message",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.status == \"Resend\";",
+   "fieldname": "resend",
+   "fieldtype": "Button",
+   "label": "Resend"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-18 14:52:20.484325",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Integration Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
