@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.8.0
+
 * Add Qr Image to sales invoice additional fields, to be used in print format.
 * Create print format for all types of invoices
 * Add Purchase Order Reference to Zatca generated XML file.
