@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add Qr Image to sales invoice additional fields, to be used in print format.
+* Create print format for all types of invoices
+* Add Purchase Order Reference to Zatca generated XML file.
+
 ## 0.7.0
 
 * Ignore permissions when inserting ZATCA integration log
@@ -21,10 +25,6 @@ to a section with the version name.
   * Draft the updated documents to resend them again.
 * Update NULL last attempt in sales invoice additional fields set equal to modified.
 * Fix invoice submission error when lava_custom is not installed
-* Add Qr Image to sales invoice additional fields, to be used in print format.
-* Update Tax calculation for items with more quantities more than 1
-* Create print format for all types of invoices
-* Add Purchase Order Reference to Zatca generated XML file.
 
 ## 0.6.0
 
