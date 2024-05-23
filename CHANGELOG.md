@@ -9,6 +9,7 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Fix tax calculation to consider items quantities.
+* Remove references to 'Lava' from the app (mainly lava-cli to zatca-cli)
 
 ## 0.8.0
 

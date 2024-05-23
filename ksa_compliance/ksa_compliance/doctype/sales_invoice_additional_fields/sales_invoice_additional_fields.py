@@ -165,10 +165,10 @@ class SalesInvoiceAdditionalFields(Document):
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
         invoice_xml = generate_xml_file(einvoice.result, invoice_type)
-        result = cli.sign_invoice(settings.lava_zatca_path, invoice_xml, cert_path, settings.private_key_path)
+        result = cli.sign_invoice(settings.zatca_cli_path, invoice_xml, cert_path, settings.private_key_path)
 
         if settings.validate_generated_xml and not self.is_compliance_mode:
-            validation_result = cli.validate_invoice(settings.lava_zatca_path, result.signed_invoice_path,
+            validation_result = cli.validate_invoice(settings.zatca_cli_path, result.signed_invoice_path,
                                                      settings.cert_path, self.previous_invoice_hash)
             self.validation_messages = '\n'.join(validation_result.messages)
             self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
