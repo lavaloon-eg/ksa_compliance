@@ -32,8 +32,8 @@
   "other_ids",
   "integration_tab",
   "configuration_section",
-  "lava_zatca_path",
-  "check_lava_zatca",
+  "zatca_path",
+  "check_zatca",
   "validate_generated_xml",
   "column_break_cjdg",
   "fatoora_server_url",
@@ -204,12 +204,6 @@
    "read_only": 1
   },
   {
-   "description": "The path to the executable for lava-zatca CLI, e.g. <pre style=\"display:inline;\">/home/frappe/lava-zatca/bin/lava-zatca</pre>",
-   "fieldname": "lava_zatca_path",
-   "fieldtype": "Data",
-   "label": "Lava Zatca Path"
-  },
-  {
    "fetch_from": "company_address.address_title",
    "fetch_if_empty": 1,
    "fieldname": "company_unit",
@@ -299,12 +293,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.lava_zatca_path",
-   "fieldname": "check_lava_zatca",
-   "fieldtype": "Button",
-   "label": "Check Lava-ZATCA"
-  },
-  {
    "description": "Use the compliance request from onboarding to perform compliance checks for the different invoice types. This is a prerequisite to retrieving a production CSID",
    "fieldname": "perform_compliance_checks",
    "fieldtype": "Button",
@@ -316,11 +304,23 @@
    "fieldname": "validate_generated_xml",
    "fieldtype": "Check",
    "label": "Validate Generated XML"
+  },
+  {
+   "description": "The path to the executable for zatca CLI, e.g. <pre style=\"display:inline;\">/home/frappe/zatca/bin/zatca</pre>",
+   "fieldname": "zatca_path",
+   "fieldtype": "Data",
+   "label": "Zatca Path"
+  },
+  {
+   "depends_on": "eval:doc.zatca_path",
+   "fieldname": "check_zatca",
+   "fieldtype": "Button",
+   "label": "Check ZATCA"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-15 04:00:50.263078",
+ "modified": "2024-05-23 10:58:18.899865",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
