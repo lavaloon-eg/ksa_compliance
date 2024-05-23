@@ -7,7 +7,10 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-* remove all 'Lava' from the app
+
+* Fix tax calculation to consider items quantities.
+* Remove references to 'Lava' from the app (mainly lava-cli to zatca-cli)
+
 ## 0.8.0
 
 * Add Qr Image to sales invoice additional fields, to be used in print format.
