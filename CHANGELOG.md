@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix tax calculation to consider items quantities.
+
 ## 0.8.0
 
 * Add Qr Image to sales invoice additional fields, to be used in print format.
