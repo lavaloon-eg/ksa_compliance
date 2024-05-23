@@ -117,6 +117,6 @@ def calculate_tax_amount(self, method):
                 )
             if item_tax_template.disabled:
                 frappe.throw("One or more items has disabled tax template", title="Disabled tax template")
-            item_tax_rate = frappe.get_value("Item Tax Template Detail", {"parent": item.item_tax_template}, ['tax_rate'])
+            item_tax_rate = item_tax_template.taxes[0].tax_rate
             item.custom_tax_total = (item.amount * item_tax_rate) / 100
             item.custom_total_after_tax = item.amount + item.custom_tax_total
