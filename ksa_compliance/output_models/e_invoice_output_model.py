@@ -1147,6 +1147,13 @@ class Einvoice:
                              rules=["BR-KSA-F-04", "BR-45", "BR-DEC-19", "BR-S-08", "BR-E-08", "BR-Z-08", "BR-O-08",
                                     "BR-CO-18", "BT-116", "BG-23"],
                              parent="invoice")
+
+        self.get_text_value(field_name="po_no",
+                            source_doc=self.sales_invoice_doc,
+                            required=False,
+                            xml_name="purchase_order_reference",
+                            rules=["BR-KSA-F-06"],
+                            parent="invoice")
         try:
             self.get_float_child_value(field_name="taxes_rate",
                                        field_value=self.sales_invoice_doc.taxes[0].rate,
