@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Fix tax calculation to consider items quantities.
 ## 0.7.0
 
 * Ignore permissions when inserting ZATCA integration log
