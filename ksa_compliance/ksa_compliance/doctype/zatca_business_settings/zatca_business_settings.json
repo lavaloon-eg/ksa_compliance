@@ -32,8 +32,8 @@
   "other_ids",
   "integration_tab",
   "configuration_section",
-  "zatca_path",
-  "check_zatca",
+  "zatca_cli_path",
+  "check_zatca_cli",
   "validate_generated_xml",
   "column_break_cjdg",
   "fatoora_server_url",
@@ -306,21 +306,21 @@
    "label": "Validate Generated XML"
   },
   {
-   "description": "The path to the executable for zatca CLI, e.g. <pre style=\"display:inline;\">/home/frappe/zatca/bin/zatca</pre>",
-   "fieldname": "zatca_path",
+   "description": "The path to the executable for ZATCA CLI, e.g. <pre style=\"display:inline;\">/home/frappe/zatca_cli/bin/zatca_cli</pre>",
+   "fieldname": "zatca_cli_path",
    "fieldtype": "Data",
    "label": "Zatca Path"
   },
   {
-   "depends_on": "eval:doc.zatca_path",
-   "fieldname": "check_zatca",
+   "depends_on": "eval:doc.zatca_cli_path",
+   "fieldname": "check_zatca_cli",
    "fieldtype": "Button",
-   "label": "Check ZATCA"
+   "label": "Check ZATCA CLI"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-23 10:58:18.899865",
+ "modified": "2024-05-23 16:58:06.691718",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",

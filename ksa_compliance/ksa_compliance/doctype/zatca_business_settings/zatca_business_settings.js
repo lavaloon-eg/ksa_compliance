@@ -10,13 +10,13 @@ frappe.ui.form.on("ZATCA Business Settings", {
     company: function (frm) {
         filter_company_address(frm);
     },
-    check_zatca: function (frm) {
+    check_zatca_cli: function (frm) {
         frappe.call({
             freeze: true,
             freeze_message: __('Please wait...'),
             method: "ksa_compliance.zatca_cli.version",
             args: {
-                zatca_path: frm.doc.zatca_path,
+                zatca_cli_path: frm.doc.zatca_cli_path,
             }
         })
     },
