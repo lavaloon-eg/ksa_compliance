@@ -57,9 +57,6 @@ def create_sales_invoice_additional_fields_doctype(self, method):
             # EGS Setting overrides company-wide setting
             is_live_sync = egs_settings.is_live_sync
 
-    if self.customer_address:
-        si_additional_fields_doc.set_buyer_address(cast(Address, frappe.get_doc("Address", self.customer_address)))
-
     # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
     if is_live_sync:
         si_additional_fields_doc.insert(ignore_permissions=True)
