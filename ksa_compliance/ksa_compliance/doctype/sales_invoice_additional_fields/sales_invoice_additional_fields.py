@@ -6,7 +6,7 @@ import base64
 import json
 import uuid
 from io import BytesIO
-from typing import cast, Optional
+from typing import cast, Optional, Literal
 
 import frappe
 import pyqrcode
@@ -260,7 +260,7 @@ class SalesInvoiceAdditionalFields(Document):
     def _set_buyer_details(self, sales_invoice: SalesInvoice):
         customer_doc = cast(Customer, frappe.get_doc("Customer", sales_invoice.customer))
 
-        self.buyer_vat_registration_number = customer_doc.custom_vat_registration_number
+        self.buyer_vat_registration_number = customer_doc.get("custom_vat_registration_number")
         if sales_invoice.customer_address:
             self._set_buyer_address(cast(Address, frappe.get_doc("Address", sales_invoice.customer_address)))
 
@@ -375,8 +375,11 @@ class SalesInvoiceAdditionalFields(Document):
             return img_str
 
 
-def get_integration_status(code) -> str:
-    status_map = {
+IntegrationStatus = Literal["Resend", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+
+
+def get_integration_status(code: int) -> IntegrationStatus:
+    status_map = cast(dict[int, IntegrationStatus], {
         200: "Accepted",
         202: "Accepted with warnings",
         303: "Clearance switched off",
@@ -387,7 +390,7 @@ def get_integration_status(code) -> str:
         500: "Resend",
         503: "Resend",
         504: "Resend"
-    }
+    })
     if code and code in status_map:
         return status_map[code]
     else:
