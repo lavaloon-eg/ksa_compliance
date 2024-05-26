@@ -10,6 +10,7 @@ import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
 from frappe import _
+from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from result import is_err
@@ -24,12 +25,15 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
     ZATCABusinessSettings)
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
+from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
+    ZATCAPrecomputedInvoice
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
 import base64
 from io import BytesIO
 import json
 import pyqrcode
+
 
 class SalesInvoiceAdditionalFields(Document):
     # begin: auto-generated types
@@ -39,7 +43,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -57,7 +62,9 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected",
+            "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -105,6 +112,27 @@ class SalesInvoiceAdditionalFields(Document):
     @property
     def is_compliance_mode(self) -> bool:
         return self.send_mode == ZatcaSendMode.Compliance
+
+    def use_precomputed_invoice(self, precomputed_invoice: ZATCAPrecomputedInvoice):
+        self.precomputed = True
+        self.precomputed_invoice = precomputed_invoice.name
+        self.invoice_counter = int(precomputed_invoice.invoice_counter)
+        self.uuid = precomputed_invoice.invoice_uuid
+        self.previous_invoice_hash = precomputed_invoice.previous_invoice_hash
+        self.invoice_hash = precomputed_invoice.invoice_hash
+        self.invoice_qr = precomputed_invoice.invoice_qr
+        self.invoice_xml = precomputed_invoice.invoice_xml
+
+    def set_buyer_address(self, address: Address):
+        self.buyer_additional_number = "not available for now"
+        self.buyer_street_name = address.address_line1
+        self.buyer_additional_street_name = address.address_line2
+        self.buyer_building_number = address.get("custom_building_number")
+        self.buyer_city = address.city
+        self.buyer_postal_code = address.pincode
+        self.buyer_district = address.get("custom_area")
+        self.buyer_province_state = address.state
+        self.buyer_country_code = address.country
 
     def get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
         invoice_type: InvoiceType
