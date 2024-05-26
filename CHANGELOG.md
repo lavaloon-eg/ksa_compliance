@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Create ZATCA phase 1 business settings.
 ## 0.8.0
 
 * Add Qr Image to sales invoice additional fields, to be used in print format.
