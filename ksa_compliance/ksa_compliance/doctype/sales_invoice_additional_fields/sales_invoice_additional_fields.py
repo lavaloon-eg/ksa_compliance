@@ -2,20 +2,23 @@
 # For license information, please see license.txt
 from __future__ import annotations
 
+import base64
 import json
 import uuid
+from io import BytesIO
 from typing import cast, Optional
 
 import frappe
+import pyqrcode
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
 from frappe import _
 from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
+from frappe.utils import now_datetime
 from result import is_err
 
-from frappe.utils import getdate, now_datetime
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
@@ -29,10 +32,6 @@ from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_preco
     ZATCAPrecomputedInvoice
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
-import base64
-from io import BytesIO
-import json
-import pyqrcode
 
 
 class SalesInvoiceAdditionalFields(Document):
@@ -187,9 +186,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.previous_invoice_hash = pre_invoice_hash
 
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
-        # TODO: Revisit this logging
-        frappe.log_error("ZATCA Result LOG", message=json.dumps(einvoice.result, indent=2))
-        frappe.log_error("ZATCA Error LOG", message=json.dumps(einvoice.error_dic, indent=2))
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
         invoice_xml = generate_xml_file(einvoice.result, invoice_type)

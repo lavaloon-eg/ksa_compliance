@@ -9,6 +9,7 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Add ZATCA workspace and dashboard
+* Remove spurious ZATCA error logs (useless results/validation errors)
 
 ## 0.10.1
 
