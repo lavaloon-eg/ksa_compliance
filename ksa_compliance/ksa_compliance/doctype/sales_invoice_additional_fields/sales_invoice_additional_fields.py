@@ -139,22 +139,19 @@ class SalesInvoiceAdditionalFields(Document):
         if self.precomputed:
             return
 
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
+        if not settings:
+            return
+
         sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
         self.uuid = str(uuid.uuid4())
         self.tax_currency = "SAR"  # Set as "SAR" as a default tax currency value
         self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
+        self.invoice_type_transaction = "0100000" if self._get_invoice_type(settings) == 'Standard' else '0200000'
+        self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
         self._set_buyer_details(sales_invoice)
-        self._set_invoice_type_code()
         self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
-
-    def after_insert(self):
-        if self.precomputed:
-            return
-
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        if not settings:
-            return
 
         self._prepare_for_zatca(settings)
 
@@ -189,7 +186,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
         self.invoice_xml = result.signed_invoice_xml
-        self.save()
 
         # To update counting settings data
         logger.info(f"Changing invoice counter, hash from: {pre_invoice_counter}, {pre_invoice_hash} -> "
@@ -222,31 +218,14 @@ class SalesInvoiceAdditionalFields(Document):
         return self._send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings.fatoora_server_url,
                                       token, secret)
 
-    def _set_invoice_type_code(self):
-        """
-        A code of the invoice subtype and invoices transactions.
-        The invoice transaction code must exist and respect the following structure:
-        - [NNPNESB] where
-        - NN (positions 1 and 2) = invoice subtype: - 01 for tax invoice - 02 for simplified tax invoice.
-        - P (position 3) = 3rd Party invoice transaction, 0 for false, 1 for true
-        - N (position 4) = Nominal invoice transaction, 0 for false, 1 for true
-        - E (position 5) = Exports invoice transaction, 0 for false, 1 for true
-        - S (position 6) = Summary invoice transaction, 0 for false, 1 for true
-        - B (position 7) = Self billed invoice. Self-billing is not allowed (KSA-2, position 7 cannot be ""1"") for
-        export invoices (KSA-2, position 5 = 1).
-        """
-        # Basic Simplified or Tax invoice
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        self.invoice_type_transaction = "0100000" if self._get_invoice_type(settings) == 'Standard' else '0200000'
+    def _get_invoice_type_code(self, invoice_doc: SalesInvoice) -> str:
+        if invoice_doc.is_debit_note:
+            return "383"
 
-        is_debit, is_credit = frappe.db.get_value("Sales Invoice", self.sales_invoice,
-                                                  ["is_debit_note", "is_return"])
-        if is_debit:
-            self.invoice_type_code = "383"
-        elif is_credit:
-            self.invoice_type_code = "381"
-        else:
-            self.invoice_type_code = "388"
+        if invoice_doc.is_return:
+            return "381"
+
+        return "388"
 
     def _get_payment_means_type_code(self, invoice: SalesInvoice) -> Optional[str]:
         # An invoice can have multiple modes of payment, but we currently only support one. Therefore, we retrieve the
