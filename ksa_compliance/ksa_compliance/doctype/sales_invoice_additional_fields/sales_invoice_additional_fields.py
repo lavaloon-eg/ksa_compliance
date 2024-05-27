@@ -141,11 +141,11 @@ class SalesInvoiceAdditionalFields(Document):
 
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
         if not settings:
-            return
+            frappe.throw(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
 
         sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
         self.uuid = str(uuid.uuid4())
-        self.tax_currency = "SAR"  # Set as "SAR" as a default tax currency value
+        self.tax_currency = "SAR"  # Review: Set as "SAR" as a default tax currency value
         self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = "0100000" if self._get_invoice_type(settings) == 'Standard' else '0200000'
