@@ -7,10 +7,9 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-* Update item tax calculation to use sales taxes and charges if item has no item tax template.
-
 * Create ZATCA phase 1 business settings.
 * Add phase 1 QR code generator jinja function: `get_zatca_phase_1_qr_for_invoice`, which accepts a single parameter: `invoice_name`
+* Update item tax calculation to use sales taxes and charges if item has no item tax template.
 
 ## 0.9.0
 
