@@ -43,7 +43,6 @@ class ZATCABusinessSettings(Document):
         district: DF.Data | None
         enable_zatca_integration: DF.Check
         fatoora_server_url: DF.Data | None
-        lava_zatca_path: DF.Data | None
         other_ids: DF.Table[AdditionalSellerIDs]
         postal_code: DF.Data | None
         production_request_id: DF.Data | None
@@ -57,6 +56,7 @@ class ZATCABusinessSettings(Document):
         type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
         validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
+        zatca_cli_path: DF.Data | None
     # end: auto-generated types
 
     def after_insert(self):
@@ -120,8 +120,8 @@ class ZATCABusinessSettings(Document):
         compliance request ID, as well as credentials (security token and secret).
 
         This is meant for consumption from Desk. It displays an error or a success dialog."""
-        if not self.lava_zatca_path:
-            frappe.throw(_("Please configure 'Lava Zatca Path'"))
+        if not self.zatca_cli_path:
+            frappe.throw(_("Please configure 'Zatca CLI Path'"))
 
         self._throw_if_api_config_missing()
 
@@ -204,7 +204,7 @@ class ZATCABusinessSettings(Document):
                                         context=self.csr_config)
 
         logger.info(f"CSR config: {config}")
-        return cli.generate_csr(self.lava_zatca_path, self.vat_registration_number, config)
+        return cli.generate_csr(self.zatca_cli_path, self.vat_registration_number, config)
 
     def _format_address(self) -> str:
         """

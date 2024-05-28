@@ -66,14 +66,14 @@ class ValidationResult:
 
 
 @frappe.whitelist()
-def version(zatca_path: str) -> NoReturn:
+def version(zatca_cli_path: str) -> NoReturn:
     """Shows a desk dialog with the version of the Lava ZATCA CLI if found, or an error otherwise"""
-    result = run_command(zatca_path, ['-v'])
+    result = run_command(zatca_cli_path, ['-v'])
     result.throw_if_failure()
-    frappe.msgprint(result.msg, _("Lava Zatca"))
+    frappe.msgprint(result.msg, _("Zatca CLI"))
 
 
-def generate_csr(lava_zatca_path: str, vat_registration_number: str, config: str) -> CsrResult:
+def generate_csr(zatca_cli_path: str, vat_registration_number: str, config: str) -> CsrResult:
     """
     Generates a CSR for a given VAT registration number. The VAT registration is used to name the resulting
     CSR and private key files.
@@ -85,7 +85,7 @@ def generate_csr(lava_zatca_path: str, vat_registration_number: str, config: str
     config_path = write_temp_file(config, f'csr-{vat_registration_number}.properties')
     csr_path = f'{vat_registration_number}.csr'
     private_key_path = f'{vat_registration_number}.privkey'
-    result = run_command(lava_zatca_path, ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path])
+    result = run_command(zatca_cli_path, ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path])
     logger.info(result.msg)
     result.throw_if_failure()
     with open(csr_path, 'rt') as file:
@@ -93,11 +93,11 @@ def generate_csr(lava_zatca_path: str, vat_registration_number: str, config: str
     return CsrResult(csr, csr_path, private_key_path)
 
 
-def sign_invoice(lava_zatca_path: str, invoice_xml: str, cert_path: str, private_key_path: str) -> SigningResult:
-    base_path = os.path.normpath(os.path.join(os.path.dirname(lava_zatca_path), '../'))
+def sign_invoice(zatca_cli_path: str, invoice_xml: str, cert_path: str, private_key_path: str) -> SigningResult:
+    base_path = os.path.normpath(os.path.join(os.path.dirname(zatca_cli_path), '../'))
     invoice_path = write_temp_file(invoice_xml, "invoice.xml")
     signed_invoice_path = get_temp_path('signed_invoice.xml')
-    result = run_command(lava_zatca_path,
+    result = run_command(zatca_cli_path,
                          ['sign', '-b', base_path, '-o', signed_invoice_path, '-c', cert_path,
                           '-k', private_key_path, invoice_path])
     logger.info(result.msg)
@@ -107,17 +107,17 @@ def sign_invoice(lava_zatca_path: str, invoice_xml: str, cert_path: str, private
     return SigningResult(signed_invoice, signed_invoice_path, result.data['hash'], result.data['qrCode'])
 
 
-def validate_invoice(lava_zatca_path: str, invoice_path: str, cert_path: str,
+def validate_invoice(zatca_cli_path: str, invoice_path: str, cert_path: str,
                      previous_invoice_hash: str) -> ValidationResult:
-    base_path = os.path.normpath(os.path.join(os.path.dirname(lava_zatca_path), '../'))
-    result = run_command(lava_zatca_path, ['validate', '-b', base_path, '-c', cert_path, '-p',
-                                           previous_invoice_hash, invoice_path])
+    base_path = os.path.normpath(os.path.join(os.path.dirname(zatca_cli_path), '../'))
+    result = run_command(zatca_cli_path, ['validate', '-b', base_path, '-c', cert_path, '-p',
+                                          previous_invoice_hash, invoice_path])
     logger.info(result.msg)
     result.throw_if_failure()
     return ValidationResult(result.data['messages'], result.data['errorsAndWarnings'])
 
 
-def run_command(zatca_path: str, args: List[str]) -> ZatcaResult:
+def run_command(zatca_cli_path: str, args: List[str]) -> ZatcaResult:
     """Runs a ZATCA command (using lava-zatca CLI) and parses its JSON output. Output is in the form:
     { 'msg': '...',
       'errors': ['...', '...']
@@ -130,10 +130,10 @@ def run_command(zatca_path: str, args: List[str]) -> ZatcaResult:
     in response to failures. The user has to apply the recommended fixes manually, so we just show the messages and
     errors as is.
     """
-    if not os.path.isfile(zatca_path):
-        frappe.throw(_("{0} does not exist or is not a file").format(zatca_path))
+    if not os.path.isfile(zatca_cli_path):
+        frappe.throw(_("{0} does not exist or is not a file").format(zatca_cli_path))
 
-    full_args = [zatca_path] + args
+    full_args = [zatca_cli_path] + args
     logger.info(f'Running: {full_args}')
     proc = subprocess.run(full_args, capture_output=True)
     try:
