@@ -73,6 +73,7 @@ def create_sales_invoice_additional_fields_doctype(self, method):
             "buyer_postal_code": customer_address_doc.get("pincode"),
             "buyer_district": customer_address_doc.get("custom_area"),
             "buyer_country_code": customer_address_doc.get("country"),
+            "buyer_province_state": customer_address_doc.get("state"),
         }
         si_additional_fields_doc.update(address_info)
 
