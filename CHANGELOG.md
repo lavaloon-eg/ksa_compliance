@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add phase 1 QR code generator jinja function: `get_zatca_phase_1_qr_for_invoice`, which accepts a single parameter: 
+  `invoice_name`
+
 ## 0.9.0
 
 * Fix tax calculation to consider items quantities.
