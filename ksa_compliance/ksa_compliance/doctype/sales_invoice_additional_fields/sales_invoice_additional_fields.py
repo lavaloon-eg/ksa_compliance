@@ -51,7 +51,7 @@ class SalesInvoiceAdditionalFields(Document):
         buyer_country_code: DF.Data | None
         buyer_district: DF.Data | None
         buyer_postal_code: DF.Data | None
-        buyer_provincestate: DF.Data | None
+        buyer_province_state: DF.Data | None
         buyer_street_name: DF.Data | None
         buyer_vat_registration_number: DF.Data | None
         charge_indicator: DF.Check

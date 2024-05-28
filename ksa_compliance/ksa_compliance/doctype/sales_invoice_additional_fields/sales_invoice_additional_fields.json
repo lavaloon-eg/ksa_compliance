@@ -35,7 +35,7 @@
   "buyer_additional_number",
   "buyer_city",
   "buyer_postal_code",
-  "buyer_provincestate",
+  "buyer_province_state",
   "buyer_district",
   "buyer_country_code",
   "invoice_tab",
@@ -186,12 +186,6 @@
    "fieldname": "buyer_postal_code",
    "fieldtype": "Data",
    "label": "Postal Code",
-   "read_only": 1
-  },
-  {
-   "fieldname": "buyer_provincestate",
-   "fieldtype": "Data",
-   "label": "Province/State",
    "read_only": 1
   },
   {
@@ -565,12 +559,18 @@
    "fieldtype": "Data",
    "is_virtual": 1,
    "label": "Qr Image"
+  },
+  {
+   "fieldname": "buyer_province_state",
+   "fieldtype": "Data",
+   "label": "Province/State",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-15 21:30:14.759058",
+ "modified": "2024-05-28 14:33:26.357406",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
