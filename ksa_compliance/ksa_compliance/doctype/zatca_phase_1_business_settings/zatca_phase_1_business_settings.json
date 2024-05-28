@@ -31,7 +31,7 @@
    "fieldname": "type_of_transaction",
    "fieldtype": "Select",
    "label": "Type Of Transaction",
-   "options": "Simplified\nStandard Tax Invoice\nBoth"
+   "options": "Simplified Tax Invoice\nStandard Tax Invoice\nBoth"
   },
   {
    "fieldname": "column_break_gigi",
@@ -55,7 +55,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-23 15:43:02.275748",
+ "modified": "2024-05-27 14:19:11.999170",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Phase 1 Business Settings",
@@ -70,6 +70,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
    "share": 1,
    "write": 1
   }
