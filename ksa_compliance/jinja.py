@@ -4,9 +4,8 @@ from base64 import b64encode
 from io import BytesIO
 from typing import cast
 
-import pyqrcode
-
 import frappe
+import pyqrcode
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe.utils.data import get_time, getdate
 
