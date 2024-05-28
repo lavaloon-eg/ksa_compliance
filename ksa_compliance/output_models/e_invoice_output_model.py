@@ -880,7 +880,7 @@ class Einvoice:
         self.get_text_value(field_name="buyer_province_state",
                             source_doc=self.additional_fields_doc,
                             required=False,
-                            xml_name="CountrySubentity",
+                            xml_name="province",
                             min_length=0,
                             max_length=127,
                             rules=["BR-KSA-F-06", "BT-54", "BG-8"],
