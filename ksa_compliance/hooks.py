@@ -61,10 +61,9 @@ doctype_js = {"Customer": "public/js/customer.js"}
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# "methods": "ksa_compliance.utils.jinja_methods",
-# "filters": "ksa_compliance.utils.jinja_filters"
-# }
+jinja = {
+    "methods": "ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice",
+}
 
 # Installation
 # ------------
