@@ -1,9 +1,9 @@
+from datetime import date
 from typing import cast
 
 import frappe
-from datetime import date
-
-from frappe.contacts.doctype.address.address import Address
+import frappe.utils.background_jobs
+from result import is_ok
 
 from ksa_compliance import logger
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import \
@@ -27,7 +27,7 @@ def clear_additional_fields_ignore_list() -> None:
 
 
 def create_sales_invoice_additional_fields_doctype(self, method):
-    if not should_enable_zatca_for_invoice(self.name):
+    if not _should_enable_zatca_for_invoice(self.name):
         logger.info(f"Skipping additional fields for {self.name} because it's before start date")
         return
 
@@ -42,6 +42,8 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         return
 
     si_additional_fields_doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc("Sales Invoice Additional Fields"))
+    # We do not expect people to create SIAF manually, so nobody has permission to create one
+    si_additional_fields_doc.flags.ignore_permissions = True
     si_additional_fields_doc.sales_invoice = self.name
 
     precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
@@ -57,18 +59,23 @@ def create_sales_invoice_additional_fields_doctype(self, method):
             # EGS Setting overrides company-wide setting
             is_live_sync = egs_settings.is_live_sync
 
-    # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
+    si_additional_fields_doc.integration_status = "Ready For Batch"
+    si_additional_fields_doc.insert()
     if is_live_sync:
-        si_additional_fields_doc.insert(ignore_permissions=True)
-        # We need to commit here to ensure saving a draft invoice in live mode before sending it to zatca to handle the Resend scenario.
-        frappe.db.commit()
-        si_additional_fields_doc.submit()
-    else:
-        si_additional_fields_doc.integration_status = "Ready For Batch"
-        si_additional_fields_doc.insert(ignore_permissions=True)
+        # We're running in the context of invoice submission (on_submit hook). We only want to run our ZATCA logic if
+        # the invoice submits successfully after on_submit is run successfully from all apps.
+        frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=si_additional_fields_doc,
+                                             enqueue_after_commit=True)
 
 
-def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
+def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
+    logger.info(f'Submitting {doc.name}')
+    result = doc.submit_to_zatca()
+    message = result.ok_value if is_ok(result) else result.err_value
+    logger.info(f'Submission result: {message}')
+
+
+def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     start_date = date(2024, 3, 1)
 
     if frappe.db.table_exists('Vehicle Booking Item Info'):

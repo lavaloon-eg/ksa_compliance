@@ -10,6 +10,60 @@ to a section with the version name.
 
 * Add ZATCA workspace and dashboard
 * Remove spurious ZATCA error logs (useless results/validation errors)
+* Rework submission to ZATCA to avoid committing partial invoices
+
+This rework addresses a problem in live sync mode, where we immediately submit
+invoices to ZATCA upon invoice submission.
+
+Here's how it worked before this change. When an invoice is submitted
+(`on_submit` hook), we create an associated 'Sales Invoice Additional Fields'
+document (SIAF for short) which produces the signed XML that'll be sent to
+ZATCA. If live sync is enabled, we immediately committed at this point
+before submitting the SIAF, which submits it to ZATCA in the `before_submit`
+method. The db commit was added as part of handling the 'Resend' scenario in
+ZATCA where there's an internal ZATCA error requiring us to resend the XML as
+is later. In that case, we wanted to keep the SIAF as draft, which we did by
+raising an exception in `before_submit`. The database commit was added to
+preserve the SIAF, as frappe rolls back the transaction when an exception is
+raised.
+
+During frappe's review, they pointed out that committing during the `on_submit`
+hook is problematic, since it may involve other apps with hooks that haven't
+been called yet. These apps may raise an error that requires rolling back the
+invoice submission transaction, only that won't work because we've already
+committed.
+
+The old logic has several issues:
+* It makes submitting the document submit to ZATCA. Aborting a document
+submission requires raising an exception, which gave us no choice other than to
+make the problematic commit or switch some tables to MyISAM or Aria
+non-transactional engines. If we reverse the notion--i.e. we submit to ZATCA,
+and only if that results in a non-Resend status, we submit the document--we
+no longer have to raise an exception to abort anything. Submission only happens
+when everything's fine, and no custom logic is needed in `before_submit`.
+* It runs too much logic in the context of invoice submission. Initially, we
+thought it would be a good idea to abort invoice submission completely if it
+failed ZATCA integration. However, as the ZATCA integration got more complicated
+(e.g. resend), this behavior no longer makes sense. If an ERPNext invoice is
+submitted successfully, it should go through. If ZATCA integration fails later
+(e.g. due to a misconfiguration), the invoice can be corrected after
+fixing the configuration with debit/credit notes.
+
+The new behavior is as follows:
+
+Upon invoice submission, we insert the SIAF as "Ready for Batch". If live sync
+is enabled, we queue the submission to ZATCA `submit_to_zatca` after commit
+(`enqueue_after_commit=True`). If the transaction rolls back, we're fine because
+the ZATCA submission won't run. If the invoice submission commits, our ZATCA
+submission logic doesn't run in the context of a document submission, so it
+doesn't raise any exceptions. It chugs along, creating logs, updating itself
+with the result received from ZATCA. If the integration status is anything
+other than 'Resend', it submits itself.
+
+As part of this new behavior, we're removing the permission to "Submit" SIAF
+from Desk from users. We'll likely add a new action on the SIAF to submit to
+ZATCA at some point. For now, such cases are covered by running the sync process
+manually from the 'EInvoicing Sync' page.
 
 ## 0.10.1
 
