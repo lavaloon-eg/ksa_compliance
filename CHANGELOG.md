@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.10.1
+
 * Fix jinja error if taxes are not defined for any lines in the invoice
     * Previously, our tax logic only added the relevant fields if tax details were found in the item wise tax details on
       taxes and charges template for the invoice. That meant if this info was missing for any reason, our template would
