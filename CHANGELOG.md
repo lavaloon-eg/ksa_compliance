@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add ZATCA workspace and dashboard
+
 ## 0.10.1
 
 * Fix jinja error if taxes are not defined for any lines in the invoice
