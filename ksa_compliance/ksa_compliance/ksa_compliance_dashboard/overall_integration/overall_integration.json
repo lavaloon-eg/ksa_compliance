@@ -1,0 +1,41 @@
+{
+ "cards": [
+  {
+   "card": "Accepted Invoices"
+  },
+  {
+   "card": "Rejected Invoices"
+  },
+  {
+   "card": "Accepted With Warnings invoices"
+  },
+  {
+   "card": "Resend Invoices"
+  },
+  {
+   "card": "Ready For Batch Invoices"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Integration Status",
+   "width": "Full"
+  },
+  {
+   "chart": "Invoice Integration Statistics",
+   "width": "Full"
+  }
+ ],
+ "creation": "2024-05-29 17:29:49.734729",
+ "dashboard_name": "OverAll Integration",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2024-05-29 17:42:14.085299",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "OverAll Integration",
+ "owner": "Administrator"
+}

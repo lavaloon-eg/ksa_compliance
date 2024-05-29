@@ -1,0 +1,43 @@
+{
+ "based_on": "",
+ "chart_name": "Integration Status",
+ "chart_type": "Group By",
+ "creation": "2024-05-29 17:28:56.443032",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "ZATCA Integration Log",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[]",
+ "group_by_based_on": "status",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2024-05-29 17:34:59.083435",
+ "modified": "2024-05-29 17:40:38.015281",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "Integration Status",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ],
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Pie",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}
