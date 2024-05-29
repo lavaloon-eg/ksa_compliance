@@ -11,6 +11,7 @@ to a section with the version name.
 * Add phase 1 QR code generator jinja function: `get_zatca_phase_1_qr_for_invoice`, which accepts a single parameter: `invoice_name`
 * Fix `Sales Invoice Additional Fields` not created for standard tax invoices
 * Update item tax calculation to use sales taxes and charges if item has no item tax template.
+* Rename KSA Simplfied print format to ZATCA Phase 2 Print Format.
 
 ## 0.9.0
 
