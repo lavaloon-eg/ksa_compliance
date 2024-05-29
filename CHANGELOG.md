@@ -8,10 +8,18 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix jinja error if taxes are not defined for any lines in the invoice
+    * Previously, our tax logic only added the relevant fields if tax details were found in the item wise tax details on
+      taxes and charges template for the invoice. That meant if this info was missing for any reason, our template would
+      raise an excpetion when trying to round the non-existent "total_amount" for the item line
+    * We now properly set the tax percent and tax amount to 0 if they're missing
+    * This will generate a proper invoice which will later fail ZATCA validation (e.g. during compliance)
+
 ## 0.10.0
 
 * Create ZATCA phase 1 business settings.
-* Add phase 1 QR code generator jinja function: `get_zatca_phase_1_qr_for_invoice`, which accepts a single parameter: `invoice_name`
+* Add phase 1 QR code generator jinja function: `get_zatca_phase_1_qr_for_invoice`, which accepts a single
+  parameter: `invoice_name`
 * Fix `Sales Invoice Additional Fields` not created for standard tax invoices
 * Update item tax calculation to use sales taxes and charges if item has no item tax template.
 * Rename KSA Simplfied print format to ZATCA Phase 2 Print Format.
@@ -36,25 +44,25 @@ to a section with the version name.
 * Autoname method for ZATCA integration log.
 * Add Last Attempt field in additional field doctype.
 * Update incorrect sales invoice additional fields.
-  * Set blank integration status to Resend.
-  * Draft the updated documents to resend them again.
+    * Set blank integration status to Resend.
+    * Draft the updated documents to resend them again.
 * Update NULL last attempt in sales invoice additional fields set equal to modified.
 * Fix invoice submission error when lava_custom is not installed
 
 ## 0.6.0
 
 * Add support for precomputed invoices from POS devices
-* Make precomputed invoice and sales invoice additional fields UUID unique to safeguard against bugs causing double ZATCA submissions
+* Make precomputed invoice and sales invoice additional fields UUID unique to safeguard against bugs causing double
+  ZATCA submissions
 
 ## 0.5.0
 
 * Update e-invoice sync patch
-  * Change timeout to 58 minutes so that we can run it hourly
-  * Run it hourly
-  * Sort additional fields by creation (oldest first)
-  * Run in batches (of 100 by default)
-  * Add more logging
-
+    * Change timeout to 58 minutes so that we can run it hourly
+    * Run it hourly
+    * Sort additional fields by creation (oldest first)
+    * Run in batches (of 100 by default)
+    * Add more logging
 
 ## 0.4.0
 
@@ -71,7 +79,7 @@ to a section with the version name.
 * Update invoice counter/hash logic to use locking to guarantee serialization
 * Fix buyer details street name being included in the XML if not defined (used to insert an error as the street name)
 * Fix payable amount in XML to be set using grand total.
-* Adding Tax Total with Subtotal in XML To handle sending tax currency code.  
+* Adding Tax Total with Subtotal in XML To handle sending tax currency code.
 * Adding integration status field in sales invoice additional fields depends on response status code.
 * Set invoice hash in sales invoice additional fields read only.
 * E Invoicing Sync page to be shown in search bar.

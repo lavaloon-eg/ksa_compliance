@@ -20,17 +20,24 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
                 WHERE parent = %(invoice_id)s
             """, {"invoice_id": invoice_id}, as_dict=1) or []
 
+    items_taxes = {}
     if item_wise_tax_details:
-        items_taxes = item_wise_tax_details[0]["item_wise_tax_detail"]
-        if isinstance(items_taxes, str):
-            items_taxes = json.loads(items_taxes)
-        for item in item_lines:
-            if item["item_code"] in items_taxes:
-                item["tax_percent"] = abs(items_taxes[item["item_code"]][0])
-                item["tax_amount"] = abs(items_taxes[item["item_code"]][1])
-                # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
-                #  value somehow
-                item["total_amount"] = abs(items_taxes[item["item_code"]][1]) + abs(item["net_amount"])
+        items_taxes_json = cast(str | None, item_wise_tax_details[0]["item_wise_tax_detail"]) or '{}'
+        items_taxes = json.loads(items_taxes_json)
+
+    for item in item_lines:
+        if item["item_code"] in items_taxes:
+            tax_percent = abs(items_taxes[item["item_code"]][0])
+            tax_amount = abs(items_taxes[item["item_code"]][1])
+        else:
+            tax_percent = 0.0
+            tax_amount = 0.0
+
+        item["tax_percent"] = tax_percent
+        item["tax_amount"] = tax_amount
+        # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
+        #  value somehow
+        item["total_amount"] = tax_amount + abs(item["net_amount"])
 
     return item_lines
 
