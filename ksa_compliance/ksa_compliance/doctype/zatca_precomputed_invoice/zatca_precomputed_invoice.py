@@ -3,7 +3,7 @@
 from typing import cast, Optional
 
 import frappe
-# import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -34,6 +34,10 @@ class ZATCAPrecomputedInvoice(Document):
             return None
 
         return cast('ZATCAPrecomputedInvoice', frappe.get_doc('ZATCA Precomputed Invoice', prepared_id))
+
+    def on_trash(self) -> None:
+        frappe.throw(msg=_("You cannot Delete a configured ZATCA Precomputed Invoice"),
+                     title=_("This Action Is Not Allowed"))
 
 
 @frappe.whitelist()

@@ -228,6 +228,10 @@ class ZATCABusinessSettings(Document):
         if not self.fatoora_server_url:
             frappe.throw(_("Please configure 'Fatoora Server URL'"))
 
+    def on_trash(self) -> None:
+        frappe.throw(msg=_("You cannot Delete a configured ZATCA Business Settings"),
+                     title=_("This Action Is Not Allowed"))
+
 
 @frappe.whitelist()
 def fetch_company_addresses(company_name):

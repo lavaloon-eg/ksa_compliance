@@ -3,6 +3,7 @@
 from typing import cast
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -42,3 +43,7 @@ class ZATCAEGS(Document):
             return cast(ZATCAEGS, frappe.get_doc('ZATCA EGS', egs))
 
         return None
+
+    def on_trash(self) -> None:
+        frappe.throw(msg=_("You cannot Delete a configured ZATCA EGS"),
+                     title=_("This Action Is Not Allowed"))

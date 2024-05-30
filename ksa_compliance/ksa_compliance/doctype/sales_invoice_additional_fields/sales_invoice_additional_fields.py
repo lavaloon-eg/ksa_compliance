@@ -347,7 +347,7 @@ class SalesInvoiceAdditionalFields(Document):
         integration_doc.insert(ignore_permissions=True)
 
     @property
-    def qr_image(self):
+    def qr_image(self) -> str | None:
         if not self.qr_code:
             return None
         qr = pyqrcode.create(self.qr_code)
@@ -356,6 +356,10 @@ class SalesInvoiceAdditionalFields(Document):
             buffer.seek(0)
             img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
             return img_str
+
+    def before_cancel(self) -> None:
+        frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
+                     title=_("This Action Is Not Allowed"))
 
 
 def get_integration_status(code: int) -> ZatcaIntegrationStatus:
