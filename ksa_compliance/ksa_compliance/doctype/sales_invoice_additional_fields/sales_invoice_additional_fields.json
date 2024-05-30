@@ -570,7 +570,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-28 14:33:26.357406",
+ "modified": "2024-05-30 12:08:07.190627",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
@@ -578,17 +578,14 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
+   "select": 1,
+   "share": 1
   }
  ],
  "sort_field": "modified",

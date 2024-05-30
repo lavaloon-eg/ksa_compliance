@@ -5,8 +5,11 @@ import frappe
 from frappe.query_builder import DocType
 from pypika import Order
 from pypika.queries import QueryBuilder
+from result import is_ok
 
 from ksa_compliance import logger
+from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import \
+    SalesInvoiceAdditionalFields
 
 
 @frappe.whitelist()
@@ -61,12 +64,14 @@ def sync_e_invoices(check_date: Optional[datetime.datetime | datetime.date] = No
                 if dry_run:
                     continue
 
-                adf_doc = frappe.get_doc("Sales Invoice Additional Fields", doc.name)
-                adf_doc.submit()
+                adf_doc = cast(SalesInvoiceAdditionalFields, frappe.get_doc("Sales Invoice Additional Fields", doc.name))
+                result = adf_doc.submit_to_zatca()
+                message = result.ok_value if is_ok(result) else result.err_value
+                logger.info(f"{prefix}{doc.name}: {message}")
                 frappe.db.commit()
-            except Exception as e:
-                # Review: Should we roll back?
-                logger.error(f"{prefix}Error submitting {doc.name}", exc_info=e)
+            except Exception:
+                logger.error(f"{prefix}Error submitting {doc.name}", exc_info=True)
+                frappe.db.rollback()
 
     logger.info(f"{prefix}Sync Done")
 

@@ -2,19 +2,23 @@
 # For license information, please see license.txt
 from __future__ import annotations
 
+import base64
 import json
 import uuid
-from typing import cast, Optional
+from io import BytesIO
+from typing import cast, Optional, Literal
 
 import frappe
+import pyqrcode
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
 from frappe import _
+from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
-from result import is_err
+from frappe.utils import now_datetime
+from result import is_err, Result, Err, Ok
 
-from frappe.utils import getdate, now_datetime
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
@@ -24,12 +28,15 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
     ZATCABusinessSettings)
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
+from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
+    ZATCAPrecomputedInvoice
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
-import base64
-from io import BytesIO
-import json
-import pyqrcode
+
+# These are the possible statuses resulting from a submission to ZATCA. Note that this is a subset of
+# [SalesInvoiceAdditionalFields.integration_status]
+ZatcaIntegrationStatus = Literal["Resend", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+
 
 class SalesInvoiceAdditionalFields(Document):
     # begin: auto-generated types
@@ -106,7 +113,17 @@ class SalesInvoiceAdditionalFields(Document):
     def is_compliance_mode(self) -> bool:
         return self.send_mode == ZatcaSendMode.Compliance
 
-    def get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
+    def use_precomputed_invoice(self, precomputed_invoice: ZATCAPrecomputedInvoice):
+        self.precomputed = True
+        self.precomputed_invoice = precomputed_invoice.name
+        self.invoice_counter = int(precomputed_invoice.invoice_counter)
+        self.uuid = precomputed_invoice.invoice_uuid
+        self.previous_invoice_hash = precomputed_invoice.previous_invoice_hash
+        self.invoice_hash = precomputed_invoice.invoice_hash
+        self.invoice_qr = precomputed_invoice.invoice_qr
+        self.invoice_xml = precomputed_invoice.invoice_xml
+
+    def _get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
         invoice_type: InvoiceType
         if settings.invoice_mode == InvoiceMode.Standard:
             invoice_type = 'Standard'
@@ -123,34 +140,24 @@ class SalesInvoiceAdditionalFields(Document):
         if self.precomputed:
             return
 
-        sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
-        self.uuid = str(uuid.uuid4())
-        self.tax_currency = "SAR"  # Set as "SAR" as a default tax currency value
-        self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
-        self.sum_of_charges = self.compute_sum_of_charges(sales_invoice.taxes)
-        self.set_buyer_details(sales_invoice)
-        self.set_invoice_type_code()
-        self.payment_means_type_code = self.get_payment_means_type_code(sales_invoice)
-
-    def after_insert(self):
-        if self.precomputed:
-            return
-
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        if not settings:
-            return
-
-        self.prepare_for_zatca(settings)
-
-    def before_submit(self):
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
         if not settings:
             frappe.throw(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
 
-        self.send_to_zatca(settings)
+        sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
+        self.uuid = str(uuid.uuid4())
+        self.tax_currency = "SAR"  # Review: Set as "SAR" as a default tax currency value
+        self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
+        self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
+        self.invoice_type_transaction = "0100000" if self._get_invoice_type(settings) == 'Standard' else '0200000'
+        self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
+        self._set_buyer_details(sales_invoice)
+        self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
 
-    def prepare_for_zatca(self, settings: ZATCABusinessSettings):
-        invoice_type = self.get_invoice_type(settings)
+        self._prepare_for_zatca(settings)
+
+    def _prepare_for_zatca(self, settings: ZATCABusinessSettings):
+        invoice_type = self._get_invoice_type(settings)
         counting_settings_id, pre_invoice_counter, pre_invoice_hash = frappe.db.get_values(
             "ZATCA Invoice Counting Settings", {"business_settings_reference": settings.name},
             ["name", "invoice_counter", "previous_invoice_hash"], for_update=True)[0]
@@ -159,9 +166,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.previous_invoice_hash = pre_invoice_hash
 
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
-        # TODO: Revisit this logging
-        frappe.log_error("ZATCA Result LOG", message=json.dumps(einvoice.result, indent=2))
-        frappe.log_error("ZATCA Error LOG", message=json.dumps(einvoice.error_dic, indent=2))
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
         invoice_xml = generate_xml_file(einvoice.result, invoice_type)
@@ -176,7 +180,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
         self.invoice_xml = result.signed_invoice_xml
-        self.save()
 
         # To update counting settings data
         logger.info(f"Changing invoice counter, hash from: {pre_invoice_counter}, {pre_invoice_hash} -> "
@@ -186,17 +189,22 @@ class SalesInvoiceAdditionalFields(Document):
             "previous_invoice_hash": self.invoice_hash
         })
 
-    def send_to_zatca(self, settings: ZATCABusinessSettings) -> str:
-        invoice_type = self.get_invoice_type(settings)
+    def submit_to_zatca(self) -> Result[str, str]:
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
+        if not settings:
+            return Err(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
+
+        invoice_type = self._get_invoice_type(settings)
         signed_xml = self.get_signed_xml()
         if not signed_xml:
-            frappe.throw(_('Could not find signed XML attachment'), title=_('ZATCA Error'))
+            return Err(_('Could not find signed XML'))
 
         if self.precomputed_invoice:
             device_id = frappe.db.get_value('ZATCA Precomputed Invoice', self.precomputed_invoice, 'device_id')
             egs = ZATCAEGS.for_device(device_id)
             if not egs:
-                frappe.throw(f"Could not find a ZATCA EGS for device '{device_id}'")
+                return Err(f"Could not find a ZATCA EGS for device '{device_id}'")
+
             token = egs.production_security_token
             secret = egs.get_password('production_secret') if egs.production_secret else ''
         else:
@@ -204,38 +212,36 @@ class SalesInvoiceAdditionalFields(Document):
             secret = settings.get_password('secret' if self.is_compliance_mode else 'production_secret')
 
         if not token or not secret:
-            frappe.throw(f"Missing ZATCA token/secret for {self.name}")
+            return Err(f"Missing ZATCA token/secret for {self.name}")
 
-        return self.send_xml_via_api(signed_xml, self.invoice_hash, invoice_type, settings.fatoora_server_url,
-                                     token, secret)
+        integration_status = self._send_xml_via_api(signed_xml, self.invoice_hash, invoice_type,
+                                                    settings.fatoora_server_url,
+                                                    token, secret)
 
-    def set_invoice_type_code(self):
-        """
-        A code of the invoice subtype and invoices transactions.
-        The invoice transaction code must exist and respect the following structure:
-        - [NNPNESB] where
-        - NN (positions 1 and 2) = invoice subtype: - 01 for tax invoice - 02 for simplified tax invoice.
-        - P (position 3) = 3rd Party invoice transaction, 0 for false, 1 for true
-        - N (position 4) = Nominal invoice transaction, 0 for false, 1 for true
-        - E (position 5) = Exports invoice transaction, 0 for false, 1 for true
-        - S (position 6) = Summary invoice transaction, 0 for false, 1 for true
-        - B (position 7) = Self billed invoice. Self-billing is not allowed (KSA-2, position 7 cannot be ""1"") for
-        export invoices (KSA-2, position 5 = 1).
-        """
-        # Basic Simplified or Tax invoice
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
-        self.invoice_type_transaction = "0100000" if self.get_invoice_type(settings) == 'Standard' else '0200000'
+        # Regardless of what happened, save the side effects of the API call
+        self.save()
 
-        is_debit, is_credit = frappe.db.get_value("Sales Invoice", self.sales_invoice,
-                                                  ["is_debit_note", "is_return"])
-        if is_debit:
-            self.invoice_type_code = "383"
-        elif is_credit:
-            self.invoice_type_code = "381"
+        # Resend means we keep ourselves as draft to be picked up by the next run of the background job
+        if integration_status == "Resend":
+            frappe.log_error(
+                title="ZATCA Resend Error",
+                message=f"Sending invoice {self.sales_invoice} through {self.name} failed with 'Resend' status.")
         else:
-            self.invoice_type_code = "388"
+            # Any case other than resend is submitted
+            self.submit()
 
-    def get_payment_means_type_code(self, invoice: SalesInvoice) -> Optional[str]:
+        return Ok(f"Invoice sent to ZATCA. Integration status: {integration_status}")
+
+    def _get_invoice_type_code(self, invoice_doc: SalesInvoice) -> str:
+        if invoice_doc.is_debit_note:
+            return "383"
+
+        if invoice_doc.is_return:
+            return "381"
+
+        return "388"
+
+    def _get_payment_means_type_code(self, invoice: SalesInvoice) -> Optional[str]:
         # An invoice can have multiple modes of payment, but we currently only support one. Therefore, we retrieve the
         # first one if any
         if not invoice.payments:
@@ -244,17 +250,30 @@ class SalesInvoiceAdditionalFields(Document):
         mode_of_payment = invoice.payments[0].mode_of_payment
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
-    def set_buyer_details(self, sales_invoice: SalesInvoice):
+    def _set_buyer_details(self, sales_invoice: SalesInvoice):
         customer_doc = cast(Customer, frappe.get_doc("Customer", sales_invoice.customer))
 
-        self.buyer_vat_registration_number = customer_doc.custom_vat_registration_number
+        self.buyer_vat_registration_number = customer_doc.get("custom_vat_registration_number")
+        if sales_invoice.customer_address:
+            self._set_buyer_address(cast(Address, frappe.get_doc("Address", sales_invoice.customer_address)))
 
         for item in customer_doc.get("custom_additional_ids"):
             self.append("other_buyer_ids",
                         {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
 
-    def send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
-                         server_url: str, token: str, secret: str) -> str:
+    def _set_buyer_address(self, address: Address):
+        self.buyer_additional_number = "not available for now"
+        self.buyer_street_name = address.address_line1
+        self.buyer_additional_street_name = address.address_line2
+        self.buyer_building_number = address.get("custom_building_number")
+        self.buyer_city = address.city
+        self.buyer_postal_code = address.pincode
+        self.buyer_district = address.get("custom_area")
+        self.buyer_province_state = address.state
+        self.buyer_country_code = address.country
+
+    def _send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
+                          server_url: str, token: str, secret: str) -> ZatcaIntegrationStatus:
         if invoice_type == 'Standard':
             result, status_code = api.clear_invoice(server=server_url, invoice_xml=invoice_xml,
                                                     invoice_uuid=self.uuid, invoice_hash=invoice_hash,
@@ -275,23 +294,13 @@ class SalesInvoiceAdditionalFields(Document):
             zatca_message = json.dumps(value.to_json(), indent=2)
             status = value.status
 
-        self.add_integration_log_document(zatca_message=zatca_message, integration_status=integration_status,
-                                          zatca_status=status)
+        self._add_integration_log_document(zatca_message=zatca_message, integration_status=integration_status,
+                                           zatca_status=status)
         self.integration_status = integration_status
         self.last_attempt = now_datetime()
-        if integration_status == "Resend":
-            frappe.db.set_value(self.doctype, self.name, "integration_status", integration_status)
-            frappe.db.set_value(self.doctype, self.name, "last_attempt", now_datetime())
-            # We need to commit here to keep the additional field document draft and inserting an integration log
-            frappe.db.commit()
-            frappe.log_error(
-                title="ZATCA Result LOG",
-                message=f"Sending invoice {self.sales_invoice}, additional reference id {self.name} fails.")
-            frappe.throw("Failed to send invoice to zatca.")
+        return integration_status
 
-        return zatca_message
-
-    def compute_sum_of_charges(self, taxes: list) -> float:
+    def _compute_sum_of_charges(self, taxes: list) -> float:
         total = 0.0
         if taxes:
             for item in taxes:
@@ -326,7 +335,7 @@ class SalesInvoiceAdditionalFields(Document):
             return content
         return content.decode('utf-8')
 
-    def add_integration_log_document(self, zatca_message, integration_status, zatca_status):
+    def _add_integration_log_document(self, zatca_message, integration_status, zatca_status):
         integration_doc = cast(ZATCAIntegrationLog, frappe.get_doc({
             "doctype": "ZATCA Integration Log",
             "invoice_reference": self.sales_invoice,
@@ -349,16 +358,8 @@ class SalesInvoiceAdditionalFields(Document):
             return img_str
 
 
-def customer_has_registration(customer_id: str):
-    customer_doc = cast(Customer, frappe.get_doc("Customer", customer_id))
-    if customer_doc.custom_vat_registration_number in (None, "") and all(
-            ide.value in (None, "") for ide in customer_doc.custom_additional_ids):
-        return False
-    return True
-
-
-def get_integration_status(code) -> str:
-    status_map = {
+def get_integration_status(code: int) -> ZatcaIntegrationStatus:
+    status_map = cast(dict[int, ZatcaIntegrationStatus], {
         200: "Accepted",
         202: "Accepted with warnings",
         303: "Clearance switched off",
@@ -369,7 +370,7 @@ def get_integration_status(code) -> str:
         500: "Resend",
         503: "Resend",
         504: "Resend"
-    }
+    })
     if code and code in status_map:
         return status_map[code]
     else:
