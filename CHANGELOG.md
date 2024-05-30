@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.11.0
+
 * Add ZATCA workspace and dashboard
 * Remove spurious ZATCA error logs (useless results/validation errors)
 * Rework submission to ZATCA to avoid committing partial invoices
