@@ -8,7 +8,7 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-# 0.12.0
+## 0.12.0
 
 * Add ZATCA Phase 1 Print Format.
 * Prevent Cancellation of Sales Invoice and Sales Invoice Additional Fields.
