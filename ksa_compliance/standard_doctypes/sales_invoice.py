@@ -1,11 +1,11 @@
 from datetime import date
 from typing import cast
 
-from result import is_ok
-
 import frappe
 import frappe.utils.background_jobs
 from frappe import _
+from result import is_ok
+
 from ksa_compliance import logger
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import \
     SalesInvoiceAdditionalFields
