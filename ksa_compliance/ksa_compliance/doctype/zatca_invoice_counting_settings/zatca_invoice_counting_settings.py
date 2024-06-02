@@ -1,7 +1,8 @@
 # Copyright (c) 2024, LavaLoon and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -19,4 +20,7 @@ class ZATCAInvoiceCountingSettings(Document):
 		previous_invoice_hash: DF.Data | None
 		zatca_egs: DF.Link | None
 	# end: auto-generated types
-	pass
+
+	def on_trash(self) -> None:
+		frappe.throw(msg=_("You cannot delete a configured Invoice Counting Settings"),
+					 title=_("This Action Is Not Allowed"))

@@ -3,6 +3,7 @@ from typing import cast
 
 import frappe
 import frappe.utils.background_jobs
+from frappe import _
 from result import is_ok
 
 from ksa_compliance import logger
@@ -115,3 +116,8 @@ def get_tax_template_rate(template_id: str) -> float:
     if item_tax_template.disabled:
         frappe.throw("One or more items has disabled tax template", title="Disabled tax template")
     return item_tax_template.taxes[0].tax_rate
+
+
+def prevent_cancellation_of_sales_invoice(self, method) -> None:
+    frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
+                 title=_("This Action Is Not Allowed"))
