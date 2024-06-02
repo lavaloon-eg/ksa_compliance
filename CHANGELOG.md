@@ -8,12 +8,13 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add ZATCA Phase 1 Print Format.
+
 ## 0.11.0
 
 * Add ZATCA workspace and dashboard
 * Remove spurious ZATCA error logs (useless results/validation errors)
 * Rework submission to ZATCA to avoid committing partial invoices
-* Add ZATCA Phase 1 Print Format.
 
 This rework addresses a problem in live sync mode, where we immediately submit
 invoices to ZATCA upon invoice submission.
