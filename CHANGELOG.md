@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Use ZATCA phase 1 settings in phase 1 print format
+
 ## 0.12.0
 
 * Add ZATCA Phase 1 Print Format.
