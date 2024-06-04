@@ -99,8 +99,11 @@ def calculate_tax_amount(self, method):
                 item_tax_rate = get_tax_template_rate(item.item_tax_template)
             else:
                 item_tax_rate = sum(account.rate for account in self.taxes)
-            item.custom_tax_total = (item.amount * item_tax_rate) / 100
-            item.custom_total_after_tax = item.amount + item.custom_tax_total
+            if self.taxes[0].included_in_print_rate:
+                item.custom_tax_total = item.amount - item.net_amount
+            else:
+                item.custom_tax_total = (item.net_amount * item_tax_rate) / 100
+            item.custom_total_after_tax = item.custom_tax_total + item.net_amount
 
 
 def get_tax_template_rate(template_id: str) -> float:
