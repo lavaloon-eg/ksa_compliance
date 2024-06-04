@@ -7,9 +7,11 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-* Fix tax calculation for tax templates with tax included in basic rate.
+
+## 0.12.1
 
 * Use ZATCA phase 1 settings in phase 1 print format
+* Fix tax calculation for tax templates with tax included in basic rate.
 
 ## 0.12.0
 
