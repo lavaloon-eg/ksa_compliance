@@ -7,6 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+* Consider Is this Tax included in Basic Rate? checkbox in tax calculation per item.
 
 ## 0.12.0
 

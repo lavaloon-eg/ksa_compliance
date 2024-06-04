@@ -184,7 +184,7 @@
         <cbc:ID>{{ item.idx | int }}</cbc:ID>
         <cbc:Note>{{ item.item_name }}</cbc:Note>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount or item.amount | round(2) }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount | round(2) or item.amount | round(2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
             {% if item.tax_amount %}
             <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount>
@@ -220,7 +220,7 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount or item.amount | round(2) }}</cbc:PriceAmount>
+            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount | round(2) or item.amount | round(2) }}</cbc:PriceAmount>
             <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
         </cac:Price>
     </cac:InvoiceLine>
