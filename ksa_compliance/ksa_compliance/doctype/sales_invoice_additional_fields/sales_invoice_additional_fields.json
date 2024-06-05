@@ -21,8 +21,11 @@
   "invoice_counter",
   "invoice_hash",
   "previous_invoice_hash",
+  "column_break_jdre",
   "qr_code",
-  "qr_image",
+  "qr_code_image",
+  "column_break_qbcl",
+  "qr_image_uri",
   "buyer_address_tab",
   "buyer_id_section",
   "buyer_vat_registration_number",
@@ -555,22 +558,40 @@
    "is_virtual": 1
   },
   {
-   "fieldname": "qr_image",
-   "fieldtype": "Data",
-   "is_virtual": 1,
-   "label": "Qr Image"
-  },
-  {
    "fieldname": "buyer_province_state",
    "fieldtype": "Data",
    "label": "Province/State",
    "read_only": 1
+  },
+  {
+   "fieldname": "qr_image_uri",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Qr Image Uri"
+  },
+  {
+   "columns": 4,
+   "fieldname": "qr_code_image",
+   "fieldtype": "Image",
+   "is_virtual": 1,
+   "label": "QR Code Image",
+   "options": "qr_image_uri",
+   "print_width": "100"
+  },
+  {
+   "fieldname": "column_break_jdre",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qbcl",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-30 12:08:07.190627",
+ "modified": "2024-06-05 16:34:49.335212",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
