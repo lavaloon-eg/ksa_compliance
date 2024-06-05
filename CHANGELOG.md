@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.13.0
+
 * Add automatic ZATCA CLI setup
   * There's now a new "CLI" tab in "ZATCA Business Settings"
   * In "Automatic" mode, we download the JRE and CLI automatically and fill in the CLI path and Java home path
