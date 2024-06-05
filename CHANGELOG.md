@@ -8,6 +8,13 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add automatic ZATCA CLI setup
+  * There's now a new "CLI" tab in "ZATCA Business Settings"
+  * In "Automatic" mode, we download the JRE and CLI automatically and fill in the CLI path and Java home path
+  * In "Manual" mode, CLI path is specified by the user. Java home path is optional
+  * Existing "ZATCA Business Settings" are automatically set to "Manual" by a patch upon deploying this change
+  * New "ZATCA Business Settings" default to "Automatic"
+
 ## 0.12.1
 
 * Use ZATCA phase 1 settings in phase 1 print format

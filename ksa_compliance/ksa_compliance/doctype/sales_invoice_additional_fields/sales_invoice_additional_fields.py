@@ -46,7 +46,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -64,7 +65,8 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -169,10 +171,12 @@ class SalesInvoiceAdditionalFields(Document):
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
         invoice_xml = generate_xml_file(einvoice.result, invoice_type)
-        result = cli.sign_invoice(settings.zatca_cli_path, invoice_xml, cert_path, settings.private_key_path)
+        result = cli.sign_invoice(settings.zatca_cli_path, settings.java_home, invoice_xml, cert_path,
+                                  settings.private_key_path)
 
         if settings.validate_generated_xml and not self.is_compliance_mode:
-            validation_result = cli.validate_invoice(settings.zatca_cli_path, result.signed_invoice_path,
+            validation_result = cli.validate_invoice(settings.zatca_cli_path, settings.java_home,
+                                                     result.signed_invoice_path,
                                                      settings.cert_path, self.previous_invoice_hash)
             self.validation_messages = '\n'.join(validation_result.messages)
             self.validation_errors = '\n'.join(validation_result.errors_and_warnings)

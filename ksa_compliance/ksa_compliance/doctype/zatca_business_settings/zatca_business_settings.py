@@ -30,6 +30,7 @@ class ZATCABusinessSettings(Document):
         additional_street: DF.Data | None
         building_number: DF.Data | None
         city: DF.Data | None
+        cli_setup: DF.Literal["Automatic", "Manual"]
         company: DF.Link
         company_address: DF.Link
         company_category: DF.Data
@@ -43,7 +44,10 @@ class ZATCABusinessSettings(Document):
         district: DF.Data | None
         enable_zatca_integration: DF.Check
         fatoora_server_url: DF.Data | None
+        java_home: DF.Data | None
         other_ids: DF.Table[AdditionalSellerIDs]
+        override_cli_download_url: DF.Data | None
+        override_jre_download_url: DF.Data | None
         postal_code: DF.Data | None
         production_request_id: DF.Data | None
         production_secret: DF.Password | None
@@ -204,7 +208,7 @@ class ZATCABusinessSettings(Document):
                                         context=self.csr_config)
 
         logger.info(f"CSR config: {config}")
-        return cli.generate_csr(self.zatca_cli_path, self.vat_registration_number, config)
+        return cli.generate_csr(self.zatca_cli_path, self.java_home, self.vat_registration_number, config)
 
     def _format_address(self) -> str:
         """
