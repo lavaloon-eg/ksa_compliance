@@ -208,6 +208,27 @@
             <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ 0.00 }}</cbc:TaxAmount>
             {% endif %}
             <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ item.total_amount | round(2) }}</cbc:RoundingAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount | round(2) }}</cbc:TaxableAmount>
+                {% if item.tax_amount %}
+                <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount>
+                {% else %}
+                <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ 0.00 }}</cbc:TaxAmount>
+                {% endif %}
+                <cac:TaxCategory>
+                    <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
+                    <cbc:Percent>{{ item.tax_percent or 0 }}</cbc:Percent>
+                    {% if invoice.tax_exemption_reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
+                    {% endif %}
+                    {% if invoice.tax_exemption_reason %}
+                    <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason }}</cbc:TaxExemptionReason>
+                    {% endif %}
+                    <cac:TaxScheme>
+                        <cbc:ID>VAT</cbc:ID>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
         </cac:TaxTotal>
         <cac:Item>
             <cbc:Name>{{ item.item_name }}</cbc:Name>
