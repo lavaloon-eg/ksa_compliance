@@ -124,3 +124,8 @@ def get_tax_template_rate(template_id: str) -> float:
 def prevent_cancellation_of_sales_invoice(self, method) -> None:
     frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
                  title=_("This Action Is Not Allowed"))
+
+def validate_tax_category(self, method):
+    if not self.tax_category:
+        frappe.throw(msg=_("Please choose a Tax Category"),
+                     title=_("Tax Category Missing"))

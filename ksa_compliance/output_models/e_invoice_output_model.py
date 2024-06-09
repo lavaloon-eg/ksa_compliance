@@ -11,6 +11,7 @@ from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import (
     ZATCABusinessSettings)
+from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 
 
 def append_tax_details_into_item_lines(invoice_id, item_lines):
@@ -1165,13 +1166,20 @@ class Einvoice:
             self.get_float_child_value(field_name="taxes_rate",
                                        field_value=self.sales_invoice_doc.taxes[0].rate,
                                        required=False,
-                                       xml_name="Percent",
+                                       xml_name="taxes_rate",
                                        rules=["BR-KSA-DEC-02", "BR-48", "BR-CO-18", "BT-119", "BG-23"],
                                        parent="invoice")
         except Exception:
             self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
 
-            # VAT exemption reason to be added in customizations
+        # Add Tax category code and Exemption reason
+        tax_category_id = self.sales_invoice_doc.get("tax_category")
+        tax_category_and_exemption = map_tax_category(tax_category_id)
+        self.result["invoice"]["tax_category_code"] = tax_category_and_exemption.tax_category_code
+        if tax_category_and_exemption.reason_code:
+            self.result["invoice"]["tax_exemption_reason_code"] = tax_category_and_exemption.reason_code
+        if tax_category_and_exemption.arabic_reason:
+            self.result["invoice"]["tax_exemption_reason"] = tax_category_and_exemption.arabic_reason
 
             # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------

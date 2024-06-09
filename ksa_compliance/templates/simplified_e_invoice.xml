@@ -141,8 +141,18 @@
         <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
         <cbc:Amount currencyID="SAR">{{ invoice.allowance_total_amount | round(2) }}</cbc:Amount>
         <cac:TaxCategory>
-            <cbc:ID>S</cbc:ID>
-            <cbc:Percent>15</cbc:Percent>
+            <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
+            {% if invoice.taxes_rate %}
+            <cbc:Percent>{{ invoice.taxes_rate }}</cbc:Percent>
+            {% else %}
+            <cbc:Percent>{{ 0.00 }}</cbc:Percent>
+            {% endif %}
+            {% if invoice.tax_exemption_reason_code %}
+            <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
+            {% endif %}
+            {% if invoice.tax_exemption_reason %}
+            <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason }}</cbc:TaxExemptionReason>
+            {% endif %}
             <cac:TaxScheme>
                 <cbc:ID>VAT</cbc:ID>
             </cac:TaxScheme>
@@ -156,8 +166,14 @@
             <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total or invoice.total | round(2) }}</cbc:TaxableAmount>
             <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
             <cac:TaxCategory>
-                <cbc:ID>S</cbc:ID>
+                <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
                 <cbc:Percent>{{ invoice.total_taxes_and_charges_percent or 0 }}</cbc:Percent>
+                {% if invoice.tax_exemption_reason_code %}
+                <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
+                {% endif %}
+                {% if invoice.tax_exemption_reason %}
+                <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason }}</cbc:TaxExemptionReason>
+                {% endif %}
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
@@ -208,7 +224,7 @@
             {% endif %}
 
             <cac:ClassifiedTaxCategory>
-                <cbc:ID>S</cbc:ID>
+                <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
                 {% if item.tax_percent %}
                 <cbc:Percent>{{ item.tax_percent }}</cbc:Percent>
                 {% else %}

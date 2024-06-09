@@ -7,7 +7,10 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+
 * Add QR code as a scannable image in Sales Invoice Additional Fields.
+* Add ZATCA tax category exemption reason and code if applicable
+
 ## 0.13.0
 
 * Add automatic ZATCA CLI setup
