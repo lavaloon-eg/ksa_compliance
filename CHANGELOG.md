@@ -10,6 +10,7 @@ to a section with the version name.
 
 * Add QR code as a scannable image in Sales Invoice Additional Fields.
 * Add ZATCA tax category exemption reason and code if applicable
+* Remove negative values in print format on credit note issue
 
 ## 0.13.0
 
