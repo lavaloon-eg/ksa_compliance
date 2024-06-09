@@ -92,7 +92,7 @@ class SalesInvoiceAdditionalFields(Document):
         prepayment_vat_category_taxable_amount: DF.Float
         previous_invoice_hash: DF.Data | None
         qr_code: DF.SmallText | None
-        qr_image_uri: DF.Data | None
+        qr_image_src: DF.Data | None
         reason_for_allowance: DF.Data | None
         reason_for_charge: DF.Data | None
         reason_for_charge_code: DF.Data | None
@@ -349,7 +349,7 @@ class SalesInvoiceAdditionalFields(Document):
         integration_doc.insert(ignore_permissions=True)
 
     @property
-    def qr_image_uri(self) -> str | None:
+    def qr_image_src(self) -> str | None:
         if not self.qr_code:
             return None
         qr = pyqrcode.create(self.qr_code)
@@ -358,9 +358,6 @@ class SalesInvoiceAdditionalFields(Document):
             buffer.seek(0)
             return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    @property
-    def qr_code_image(self):
-        return self.qr_code_image
     def before_cancel(self) -> None:
         frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
                      title=_("This Action Is Not Allowed"))
