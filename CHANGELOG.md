@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.14.0
+
 * Add QR code as a scannable image in Sales Invoice Additional Fields.
 * Add ZATCA tax category exemption reason and code if applicable
 * Remove negative values in print format on credit note issue
