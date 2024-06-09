@@ -46,8 +46,7 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -65,8 +64,7 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal[
-            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -94,7 +92,7 @@ class SalesInvoiceAdditionalFields(Document):
         prepayment_vat_category_taxable_amount: DF.Float
         previous_invoice_hash: DF.Data | None
         qr_code: DF.SmallText | None
-        qr_image: DF.Data | None
+        qr_image_src: DF.Data | None
         reason_for_allowance: DF.Data | None
         reason_for_charge: DF.Data | None
         reason_for_charge_code: DF.Data | None
@@ -351,15 +349,14 @@ class SalesInvoiceAdditionalFields(Document):
         integration_doc.insert(ignore_permissions=True)
 
     @property
-    def qr_image(self) -> str | None:
+    def qr_image_src(self) -> str | None:
         if not self.qr_code:
             return None
         qr = pyqrcode.create(self.qr_code)
         with BytesIO() as buffer:
             qr.png(buffer, scale=7)
             buffer.seek(0)
-            img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
-            return img_str
+            return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     def before_cancel(self) -> None:
         frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
