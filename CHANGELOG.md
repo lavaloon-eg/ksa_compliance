@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add invoice line tax category and taxable amount in ZATCA XML
+
 ## 0.14.0
 
 * Add QR code as a scannable image in Sales Invoice Additional Fields.
