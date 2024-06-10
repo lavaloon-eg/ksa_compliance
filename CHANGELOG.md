@@ -8,7 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.15.0
+
 * Add invoice line tax category and taxable amount in ZATCA XML
+* Filter addresses in ZATCA phase 1 settings based on company
 
 ## 0.14.0
 
