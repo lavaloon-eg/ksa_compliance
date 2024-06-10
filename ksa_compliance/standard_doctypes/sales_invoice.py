@@ -1,5 +1,4 @@
 from datetime import date
-from typing import cast
 
 import frappe
 import frappe.utils.background_jobs
@@ -42,11 +41,7 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         logger.info(f"Skipping additional fields for {self.name} because it's in the ignore list")
         return
 
-    si_additional_fields_doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc("Sales Invoice Additional Fields"))
-    # We do not expect people to create SIAF manually, so nobody has permission to create one
-    si_additional_fields_doc.flags.ignore_permissions = True
-    si_additional_fields_doc.sales_invoice = self.name
-
+    si_additional_fields_doc = SalesInvoiceAdditionalFields.create_for_invoice(self.name)
     precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
     is_live_sync = settings.is_live_sync
     if precomputed_invoice:
@@ -60,7 +55,6 @@ def create_sales_invoice_additional_fields_doctype(self, method):
             # EGS Setting overrides company-wide setting
             is_live_sync = egs_settings.is_live_sync
 
-    si_additional_fields_doc.integration_status = "Ready For Batch"
     si_additional_fields_doc.insert()
     if is_live_sync:
         # We're running in the context of invoice submission (on_submit hook). We only want to run our ZATCA logic if
@@ -82,7 +76,7 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     if frappe.db.table_exists('Vehicle Booking Item Info'):
         records = frappe.db.sql(
             "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii "
-            "JOIN `tabBooking Vehicle` bv on bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
+            "JOIN `tabBooking Vehicle` bv ON bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
             {'invoice': invoice_id}, as_dict=True)
         if records:
             local_date = records[0]['local_trx_date_time'].date()
@@ -124,6 +118,7 @@ def get_tax_template_rate(template_id: str) -> float:
 def prevent_cancellation_of_sales_invoice(self, method) -> None:
     frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
                  title=_("This Action Is Not Allowed"))
+
 
 def validate_tax_category(self, method):
     if not self.tax_category:
