@@ -44,3 +44,8 @@ def get_company_primary_address(company):
         .where(dynamic_link.link_name == company)
     ).run(as_dict=1)
     return query
+
+
+@frappe.whitelist()
+def get_all_company_addresses(company):
+    return frappe.get_all("Dynamic Link", filters={"link_name": company}, fields=["parent"], pluck="parent")
