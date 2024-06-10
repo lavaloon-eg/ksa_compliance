@@ -48,4 +48,4 @@ def get_company_primary_address(company):
 
 @frappe.whitelist()
 def get_all_company_addresses(company):
-    return frappe.get_all("Dynamic Link", filters={"link_name": company}, fields=["parent"], pluck="parent")
+    return frappe.get_all("Dynamic Link", filters={"link_name": company, "parenttype": "Address"}, fields=["parent"], pluck="parent")
