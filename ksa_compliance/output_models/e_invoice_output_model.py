@@ -1173,8 +1173,7 @@ class Einvoice:
             self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
 
         # Add Tax category code and Exemption reason
-        tax_category_id = self.sales_invoice_doc.get("tax_category")
-        tax_category_and_exemption = map_tax_category(tax_category_id)
+        tax_category_and_exemption = map_tax_category(self.sales_invoice_doc.tax_category)
         self.result["invoice"]["tax_category_code"] = tax_category_and_exemption.tax_category_code
         if tax_category_and_exemption.reason_code:
             self.result["invoice"]["tax_exemption_reason_code"] = tax_category_and_exemption.reason_code

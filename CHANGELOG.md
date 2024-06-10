@@ -8,6 +8,22 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Default to "Standard rate" if a sales invoice doesn't specify a tax category
+  * We added a validation check to ensure a tax category is present, but that doesn't work for old submitted invoices.
+    Such invoices could have been rejected for a variety of reasons, and we need to default to S tax category if they
+    don't specify one when attempting to fix the rejection.
+* Support fixing rejected sales invoices 
+  * A fixable rejection can happen in mainly two cases:
+    1) Bad or missing ZATCA configuration that leads to rejection. These cases can be fixed by updating the 
+       configuration and generating another 'Sales Invoice Additional Fields' document for the invoice to submit to
+       ZATCA
+    2) An application bug that results in generating an invalid XML. These cases can be fixed by updating the app to a 
+       later version that fixes the issue, then generating another 'Sales Invoice Additional Fields' document to submit
+       to ZATCA
+  * This change adds a custom button to the 'Sales Invoice Additional Fields' document that allows users to trigger the
+    aforementioned generation.
+  * Also, the invoice counter was appended to the 'Sales Invoice Additional Fields' name expression to ensure uniqueness.
+
 ## 0.15.0
 
 * Add invoice line tax category and taxable amount in ZATCA XML

@@ -9,6 +9,7 @@ from io import BytesIO
 from typing import cast, Optional, Literal
 
 import frappe
+import frappe.utils.background_jobs
 import pyqrcode
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
@@ -16,8 +17,8 @@ from frappe import _
 from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
-from frappe.utils import now_datetime
-from result import is_err, Result, Err, Ok
+from frappe.utils import now_datetime, get_link_to_form
+from result import is_err, Result, Err, Ok, is_ok
 
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
@@ -31,6 +32,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integrati
 from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
     ZATCAPrecomputedInvoice
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
+from ksa_compliance.translation import ft
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
 
 # These are the possible statuses resulting from a submission to ZATCA. Note that this is a subset of
@@ -46,7 +48,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -64,7 +67,8 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -109,6 +113,14 @@ class SalesInvoiceAdditionalFields(Document):
     # end: auto-generated types
     send_mode: ZatcaSendMode = ZatcaSendMode.Production
 
+    @staticmethod
+    def create_for_invoice(invoice_id: str) -> 'SalesInvoiceAdditionalFields':
+        doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc("Sales Invoice Additional Fields"))
+        # We do not expect people to create SIAF manually, so nobody has permission to create one
+        doc.flags.ignore_permissions = True
+        doc.sales_invoice = invoice_id
+        return doc
+
     @property
     def is_compliance_mode(self) -> bool:
         return self.send_mode == ZatcaSendMode.Compliance
@@ -137,6 +149,8 @@ class SalesInvoiceAdditionalFields(Document):
         return invoice_type
 
     def before_insert(self):
+        self.integration_status = "Ready For Batch"
+
         if self.precomputed:
             return
 
@@ -286,7 +300,7 @@ class SalesInvoiceAdditionalFields(Document):
                                                      security_token=token, secret=secret, mode=self.send_mode)
 
         status = ''
-        integration_status = get_integration_status(status_code)
+        integration_status = _get_integration_status(status_code)
         if is_err(result):
             # The IDE gets confused resolving types, so we help it along
             error = cast(ReportOrClearInvoiceError, result.err_value)
@@ -363,7 +377,45 @@ class SalesInvoiceAdditionalFields(Document):
                      title=_("This Action Is Not Allowed"))
 
 
-def get_integration_status(code: int) -> ZatcaIntegrationStatus:
+@frappe.whitelist()
+def download_xml(id: str):
+    """
+    Frappe doesn't know how to display an XML field without escaping it, so we made the field hidden. The only way
+    for users to view the XML is to download it through this endpoint
+    """
+    siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
+
+    # Reference: https://frappeframework.com/docs/user/en/python-api/response
+    frappe.response.filename = siaf.name + '.xml'
+    frappe.response.filecontent = siaf.get_signed_xml()
+    frappe.response.type = "download"
+    frappe.response.display_content_as = "attachment"
+
+
+@frappe.whitelist()
+def fix_rejection(id: str):
+    import frappe.permissions
+    if not frappe.permissions.has_permission('Sales Invoice Additional Fields'):
+        raise PermissionError()
+
+    siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
+    if siaf.precomputed_invoice:
+        frappe.throw(ft("Cannot fix rejection for a precomputed invoice from Desk"))
+
+    settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice)
+    if not settings:
+        frappe.throw(ft("Missing ZATCA business settings for sales invoice: $invoice", invoice=siaf.sales_invoice))
+
+    new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice)
+    new_siaf.insert()
+
+    if settings.is_live_sync:
+        frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=new_siaf, enqueue_after_commit=True)
+
+    frappe.msgprint(ft("Created $link", link=get_link_to_form("Sales Invoice Additional Fields", new_siaf.name)))
+
+
+def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
     status_map = cast(dict[int, ZatcaIntegrationStatus], {
         200: "Accepted",
         202: "Accepted with warnings",
@@ -382,16 +434,8 @@ def get_integration_status(code: int) -> ZatcaIntegrationStatus:
         return "Resend"
 
 
-@frappe.whitelist()
-def download_xml(id: str):
-    """
-    Frappe doesn't know how to display an XML field without escaping it, so we made the field hidden. The only way
-    for users to view the XML is to download it through this endpoint
-    """
-    siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
-
-    # Reference: https://frappeframework.com/docs/user/en/python-api/response
-    frappe.response.filename = siaf.name + '.xml'
-    frappe.response.filecontent = siaf.get_signed_xml()
-    frappe.response.type = "download"
-    frappe.response.display_content_as = "attachment"
+def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
+    logger.info(f'Submitting {doc.name}')
+    result = doc.submit_to_zatca()
+    message = result.ok_value if is_ok(result) else result.err_value
+    logger.info(f'Submission result: {message}')
