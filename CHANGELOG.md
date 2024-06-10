@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.16.0
+
 * Default to "Standard rate" if a sales invoice doesn't specify a tax category
   * We added a validation check to ensure a tax category is present, but that doesn't work for old submitted invoices.
     Such invoices could have been rejected for a variety of reasons, and we need to default to S tax category if they
