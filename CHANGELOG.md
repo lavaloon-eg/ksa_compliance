@@ -9,6 +9,13 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Fix errors from non-escaped content in simplified invoice XML: Customer name, item name, etc.
+* Fix and revamp simplified invoice compliance checks
+  * Move compliance checks to the background queue to avoid timeouts
+  * Add progress reporting
+  * Tax category is now required for the compliance check since we've added a validation for it on invoice validate
+  * Require all fields in the compliance prompt
+  * Report the detailed ZATCA responses in an error log and link to it after the operation to enable users to report 
+    problems
 
 ## 0.16.0
 
