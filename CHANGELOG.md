@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.17.0
+
 * Fix errors from non-escaped content in simplified invoice XML: Customer name, item name, etc.
 * Fix and revamp simplified invoice compliance checks
   * Move compliance checks to the background queue to avoid timeouts
