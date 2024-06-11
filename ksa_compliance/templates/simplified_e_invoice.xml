@@ -45,18 +45,18 @@
             {% endfor %}
             {% endif %}
             <cac:PostalAddress>
-                <cbc:StreetName>{{ seller_details.street_name }}</cbc:StreetName>
-                <cbc:BuildingNumber>{{ seller_details.building_number }}</cbc:BuildingNumber>
+                <cbc:StreetName>{{ seller_details.street_name | escape }}</cbc:StreetName>
+                <cbc:BuildingNumber>{{ seller_details.building_number | escape }}</cbc:BuildingNumber>
                 {% if seller_details.address_additional_number %}
-                <cbc:PlotIdentification>{{ seller_details.address_additional_number }}</cbc:PlotIdentification>
+                <cbc:PlotIdentification>{{ seller_details.address_additional_number | escape }}</cbc:PlotIdentification>
                 {% endif %}
-                <cbc:CitySubdivisionName>{{ seller_details.city_subdivision_name }}</cbc:CitySubdivisionName>
-                <cbc:CityName>{{ seller_details.city_name }}</cbc:CityName>
+                <cbc:CitySubdivisionName>{{ seller_details.city_subdivision_name | escape }}</cbc:CitySubdivisionName>
+                <cbc:CityName>{{ seller_details.city_name | escape }}</cbc:CityName>
                 {% if seller_details.postal_zone %}
-                <cbc:PostalZone>{{ seller_details.postal_zone }}</cbc:PostalZone>
+                <cbc:PostalZone>{{ seller_details.postal_zone | escape }}</cbc:PostalZone>
                 {% endif %}
                 {% if seller_details.province %}
-                <cbc:CountrySubentity>{{ seller_details.province }}</cbc:CountrySubentity>
+                <cbc:CountrySubentity>{{ seller_details.province | escape }}</cbc:CountrySubentity>
                 {% endif %}
                 <cac:Country>
                     <cbc:IdentificationCode>{{ seller_details.country_code }}</cbc:IdentificationCode>
@@ -70,7 +70,7 @@
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName>{{ business_settings.registration_name }}</cbc:RegistrationName>
+                <cbc:RegistrationName>{{ business_settings.registration_name | escape }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingSupplierParty>
@@ -80,31 +80,31 @@
             {% if buyer_details.party_identifications %}
             {% for it in buyer_details.party_identifications %}
             <cac:PartyIdentification>
-                <cbc:ID schemeID="{{ it.code }}">{{ it.value }}</cbc:ID>
+                <cbc:ID schemeID="{{ it.code }}">{{ it.value | escape }}</cbc:ID>
             </cac:PartyIdentification>
             {% endfor %}
             {% endif %}
             <cac:PostalAddress>
                 {% if buyer_details.street_name %}
-                <cbc:StreetName>{{ buyer_details.street_name }}</cbc:StreetName>
+                <cbc:StreetName>{{ buyer_details.street_name | escape }}</cbc:StreetName>
                 {% endif %}
                 {% if buyer_details.building_number %}
-                <cbc:BuildingNumber>{{ buyer_details.building_number }}</cbc:BuildingNumber>
+                <cbc:BuildingNumber>{{ buyer_details.building_number | escape }}</cbc:BuildingNumber>
                 {% endif %}
                 {% if buyer_details.address_additional_number %}
-                <cbc:PlotIdentification>{{ buyer_details.address_additional_number }}</cbc:PlotIdentification>
+                <cbc:PlotIdentification>{{ buyer_details.address_additional_number | escape }}</cbc:PlotIdentification>
                 {% endif %}
                 {% if buyer_details.city_subdivision_name %}
-                <cbc:CitySubdivisionName>{{ buyer_details.city_subdivision_name }}</cbc:CitySubdivisionName>
+                <cbc:CitySubdivisionName>{{ buyer_details.city_subdivision_name | escape }}</cbc:CitySubdivisionName>
                 {% endif %}
                 {% if buyer_details.city_name %}
-                <cbc:CityName>{{ buyer_details.city_name }}</cbc:CityName>
+                <cbc:CityName>{{ buyer_details.city_name | escape }}</cbc:CityName>
                 {% endif %}
                 {% if buyer_details.postal_zone %}
-                <cbc:PostalZone>{{ buyer_details.postal_zone }}</cbc:PostalZone>
+                <cbc:PostalZone>{{ buyer_details.postal_zone | escape }}</cbc:PostalZone>
                 {% endif %}
                 {% if buyer_details.province %}
-                <cbc:CountrySubentity>{{ buyer_details.province }}</cbc:CountrySubentity>
+                <cbc:CountrySubentity>{{ buyer_details.province | escape }}</cbc:CountrySubentity>
                 {% endif %}
                 {% if buyer_details.country_code %}
                 <cac:Country>
@@ -123,7 +123,7 @@
             {% endif %}
             {% if buyer_details.registration_name %}
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName>{{ buyer_details.registration_name }}</cbc:RegistrationName>
+                <cbc:RegistrationName>{{ buyer_details.registration_name | escape }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
             {% endif %}
         </cac:Party>
@@ -198,7 +198,7 @@
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
         <cbc:ID>{{ item.idx | int }}</cbc:ID>
-        <cbc:Note>{{ item.item_name }}</cbc:Note>
+        <cbc:Note>{{ item.item_name | escape }}</cbc:Note>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ (item.net_amount or item.amount) | round(2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
@@ -219,10 +219,10 @@
                     <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
                     <cbc:Percent>{{ item.tax_percent or 0 }}</cbc:Percent>
                     {% if invoice.tax_exemption_reason_code %}
-                    <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
+                    <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
                     {% endif %}
                     {% if invoice.tax_exemption_reason %}
-                    <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason }}</cbc:TaxExemptionReason>
+                    <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason | escape }}</cbc:TaxExemptionReason>
                     {% endif %}
                     <cac:TaxScheme>
                         <cbc:ID>VAT</cbc:ID>
@@ -231,16 +231,16 @@
             </cac:TaxSubtotal>
         </cac:TaxTotal>
         <cac:Item>
-            <cbc:Name>{{ item.item_name }}</cbc:Name>
+            <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
             {% if item.buyer_item_identification %}
             <cac:BuyersItemIdentification>
-                <cbc:ID>{{ item.buyer_item_identification }}</cbc:ID>
+                <cbc:ID>{{ item.buyer_item_identification | escape }}</cbc:ID>
             </cac:BuyersItemIdentification>
             {% endif %}
 
             {% if item.seller_item_identification %}
             <cac:SellersItemIdentification>
-                <cbc:ID>{{ item.seller_item_identification }}</cbc:ID>
+                <cbc:ID>{{ item.seller_item_identification | escape }}</cbc:ID>
             </cac:SellersItemIdentification>
             {% endif %}
 
