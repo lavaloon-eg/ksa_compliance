@@ -114,9 +114,9 @@
             </cac:PostalAddress>
             {% if buyer_details.vat_id %}
             <cac:PartyTaxScheme>
+                <cbc:CompanyID>{{ buyer_details.vat_id }}</cbc:CompanyID>
                 <cac:TaxScheme>
                     <!-- Vat Registration Number -->
-                    <cbc:CompanyID>{{ buyer_details.vat_id }}</cbc:CompanyID>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>

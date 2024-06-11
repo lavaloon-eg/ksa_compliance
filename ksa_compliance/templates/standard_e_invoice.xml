@@ -106,9 +106,8 @@
                 </cac:Country>
             </cac:PostalAddress>
             <cac:PartyTaxScheme>
+                <cbc:CompanyID>{{ buyer_details.company_id }}</cbc:CompanyID>
                 <cac:TaxScheme>
-                    <!-- Vat Registration Number -->
-                    <cbc:CompanyID>{{ buyer_details.company_id }}</cbc:CompanyID>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
