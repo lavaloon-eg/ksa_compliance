@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix errors from non-escaped content in simplified invoice XML: Customer name, item name, etc.
+
 ## 0.16.0
 
 * Default to "Standard rate" if a sales invoice doesn't specify a tax category
