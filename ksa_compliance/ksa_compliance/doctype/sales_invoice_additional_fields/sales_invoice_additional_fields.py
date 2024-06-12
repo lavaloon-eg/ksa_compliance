@@ -284,7 +284,7 @@ class SalesInvoiceAdditionalFields(Document):
         self.buyer_postal_code = address.pincode
         self.buyer_district = address.get("custom_area")
         self.buyer_province_state = address.state
-        self.buyer_country_code = address.country
+        self.buyer_country_code = frappe.get_value('Country', address.country, 'code')
 
     def _send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
                           server_url: str, token: str, secret: str) -> ZatcaIntegrationStatus:
