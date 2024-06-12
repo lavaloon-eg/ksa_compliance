@@ -180,7 +180,7 @@ class SalesInvoiceAdditionalFields(Document):
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
-        invoice_xml = generate_xml_file(einvoice.result, invoice_type)
+        invoice_xml = generate_xml_file(einvoice.result)
         result = cli.sign_invoice(settings.zatca_cli_path, settings.java_home, invoice_xml, cert_path,
                                   settings.private_key_path)
 

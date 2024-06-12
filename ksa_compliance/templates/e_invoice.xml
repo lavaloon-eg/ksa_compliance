@@ -114,9 +114,8 @@
             </cac:PostalAddress>
             {% if buyer_details.vat_id %}
             <cac:PartyTaxScheme>
-                <cbc:CompanyID>{{ buyer_details.vat_id }}</cbc:CompanyID>
+                <cbc:CompanyID>{{ buyer_details.company_id }}</cbc:CompanyID>
                 <cac:TaxScheme>
-                    <!-- Vat Registration Number -->
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
@@ -128,6 +127,11 @@
             {% endif %}
         </cac:Party>
     </cac:AccountingCustomerParty>
+    {% if invoice.delivery_date %}
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>{{ invoice.issue_date }}</cbc:ActualDeliveryDate>
+    </cac:Delivery>
+    {% endif %}
     {% if invoice.payment_means_type_code or invoice.instruction_note %}
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode>{{ invoice.payment_means_type_code or '1' }}</cbc:PaymentMeansCode>
@@ -158,10 +162,8 @@
             </cac:TaxScheme>
         </cac:TaxCategory>
     </cac:AllowanceCharge>
-    <!-- Taxes -->
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
-        <!-- Sales Taxes and Charges Child -->
         <cac:TaxSubtotal>
             <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total or invoice.total | round(2) }}</cbc:TaxableAmount>
             <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>

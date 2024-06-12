@@ -918,7 +918,7 @@ class Einvoice:
             self.get_text_value(field_name="buyer_country_code",
                                 source_doc=self.additional_fields_doc,
                                 required=True,
-                                xml_name="identification_code",
+                                xml_name="country_code",
                                 rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"],
                                 parent="buyer_details")
 
@@ -926,7 +926,7 @@ class Einvoice:
             self.get_text_value(field_name="buyer_country_code",
                                 source_doc=self.additional_fields_doc,
                                 required=False,
-                                xml_name="identification_code",
+                                xml_name="country_code",
                                 rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"],
                                 parent="buyer_details")
 
