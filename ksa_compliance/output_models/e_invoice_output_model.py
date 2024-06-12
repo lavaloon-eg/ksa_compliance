@@ -11,6 +11,7 @@ from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import (
     ZATCABusinessSettings)
+from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 
 
 def append_tax_details_into_item_lines(invoice_id, item_lines):
@@ -20,17 +21,24 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
                 WHERE parent = %(invoice_id)s
             """, {"invoice_id": invoice_id}, as_dict=1) or []
 
+    items_taxes = {}
     if item_wise_tax_details:
-        items_taxes = item_wise_tax_details[0]["item_wise_tax_detail"]
-        if isinstance(items_taxes, str):
-            items_taxes = json.loads(items_taxes)
-        for item in item_lines:
-            if item["item_code"] in items_taxes:
-                item["tax_percent"] = abs(items_taxes[item["item_code"]][0])
-                item["tax_amount"] = abs(items_taxes[item["item_code"]][1])
-                # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
-                #  value somehow
-                item["total_amount"] = abs(items_taxes[item["item_code"]][1]) + abs(item["net_amount"])
+        items_taxes_json = cast(str | None, item_wise_tax_details[0]["item_wise_tax_detail"]) or '{}'
+        items_taxes = json.loads(items_taxes_json)
+
+    for item in item_lines:
+        if item["item_code"] in items_taxes:
+            tax_percent = abs(items_taxes[item["item_code"]][0])
+            tax_amount = abs(items_taxes[item["item_code"]][1])
+        else:
+            tax_percent = 0.0
+            tax_amount = 0.0
+
+        item["tax_percent"] = tax_percent
+        item["tax_amount"] = tax_amount
+        # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
+        #  value somehow
+        item["total_amount"] = tax_amount + abs(item["net_amount"])
 
     return item_lines
 
@@ -880,7 +888,7 @@ class Einvoice:
         self.get_text_value(field_name="buyer_province_state",
                             source_doc=self.additional_fields_doc,
                             required=False,
-                            xml_name="CountrySubentity",
+                            xml_name="province",
                             min_length=0,
                             max_length=127,
                             rules=["BR-KSA-F-06", "BT-54", "BG-8"],
@@ -1158,13 +1166,19 @@ class Einvoice:
             self.get_float_child_value(field_name="taxes_rate",
                                        field_value=self.sales_invoice_doc.taxes[0].rate,
                                        required=False,
-                                       xml_name="Percent",
+                                       xml_name="taxes_rate",
                                        rules=["BR-KSA-DEC-02", "BR-48", "BR-CO-18", "BT-119", "BG-23"],
                                        parent="invoice")
         except Exception:
             self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
 
-            # VAT exemption reason to be added in customizations
+        # Add Tax category code and Exemption reason
+        tax_category_and_exemption = map_tax_category(self.sales_invoice_doc.tax_category)
+        self.result["invoice"]["tax_category_code"] = tax_category_and_exemption.tax_category_code
+        if tax_category_and_exemption.reason_code:
+            self.result["invoice"]["tax_exemption_reason_code"] = tax_category_and_exemption.reason_code
+        if tax_category_and_exemption.arabic_reason:
+            self.result["invoice"]["tax_exemption_reason"] = tax_category_and_exemption.arabic_reason
 
             # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------

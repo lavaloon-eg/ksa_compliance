@@ -1,5 +1,5 @@
 frappe.ui.form.on("ZATCA Business Settings", {
-    setup: function(frm){
+    setup: function (frm) {
         frm.set_df_property('other_ids', 'cannot_delete_rows', 1);
         frm.set_df_property('other_ids', 'cannot_add_rows', 1);
     },
@@ -10,13 +10,28 @@ frappe.ui.form.on("ZATCA Business Settings", {
     company: function (frm) {
         filter_company_address(frm);
     },
-    check_lava_zatca: function (frm) {
+    setup_zatca_cli: async function (frm) {
+        let response = await frappe.call({
+            method: "ksa_compliance.zatca_cli.setup",
+            args: {
+                override_cli_download_url: frm.doc.override_cli_download_url || '',
+                override_jre_download_url: frm.doc.override_jre_download_url || '',
+            },
+        })
+        if (response.message) {
+            frm.set_value('zatca_cli_path', response.message.cli_path);
+            frm.set_value('java_home', response.message.jre_path);
+            frm.save();
+        }
+    },
+    check_zatca_cli: function (frm) {
         frappe.call({
             freeze: true,
             freeze_message: __('Please wait...'),
-            method: "ksa_compliance.zatca_cli.version",
+            method: "ksa_compliance.zatca_cli.check_setup",
             args: {
-                zatca_path: frm.doc.lava_zatca_path,
+                zatca_cli_path: frm.doc.zatca_cli_path || '',
+                java_home: frm.doc.java_home || '',
             }
         })
     },
@@ -44,14 +59,23 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 label: 'Customer',
                 fieldname: 'customer_id',
                 fieldtype: 'Link',
-                options: 'Customer'
+                options: 'Customer',
+                reqd: 1,
             },
             {
                 label: 'Item',
                 fieldname: 'item_id',
                 fieldtype: 'Link',
-                options: 'Item'
-            }
+                options: 'Item',
+                reqd: 1,
+            },
+            {
+                label: 'Tax Category',
+                fieldname: 'tax_category_id',
+                fieldtype: 'Link',
+                options: 'Tax Category',
+                reqd: 1,
+            },
         ], values => {
             frappe.call({
                 freeze: true,
@@ -61,6 +85,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                     business_settings_id: frm.doc.name,
                     customer_id: values.customer_id,
                     item_id: values.item_id,
+                    tax_category_id: values.tax_category_id,
                 },
             });
         });

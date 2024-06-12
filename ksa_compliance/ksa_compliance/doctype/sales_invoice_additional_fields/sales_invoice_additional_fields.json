@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{sales_invoice}-AdditionalFields",
+ "autoname": "format:{sales_invoice}-AdditionalFields-{invoice_counter}",
  "creation": "2024-01-23 15:33:17.438354",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -21,8 +21,11 @@
   "invoice_counter",
   "invoice_hash",
   "previous_invoice_hash",
+  "column_break_jdre",
   "qr_code",
-  "qr_image",
+  "qr_code_image",
+  "column_break_qbcl",
+  "qr_image_src",
   "buyer_address_tab",
   "buyer_id_section",
   "buyer_vat_registration_number",
@@ -35,7 +38,7 @@
   "buyer_additional_number",
   "buyer_city",
   "buyer_postal_code",
-  "buyer_provincestate",
+  "buyer_province_state",
   "buyer_district",
   "buyer_country_code",
   "invoice_tab",
@@ -189,12 +192,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "buyer_provincestate",
-   "fieldtype": "Data",
-   "label": "Province/State",
-   "read_only": 1
-  },
-  {
    "fieldname": "buyer_district",
    "fieldtype": "Data",
    "label": "District",
@@ -215,6 +212,7 @@
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1,
@@ -502,6 +500,8 @@
    "default": "Ready For Batch",
    "fieldname": "integration_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Integration Status",
    "options": "\nReady For Batch\nResend\nCorrected\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
    "read_only": 1
@@ -561,16 +561,40 @@
    "is_virtual": 1
   },
   {
-   "fieldname": "qr_image",
+   "fieldname": "buyer_province_state",
    "fieldtype": "Data",
+   "label": "Province/State",
+   "read_only": 1
+  },
+  {
+   "columns": 4,
+   "fieldname": "qr_code_image",
+   "fieldtype": "Image",
    "is_virtual": 1,
-   "label": "Qr Image"
+   "label": "QR Code Image",
+   "options": "qr_image_src",
+   "print_width": "100"
+  },
+  {
+   "fieldname": "column_break_jdre",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qbcl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qr_image_src",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Qr Image Source"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-15 21:30:14.759058",
+ "modified": "2024-06-10 21:23:01.008154",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
@@ -578,17 +602,14 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
+   "select": 1,
+   "share": 1
   }
  ],
  "sort_field": "modified",

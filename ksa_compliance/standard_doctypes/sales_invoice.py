@@ -1,7 +1,9 @@
-from typing import cast
+from datetime import date
 
 import frappe
-from datetime import date
+import frappe.utils.background_jobs
+from frappe import _
+from result import is_ok
 
 from ksa_compliance import logger
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import \
@@ -25,7 +27,7 @@ def clear_additional_fields_ignore_list() -> None:
 
 
 def create_sales_invoice_additional_fields_doctype(self, method):
-    if not should_enable_zatca_for_invoice(self.name):
+    if not _should_enable_zatca_for_invoice(self.name):
         logger.info(f"Skipping additional fields for {self.name} because it's before start date")
         return
 
@@ -39,21 +41,12 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         logger.info(f"Skipping additional fields for {self.name} because it's in the ignore list")
         return
 
-    si_additional_fields_doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc("Sales Invoice Additional Fields"))
-    si_additional_fields_doc.sales_invoice = self.name
-
+    si_additional_fields_doc = SalesInvoiceAdditionalFields.create_for_invoice(self.name)
     precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
     is_live_sync = settings.is_live_sync
     if precomputed_invoice:
         logger.info(f"Using precomputed invoice {precomputed_invoice.name} for {self.name}")
-        si_additional_fields_doc.precomputed = True
-        si_additional_fields_doc.precomputed_invoice = precomputed_invoice.name
-        si_additional_fields_doc.invoice_counter = precomputed_invoice.invoice_counter
-        si_additional_fields_doc.uuid = precomputed_invoice.invoice_uuid
-        si_additional_fields_doc.previous_invoice_hash = precomputed_invoice.previous_invoice_hash
-        si_additional_fields_doc.invoice_hash = precomputed_invoice.invoice_hash
-        si_additional_fields_doc.invoice_qr = precomputed_invoice.invoice_qr
-        si_additional_fields_doc.invoice_xml = precomputed_invoice.invoice_xml
+        si_additional_fields_doc.use_precomputed_invoice(precomputed_invoice)
 
         egs_settings = ZATCAEGS.for_device(precomputed_invoice.device_id)
         if not egs_settings:
@@ -62,38 +55,28 @@ def create_sales_invoice_additional_fields_doctype(self, method):
             # EGS Setting overrides company-wide setting
             is_live_sync = egs_settings.is_live_sync
 
-    if self.customer_address:
-        customer_address_doc = frappe.get_doc("Address", self.customer_address)
-        address_info = {
-            "buyer_additional_number": "not available for now",
-            "buyer_street_name": customer_address_doc.get("address_line1"),
-            "buyer_additional_street_name": customer_address_doc.get("address_line2"),
-            "buyer_building_number": customer_address_doc.get("custom_building_number"),
-            "buyer_city": customer_address_doc.get("city"),
-            "buyer_postal_code": customer_address_doc.get("pincode"),
-            "buyer_district": customer_address_doc.get("custom_area"),
-            "buyer_country_code": customer_address_doc.get("country"),
-        }
-        si_additional_fields_doc.update(address_info)
-
-    # We have to insert before submitting to ensure we can properly update the document with the hash, XML, etc.
+    si_additional_fields_doc.insert()
     if is_live_sync:
-        si_additional_fields_doc.insert(ignore_permissions=True)
-        # We need to commit here to ensure saving a draft invoice in live mode before sending it to zatca to handle the Resend scenario.
-        frappe.db.commit()
-        si_additional_fields_doc.submit()
-    else:
-        si_additional_fields_doc.integration_status = "Ready For Batch"
-        si_additional_fields_doc.insert(ignore_permissions=True)
+        # We're running in the context of invoice submission (on_submit hook). We only want to run our ZATCA logic if
+        # the invoice submits successfully after on_submit is run successfully from all apps.
+        frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=si_additional_fields_doc,
+                                             enqueue_after_commit=True)
 
 
-def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
+def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
+    logger.info(f'Submitting {doc.name}')
+    result = doc.submit_to_zatca()
+    message = result.ok_value if is_ok(result) else result.err_value
+    logger.info(f'Submission result: {message}')
+
+
+def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     start_date = date(2024, 3, 1)
 
     if frappe.db.table_exists('Vehicle Booking Item Info'):
         records = frappe.db.sql(
             "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii "
-            "JOIN `tabBooking Vehicle` bv on bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
+            "JOIN `tabBooking Vehicle` bv ON bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
             {'invoice': invoice_id}, as_dict=True)
         if records:
             local_date = records[0]['local_trx_date_time'].date()
@@ -101,3 +84,43 @@ def should_enable_zatca_for_invoice(invoice_id: str) -> bool:
 
     posting_date = frappe.db.get_value('Sales Invoice', invoice_id, 'posting_date')
     return posting_date >= start_date
+
+
+def calculate_tax_amount(self, method):
+    if self.items:
+        for item in self.items:
+            if item.item_tax_template:
+                item_tax_rate = get_tax_template_rate(item.item_tax_template)
+            else:
+                item_tax_rate = sum(account.rate for account in self.taxes)
+            if self.taxes[0].included_in_print_rate:
+                item.custom_tax_total = item.amount - item.net_amount
+            else:
+                item.custom_tax_total = (item.net_amount * item_tax_rate) / 100
+            item.custom_total_after_tax = item.custom_tax_total + item.net_amount
+
+
+def get_tax_template_rate(template_id: str) -> float:
+    item_tax_template = frappe.get_doc("Item Tax Template", template_id)
+    if len(item_tax_template.taxes) > 1:
+        frappe.throw(
+            msg="""
+                One or more items have a tax template with multiple tax accounts which is not currently 
+                supported. Please contact the vendor.
+                """,
+            title="Multiple tax accounts found"
+        )
+    if item_tax_template.disabled:
+        frappe.throw("One or more items has disabled tax template", title="Disabled tax template")
+    return item_tax_template.taxes[0].tax_rate
+
+
+def prevent_cancellation_of_sales_invoice(self, method) -> None:
+    frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
+                 title=_("This Action Is Not Allowed"))
+
+
+def validate_tax_category(self, method):
+    if not self.tax_category:
+        frappe.throw(msg=_("Please choose a Tax Category"),
+                     title=_("Tax Category Missing"))

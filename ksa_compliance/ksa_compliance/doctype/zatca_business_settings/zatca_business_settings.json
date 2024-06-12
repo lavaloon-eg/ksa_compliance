@@ -30,10 +30,18 @@
   "seller_name",
   "vat_registration_number",
   "other_ids",
+  "cli_tab",
+  "cli_setup",
+  "setup_zatca_cli",
+  "column_break_tsik",
+  "zatca_cli_path",
+  "java_home",
+  "check_zatca_cli",
+  "automatic_setup_configuration_section",
+  "override_cli_download_url",
+  "override_jre_download_url",
   "integration_tab",
   "configuration_section",
-  "lava_zatca_path",
-  "check_lava_zatca",
   "validate_generated_xml",
   "column_break_cjdg",
   "fatoora_server_url",
@@ -204,12 +212,6 @@
    "read_only": 1
   },
   {
-   "description": "The path to the executable for lava-zatca CLI, e.g. <pre style=\"display:inline;\">/home/frappe/lava-zatca/bin/lava-zatca</pre>",
-   "fieldname": "lava_zatca_path",
-   "fieldtype": "Data",
-   "label": "Lava Zatca Path"
-  },
-  {
    "fetch_from": "company_address.address_title",
    "fetch_if_empty": 1,
    "fieldname": "company_unit",
@@ -299,12 +301,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.lava_zatca_path",
-   "fieldname": "check_lava_zatca",
-   "fieldtype": "Button",
-   "label": "Check Lava-ZATCA"
-  },
-  {
    "description": "Use the compliance request from onboarding to perform compliance checks for the different invoice types. This is a prerequisite to retrieving a production CSID",
    "fieldname": "perform_compliance_checks",
    "fieldtype": "Button",
@@ -316,11 +312,76 @@
    "fieldname": "validate_generated_xml",
    "fieldtype": "Check",
    "label": "Validate Generated XML"
+  },
+  {
+   "description": "The path to the executable for ZATCA CLI, e.g.<br>\n<pre style=\"display:inline;\">/home/frappe/zatca-cli/bin/zatca-cli</pre>",
+   "fieldname": "zatca_cli_path",
+   "fieldtype": "Data",
+   "label": "CLI Path",
+   "read_only_depends_on": "eval:doc.cli_setup==='Automatic'"
+  },
+  {
+   "depends_on": "eval:doc.zatca_cli_path",
+   "fieldname": "check_zatca_cli",
+   "fieldtype": "Button",
+   "label": "Check ZATCA CLI"
+  },
+  {
+   "default": "Automatic",
+   "description": "<p>The ZATCA CLI is an open-source tool used to generate CSRs, validate, and sign XML sales invoices sent to ZATCA.</p>\n\n<p><b>Automatic:</b> One-click setup downloads the CLI and Java 11 runtime from GitHub by default (configurable)</p>\n<p><b>Manual:</b> You manually deploy the CLI on the server as well as a Java 11 runtime and configure the path to the deployed CLI</p>",
+   "fieldname": "cli_setup",
+   "fieldtype": "Select",
+   "label": "CLI Setup",
+   "options": "Automatic\nManual",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.cli_setup===\"Automatic\"",
+   "description": "If left empty, the CLI will be downloaded from <a href=\"https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.0/zatca-cli-2.0.0.zip\">https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.0/zatca-cli-2.0.0.zip</a>",
+   "fieldname": "override_cli_download_url",
+   "fieldtype": "Data",
+   "label": "Override CLI Download URL"
+  },
+  {
+   "depends_on": "eval:doc.cli_setup===\"Automatic\"",
+   "description": "If left empty, JRE 11 will be downloaded from <a href=\"https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz\">https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23+9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz</a>",
+   "fieldname": "override_jre_download_url",
+   "fieldtype": "Data",
+   "label": "Override JRE Download URL"
+  },
+  {
+   "depends_on": "eval:doc.cli_setup==='Automatic'",
+   "fieldname": "setup_zatca_cli",
+   "fieldtype": "Button",
+   "label": "Download and Set Up ZATCA CLI"
+  },
+  {
+   "description": "<pre style=\"display:inline;\">JAVA_HOME</pre> path used for running the CLI. Leave blank to use the default system Java installation",
+   "fieldname": "java_home",
+   "fieldtype": "Data",
+   "label": "Java Home",
+   "read_only_depends_on": "eval:doc.cli_setup === 'Automatic'"
+  },
+  {
+   "fieldname": "cli_tab",
+   "fieldtype": "Tab Break",
+   "label": "CLI"
+  },
+  {
+   "fieldname": "column_break_tsik",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.cli_setup === 'Automatic'",
+   "fieldname": "automatic_setup_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Automatic Setup Configuration"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-15 04:00:50.263078",
+ "modified": "2024-06-05 11:52:42.628383",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
