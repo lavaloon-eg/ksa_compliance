@@ -775,48 +775,22 @@ class Einvoice:
 
     def get_buyer_details(self, invoice_type):
         # --------------------------- START Buyer Details fields ------------------------------
+        is_standard = (invoice_type == "Standard")
+        self.get_list_value(field_name="other_buyer_identification",
+                            source_doc=self.sales_invoice_doc,
+                            required=is_standard and not self.additional_fields_doc.buyer_vat_registration_number,
+                            xml_name="PartyIdentification",
+                            rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
+                            parent="buyer_details")
 
-        if invoice_type == "Standard":
-            if self.additional_fields_doc.buyer_vat_registration_number is None or "":
-                self.get_list_value(field_name="other_buyer_identification",
-                                    # TODO: Fix Add to doctype customer and additional
-                                    source_doc=self.sales_invoice_doc,
-                                    required=True,
-                                    xml_name="PartyIdentification",
-                                    rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
-                                    parent="buyer_details")
-            else:
-                self.get_list_value(field_name="other_buyer_identification",
-                                    source_doc=self.sales_invoice_doc,
-                                    required=False,
-                                    xml_name="PartyIdentification",
-                                    rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
-                                    parent="buyer_details")
-        if invoice_type == "Simplified":
-            self.get_list_value(field_name="other_buyer_identification",
-                                source_doc=self.sales_invoice_doc,
-                                required=False,
-                                xml_name="PartyIdentification",
-                                rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
-                                parent="buyer_details")
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="buyer_street_name",
-                                source_doc=self.additional_fields_doc,
-                                required=True,
-                                xml_name="street_name",
-                                min_length=1,
-                                max_length=127,
-                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-50", "BG-8"],
-                                parent="buyer_details")
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_street_name",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="street_name",
-                                min_length=0,
-                                max_length=127,
-                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-50", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="buyer_street_name",
+                            source_doc=self.additional_fields_doc,
+                            required=is_standard,
+                            xml_name="street_name",
+                            min_length=1,
+                            max_length=127,
+                            rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-50", "BG-8"],
+                            parent="buyer_details")
 
         self.get_text_value(field_name="buyer_additional_street_name",
                             source_doc=self.additional_fields_doc,
@@ -827,63 +801,35 @@ class Einvoice:
                             rules=["BR-KSA-F-06", "BT-51", "BG-8"],
                             parent="buyer_details")
 
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="buyer_building_number",
-                                source_doc=self.additional_fields_doc,
-                                required=True,
-                                xml_name="building_number",
-                                rules=["KSA-18", "BG-8"],
-                                parent="buyer_details")
-
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_building_number",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="building_number",
-                                rules=["KSA-18", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="buyer_building_number",
+                            source_doc=self.additional_fields_doc,
+                            required=is_standard,
+                            xml_name="building_number",
+                            rules=["KSA-18", "BG-8"],
+                            parent="buyer_details")
 
         self.get_text_value(field_name="buyer_additional_number",
-                            # TODO: add additional number field for address if needed
                             source_doc=self.additional_fields_doc,
                             required=False,
                             xml_name="plot_identification",
                             rules=["KSA-19", "BG-8"],
                             parent="buyer_details")
 
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="buyer_city",
-                                source_doc=self.additional_fields_doc,
-                                required=True,
-                                xml_name="city_name",
-                                min_length=1,
-                                max_length=127,
-                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-52", "BG-8"],
-                                parent="buyer_details")
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_city",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="city_name",
-                                min_length=0,
-                                max_length=127,
-                                rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-52", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="buyer_city",
+                            source_doc=self.additional_fields_doc,
+                            required=is_standard,
+                            xml_name="city_name",
+                            min_length=1,
+                            max_length=127,
+                            rules=["BR-KSA-10", "BR-KSA-63", "BR-KSA-F-06", "BR-10", "BT-52", "BG-8"],
+                            parent="buyer_details")
 
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="postal_code",
-                                source_doc=self.business_settings_doc,
-                                required=True,
-                                xml_name="postal_zone",
-                                rules=["BR-KSA-09", "BR-KSA-66", "BR-08", "BT-38", "BG-5"],
-                                parent="buyer_details")
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_postal_code",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="postal_zone",
-                                rules=["BR-10", "BT-53", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="postal_code",
+                            source_doc=self.business_settings_doc,
+                            required=is_standard,
+                            xml_name="postal_zone",
+                            rules=["BR-KSA-09", "BR-KSA-66", "BR-08", "BT-38", "BG-5"],
+                            parent="buyer_details")
 
         self.get_text_value(field_name="buyer_province_state",
                             source_doc=self.additional_fields_doc,
@@ -894,85 +840,37 @@ class Einvoice:
                             rules=["BR-KSA-F-06", "BT-54", "BG-8"],
                             parent="buyer_details")
 
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="buyer_district",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="city_subdivision_name",
-                                min_length=0,
-                                max_length=127,
-                                rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="buyer_district",
+                            source_doc=self.additional_fields_doc,
+                            required=False,
+                            xml_name="city_subdivision_name",
+                            min_length=0,
+                            max_length=127,
+                            rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"],
+                            parent="buyer_details")
 
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_district",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="city_subdivision_name",
-                                min_length=0,
-                                max_length=127,
-                                rules=["BR-KSA-63", "BR-KSA-F-06", "KSA-4", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="buyer_country_code",
+                            source_doc=self.additional_fields_doc,
+                            required=is_standard,
+                            xml_name="country_code",
+                            rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"],
+                            parent="buyer_details")
 
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="buyer_country_code",
-                                source_doc=self.additional_fields_doc,
-                                required=True,
-                                xml_name="country_code",
-                                rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="buyer_vat_registration_number",
+                            source_doc=self.additional_fields_doc,
+                            required=is_standard and not self.has_any_other_buyer_id(),
+                            xml_name="company_id",
+                            rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
+                            parent="buyer_details")
 
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_country_code",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="country_code",
-                                rules=["BR-KSA-10", "BR-KSA-63", "BR-CL-14", "BR-10", "BT-55", "BG-8"],
-                                parent="buyer_details")
-
-        if invoice_type == "Standard":
-            if self.has_any_other_buyer_id():
-                self.get_text_value(field_name="buyer_vat_registration_number",
-                                    source_doc=self.additional_fields_doc,
-                                    required=False,
-                                    xml_name="company_id",
-                                    rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
-                                    parent="buyer_details")
-            else:
-                self.get_text_value(field_name="buyer_vat_registration_number",
-                                    source_doc=self.additional_fields_doc,
-                                    required=True,
-                                    xml_name="company_id",
-                                    rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
-                                    parent="buyer_details")
-
-        elif invoice_type == "Simplified":
-            self.get_text_value(field_name="buyer_vat_registration_number",
-                                source_doc=self.additional_fields_doc,
-                                required=False,
-                                xml_name="company_id",
-                                rules=["BR-KSA-44", "BR-KSA-46", "BT-48", "BG-7"],
-                                parent="buyer_details")
-
-        if invoice_type == "Standard":
-            self.get_text_value(field_name="customer_name",
-                                source_doc=self.sales_invoice_doc,
-                                required=True,
-                                xml_name="registration_name",
-                                min_length=1,
-                                max_length=1000,
-                                rules=["BR-KSA-25", "BR-KSA-42", "BR-KSA-71", "BR-KSA-F-06", "BT-44", "BG-7"],
-                                parent="buyer_details")
-
-        elif invoice_type == "Simplified" and self.sales_invoice_doc.get("customer_name"):
-            self.get_text_value(field_name="customer_name",
-                                source_doc=self.sales_invoice_doc,
-                                required=False,
-                                xml_name="registration_name",
-                                min_length=0,
-                                max_length=1000,
-                                rules=["BR-KSA-25", "BR-KSA-42", "BR-KSA-71", "BR-KSA-F-06", "BT-44", "BG-7"],
-                                parent="buyer_details")
+        self.get_text_value(field_name="customer_name",
+                            source_doc=self.sales_invoice_doc,
+                            required=is_standard,
+                            xml_name="registration_name",
+                            min_length=1,
+                            max_length=1000,
+                            rules=["BR-KSA-25", "BR-KSA-42", "BR-KSA-71", "BR-KSA-F-06", "BT-44", "BG-7"],
+                            parent="buyer_details")
 
         # --------------------------- END Buyer Details fields ------------------------------
 
