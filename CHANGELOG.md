@@ -9,7 +9,6 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Support arabic translation for ZATCA tax categories.
-* Remove Qr code from standard invoice print format as per ZATCA requirements.
 * Add link for related integration log in Sales Invoice Additional Fields.
 * Fix buyer country code in ZATCA XML
   * We used to include the country ID itself (e.g. Saudi Arabia) instead of the code (SA)
