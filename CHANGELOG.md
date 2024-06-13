@@ -22,6 +22,7 @@ to a section with the version name.
   * Note that this requires redoing the onboarding (production only) if the setting is changed because it requires 
     doing compliance checks for that invoice type.
 * Update clearance API integration to send the "Clearance-Status" flag
+* Fix company ID in buyer details (XML)
 
 ## 0.17.0
 

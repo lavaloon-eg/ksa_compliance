@@ -112,7 +112,7 @@
                 </cac:Country>
                 {% endif %}
             </cac:PostalAddress>
-            {% if buyer_details.vat_id %}
+            {% if buyer_details.company_id %}
             <cac:PartyTaxScheme>
                 <cbc:CompanyID>{{ buyer_details.company_id }}</cbc:CompanyID>
                 <cac:TaxScheme>
