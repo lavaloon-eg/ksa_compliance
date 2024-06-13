@@ -12,12 +12,15 @@ to a section with the version name.
 * Remove Qr code from standard invoice print format as per ZATCA requirements.
 * Add link for related integration log in Sales Invoice Additional Fields.
 * Fix buyer country code in ZATCA XML
-  * We used to include the country ID itself (e.g. Saudi Arabia) instead
-of the code (SA)
+  * We used to include the country ID itself (e.g. Saudi Arabia) instead of the code (SA)
 * Fix detection of standard sales invoices when ZATCA business settings is set to "Let the system decide"
-  * We rely on whether the buyer has a VAT registration number, but we were
-setting buyer info after we've already detected invoice type, resulting
-in always thinking it's a simplified invoice.
+  * We rely on whether the buyer has a VAT registration number, but we were setting buyer info after we've already
+    detected invoice type, resulting in always thinking it's a simplified invoice.
+* Specify invoice types when generating CSR
+  * We used to hard code 0100 (simplified). Now we generate 1000 (standard), 0100 (simplified), or 1100 (both) depending
+    on the configuration in ZATCA business settings
+  * Note that this requires redoing the onboarding (production only) if the setting is changed because it requires 
+    doing compliance checks for that invoice type.
 
 ## 0.17.0
 
