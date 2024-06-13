@@ -14,6 +14,10 @@ to a section with the version name.
 * Fix buyer country code in ZATCA XML
   * We used to include the country ID itself (e.g. Saudi Arabia) instead
 of the code (SA)
+* Fix detection of standard sales invoices when ZATCA business settings is set to "Let the system decide"
+  * We rely on whether the buyer has a VAT registration number, but we were
+setting buyer info after we've already detected invoice type, resulting
+in always thinking it's a simplified invoice.
 
 ## 0.17.0
 
