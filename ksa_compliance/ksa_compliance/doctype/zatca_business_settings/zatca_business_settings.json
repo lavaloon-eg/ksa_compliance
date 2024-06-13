@@ -194,6 +194,7 @@
   },
   {
    "default": "Let the system decide (both)",
+   "description": "Changing this setting requires redoing the onboarding process, starting from CSR generation.",
    "fieldname": "type_of_business_transactions",
    "fieldtype": "Select",
    "label": "Type of Business Transactions",
@@ -381,7 +382,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-05 11:52:42.628383",
+ "modified": "2024-06-13 15:27:21.790960",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",

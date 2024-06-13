@@ -159,11 +159,15 @@ class SalesInvoiceAdditionalFields(Document):
         sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
         self.uuid = str(uuid.uuid4())
         self.tax_currency = "SAR"  # Review: Set as "SAR" as a default tax currency value
+
+        # FIXME: Buyer details must come before invoice type and code, since this information relies on buyer details
+        #   This temporal dependency is not great
+        self._set_buyer_details(sales_invoice)
+
         self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = "0100000" if self._get_invoice_type(settings) == 'Standard' else '0200000'
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
-        self._set_buyer_details(sales_invoice)
         self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
 
         self._prepare_for_zatca(settings)
@@ -180,7 +184,7 @@ class SalesInvoiceAdditionalFields(Document):
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
-        invoice_xml = generate_xml_file(einvoice.result, invoice_type)
+        invoice_xml = generate_xml_file(einvoice.result)
         result = cli.sign_invoice(settings.zatca_cli_path, settings.java_home, invoice_xml, cert_path,
                                   settings.private_key_path)
 
@@ -284,7 +288,7 @@ class SalesInvoiceAdditionalFields(Document):
         self.buyer_postal_code = address.pincode
         self.buyer_district = address.get("custom_area")
         self.buyer_province_state = address.state
-        self.buyer_country_code = address.country
+        self.buyer_country_code = frappe.get_value('Country', address.country, 'code')
 
     def _send_xml_via_api(self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType,
                           server_url: str, token: str, secret: str) -> ZatcaIntegrationStatus:
