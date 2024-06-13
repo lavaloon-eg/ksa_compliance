@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.18.0
+
 * Support arabic translation for ZATCA tax categories.
 * Add link for related integration log in Sales Invoice Additional Fields.
 * Fix buyer country code in ZATCA XML
