@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:company",
  "creation": "2024-05-23 15:10:35.449147",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -54,10 +55,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-10 10:49:53.394990",
+ "modified": "2024-06-12 14:35:12.719923",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Phase 1 Business Settings",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -87,5 +89,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "company"
 }

@@ -7,7 +7,9 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Support arabic translation for ZATCA tax categories.
+* Remove Qr code from standard invoice print format as per ZATCA requirements.
+* Add link for related integration log in Sales Invoice Additional Fields.
 ## 0.17.0
 
 * Fix errors from non-escaped content in simplified invoice XML: Customer name, item name, etc.
