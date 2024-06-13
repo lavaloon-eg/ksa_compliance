@@ -66,7 +66,7 @@ class Einvoice:
         self.get_buyer_details(invoice_type=invoice_type)
 
         # Get E-Invoice Fields
-        self.get_e_invoice_details()  # TODO: Implement the rest of fields
+        self.get_e_invoice_details(invoice_type)
 
         # TODO: Delivery (Supply start and end dates)
         # TODO: Allowance Charge (Discount)
@@ -874,7 +874,9 @@ class Einvoice:
 
         # --------------------------- END Buyer Details fields ------------------------------
 
-    def get_e_invoice_details(self):
+    def get_e_invoice_details(self, invoice_type: str):
+        is_standard = (invoice_type == 'Standard')
+
         # --------------------------- START Invoice fields ------------------------------
         # --------------------------- START Invoice Basic info ------------------------------
         self.get_text_value(field_name="name",
@@ -904,6 +906,15 @@ class Einvoice:
                             xml_name="issue_time",
                             rules=["KSA-25", "BR-KSA-70"],
                             parent="invoice")
+
+        if is_standard:
+            # TODO: Review this with business and finalize
+            self.get_date_value(field_name="due_date",
+                                source_doc=self.sales_invoice_doc,
+                                required=True,
+                                xml_name="delivery_date",
+                                rules=[],
+                                parent="invoice")
 
         self.get_text_value(field_name="invoice_type_code",
                             source_doc=self.additional_fields_doc,

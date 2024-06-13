@@ -23,6 +23,7 @@ to a section with the version name.
     doing compliance checks for that invoice type.
 * Update clearance API integration to send the "Clearance-Status" flag
 * Fix company ID in buyer details (XML)
+* Use due date as delivery date for standard invoices
 
 ## 0.17.0
 

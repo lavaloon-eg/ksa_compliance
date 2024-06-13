@@ -129,7 +129,7 @@
     </cac:AccountingCustomerParty>
     {% if invoice.delivery_date %}
     <cac:Delivery>
-        <cbc:ActualDeliveryDate>{{ invoice.issue_date }}</cbc:ActualDeliveryDate>
+        <cbc:ActualDeliveryDate>{{ invoice.delivery_date }}</cbc:ActualDeliveryDate>
     </cac:Delivery>
     {% endif %}
     {% if invoice.payment_means_type_code or invoice.instruction_note %}
