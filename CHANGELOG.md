@@ -23,6 +23,9 @@ to a section with the version name.
 * Update clearance API integration to send the "Clearance-Status" flag
 * Fix company ID in buyer details (XML)
 * Use due date as delivery date for standard invoices
+* Rely on standard calculations of item tax details in print format.
+  * Remove custom tax total and custom total after tax from sales invoice items.
+* Remove custom qr code field in sales invoice
 
 ## 0.17.0
 
