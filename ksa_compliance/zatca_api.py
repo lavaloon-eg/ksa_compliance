@@ -158,7 +158,7 @@ def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash
         "Accept-Version": "V2",
     }
 
-    url = "invoices/clearances/single" if mode == ZatcaSendMode.Production else "compliance/invoices"
+    url = "invoices/clearance/single" if mode == ZatcaSendMode.Production else "compliance/invoices"
     return api_call(server, url, headers, body, ReportOrClearInvoiceResult.from_json, try_get_report_or_clear_error,
                     auth=HTTPBasicAuth(security_token, secret))
 
