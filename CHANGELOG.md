@@ -21,6 +21,7 @@ to a section with the version name.
     on the configuration in ZATCA business settings
   * Note that this requires redoing the onboarding (production only) if the setting is changed because it requires 
     doing compliance checks for that invoice type.
+* Update clearance API integration to send the "Clearance-Status" flag
 
 ## 0.17.0
 

@@ -51,6 +51,7 @@ class WarningOrError:
 @dataclass
 class ReportOrClearInvoiceResult:
     status: Optional[str]
+    invoice_hash: Optional[str]
     cleared_invoice: Optional[str]
     warnings: List[WarningOrError]
     errors: List[WarningOrError]
@@ -82,6 +83,7 @@ class ReportOrClearInvoiceResult:
         #
         # So we're going to try to parse both
         status = data.get('reportingStatus') or data.get('status')
+        invoice_hash = data.get('invoiceHash')
         cleared_invoice = data.get('clearedInvoice')
         warnings, errors = [], []
         if data.get('warnings'):
@@ -92,7 +94,7 @@ class ReportOrClearInvoiceResult:
             errors = [WarningOrError.from_json(e) for e in data['errors']]
         if data.get('validationResults') and data.get('validationResults').get('errorMessages'):
             errors = [WarningOrError.from_json(e) for e in data['validationResults']['errorMessages']]
-        return ReportOrClearInvoiceResult(status, cleared_invoice, warnings, errors)
+        return ReportOrClearInvoiceResult(status, invoice_hash, cleared_invoice, warnings, errors)
 
 
 @dataclass
@@ -152,6 +154,7 @@ def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash
         "invoice": b64_xml
     }
     headers = {
+        "Clearance-Status": "1",
         "Accept-Version": "V2",
     }
 
