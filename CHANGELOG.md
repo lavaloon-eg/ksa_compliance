@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.19.0
+
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions
   * If it's "Let the system decide", we prompt the user for simplified and standard customers and perform compliance
     for both
