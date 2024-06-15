@@ -11,6 +11,8 @@ to a section with the version name.
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions
   * If it's "Let the system decide", we prompt the user for simplified and standard customers and perform compliance
     for both
+* Do not require a tax category if the sales invoice company does not have an enabled ZATCA phase 2 integration (`ZATCA
+  Business Settings` with `Enable ZATCA Integration` checked)
 
 ## 0.18.0
 

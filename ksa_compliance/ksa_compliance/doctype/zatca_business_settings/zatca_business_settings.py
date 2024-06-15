@@ -213,6 +213,11 @@ class ZATCABusinessSettings(Document):
 
         return cast(ZATCABusinessSettings, frappe.get_doc("ZATCA Business Settings", business_settings_id))
 
+    @staticmethod
+    def is_enabled_for_company(company_id: str) -> bool:
+        return bool(frappe.db.get_value('ZATCA Business Settings',
+                                        filters={'company': company_id, 'enable_zatca_integration': True}))
+
     def _generate_csr(self) -> cli.CsrResult:
         config = frappe.render_template('ksa_compliance/templates/csr-config.properties', is_path=True,
                                         context=self.csr_config)
