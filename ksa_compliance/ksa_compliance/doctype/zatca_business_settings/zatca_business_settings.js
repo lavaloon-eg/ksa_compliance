@@ -36,8 +36,8 @@ frappe.ui.form.on("ZATCA Business Settings", {
         })
     },
     create_csr: function (frm) {
-        frappe.prompt(__('OTP'), ({value}) => {
-            frappe.call({
+        frappe.prompt(__('OTP'), async ({value}) => {
+            await frappe.call({
                 freeze: true,
                 freeze_message: __('Please wait...'),
                 method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.onboard",
@@ -46,6 +46,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                     otp: value
                 },
             });
+            frm.reload_doc();
         });
     },
     perform_compliance_checks: function (frm) {
@@ -54,14 +55,48 @@ frappe.ui.form.on("ZATCA Business Settings", {
             return;
         }
 
-        frappe.prompt([
-            {
-                label: 'Customer',
-                fieldname: 'customer_id',
+
+        let simplified = frm.doc.type_of_business_transactions === 'Let the system decide (both)' ||
+            frm.doc.type_of_business_transactions === 'Simplified Tax Invoices';
+        let standard  = frm.doc.type_of_business_transactions === 'Let the system decide (both)' ||
+            frm.doc.type_of_business_transactions === 'Standard Tax Invoices';
+        let customer_fields = [];
+        if (simplified)
+            customer_fields.push({
+                label: 'Simplified Tax Customer',
+                fieldname: 'simplified_customer_id',
                 fieldtype: 'Link',
                 options: 'Customer',
                 reqd: 1,
-            },
+                get_query: function () {
+                    return {
+                        filters: [
+                            ["Additional Buyer IDs", "value", "is", "not set"],
+                            ["Customer", "custom_vat_registration_number", "is", "not set"]
+                        ]
+                    }
+                }
+            });
+
+        if (standard) {
+            customer_fields.push({
+                label: 'Standard Tax Customer',
+                fieldname: 'standard_customer_id',
+                fieldtype: 'Link',
+                options: 'Customer',
+                reqd: 1,
+                get_query: function () {
+                    return {
+                        // TODO: We should also pick up customers who have other IDs, but or_filters don't work here
+                        filters: [
+                            ["Customer", "custom_vat_registration_number", "is", "set"]
+                        ]
+                    }
+                }
+            });
+        }
+
+        let fields = customer_fields.concat([
             {
                 label: 'Item',
                 fieldname: 'item_id',
@@ -76,14 +111,17 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 options: 'Tax Category',
                 reqd: 1,
             },
-        ], values => {
+        ])
+
+        frappe.prompt(fields, values => {
             frappe.call({
                 freeze: true,
                 freeze_message: 'Please wait...',
                 method: "ksa_compliance.compliance_checks.perform_compliance_checks",
                 args: {
                     business_settings_id: frm.doc.name,
-                    customer_id: values.customer_id,
+                    simplified_customer_id: values.simplified_customer_id,
+                    standard_customer_id: values.standard_customer_id,
                     item_id: values.item_id,
                     tax_category_id: values.tax_category_id,
                 },
