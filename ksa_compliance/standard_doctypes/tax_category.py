@@ -81,7 +81,7 @@ def _reason_to_code_and_arabic(reason: str, input_reason: Optional[str] = None) 
             "reason_code": "VATEX-SA-34-4",
             "arabic_reason": "توريد وسائل النقل المؤهلة",
         },
-        "Any services relating to Goods or passenger transportation, as defined in article twenty five of these "
+        "Any services relating to Goods or passenger transportation as defined in article twenty five of these "
         "Regulations": {
             "reason_code": "VATEX-SA-34-5",
             "arabic_reason": "الخدمات ذات الصلة بنقل السلع او الركاب، وفقاً للتعريف الوارد بالمادة الخامسة و العشرين "

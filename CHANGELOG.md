@@ -8,6 +8,35 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.19.0
+
+* Update compliance to handle both simplified and standard checks based on the configured type of transactions
+  * If it's "Let the system decide", we prompt the user for simplified and standard customers and perform compliance
+    for both
+* Do not require a tax category if the sales invoice company does not have an enabled ZATCA phase 2 integration (`ZATCA
+  Business Settings` with `Enable ZATCA Integration` checked)
+
+## 0.18.0
+
+* Support arabic translation for ZATCA tax categories.
+* Add link for related integration log in Sales Invoice Additional Fields.
+* Fix buyer country code in ZATCA XML
+  * We used to include the country ID itself (e.g. Saudi Arabia) instead of the code (SA)
+* Fix detection of standard sales invoices when ZATCA business settings is set to "Let the system decide"
+  * We rely on whether the buyer has a VAT registration number, but we were setting buyer info after we've already
+    detected invoice type, resulting in always thinking it's a simplified invoice.
+* Specify invoice types when generating CSR
+  * We used to hard code 0100 (simplified). Now we generate 1000 (standard), 0100 (simplified), or 1100 (both) depending
+    on the configuration in ZATCA business settings
+  * Note that this requires redoing the onboarding (production only) if the setting is changed because it requires 
+    doing compliance checks for that invoice type.
+* Update clearance API integration to send the "Clearance-Status" flag
+* Fix company ID in buyer details (XML)
+* Use due date as delivery date for standard invoices
+* Rely on standard calculations of item tax details in print format.
+  * Remove custom tax total and custom total after tax from sales invoice items.
+* Remove custom qr code field in sales invoice
+
 ## 0.17.0
 
 * Fix errors from non-escaped content in simplified invoice XML: Customer name, item name, etc.

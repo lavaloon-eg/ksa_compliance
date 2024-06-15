@@ -86,41 +86,11 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     return posting_date >= start_date
 
 
-def calculate_tax_amount(self, method):
-    if self.items:
-        for item in self.items:
-            if item.item_tax_template:
-                item_tax_rate = get_tax_template_rate(item.item_tax_template)
-            else:
-                item_tax_rate = sum(account.rate for account in self.taxes)
-            if self.taxes[0].included_in_print_rate:
-                item.custom_tax_total = item.amount - item.net_amount
-            else:
-                item.custom_tax_total = (item.net_amount * item_tax_rate) / 100
-            item.custom_total_after_tax = item.custom_tax_total + item.net_amount
-
-
-def get_tax_template_rate(template_id: str) -> float:
-    item_tax_template = frappe.get_doc("Item Tax Template", template_id)
-    if len(item_tax_template.taxes) > 1:
-        frappe.throw(
-            msg="""
-                One or more items have a tax template with multiple tax accounts which is not currently 
-                supported. Please contact the vendor.
-                """,
-            title="Multiple tax accounts found"
-        )
-    if item_tax_template.disabled:
-        frappe.throw("One or more items has disabled tax template", title="Disabled tax template")
-    return item_tax_template.taxes[0].tax_rate
-
-
 def prevent_cancellation_of_sales_invoice(self, method) -> None:
     frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
                  title=_("This Action Is Not Allowed"))
 
 
 def validate_tax_category(self, method):
-    if not self.tax_category:
-        frappe.throw(msg=_("Please choose a Tax Category"),
-                     title=_("Tax Category Missing"))
+    if ZATCABusinessSettings.is_enabled_for_company(self.company) and not self.tax_category:
+        frappe.throw(msg=_("Please choose a Tax Category"), title=_("Tax Category Missing"))

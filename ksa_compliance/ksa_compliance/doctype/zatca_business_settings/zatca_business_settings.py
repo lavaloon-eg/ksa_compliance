@@ -25,7 +25,8 @@ class ZATCABusinessSettings(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         additional_street: DF.Data | None
         building_number: DF.Data | None
@@ -57,10 +58,12 @@ class ZATCABusinessSettings(Document):
         seller_name: DF.Data
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
-        type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        type_of_business_transactions: DF.Literal[
+            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
         validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
         zatca_cli_path: DF.Data | None
+
     # end: auto-generated types
 
     def after_insert(self):
@@ -175,6 +178,13 @@ class ZATCABusinessSettings(Document):
 
     @property
     def csr_config(self) -> dict:
+        if self.invoice_mode == InvoiceMode.Standard:
+            invoice_type = '1000'
+        elif self.invoice_mode == InvoiceMode.Simplified:
+            invoice_type = '0100'
+        else:
+            invoice_type = '1100'
+
         return {
             'unit_common_name': self.company_unit,  # Review: Same as unit_name
             'unit_serial_number': self.company_unit_serial,
@@ -182,7 +192,7 @@ class ZATCABusinessSettings(Document):
             'unit_name': self.company_unit or 'Main Branch',  # Review: Use default value?
             'organization_name': self.company,
             'country': self.country_code.upper(),
-            'invoice_type': '0100',  # Review: Hard-coded
+            'invoice_type': invoice_type,
             'address': self._format_address(),
             'category': self.company_category,
         }
@@ -202,6 +212,11 @@ class ZATCABusinessSettings(Document):
             return None
 
         return cast(ZATCABusinessSettings, frappe.get_doc("ZATCA Business Settings", business_settings_id))
+
+    @staticmethod
+    def is_enabled_for_company(company_id: str) -> bool:
+        return bool(frappe.db.get_value('ZATCA Business Settings',
+                                        filters={'company': company_id, 'enable_zatca_integration': True}))
 
     def _generate_csr(self) -> cli.CsrResult:
         config = frappe.render_template('ksa_compliance/templates/csr-config.properties', is_path=True,
