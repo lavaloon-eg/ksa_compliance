@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Fix calculation of sum of allowance on invoice to be (invoice discount amount) + (sum discount amount on item)
 ## 0.19.0
 
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions
