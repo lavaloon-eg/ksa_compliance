@@ -8,6 +8,7 @@ to a section with the version name.
 
 ## Unreleased Changes
 * Fix calculation of sum of allowance on invoice to be (invoice discount amount) + (sum discount amount on item)
+* Validate that sales invoice has tax rate in Sales Taxes and Charges Table in case of enabled ZATCA Phase 2 integration.
 ## 0.19.0
 
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions
