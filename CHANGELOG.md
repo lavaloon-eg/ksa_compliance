@@ -7,7 +7,9 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Use item_code instead of item_name when accessing item tax details in print format of phase 1 and phase 2.
+* Fix a bug in phase 1 print format the company address is displayed for the buyer instead of the buyer address in case 
+  of Standard Tax Invoice.
 ## 0.19.0
 
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions
