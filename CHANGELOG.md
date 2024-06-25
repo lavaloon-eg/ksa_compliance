@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Update ZATCA workspace
+  * Add link to overall integration dashboard
+  * Add link to phase 1 business settings
+  * Add link to tax categories
+
 ## 0.19.0
 
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions
