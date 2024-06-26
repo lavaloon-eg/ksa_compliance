@@ -17,7 +17,7 @@ from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
 
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
-DEFAULT_CLI_URL = 'https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.0/zatca-cli-2.0.0.zip'
+DEFAULT_CLI_URL = 'https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.1/zatca-cli-2.0.1.zip'
 CLI_DIRECTORY = 'zatca'  # Relative to the 'sites' directory
 
 
@@ -139,20 +139,21 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         progress_callback(ft('Done'), 100)
 
 
-def generate_csr(zatca_cli_path: str, java_home: Optional[str], vat_registration_number: str, config: str) -> CsrResult:
+def generate_csr(zatca_cli_path: str, java_home: Optional[str], vat_registration_number: str, config: str,
+                 simulation=False) -> CsrResult:
     """
     Generates a CSR for a given VAT registration number. The VAT registration is used to name the resulting
     CSR and private key files.
 
     Currently, both files are stored in 'sites/' and named '{vat}-.csr' and '{vat}.privkey'
-
-    TODO: Revisit this, especially with respect to the private key. ZATCA requires it to not be exportable.
     """
     config_path = write_temp_file(config, f'csr-{vat_registration_number}.properties')
     csr_path = f'{vat_registration_number}.csr'
     private_key_path = f'{vat_registration_number}.privkey'
-    result = run_command(zatca_cli_path, ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path],
-                         java_home=java_home)
+    args = ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path]
+    if simulation:
+        args.append('-s')
+    result = run_command(zatca_cli_path, args, java_home=java_home)
     logger.info(result.msg)
     result.throw_if_failure()
     with open(csr_path, 'rt') as file:
