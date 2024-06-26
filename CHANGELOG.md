@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix parsing of ZATCA API responses
+  * This should result in displaying actual error messages instead of just reporting the HTTP exception
+
 ## 0.20.0
 
 * Update ZATCA workspace
