@@ -107,6 +107,10 @@ class ZATCABusinessSettings(Document):
         return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal')
 
     @property
+    def is_simulation_server(self) -> bool:
+        return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation')
+
+    @property
     def _sandbox_private_key_path(self) -> str:
         """
         Returns the path of the sandbox private key
@@ -223,7 +227,8 @@ class ZATCABusinessSettings(Document):
                                         context=self.csr_config)
 
         logger.info(f"CSR config: {config}")
-        return cli.generate_csr(self.zatca_cli_path, self.java_home, self.vat_registration_number, config)
+        return cli.generate_csr(self.zatca_cli_path, self.java_home, self.vat_registration_number, config,
+                                simulation=self.is_simulation_server)
 
     def _format_address(self) -> str:
         """

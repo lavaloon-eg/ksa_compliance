@@ -10,6 +10,8 @@ to a section with the version name.
 
 * Fix parsing of ZATCA API responses
   * This should result in displaying actual error messages instead of just reporting the HTTP exception
+* Fix simulation environment compliance CSID request
+  * Requires ZATCA CLI version >= 2.0.1
 
 ## 0.20.0
 
