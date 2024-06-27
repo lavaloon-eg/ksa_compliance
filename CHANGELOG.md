@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.20.1
+
 * Fix parsing of ZATCA API responses
   * This should result in displaying actual error messages instead of just reporting the HTTP exception
 * Fix simulation environment compliance CSID request
