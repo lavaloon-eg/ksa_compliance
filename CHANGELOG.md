@@ -8,6 +8,25 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.20.1
+
+* Fix parsing of ZATCA API responses
+  * This should result in displaying actual error messages instead of just reporting the HTTP exception
+* Fix simulation environment compliance CSID request
+  * Requires ZATCA CLI version >= 2.0.1
+
+## 0.20.0
+
+* Update ZATCA workspace
+  * Add link to overall integration dashboard
+  * Add link to phase 1 business settings
+  * Add link to tax categories
+* Use `item_code` instead of `item_name` when accessing item tax details in print format of phase 1 and phase 2
+* Fix a bug in phase 1 print format where the company address is displayed for the buyer instead of the buyer address in case 
+  of Standard Tax Invoice
+* Fix calculation of sum of allowance on invoice to be (invoice discount amount) + (sum discount amount on item)
+* Validate that sales invoice has tax rate in Sales Taxes and Charges Table in case of enabled ZATCA Phase 2 integration
+
 ## 0.19.0
 
 * Update compliance to handle both simplified and standard checks based on the configured type of transactions

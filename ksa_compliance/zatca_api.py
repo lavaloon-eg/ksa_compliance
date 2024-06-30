@@ -127,7 +127,8 @@ def get_production_csid(server: str, compliance_request_id: str, otp: str, secur
 
 
 def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                   secret: str, mode: ZatcaSendMode) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+                   secret: str, mode: ZatcaSendMode) -> \
+        Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a simplified invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -145,7 +146,8 @@ def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_has
 
 
 def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                  secret: str, mode: ZatcaSendMode) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+                  secret: str, mode: ZatcaSendMode) -> \
+        Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a standard invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {
@@ -194,37 +196,42 @@ def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, st
         response.raise_for_status()
         return Ok(result_builder(response.json())), response.status_code
     except HTTPError as e:
-        logger.error('An HTTP error occurred')
+        error = error_builder(e.response, e)
+        logger.error(f'An HTTP error occurred: {error}')
         if e.response.text:
-            logger.info(f'Response: {e.response.json()}')
+            logger.info(f'Response: {e.response.text}')
 
-        return Err(error_builder(e.response, e)), response.status_code
+        return Err(error), response.status_code
     except Exception as e:
-        logger.error('An unexpected exception occurred', exc_info=e)
-        if response:
+        error = error_builder(response, e)
+        logger.error(f'An unexpected error occurred: {error}', exc_info=e)
+        status_code = 0
+        if response is not None:
             logger.info(f'Response: {response.text}')
-            return Err(error_builder(response, e)), response.status_code
-        return Err(error_builder(response, e)), 0
+            status_code = response.status_code
+        return Err(error), status_code
 
 
 def try_get_csid_error(response: Response | None, exception: Exception | None) -> str:
-    """Tries to extract an error from a ZATCA response. The sandbox API isn't consistent in how it reports errors,
-    so this method tries a number of approaches based on the observed error responses."""
-    if exception:
-        return ''.join(traceback.format_exception_only(exception))
+    """
+    Tries to extract an error from a ZATCA response. The sandbox API isn't consistent in how it reports errors,
+    so this method tries a number of approaches based on the observed error responses.
+    """
+    if response is None:
+        if exception:
+            return ''.join(traceback.format_exception_only(exception))
 
-    if not response:
         return "API call failed but we don't have a response or an exception. This is a bug."
 
     try:
         data = response.json()
         if response.status_code == 400:
-            errors = cast(List[str], data.get('errors', []))
+            errors = [WarningOrError.from_json(e) for e in cast(List[dict], data.get('errors', []))]
             if errors:
-                return ', '.join(errors)
+                return ', '.join([e.message for e in errors])
 
         if response.status_code == 500 and data.get('message'):
-            return data.get['message']
+            return data['message']
 
         return response.text
     except JSONDecodeError:
@@ -234,10 +241,10 @@ def try_get_csid_error(response: Response | None, exception: Exception | None) -
 
 def try_get_report_or_clear_error(response: Response | None, exception: Exception | None) -> ReportOrClearInvoiceError:
     """Tries to extract an error from a ZATCA reporting/clearance response"""
-    if exception:
-        return ReportOrClearInvoiceError('', ''.join(traceback.format_exception_only(exception)))
+    if response is None:
+        if exception:
+            return ReportOrClearInvoiceError('', ''.join(traceback.format_exception_only(exception)))
 
-    if not response:
         return ReportOrClearInvoiceError('',
                                          "API call failed but we don't have a response or an exception. This is a bug.")
 

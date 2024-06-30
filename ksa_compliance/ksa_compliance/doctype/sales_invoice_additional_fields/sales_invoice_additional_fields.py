@@ -163,8 +163,7 @@ class SalesInvoiceAdditionalFields(Document):
         # FIXME: Buyer details must come before invoice type and code, since this information relies on buyer details
         #   This temporal dependency is not great
         self._set_buyer_details(sales_invoice)
-
-        self.sum_of_allowances = sales_invoice.total - sales_invoice.net_total
+        self.sum_of_allowances = sales_invoice.discount_amount + sum(item.discount_amount for item in sales_invoice.items)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = "0100000" if self._get_invoice_type(settings) == 'Standard' else '0200000'
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
