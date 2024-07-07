@@ -7,6 +7,8 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+* Validate that sales invoice has tax rate in Sales Taxes and Charges Table in Phase 1 and Phase 2.
+* Show all validation errors in one message on saving sales invoice.
 
 ## 0.20.1
 
