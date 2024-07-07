@@ -92,10 +92,16 @@ def prevent_cancellation_of_sales_invoice(self, method) -> None:
 
 
 def validate_sales_invoice(self, method) -> None:
+    valid = True
     if ZATCABusinessSettings.is_enabled_for_company(self.company):
         if not self.tax_category:
-            frappe.throw(msg=_("Please choose a Tax Category"), title=_("Tax Category Missing"))
+            frappe.msgprint(msg=_("Please choose a Tax Category"), title=_("Validation Error"), indicator="red")
+            valid = False
 
     if len(self.taxes) == 0:
-        frappe.throw(msg=_("Please include tax rate in Sales Taxes and Charges Table"),
-                     title=_("Tax Rate Is Not Specified"))
+        frappe.msgprint(msg=_("Please include tax rate in Sales Taxes and Charges Table"),
+                        title=_("Validation Error"), indicator="red")
+        valid = False
+
+    if not valid:
+        raise frappe.ValidationError()
