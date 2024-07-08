@@ -407,6 +407,10 @@ def fix_rejection(id: str):
     if siaf.precomputed_invoice:
         frappe.throw(ft("Cannot fix rejection for a precomputed invoice from Desk"))
 
+    if not siaf.is_latest:
+        frappe.throw(ft("This is not the latest Sales Invoice Additional Fields for invoice $invoice. Please fix "
+                        "rejection from the latest", invoice=siaf.sales_invoice))
+
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice)
     if not settings:
         frappe.throw(ft("Missing ZATCA business settings for sales invoice: $invoice", invoice=siaf.sales_invoice))
