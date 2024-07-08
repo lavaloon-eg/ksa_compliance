@@ -11,6 +11,8 @@ to a section with the version name.
 * Track which `Sales Invoice Additional Fields` is latest in case of multiple submissions for the same invoice  due to
   rejection
 * Limit fixing rejection to the latest sales invoice additional fields document
+* Fix dashboard rejected invoice count
+  * If an invoice receives multiple rejections, it counts as one rejected invoice now.
 
 ## 0.20.2
 
