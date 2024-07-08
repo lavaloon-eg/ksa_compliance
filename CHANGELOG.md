@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix compliance errors when specifying "simplified" or "standard" explicitly
+
 ## 0.21.0
 
 * Track which `Sales Invoice Additional Fields` is latest in case of multiple submissions for the same invoice  due to
