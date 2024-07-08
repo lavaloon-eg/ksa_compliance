@@ -80,6 +80,7 @@ class SalesInvoiceAdditionalFields(Document):
         invoice_type_code: DF.Data | None
         invoice_type_transaction: DF.Data | None
         invoice_xml: DF.LongText | None
+        is_latest: DF.Check
         last_attempt: DF.Datetime | None
         other_buyer_ids: DF.Table[AdditionalSellerIDs]
         payment_means_type_code: DF.Data | None
@@ -148,6 +149,9 @@ class SalesInvoiceAdditionalFields(Document):
 
     def before_insert(self):
         self.integration_status = "Ready For Batch"
+        self.is_latest = True
+        # Mark any pre-existing sales invoice additional fields as no longer being latest
+        frappe.db.set_value('Sales Invoice Additional Fields', {'sales_invoice': self.sales_invoice}, 'is_latest', 0)
 
         if self.precomputed:
             return
@@ -402,6 +406,10 @@ def fix_rejection(id: str):
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     if siaf.precomputed_invoice:
         frappe.throw(ft("Cannot fix rejection for a precomputed invoice from Desk"))
+
+    if not siaf.is_latest:
+        frappe.throw(ft("This is not the latest Sales Invoice Additional Fields for invoice $invoice. Please fix "
+                        "rejection from the latest", invoice=siaf.sales_invoice))
 
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice)
     if not settings:
