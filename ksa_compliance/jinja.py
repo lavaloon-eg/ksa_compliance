@@ -2,7 +2,7 @@ import base64
 import datetime
 from base64 import b64encode
 from io import BytesIO
-from typing import cast
+from typing import cast, Optional
 
 import frappe
 import pyqrcode
@@ -20,7 +20,7 @@ def get_zatca_phase_1_qr_for_invoice(invoice_name: str) -> str:
 
 
 def get_qr_inputs(invoice_name: str) -> list:
-    invoice_doc = None
+    invoice_doc: Optional[SalesInvoice] = None
     if frappe.db.exists("POS Invoice", invoice_name):
         invoice_doc = cast(POSInvoice, frappe.get_doc("POS Invoice", invoice_name))
     elif frappe.db.exists("Sales Invoice", invoice_name):
