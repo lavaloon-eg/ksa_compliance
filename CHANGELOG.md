@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.22.0
+
 * Add ZATCA phase 1 print format for `POS Invoice`
 
 ## 0.21.1
