@@ -8,6 +8,23 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.21.1
+
+* Fix compliance errors when specifying "simplified" or "standard" explicitly
+
+## 0.21.0
+
+* Track which `Sales Invoice Additional Fields` is latest in case of multiple submissions for the same invoice  due to
+  rejection
+* Limit fixing rejection to the latest sales invoice additional fields document
+* Fix dashboard rejected invoice count
+  * If an invoice receives multiple rejections, it counts as one rejected invoice now.
+
+## 0.20.2
+
+* Validate that sales invoice has tax rate in Sales Taxes and Charges Table in Phase 1 and Phase 2.
+* Show all validation errors in one message on saving sales invoice.
+
 ## 0.20.1
 
 * Fix parsing of ZATCA API responses

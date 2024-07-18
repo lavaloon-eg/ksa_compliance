@@ -120,8 +120,8 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 method: "ksa_compliance.compliance_checks.perform_compliance_checks",
                 args: {
                     business_settings_id: frm.doc.name,
-                    simplified_customer_id: values.simplified_customer_id,
-                    standard_customer_id: values.standard_customer_id,
+                    simplified_customer_id: values.simplified_customer_id || '',
+                    standard_customer_id: values.standard_customer_id || '',
                     item_id: values.item_id,
                     tax_category_id: values.tax_category_id,
                 },
