@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Include ZATCA Validation on sales taxes and charges table only if company has active phase 1 or phase 2 business settings
+
 ## 0.22.0
 
 * Add ZATCA phase 1 print format for `POS Invoice`
