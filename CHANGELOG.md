@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.22.1
+
 * Include ZATCA Validation on sales taxes and charges table only if company has active phase 1 or phase 2 business settings
 
 ## 0.22.0
