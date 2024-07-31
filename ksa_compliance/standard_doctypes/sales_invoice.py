@@ -10,6 +10,8 @@ from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales
     SalesInvoiceAdditionalFields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
+from ksa_compliance.ksa_compliance.doctype.zatca_phase_1_business_settings.zatca_phase_1_business_settings import \
+    ZATCAPhase1BusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
     ZATCAPrecomputedInvoice
 
@@ -93,15 +95,16 @@ def prevent_cancellation_of_sales_invoice(self, method) -> None:
 
 def validate_sales_invoice(self, method) -> None:
     valid = True
-    if ZATCABusinessSettings.is_enabled_for_company(self.company):
+    is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
+    if is_phase_2_enabled_for_company:
         if not self.tax_category:
             frappe.msgprint(msg=_("Please choose a Tax Category"), title=_("Validation Error"), indicator="red")
             valid = False
-
-    if len(self.taxes) == 0:
-        frappe.msgprint(msg=_("Please include tax rate in Sales Taxes and Charges Table"),
-                        title=_("Validation Error"), indicator="red")
-        valid = False
+    if ZATCAPhase1BusinessSettings.is_phase_1_enabled_for_company(self.company) | is_phase_2_enabled_for_company:
+        if len(self.taxes) == 0:
+            frappe.msgprint(msg=_("Please include tax rate in Sales Taxes and Charges Table"),
+                            title=_("Validation Error"), indicator="red")
+            valid = False
 
     if not valid:
         raise frappe.ValidationError()
