@@ -32,7 +32,7 @@ class ZATCAPhase1BusinessSettings(Document):
                          title="Another Setting Already Enabled")
 
     @staticmethod
-    def is_phase_1_enabled_for_company(company_id: str) -> bool:
+    def is_enabled_for_company(company_id: str) -> bool:
         return bool(frappe.db.get_value('ZATCA Phase 1 Business Settings',
                                         filters={'company': company_id, 'status': "Active"}))
 
