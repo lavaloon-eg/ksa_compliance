@@ -8,6 +8,7 @@ to a section with the version name.
 
 ## Unreleased Changes
 * Support submitting sales invoice with different currencies as per ZATCA acceptance criteria.
+* Show print format of POS, Phase 1 and Phase 2 in current invoice currency.
 ## 0.22.0
 
 * Add ZATCA phase 1 print format for `POS Invoice`
