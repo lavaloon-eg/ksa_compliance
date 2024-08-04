@@ -38,7 +38,7 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
         item["tax_amount"] = tax_amount
         # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
         #  value somehow
-        item["total_amount"] = tax_amount + abs(item["net_amount"])
+        item["total_amount"] = tax_amount + abs(item["amount"])
 
     return item_lines
 
@@ -248,15 +248,16 @@ class Einvoice:
                                 parent="invoice")
 
         if self.additional_fields_doc.allowance_indicator:
-            self.get_float_value(field_name="sum_of_allowances",
-                                 source_doc=self.additional_fields_doc,
+            # Allowance on invoice should be only the document level allowance without items allowances.
+            self.get_float_value(field_name="discount_amount",
+                                 source_doc=self.sales_invoice_doc,
                                  required=True,
                                  xml_name="allowance_total_amount",
                                  rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
                                  parent="invoice")
         else:
-            self.get_float_value(field_name="sum_of_allowances",
-                                 source_doc=self.additional_fields_doc,
+            self.get_float_value(field_name="discount_amount",
+                                 source_doc=self.sales_invoice_doc,
                                  required=False,
                                  xml_name="allowance_total_amount",
                                  rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
@@ -1135,4 +1136,5 @@ class Einvoice:
         self.result["invoice"]["total_taxes_and_charges_percent"] = sum(
             it.rate for it in self.sales_invoice_doc.get("taxes", []))
         self.result["invoice"]["item_lines"] = item_lines
+        self.result["invoice"]["actual_line_extension_amount"] = sum(it["amount"] for it in item_lines)
         # --------------------------- END Getting Invoice's item lines ------------------------------

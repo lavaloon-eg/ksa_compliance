@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+ * Support discount in the XML on item.
 ## 0.22.0
 
 * Add ZATCA phase 1 print format for `POS Invoice`
