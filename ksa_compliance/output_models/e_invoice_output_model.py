@@ -36,8 +36,6 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
 
         item["tax_percent"] = tax_percent
         item["tax_amount"] = tax_amount
-        # TODO: In theory, net_amount includes the discount while amount doesn't. In practice, both have the same
-        #  value somehow
         item["total_amount"] = tax_amount + abs(item["amount"])
 
     return item_lines
@@ -1136,5 +1134,5 @@ class Einvoice:
         self.result["invoice"]["total_taxes_and_charges_percent"] = sum(
             it.rate for it in self.sales_invoice_doc.get("taxes", []))
         self.result["invoice"]["item_lines"] = item_lines
-        self.result["invoice"]["actual_line_extension_amount"] = sum(it["amount"] for it in item_lines)
+        self.result["invoice"]["line_extension_amount"] = sum(it["amount"] for it in item_lines)
         # --------------------------- END Getting Invoice's item lines ------------------------------

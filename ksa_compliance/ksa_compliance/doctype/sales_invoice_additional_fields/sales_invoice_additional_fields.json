@@ -56,9 +56,8 @@
   "reason_for_charge",
   "reason_for_charge_code",
   "section_break_ytrn",
-  "sum_of_allowances",
-  "column_break_bcho",
   "sum_of_charges",
+  "column_break_bcho",
   "section_break_tsfk",
   "column_break_mest",
   "vat_exemption_reason_code",
@@ -274,12 +273,6 @@
   {
    "fieldname": "section_break_ytrn",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "sum_of_allowances",
-   "fieldtype": "Float",
-   "label": "Sum of Allowances",
-   "read_only": 1
   },
   {
    "fieldname": "sum_of_charges",
@@ -609,7 +602,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2024-07-08 12:04:47.540322",
+ "modified": "2024-08-08 16:15:53.221975",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
