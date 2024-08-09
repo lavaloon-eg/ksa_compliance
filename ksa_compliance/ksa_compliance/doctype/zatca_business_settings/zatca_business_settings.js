@@ -71,7 +71,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 get_query: function () {
                     return {
                         filters: [
-                            ["Additional Buyer IDs", "value", "is", "not set"],
+                            // ["Additional Buyer IDs", "value", "is", "not set"],
                             ["Customer", "custom_vat_registration_number", "is", "not set"]
                         ]
                     }
