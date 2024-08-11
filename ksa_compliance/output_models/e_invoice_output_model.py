@@ -14,7 +14,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
 from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 
 
-def append_tax_details_into_item_lines(invoice_id, item_lines):
+def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conversion_rate: float) -> list:
     item_wise_tax_details = frappe.db.sql("""
                 SELECT item_wise_tax_detail  
                 FROM `tabSales Taxes and Charges` 
@@ -29,7 +29,7 @@ def append_tax_details_into_item_lines(invoice_id, item_lines):
     for item in item_lines:
         if item["item_code"] in items_taxes:
             tax_percent = abs(items_taxes[item["item_code"]][0])
-            tax_amount = abs(items_taxes[item["item_code"]][1])
+            tax_amount = abs(items_taxes[item["item_code"]][1]) / conversion_rate
         else:
             tax_percent = 0.0
             tax_amount = 0.0
@@ -1030,6 +1030,15 @@ class Einvoice:
                                     "BR-KSA-EN16931-09",
                                     "BR-KSA-F-04"],
                              parent="invoice")
+
+        self.get_float_value(field_name="base_total_taxes_and_charges",
+                             source_doc=self.sales_invoice_doc,
+                             required=True,
+                             xml_name="base_total_taxes_and_charges",
+                             rules=["BG-22", "BT-110", "BR-CO-14", "BR-DEC-13", "BR-KSA-EN16931-08",
+                                    "BR-KSA-EN16931-09",
+                                    "BR-KSA-F-04"],
+                             parent="invoice")
         # TODO: Tax Account Currency
         self.get_float_value(field_name="grand_total",
                              source_doc=self.sales_invoice_doc,
@@ -1129,7 +1138,9 @@ class Einvoice:
             item_lines.append(new_item)
 
         # Add tax amount and tax percent on each item line
-        item_lines = append_tax_details_into_item_lines(self.sales_invoice_doc.name, item_lines)
+        item_lines = append_tax_details_into_item_lines(invoice_id=self.sales_invoice_doc.name,
+                                                        item_lines=item_lines,
+                                                        conversion_rate=self.sales_invoice_doc.conversion_rate)
         # Add invoice total taxes and charges percentage field
         self.result["invoice"]["total_taxes_and_charges_percent"] = sum(
             it.rate for it in self.sales_invoice_doc.get("taxes", []))
