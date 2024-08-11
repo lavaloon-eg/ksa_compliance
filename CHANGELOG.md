@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support item discounts
+
 ## 0.23.0
 
 * Support submitting sales invoice with different currencies as per ZATCA acceptance criteria.

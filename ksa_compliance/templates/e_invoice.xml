@@ -186,7 +186,7 @@
         <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.base_total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total | round(2) }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.line_extension_amount | round(2) }}</cbc:LineExtensionAmount>
         <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total | round(2) }}</cbc:TaxExclusiveAmount>
         <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total | round(2) }}</cbc:TaxInclusiveAmount>
         <cbc:AllowanceTotalAmount currencyID="{{ invoice.currency_code }}">{{ invoice.allowance_total_amount | round(2) }}</cbc:AllowanceTotalAmount>
@@ -202,7 +202,7 @@
         <cbc:ID>{{ item.idx | int }}</cbc:ID>
         <cbc:Note>{{ item.item_name | escape }}</cbc:Note>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ (item.net_amount or item.amount) | round(2) }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ (item.amount) | round(2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
             {% if item.tax_amount %}
             <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount>
@@ -259,8 +259,16 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ (item.net_amount or item.amount) | round(2) }}</cbc:PriceAmount>
+
+            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ (item.amount) | round(2) }}</cbc:PriceAmount>
             <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
+            {% if item.discount_amount %}
+            <cac:AllowanceCharge>
+                <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+                <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ (item.discount_amount * item.qty) | round(2) }}</cbc:Amount>
+                <cbc:BaseAmount currencyID="{{ invoice.currency_code }}">{{ (item.price_list_rate * item.qty) | round(2) }}</cbc:BaseAmount>
+            </cac:AllowanceCharge>
+            {% endif %}
         </cac:Price>
     </cac:InvoiceLine>
     {% endfor %}
