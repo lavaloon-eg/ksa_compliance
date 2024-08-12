@@ -265,8 +265,8 @@
             {% if item.discount_amount %}
             <cac:AllowanceCharge>
                 <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-                <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ (item.discount_amount * item.qty) | round(2) }}</cbc:Amount>
-                <cbc:BaseAmount currencyID="{{ invoice.currency_code }}">{{ (item.price_list_rate * item.qty) | round(2) }}</cbc:BaseAmount>
+                <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ item.discount_amount| round(2) }}</cbc:Amount>
+                <cbc:BaseAmount currencyID="{{ invoice.currency_code }}">{{ item.price_list_rate | round(2) }}</cbc:BaseAmount>
             </cac:AllowanceCharge>
             {% endif %}
         </cac:Price>

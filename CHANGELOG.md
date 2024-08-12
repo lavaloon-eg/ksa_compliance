@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support item tax included in basic rate.
+
 ## 0.24.0
 
 * Support item discounts
