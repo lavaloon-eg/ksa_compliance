@@ -2,11 +2,12 @@ import base64
 import datetime
 from base64 import b64encode
 from io import BytesIO
-from typing import cast
+from typing import cast, Optional
 
 import frappe
 import pyqrcode
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from frappe.utils.data import get_time, getdate
 
 
@@ -19,8 +20,14 @@ def get_zatca_phase_1_qr_for_invoice(invoice_name: str) -> str:
 
 
 def get_qr_inputs(invoice_name: str) -> list:
-    sales_invoice = cast(SalesInvoice, frappe.get_doc("Sales Invoice", invoice_name))
-    seller_name = sales_invoice.company
+    invoice_doc: Optional[SalesInvoice] = None
+    if frappe.db.exists("POS Invoice", invoice_name):
+        invoice_doc = cast(POSInvoice, frappe.get_doc("POS Invoice", invoice_name))
+    elif frappe.db.exists("Sales Invoice", invoice_name):
+        invoice_doc = cast(SalesInvoice, frappe.get_doc("Sales Invoice", invoice_name))
+    else:
+        return None
+    seller_name = invoice_doc.company
     phase_1_name = frappe.get_value("ZATCA Phase 1 Business Settings", {"company": seller_name})
     if not phase_1_name:
         return None
@@ -28,10 +35,10 @@ def get_qr_inputs(invoice_name: str) -> list:
     if phase_1_settings.status == "Disabled":
         return None
     seller_vat_reg_no = phase_1_settings.vat_registration_number
-    time = sales_invoice.posting_time
-    timestamp = format_date(sales_invoice.posting_date, time)
-    grand_total = sales_invoice.grand_total
-    total_vat = sales_invoice.total_taxes_and_charges
+    time = invoice_doc.posting_time
+    timestamp = format_date(invoice_doc.posting_date, time)
+    grand_total = invoice_doc.grand_total
+    total_vat = invoice_doc.total_taxes_and_charges
     # returned values should be ordered based on ZATCA Qr Specifications
     return [seller_name, seller_vat_reg_no, timestamp, grand_total, total_vat]
 
