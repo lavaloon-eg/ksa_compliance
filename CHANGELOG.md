@@ -7,7 +7,11 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-* Fix not showing addtional buyer ids for customer when creating a new customer using quick entry.
+
+## 0.24.1
+
+* Fix not showing additional buyer ids for customer when creating a new customer using quick entry.
+
 ## 0.24.0
 
 * Support item discounts
