@@ -10,7 +10,7 @@ frappe.ui.form.on("Customer", {
 
 function add_other_ids_if_new(frm) {
   // TODO: update permissions for child doctype
-  if (frm.is_new()) {
+  if (frm.doc.name && !frm.is_dirty() && frm.doc.custom_additional_ids.length === 0) {
     var buyer_id_list = [];
     buyer_id_list.push(
       {
