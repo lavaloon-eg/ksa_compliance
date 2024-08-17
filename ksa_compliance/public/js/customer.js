@@ -1,5 +1,8 @@
 frappe.ui.form.on("Customer", {
   setup: function(frm){
+    // Workaround for a change introduced in frappe v15.38.0: https://github.com/frappe/frappe/issues/27430
+    if (frm.is_dialog) return;
+
     frm.set_df_property('custom_additional_ids', 'cannot_delete_rows', 1);
     frm.set_df_property('custom_additional_ids', 'cannot_add_rows', 1);
   },
