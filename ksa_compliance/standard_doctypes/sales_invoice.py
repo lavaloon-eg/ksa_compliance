@@ -109,4 +109,4 @@ def validate_sales_invoice(self, method) -> None:
     if not valid:
         message_log = frappe.get_message_log()
         error_messages = "\n".join(log["message"] for log in message_log)
-        raise frappe.ValidationError(_(error_messages))
+        raise frappe.ValidationError(error_messages)
