@@ -107,4 +107,4 @@ def validate_sales_invoice(self, method) -> None:
             valid = False
 
     if not valid:
-        raise frappe.ValidationError()
+        raise frappe.ValidationError(_(f"Please set a default sales taxes and charges template for {self.company}."))

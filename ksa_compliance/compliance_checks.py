@@ -82,6 +82,10 @@ def _perform_compliance_checks(business_settings_id: str, simplified_customer_id
         if standard_result:
             message += standard_result.format(ft('Standard'))
         frappe.msgprint(message, realtime=True)
+    except Exception as e:
+        error_log = frappe.log_error(str(e))
+        error_link = frappe.utils.get_link_to_form('Error Log', error_log.name)
+        frappe.msgprint(msg=f"{str(e)}.\nError log link: {error_link}", indicator='red', realtime=True)
     finally:
         _report_progress(ft('Done'), 100)
         clear_additional_fields_ignore_list()
