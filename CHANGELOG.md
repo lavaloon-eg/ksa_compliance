@@ -10,6 +10,15 @@ to a section with the version name.
 
 * Support item tax included in basic rate.
 
+## 0.24.2
+
+* Hot fix for customer creation on frappe v15.38.0 ([Issue](https://github.com/lavaloon-eg/ksa_compliance/issues/86))
+* Fix showing done only without displaying error message on Perform Compliance Check when there is an issue in company setup.
+
+## 0.24.1
+
+* Fix not showing additional buyer ids for customer when creating a new customer using quick entry.
+
 ## 0.24.0
 
 * Support item discounts

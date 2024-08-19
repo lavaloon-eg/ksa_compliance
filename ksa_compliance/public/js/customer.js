@@ -1,5 +1,8 @@
 frappe.ui.form.on("Customer", {
   setup: function(frm){
+    // Workaround for a change introduced in frappe v15.38.0: https://github.com/frappe/frappe/issues/27430
+    if (frm.is_dialog) return;
+
     frm.set_df_property('custom_additional_ids', 'cannot_delete_rows', 1);
     frm.set_df_property('custom_additional_ids', 'cannot_add_rows', 1);
   },
@@ -10,7 +13,7 @@ frappe.ui.form.on("Customer", {
 
 function add_other_ids_if_new(frm) {
   // TODO: update permissions for child doctype
-  if (frm.is_new()) {
+  if (frm.doc.custom_additional_ids.length === 0) {
     var buyer_id_list = [];
     buyer_id_list.push(
       {
