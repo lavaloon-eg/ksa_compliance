@@ -194,7 +194,7 @@ class ZATCABusinessSettings(Document):
             'unit_serial_number': self.company_unit_serial,
             'vat_number': self.vat_registration_number,
             'unit_name': self.company_unit or 'Main Branch',  # Review: Use default value?
-            'organization_name': self.company,
+            'organization_name': self.seller_name,
             'country': self.country_code.upper(),
             'invoice_type': invoice_type,
             'address': self._format_address(),

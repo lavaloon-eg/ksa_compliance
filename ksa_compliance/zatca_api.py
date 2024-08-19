@@ -43,7 +43,9 @@ class WarningOrError:
     message: str
 
     @staticmethod
-    def from_json(data: dict) -> 'WarningOrError':
+    def from_json(data: dict | str) -> 'WarningOrError':
+        if isinstance(data, str):
+            return WarningOrError(category='No Category', code='No Code', message=data)
         return WarningOrError(category=data.get('category', 'No Category'), code=data.get('code', 'No Code'),
                               message=data.get('message', 'No Message'))
 
@@ -226,7 +228,7 @@ def try_get_csid_error(response: Response | None, exception: Exception | None) -
     try:
         data = response.json()
         if response.status_code == 400:
-            errors = [WarningOrError.from_json(e) for e in cast(List[dict], data.get('errors', []))]
+            errors = [WarningOrError.from_json(e) for e in cast(List[dict|str], data.get('errors', []))]
             if errors:
                 return ', '.join([e.message for e in errors])
 
