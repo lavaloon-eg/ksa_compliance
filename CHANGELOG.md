@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.25.1
+
+* Merge hot fixes from master (from 0.23.2)
+
 ## 0.25.0
 
 * Support item tax included in basic rate.
