@@ -10,6 +10,9 @@ to a section with the version name.
 
 * Hot fix: Use seller name instead of company name when generating CSR. Seller name is meant to be the company name
   in communications with ZATCA, and can be edited directly (whereas company name is internal)
+* Hot fix: When parsing ZATCA errors, handle plain string errors without code or category. In certain cases, like the 
+  seller name being too long, the ZATCA response included plain errors which caused error parsing itself to fail prior
+  to logging the failure
 
 ## 0.23.1
 
