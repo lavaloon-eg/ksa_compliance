@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Hot fix: Use seller name instead of company name when generating CSR. Seller name is meant to be the company name
+  in communications with ZATCA, and can be edited directly (whereas company name is internal)
+
 ## 0.23.1
 
 * Hot fix for customer creation on frappe v15.38.0 ([Issue](https://github.com/lavaloon-eg/ksa_compliance/issues/86))
