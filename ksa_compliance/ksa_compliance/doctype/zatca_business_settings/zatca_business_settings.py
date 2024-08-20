@@ -131,6 +131,7 @@ class ZATCABusinessSettings(Document):
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/'
         if self.fatoora_server == "Production":
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core/'
+        frappe.throw(f"Invalid Fatoora Server, Please update {self.company} Fatoora Server in ZATCA Business Settings")
 
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,

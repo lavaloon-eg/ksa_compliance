@@ -4,9 +4,9 @@ import frappe
 def execute():
     print("Start updating old fatoora url")
     sql = """
-            SELECT company, fatoora_server_url
+            SELECT name, fatoora_server_url
             FROM `tabZATCA Business Settings`
-        """
+         """
     old_urls = frappe.db.sql(sql, as_dict=True)
     fatoora_servers = {
         "sandbox": "Sandbox",
@@ -24,9 +24,10 @@ def execute():
         else:
             fatoora_server = None
         if fatoora_server:
+            print(f"Setting Fatoora Server for {url['name']} to {fatoora_server}")
             frappe.db.sql("""
                             UPDATE `tabZATCA Business Settings` SET fatoora_server = %(fatoora_server)s
-                            WHERE company = %(company)s
+                            WHERE name = %(name)s
                             """,
-                          {"fatoora_server": fatoora_server, "company": url["company"]})
+                          {"fatoora_server": fatoora_server, "name": url["name"]})
     print("Finish updating Fatoora server for all companies in business settings")
