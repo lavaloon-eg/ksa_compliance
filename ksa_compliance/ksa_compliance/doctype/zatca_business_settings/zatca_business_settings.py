@@ -25,8 +25,7 @@ class ZATCABusinessSettings(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         additional_street: DF.Data | None
         building_number: DF.Data | None
@@ -44,7 +43,7 @@ class ZATCABusinessSettings(Document):
         currency: DF.Link
         district: DF.Data | None
         enable_zatca_integration: DF.Check
-        fatoora_server_url: DF.Data | None
+        fatoora_server_url: DF.Literal["Sandbox | https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/", "Simulation | https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/", "Production | https://gw-fatoora.zatca.gov.sa/e-invoicing/core/"]
         java_home: DF.Data | None
         other_ids: DF.Table[AdditionalSellerIDs]
         override_cli_download_url: DF.Data | None
@@ -58,12 +57,10 @@ class ZATCABusinessSettings(Document):
         seller_name: DF.Data
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
-        type_of_business_transactions: DF.Literal[
-            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
         validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
         zatca_cli_path: DF.Data | None
-
     # end: auto-generated types
 
     def after_insert(self):
@@ -104,11 +101,13 @@ class ZATCABusinessSettings(Document):
 
     @property
     def is_sandbox_server(self) -> bool:
-        return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal')
+        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
+        return fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal')
 
     @property
     def is_simulation_server(self) -> bool:
-        return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation')
+        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
+        return fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation')
 
     @property
     def _sandbox_private_key_path(self) -> str:
@@ -137,7 +136,8 @@ class ZATCABusinessSettings(Document):
         self._throw_if_api_config_missing()
 
         csr_result = self._generate_csr()
-        compliance_result, status_code = api.get_compliance_csid(self.fatoora_server_url, csr_result.csr, otp)
+        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
+        compliance_result, status_code = api.get_compliance_csid(fatoora_server_url, csr_result.csr, otp)
         if is_err(compliance_result):
             frappe.throw(compliance_result.err_value, title=_('Compliance API Error'))
 
@@ -163,7 +163,8 @@ class ZATCABusinessSettings(Document):
         if not self.compliance_request_id:
             frappe.throw(_("Please onboard first to generate a 'Compliance Request ID'"))
 
-        csid_result, status_code = api.get_production_csid(self.fatoora_server_url, self.compliance_request_id, otp,
+        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
+        csid_result, status_code = api.get_production_csid(fatoora_server_url, self.compliance_request_id, otp,
                                                            self.security_token, self.get_password('secret'))
         if is_err(csid_result):
             frappe.throw(csid_result.err_value, title=_('Production CSID Error'))
