@@ -44,7 +44,7 @@
   "configuration_section",
   "validate_generated_xml",
   "column_break_cjdg",
-  "fatoora_server_url",
+  "fatoora_server",
   "onboarding_section",
   "create_csr",
   "csr",
@@ -213,6 +213,7 @@
    "read_only": 1
   },
   {
+   "description": "The Name of the onboarded EGS unit on Fatoorah platform.",
    "fetch_from": "company_address.address_title",
    "fetch_if_empty": 1,
    "fieldname": "company_unit",
@@ -221,7 +222,7 @@
    "reqd": 1
   },
   {
-   "description": "Format: <pre style=\"display:inline;\">1-Solution Provider Name|2-Model or version|3-Serial</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-ERPNext|2-15|3-1</pre>",
+   "description": "ID of the onboarded EGS unit on Fatoorah platform. (unique)\n<br>\nFormat: <pre style=\"display:inline;\">1-Solution Provider Name|2-Model or version|3-Serial</pre>\n<br>\nExample: <pre style=\"display:inline;\">1-ERPNext|2-15|3-1</pre>",
    "fieldname": "company_unit_serial",
    "fieldtype": "Data",
    "label": "Company Unit Serial",
@@ -284,13 +285,6 @@
    "fieldname": "onboarding_section",
    "fieldtype": "Section Break",
    "label": "Onboarding"
-  },
-  {
-   "description": "The URL for the ZATCA server to use. Use <pre style=\"display:inline;\">https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/</pre> for the ZATCA sandbox (testing)",
-   "fieldname": "fatoora_server_url",
-   "fieldtype": "Select",
-   "label": "Fatoora Server URL",
-   "options": "Sandbox | https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/\nSimulation | https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/\nProduction | https://gw-fatoora.zatca.gov.sa/e-invoicing/core/"
   },
   {
    "fieldname": "production_request_id",
@@ -379,11 +373,18 @@
    "fieldname": "automatic_setup_configuration_section",
    "fieldtype": "Section Break",
    "label": "Automatic Setup Configuration"
+  },
+  {
+   "description": "Sandbox: ZATCA test environment<br>\nSimulation: Test environment requires OTP from Fatoorah platform<br>\nProduction: ZATCA production enviroment",
+   "fieldname": "fatoora_server",
+   "fieldtype": "Select",
+   "label": "Fatoora Server",
+   "options": "Sandbox\nSimulation\nProduction"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-19 17:29:14.568875",
+ "modified": "2024-08-20 11:42:19.103811",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",

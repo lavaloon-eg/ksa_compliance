@@ -43,7 +43,7 @@ class ZATCABusinessSettings(Document):
         currency: DF.Link
         district: DF.Data | None
         enable_zatca_integration: DF.Check
-        fatoora_server_url: DF.Literal["Sandbox | https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/", "Simulation | https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/", "Production | https://gw-fatoora.zatca.gov.sa/e-invoicing/core/"]
+        fatoora_server: DF.Literal["Sandbox", "Simulation", "Production"]
         java_home: DF.Data | None
         other_ids: DF.Table[AdditionalSellerIDs]
         override_cli_download_url: DF.Data | None
@@ -101,13 +101,11 @@ class ZATCABusinessSettings(Document):
 
     @property
     def is_sandbox_server(self) -> bool:
-        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
-        return fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal')
+        return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal')
 
     @property
     def is_simulation_server(self) -> bool:
-        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
-        return fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation')
+        return self.fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation')
 
     @property
     def _sandbox_private_key_path(self) -> str:
@@ -125,6 +123,15 @@ class ZATCABusinessSettings(Document):
                 f.write(key.encode('utf-8'))
         return path
 
+    @property
+    def fatoora_server_url(self) -> str:
+        if self.fatoora_server == "Sandbox":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/'
+        if self.fatoora_server == "Simulation":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/'
+        if self.fatoora_server == "Sandbox":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core/'
+
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,
         compliance request ID, as well as credentials (security token and secret).
@@ -136,8 +143,7 @@ class ZATCABusinessSettings(Document):
         self._throw_if_api_config_missing()
 
         csr_result = self._generate_csr()
-        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
-        compliance_result, status_code = api.get_compliance_csid(fatoora_server_url, csr_result.csr, otp)
+        compliance_result, status_code = api.get_compliance_csid(self.fatoora_server_url, csr_result.csr, otp)
         if is_err(compliance_result):
             frappe.throw(compliance_result.err_value, title=_('Compliance API Error'))
 
@@ -163,8 +169,7 @@ class ZATCABusinessSettings(Document):
         if not self.compliance_request_id:
             frappe.throw(_("Please onboard first to generate a 'Compliance Request ID'"))
 
-        fatoora_server_url = self.fatoora_server_url.split(" | ")[1]
-        csid_result, status_code = api.get_production_csid(fatoora_server_url, self.compliance_request_id, otp,
+        csid_result, status_code = api.get_production_csid(self.fatoora_server_url, self.compliance_request_id, otp,
                                                            self.security_token, self.get_password('secret'))
         if is_err(csid_result):
             frappe.throw(csid_result.err_value, title=_('Production CSID Error'))

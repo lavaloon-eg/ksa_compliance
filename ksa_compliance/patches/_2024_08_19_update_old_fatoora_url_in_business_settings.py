@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
     print("Start updating old fatoora url")
     sql = """
@@ -7,26 +8,25 @@ def execute():
             FROM `tabZATCA Business Settings`
         """
     old_urls = frappe.db.sql(sql, as_dict=True)
-    new_urls = {
-        "sandbox": "Sandbox | https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/",
-        "simulation": "Simulation | https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/",
-        "production": "Production | https://gw-fatoora.zatca.gov.sa/e-invoicing/core/"
+    fatoora_servers = {
+        "sandbox": "Sandbox",
+        "simulation": "Simulation",
+        "production": "Production"
     }
-    print("Updating fatoora urls based on old urls")
+    print("Updating Fatoora Server based on old urls")
     for url in old_urls:
         if url["fatoora_server_url"].startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal'):
-            new_url = new_urls["sandbox"]
+            fatoora_server = fatoora_servers["sandbox"]
         elif url["fatoora_server_url"].startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation'):
-            new_url = new_urls["simulation"]
+            fatoora_server = fatoora_servers["simulation"]
         elif url["fatoora_server_url"].startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/core'):
-            new_url = new_urls["production"]
+            fatoora_server = fatoora_servers["production"]
         else:
-            new_url = None
-        if new_url:
+            fatoora_server = None
+        if fatoora_server:
             frappe.db.sql("""
-                            UPDATE `tabZATCA Business Settings` SET fatoora_server_url = %(url)s
+                            UPDATE `tabZATCA Business Settings` SET fatoora_server = %(fatoora_server)s
                             WHERE company = %(company)s
                             """,
-                          {"url": new_url, "company": url["company"]})
-    print("Finish updating old fatoora url")
-
+                          {"fatoora_server": fatoora_server, "company": url["company"]})
+    print("Finish updating Fatoora server for all companies in business settings")
