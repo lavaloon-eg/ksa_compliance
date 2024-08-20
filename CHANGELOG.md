@@ -7,7 +7,8 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Remove `Fatoora Server Url` field and replace it with `Fatoora Server` Select Field with 3 options `['Sandbox', 'Simulation', 'Production']`
+* Automatic update of the new `Fatoora server` field with the server that was already in the `Fatoora Server Url` field. 
 ## 0.25.1
 
 * Merge hot fixes from master (from 0.23.2)

@@ -25,8 +25,7 @@ class ZATCABusinessSettings(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         additional_street: DF.Data | None
         building_number: DF.Data | None
@@ -44,7 +43,7 @@ class ZATCABusinessSettings(Document):
         currency: DF.Link
         district: DF.Data | None
         enable_zatca_integration: DF.Check
-        fatoora_server_url: DF.Data | None
+        fatoora_server: DF.Literal["Sandbox", "Simulation", "Production"]
         java_home: DF.Data | None
         other_ids: DF.Table[AdditionalSellerIDs]
         override_cli_download_url: DF.Data | None
@@ -58,12 +57,10 @@ class ZATCABusinessSettings(Document):
         seller_name: DF.Data
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
-        type_of_business_transactions: DF.Literal[
-            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
         validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
         zatca_cli_path: DF.Data | None
-
     # end: auto-generated types
 
     def after_insert(self):
@@ -125,6 +122,16 @@ class ZATCABusinessSettings(Document):
             with open(path, 'wb') as f:
                 f.write(key.encode('utf-8'))
         return path
+
+    @property
+    def fatoora_server_url(self) -> str:
+        if self.fatoora_server == "Sandbox":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/'
+        if self.fatoora_server == "Simulation":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/'
+        if self.fatoora_server == "Production":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core/'
+        frappe.throw(f"Invalid Fatoora Server, Please update {self.company} Fatoora Server in ZATCA Business Settings")
 
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,
