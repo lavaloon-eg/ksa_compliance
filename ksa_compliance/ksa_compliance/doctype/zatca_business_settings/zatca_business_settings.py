@@ -129,7 +129,7 @@ class ZATCABusinessSettings(Document):
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/'
         if self.fatoora_server == "Simulation":
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/'
-        if self.fatoora_server == "Sandbox":
+        if self.fatoora_server == "Production":
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core/'
 
     def onboard(self, otp: str) -> NoReturn:
