@@ -318,7 +318,7 @@ class ZATCABusinessSettings(Document):
         item_tax_template_doc.custom_zatca_item_tax_category = self.zatca_tax_category
         item_tax_template_doc.append("taxes", {
             "tax_type": account_head,
-            "tax_rate": self.tax_rate
+            "rate": self.tax_rate
         })
         item_tax_template_doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
