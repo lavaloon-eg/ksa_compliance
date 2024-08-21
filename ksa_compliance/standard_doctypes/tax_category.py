@@ -12,10 +12,14 @@ class ZatcaTaxCategory:
     arabic_reason: Optional[str] = None
 
 
-def map_tax_category(tax_category_id: Optional[str]) -> ZatcaTaxCategory:
+def map_tax_category(tax_category_id: Optional[str] = None,
+                     item_tax_template_id: Optional[str] = None) -> ZatcaTaxCategory:
     if tax_category_id:
         zatca_category, custom_category_reason = frappe.get_value("Tax Category", {"name": tax_category_id},
                                                                   ["custom_zatca_category", "custom_category_reason"])
+    elif item_tax_template_id:
+        zatca_category, custom_category_reason = frappe.get_value("Item Tax Template", {"name": item_tax_template_id},
+                                                                  ["custom_zatca_item_tax_category", "custom_category_reason"])
     else:
         zatca_category = "Standard rate"
         custom_category_reason = None

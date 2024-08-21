@@ -145,17 +145,17 @@
         <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
         <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ invoice.allowance_total_amount | round(2) }}</cbc:Amount>
         <cac:TaxCategory>
-            <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
-            {% if invoice.taxes_rate %}
-            <cbc:Percent>{{ invoice.taxes_rate }}</cbc:Percent>
+            <cbc:ID>{{ invoice.tax_categories[0].tax_category_code }}</cbc:ID>
+            {% if invoice.item_lines[0].tax_percent %}
+            <cbc:Percent>{{ invoice.tax_categories[0].tax_percent }}</cbc:Percent>
             {% else %}
             <cbc:Percent>{{ 0.00 }}</cbc:Percent>
             {% endif %}
-            {% if invoice.tax_exemption_reason_code %}
-            <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
+            {% if invoice.tax_categories[0].tax_exemption_reason_code %}
+            <cbc:TaxExemptionReasonCode>{{ invoice.tax_categories[0].tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
             {% endif %}
-            {% if invoice.tax_exemption_reason %}
-            <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason }}</cbc:TaxExemptionReason>
+            {% if invoice.tax_categories[0].tax_exemption_reason %}
+            <cbc:TaxExemptionReason>{{ invoice.tax_categories[0].tax_exemption_reason }}</cbc:TaxExemptionReason>
             {% endif %}
             <cac:TaxScheme>
                 <cbc:ID>VAT</cbc:ID>
@@ -164,23 +164,25 @@
     </cac:AllowanceCharge>
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
-        <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.net_total or invoice.total | round(2) }}</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
-            <cac:TaxCategory>
-                <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
-                <cbc:Percent>{{ invoice.total_taxes_and_charges_percent or 0 }}</cbc:Percent>
-                {% if invoice.tax_exemption_reason_code %}
-                <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
-                {% endif %}
-                {% if invoice.tax_exemption_reason %}
-                <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason }}</cbc:TaxExemptionReason>
-                {% endif %}
-                <cac:TaxScheme>
-                    <cbc:ID>VAT</cbc:ID>
-                </cac:TaxScheme>
-            </cac:TaxCategory>
-        </cac:TaxSubtotal>
+        {% for tax_category in invoice.tax_categories %}
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ tax_category.taxable_amount or invoice.total | round(2) }}</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ tax_category.tax_amount or 0 | round(2) }}</cbc:TaxAmount>
+                <cac:TaxCategory>
+                    <cbc:ID>{{ tax_category.tax_category_code }}</cbc:ID>
+                    <cbc:Percent>{{ tax_category.tax_percent or 0 }}</cbc:Percent>
+                    {% if tax_category.tax_exemption_reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ tax_category.tax_exemption_reason_code }}</cbc:TaxExemptionReasonCode>
+                    {% endif %}
+                    {% if tax_category.tax_exemption_reason %}
+                    <cbc:TaxExemptionReason>{{ tax_category.tax_exemption_reason }}</cbc:TaxExemptionReason>
+                    {% endif %}
+                    <cac:TaxScheme>
+                        <cbc:ID>VAT</cbc:ID>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        {% endfor %}
     </cac:TaxTotal>
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.base_total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
@@ -218,13 +220,13 @@
                 <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ 0.00 }}</cbc:TaxAmount>
                 {% endif %}
                 <cac:TaxCategory>
-                    <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
+                    <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
                     <cbc:Percent>{{ item.tax_percent or 0 }}</cbc:Percent>
-                    {% if invoice.tax_exemption_reason_code %}
-                    <cbc:TaxExemptionReasonCode>{{ invoice.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
+                    {% if item.tax_exemption_reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ item.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
                     {% endif %}
-                    {% if invoice.tax_exemption_reason %}
-                    <cbc:TaxExemptionReason>{{ invoice.tax_exemption_reason | escape }}</cbc:TaxExemptionReason>
+                    {% if item.tax_exemption_reason %}
+                    <cbc:TaxExemptionReason>{{ item.tax_exemption_reason | escape }}</cbc:TaxExemptionReason>
                     {% endif %}
                     <cac:TaxScheme>
                         <cbc:ID>VAT</cbc:ID>
@@ -247,11 +249,17 @@
             {% endif %}
 
             <cac:ClassifiedTaxCategory>
-                <cbc:ID>{{ invoice.tax_category_code }}</cbc:ID>
+                <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
                 {% if item.tax_percent %}
                 <cbc:Percent>{{ item.tax_percent }}</cbc:Percent>
                 {% else %}
                 <cbc:Percent>{{ 0.00 }}</cbc:Percent>
+                {% endif %}
+                {% if item.tax_exemption_reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ item.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
+                {% endif %}
+                {% if item.tax_exemption_reason %}
+                    <cbc:TaxExemptionReason>{{ item.tax_exemption_reason | escape }}</cbc:TaxExemptionReason>
                 {% endif %}
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
