@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 * Support multiple tax categories in sales invoice.
+* Add new ZATCA Tax Category
+  * Code: VATEX-SA-DUTYFREE,
+  * Reason: Qualified Supply of Goods in Duty Free area
 ## 0.25.1
 
 * Merge hot fixes from master (from 0.23.2)
