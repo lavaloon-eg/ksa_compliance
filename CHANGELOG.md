@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-* Support more than one Tax Category per Sales Invoice Item.
+* Support multiple tax categories in sales invoice.
 ## 0.25.1
 
 * Merge hot fixes from master (from 0.23.2)

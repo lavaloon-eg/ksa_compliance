@@ -54,9 +54,8 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
         tax_category_id = frappe.get_value("Sales Taxes and Charges Template", taxes_and_charges, "tax_category")
     else:
         tax_category_id = None
-    unique_tax_categories = []
+    unique_tax_categories = {}
     for item in item_lines:
-        # Append item tax category to item from item tax template
         if item["item_tax_template"]:
             item_tax_category = map_tax_category(item_tax_template_id=item["item_tax_template"])
         else:
@@ -72,7 +71,7 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
             "tax_category_code": item["tax_category_code"],
             "tax_amount": item["tax_amount"],
             "tax_percent": item["tax_percent"],
-            "taxable_amount": item["amount"]
+            "taxable_amount": item["net_amount"]
         }
         if item_tax_category.reason_code:
             item["tax_exemption_reason_code"] = item_tax_category.reason_code
@@ -81,32 +80,14 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
             item["tax_exemption_reason"] = item_tax_category.arabic_reason
             item_tax_category_details["tax_exemption_reason"] = item_tax_category.arabic_reason
 
-        if unique_tax_categories:
-            if item_tax_category_details["tax_category_code"] == "S":
-                exact_standard_rate_exists = False
-                for category in unique_tax_categories:
-                    if category["tax_category_code"] == "S" and category["tax_percent"] == item_tax_category_details["tax_percent"]:
-                        exact_standard_rate_exists = True
-                    if exact_standard_rate_exists:
-                        category["tax_amount"] += item_tax_category_details["tax_amount"]
-                        category["taxable_amount"] += item_tax_category_details["taxable_amount"]
-                        break
-                if not exact_standard_rate_exists:
-                    unique_tax_categories.append(item_tax_category_details)
-            else:
-                exemption_code_exists = False
-                for category in unique_tax_categories:
-                    if category.get("tax_exemption_reason_code", "") == item_tax_category_details["tax_exemption_reason_code"]:
-                        exemption_code_exists = True
-                    if exemption_code_exists:
-                        category["taxable_amount"] += item_tax_category_details["taxable_amount"]
-                        break
-                if not exemption_code_exists:
-                    unique_tax_categories.append(item_tax_category_details)
+        key = item_tax_category.tax_category_code + str(item_tax_category.reason_code) + str(item["tax_percent"])
+        if key in unique_tax_categories:
+            unique_tax_categories[key]["tax_amount"] += item_tax_category_details["tax_amount"]
+            unique_tax_categories[key]["taxable_amount"] += item_tax_category_details["taxable_amount"]
         else:
-            unique_tax_categories.append(item_tax_category_details)
+            unique_tax_categories[key] = item_tax_category_details
 
-    return unique_tax_categories
+    return [val for i, val in unique_tax_categories.items()]
 
 
 class Einvoice:

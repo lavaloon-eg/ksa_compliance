@@ -114,6 +114,10 @@ def _reason_to_code_and_arabic(reason: str, input_reason: Optional[str] = None) 
         "{manual entry}": {
             "reason_code": "VATEX-SA-OOS",
             "arabic_reason": input_reason
+        },
+        "Qualified Supply of Goods in Duty Free area": {
+            "reason_code": "VATEX-SA-DUTYFREE",
+            "arabic_reason": "التوريد المؤهل للسلع في الأسواق الحرة"
         }
     }
     return reasons[reason]
