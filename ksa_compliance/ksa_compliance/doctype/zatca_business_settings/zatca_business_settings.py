@@ -299,7 +299,7 @@ class ZATCABusinessSettings(Document):
 
     def create_zatca_tax_category(self) -> str:
         tax_category_name = self.zatca_tax_category.split(' || ')[-1]
-        tax_category_id = frappe.get_value("Tax Category", tax_category_name, "name")
+        tax_category_id = frappe.db.exists('Tax Category', tax_category_name)
         if tax_category_id:
             return tax_category_id
         tax_category_doc = cast(TaxCategory, frappe.new_doc("Tax Category"))
