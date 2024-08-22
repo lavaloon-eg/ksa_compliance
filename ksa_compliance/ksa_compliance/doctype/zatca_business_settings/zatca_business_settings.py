@@ -298,8 +298,12 @@ class ZATCABusinessSettings(Document):
         return account_doc.name
 
     def create_zatca_tax_category(self) -> str:
+        tax_category_name = self.zatca_tax_category.split(' || ')[-1]
+        tax_category_id = frappe.get_value("Tax Category", tax_category_name, "name")
+        if tax_category_id:
+            return tax_category_id
         tax_category_doc = cast(TaxCategory, frappe.new_doc("Tax Category"))
-        tax_category_doc.title = f"{self.company} - {self.zatca_tax_category.split(' || ')[-1]}"
+        tax_category_doc.title = tax_category_name
         tax_category_doc.custom_zatca_category = self.zatca_tax_category
         tax_category_doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return tax_category_doc.name
