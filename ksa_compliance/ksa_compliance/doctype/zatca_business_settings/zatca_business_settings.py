@@ -6,6 +6,11 @@ from typing import Optional, NoReturn, cast
 
 # import frappe
 import frappe
+from erpnext.accounts.doctype.account.account import Account
+from erpnext.accounts.doctype.item_tax_template.item_tax_template import ItemTaxTemplate
+from erpnext.accounts.doctype.sales_taxes_and_charges_template.sales_taxes_and_charges_template import \
+    SalesTaxesandChargesTemplate
+from erpnext.accounts.doctype.tax_category.tax_category import TaxCategory
 # noinspection PyProtectedMember
 from frappe import _
 from frappe.model.document import Document
@@ -75,6 +80,8 @@ class ZATCABusinessSettings(Document):
         invoice_counting_doc.previous_invoice_hash = \
             "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
         invoice_counting_doc.insert(ignore_permissions=True)
+
+    def before_insert(self):
         # Create Tax Account under Duties and Taxes Account
         tax_account_id = self.create_tax_account()
         # Create Tax Category based on ZATCA Tax Category in business settings
@@ -82,7 +89,7 @@ class ZATCABusinessSettings(Document):
         # Create Sales Taxes and Charges Template
         self.create_sales_taxes_and_charges_template(tax_category=tax_category_id, account_head=tax_account_id)
         # Create Item Tax Template
-        self.create_item_tax_template(tax_category=tax_category_id, account_head=tax_account_id)
+        self.create_item_tax_template(account_head=tax_account_id)
 
     @property
     def is_live_sync(self) -> bool:
@@ -277,7 +284,7 @@ class ZATCABusinessSettings(Document):
                      title=_("This Action Is Not Allowed"))
 
     def create_tax_account(self) -> str:
-        account_doc = frappe.new_doc("Account")
+        account_doc = cast(Account, frappe.new_doc("Account"))
         parent_account = frappe.get_value("Account", {"company": self.company, "account_name": "Duties and Taxes"}
                                           , "name")
         account_doc.parent_account = parent_account
@@ -288,18 +295,18 @@ class ZATCABusinessSettings(Document):
         account_doc.tax_rate = self.tax_rate
         account_doc.insert(ignore_permissions=True)
         self.linked_tax_account = account_doc.name
-        self.save(ignore_permissions=True)
         return account_doc.name
 
     def create_zatca_tax_category(self) -> str:
-        tax_category_doc = frappe.new_doc("Tax Category")
-        tax_category_doc.title = self.zatca_tax_category.split(" || ")[-1]
+        tax_category_doc = cast(TaxCategory, frappe.new_doc("Tax Category"))
+        tax_category_doc.title = f"{self.company} - {self.zatca_tax_category.split(' || ')[-1]}"
         tax_category_doc.custom_zatca_category = self.zatca_tax_category
         tax_category_doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return tax_category_doc.name
 
     def create_sales_taxes_and_charges_template(self, tax_category: str, account_head: str):
-        sales_taxes_and_charges_template_doc = frappe.new_doc("Sales Taxes and Charges Template")
+        sales_taxes_and_charges_template_doc = cast(SalesTaxesandChargesTemplate,
+                                                    frappe.new_doc("Sales Taxes and Charges Template"))
         sales_taxes_and_charges_template_doc.title = f"VAT - {self.tax_rate}%"
         sales_taxes_and_charges_template_doc.company = self.company
         sales_taxes_and_charges_template_doc.tax_category = tax_category
@@ -307,18 +314,18 @@ class ZATCABusinessSettings(Document):
             "charge_type": "On Net Total",
             "account_head": account_head,
             "description": "VAT Account",
-            "tax_rate": self.tax_rate
+            "rate": self.tax_rate
         })
         sales_taxes_and_charges_template_doc.insert(ignore_permissions=True)
 
-    def create_item_tax_template(self, tax_category: str, account_head: str):
-        item_tax_template_doc = frappe.new_doc("Item Tax Template")
+    def create_item_tax_template(self, account_head: str):
+        item_tax_template_doc = cast(ItemTaxTemplate, frappe.new_doc("Item Tax Template"))
         item_tax_template_doc.title = f"VAT - {self.tax_rate}%"
         item_tax_template_doc.company = self.company
         item_tax_template_doc.custom_zatca_item_tax_category = self.zatca_tax_category
         item_tax_template_doc.append("taxes", {
             "tax_type": account_head,
-            "rate": self.tax_rate
+            "tax_rate": self.tax_rate
         })
         item_tax_template_doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
