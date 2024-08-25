@@ -12,10 +12,14 @@ class ZatcaTaxCategory:
     arabic_reason: Optional[str] = None
 
 
-def map_tax_category(tax_category_id: Optional[str]) -> ZatcaTaxCategory:
+def map_tax_category(tax_category_id: Optional[str] = None,
+                     item_tax_template_id: Optional[str] = None) -> ZatcaTaxCategory:
     if tax_category_id:
         zatca_category, custom_category_reason = frappe.get_value("Tax Category", {"name": tax_category_id},
                                                                   ["custom_zatca_category", "custom_category_reason"])
+    elif item_tax_template_id:
+        zatca_category, custom_category_reason = frappe.get_value("Item Tax Template", {"name": item_tax_template_id},
+                                                                  ["custom_zatca_item_tax_category", "custom_category_reason"])
     else:
         zatca_category = "Standard rate"
         custom_category_reason = None
@@ -110,6 +114,10 @@ def _reason_to_code_and_arabic(reason: str, input_reason: Optional[str] = None) 
         "{manual entry}": {
             "reason_code": "VATEX-SA-OOS",
             "arabic_reason": input_reason
+        },
+        "Qualified Supply of Goods in Duty Free area": {
+            "reason_code": "VATEX-SA-DUTYFREE",
+            "arabic_reason": "التوريد المؤهل للسلع في الأسواق الحرة"
         }
     }
     return reasons[reason]

@@ -45,6 +45,50 @@ def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conver
     return item_lines
 
 
+def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | None) -> list:
+    """
+    Append tax category of each item based on item tax template or sales taxes and charges template in sales invoice.
+    Returns unique Tax Categories with sum of item taxable amount and item tax amount per tax category.
+    """
+    if taxes_and_charges:
+        tax_category_id = frappe.get_value("Sales Taxes and Charges Template", taxes_and_charges, "tax_category")
+    else:
+        tax_category_id = None
+    unique_tax_categories = {}
+    for item in item_lines:
+        if item["item_tax_template"]:
+            item_tax_category = map_tax_category(item_tax_template_id=item["item_tax_template"])
+        else:
+            if tax_category_id:
+                item_tax_category = map_tax_category(tax_category_id=tax_category_id)
+            else:
+                item_tax_category = None
+                frappe.throw("Please Include Sales Taxes and Charges Template on invoice\n"
+                             f"Or include Item Tax Template on {item['item_name']}")
+
+        item["tax_category_code"] = item_tax_category.tax_category_code
+        item_tax_category_details = {
+            "tax_category_code": item["tax_category_code"],
+            "tax_amount": item["tax_amount"],
+            "tax_percent": item["tax_percent"],
+            "taxable_amount": item["net_amount"]
+        }
+        if item_tax_category.reason_code:
+            item["tax_exemption_reason_code"] = item_tax_category.reason_code
+            item_tax_category_details["tax_exemption_reason_code"] = item_tax_category.reason_code
+        if item_tax_category.arabic_reason:
+            item["tax_exemption_reason"] = item_tax_category.arabic_reason
+            item_tax_category_details["tax_exemption_reason"] = item_tax_category.arabic_reason
+
+        key = item_tax_category.tax_category_code + str(item_tax_category.reason_code) + str(item["tax_percent"])
+        if key in unique_tax_categories:
+            unique_tax_categories[key]["tax_amount"] += item_tax_category_details["tax_amount"]
+            unique_tax_categories[key]["taxable_amount"] += item_tax_category_details["taxable_amount"]
+        else:
+            unique_tax_categories[key] = item_tax_category_details
+    return list(unique_tax_categories.values())
+
+
 class Einvoice:
     # TODO: if batch doc = none validate business settings else pass
 
@@ -1093,14 +1137,6 @@ class Einvoice:
         except Exception:
             self.error_dic["taxable_amount"] = f"Could not map to sales invoice taxes rate."
 
-        # Add Tax category code and Exemption reason
-        tax_category_and_exemption = map_tax_category(self.sales_invoice_doc.tax_category)
-        self.result["invoice"]["tax_category_code"] = tax_category_and_exemption.tax_category_code
-        if tax_category_and_exemption.reason_code:
-            self.result["invoice"]["tax_exemption_reason_code"] = tax_category_and_exemption.reason_code
-        if tax_category_and_exemption.arabic_reason:
-            self.result["invoice"]["tax_exemption_reason"] = tax_category_and_exemption.arabic_reason
-
             # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------
         # TODO : Add Rules for fields
@@ -1109,11 +1145,11 @@ class Einvoice:
             new_item = {}
             has_discount = False
             req_fields = ["idx", "qty", "uom", "item_code", "item_name", "net_amount", "amount", "price_list_rate",
-                          "rate", "discount_percentage", "discount_amount"]
+                          "rate", "discount_percentage", "discount_amount", "item_tax_template"]
             if isinstance(item.discount_amount, float) and item.discount_amount > 0:
                 has_discount = True
             for it in req_fields:
-                if it not in ["item_name", "uom", "item_code"]:
+                if it not in ["item_name", "uom", "item_code", "item_tax_template"]:
                     if it in ["discount_percentage", "discount_amount"] and not has_discount:
                         new_item[it] = self.get_float_value(
                             field_name=it,
@@ -1132,7 +1168,7 @@ class Einvoice:
                             max_value=999999999,
                             xml_name=it
                         )
-                elif it in ["item_name", "uom", "item_code"]:
+                elif it in ["item_name", "uom", "item_code", "item_tax_template"]:
                     new_item[it] = self.get_text_value(
                         field_name=it,
                         source_doc=item,
@@ -1147,6 +1183,10 @@ class Einvoice:
                                                         item_lines=item_lines,
                                                         conversion_rate=self.sales_invoice_doc.conversion_rate,
                                                         is_tax_included=is_tax_included)
+        unique_tax_categories = append_tax_categories_to_item(item_lines, self.sales_invoice_doc.taxes_and_charges)
+        # Append unique Tax categories to invoice
+        self.result["invoice"]["tax_categories"] = unique_tax_categories
+
         # Add invoice total taxes and charges percentage field
         self.result["invoice"]["total_taxes_and_charges_percent"] = sum(
             it.rate for it in self.sales_invoice_doc.get("taxes", []))
