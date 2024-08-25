@@ -409,7 +409,7 @@
    "fieldname": "tax_rate",
    "fieldtype": "Percent",
    "label": "Tax Rate",
-   "reqd": 1,
+   "mandatory_depends_on": "eval:doc.__islocal == 1",
    "set_only_once": 1
   },
   {
@@ -417,8 +417,8 @@
    "fieldname": "zatca_tax_category",
    "fieldtype": "Select",
    "label": "ZATCA Tax Category",
+   "mandatory_depends_on": "eval:doc.__islocal == 1",
    "options": "\nStandard rate\nServices outside scope of tax / Not subject to VAT || {manual entry}\nExempt from Tax || Financial services mentioned in Article 29 of the VAT Regulations\nExempt from Tax || Life insurance services mentioned in Article 29 of the VAT Regulations\nExempt from Tax || Real estate transactions mentioned in Article 30 of the VAT Regulations\nExempt from Tax || Qualified Supply of Goods in Duty Free area\nZero rated goods || Export of goods\nZero rated goods || Export of services\nZero rated goods || The international transport of Goods\nZero rated goods || International transport of passengers\nZero rated goods || Services directly connected and incidental to a Supply of international passenger transport\nZero rated goods || Supply of a qualifying means of transport\nZero rated goods || Any services relating to Goods or passenger transportation as defined in article twenty five of these Regulations\nZero rated goods || Medicines and medical equipment\nZero rated goods || Qualifying metals\nZero rated goods || Private education to citizen\nZero rated goods || Private healthcare to citizen\nZero rated goods || Supply of qualified military goods",
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -433,7 +433,7 @@
    "fieldname": "account_name",
    "fieldtype": "Data",
    "label": "Account Name",
-   "reqd": 1,
+   "mandatory_depends_on": "eval:doc.__islocal == 1",
    "set_only_once": 1
   },
   {
@@ -441,13 +441,13 @@
    "fieldname": "account_number",
    "fieldtype": "Data",
    "label": "Account Number",
-   "reqd": 1,
+   "mandatory_depends_on": "eval:doc.__islocal == 1",
    "set_only_once": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-25 11:57:53.123568",
+ "modified": "2024-08-25 13:32:15.217588",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
