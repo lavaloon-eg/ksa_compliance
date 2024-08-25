@@ -65,6 +65,7 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
   {
@@ -78,6 +79,7 @@
    "fieldtype": "Link",
    "label": "Company Address",
    "options": "Address",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
   {
@@ -95,19 +97,22 @@
    "fieldname": "seller_name",
    "fieldtype": "Data",
    "label": "Seller Name",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
   {
    "fieldname": "vat_registration_number",
    "fieldtype": "Data",
    "label": "Vat Registration Number",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
   {
    "fieldname": "other_ids",
    "fieldtype": "Table",
    "label": "Additional IDs",
-   "options": "Additional Seller IDs"
+   "options": "Additional Seller IDs",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id"
   },
   {
    "fieldname": "column_break_kjzc",
@@ -219,6 +224,7 @@
    "fieldname": "company_unit",
    "fieldtype": "Data",
    "label": "Company Unit",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
   {
@@ -226,6 +232,7 @@
    "fieldname": "company_unit_serial",
    "fieldtype": "Data",
    "label": "Company Unit Serial",
+   "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
   {
@@ -384,7 +391,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-20 11:42:19.103811",
+ "modified": "2024-08-25 11:57:53.123568",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
