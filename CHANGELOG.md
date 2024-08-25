@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.28.0
+
 * Support multiple tax categories in sales invoice.
 * Add new ZATCA Tax Category
   * Code: VATEX-SA-DUTYFREE,
