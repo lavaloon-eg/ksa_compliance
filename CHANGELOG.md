@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add a new tab in ZATCA Phase 2 Business Settings for configuration of the tax account per company.
+* Create Tax Category, Sales Taxes and Charges template and Item tax template and link them to the tax account created on creating new ZATCA Business Settings
 * Set ZATCA Business Settings Fields to Be readonly only after onboarding except for system manager.
   * Updated fields: Company, Unit Name, Unit Serial, Address, seller name, VAT Registration Number and additional ids.
 
