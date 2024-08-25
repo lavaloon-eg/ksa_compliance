@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Set ZATCA Business Settings Fields to Be readonly only after onboarding except for system manager.
+  * Updated fields: Company, Unit Name, Unit Serial, Address, seller name, VAT Registration Number and additional ids.
+
 ## 0.26.0
 
 * Remove `Fatoora Server Url` field and replace it with `Fatoora Server` Select Field with 3 options `['Sandbox', 'Simulation', 'Production']`
