@@ -7,7 +7,8 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Add a new tab in ZATCA Phase 2 Business Settings for configuration of the tax account per company.
+* Create Tax Category, Sales Taxes and Charges template and Item tax template and link them to the tax account created on creating new ZATCA Business Settings
 ## 0.26.0
 
 * Remove `Fatoora Server Url` field and replace it with `Fatoora Server` Select Field with 3 options `['Sandbox', 'Simulation', 'Production']`

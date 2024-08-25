@@ -171,7 +171,7 @@ function filter_company_address(frm) {
 
 function add_other_ids_if_new(frm) {
     // TODO: update permissions for child doctype
-    if (frm.is_new()) {
+    if (frm.doc.other_ids.length === 0) {
         var seller_id_list = [];
         seller_id_list.push(
             {
