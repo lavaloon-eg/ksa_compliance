@@ -6,6 +6,11 @@ from typing import Optional, NoReturn, cast
 
 # import frappe
 import frappe
+from erpnext.accounts.doctype.account.account import Account
+from erpnext.accounts.doctype.item_tax_template.item_tax_template import ItemTaxTemplate
+from erpnext.accounts.doctype.sales_taxes_and_charges_template.sales_taxes_and_charges_template import \
+    SalesTaxesandChargesTemplate
+from erpnext.accounts.doctype.tax_category.tax_category import TaxCategory
 # noinspection PyProtectedMember
 from frappe import _
 from frappe.model.document import Document
@@ -25,9 +30,10 @@ class ZATCABusinessSettings(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
+        account_name: DF.Data
+        account_number: DF.Data
         additional_street: DF.Data | None
         building_number: DF.Data | None
         city: DF.Data | None
@@ -44,8 +50,9 @@ class ZATCABusinessSettings(Document):
         currency: DF.Link
         district: DF.Data | None
         enable_zatca_integration: DF.Check
-        fatoora_server_url: DF.Data | None
+        fatoora_server: DF.Literal["Sandbox", "Simulation", "Production"]
         java_home: DF.Data | None
+        linked_tax_account: DF.Link | None
         other_ids: DF.Table[AdditionalSellerIDs]
         override_cli_download_url: DF.Data | None
         override_jre_download_url: DF.Data | None
@@ -58,12 +65,12 @@ class ZATCABusinessSettings(Document):
         seller_name: DF.Data
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
-        type_of_business_transactions: DF.Literal[
-            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        tax_rate: DF.Percent
+        type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
         validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
         zatca_cli_path: DF.Data | None
-
+        zatca_tax_category: DF.Literal["", "Standard rate", "Services outside scope of tax / Not subject to VAT || {manual entry}", "Exempt from Tax || Financial services mentioned in Article 29 of the VAT Regulations", "Exempt from Tax || Life insurance services mentioned in Article 29 of the VAT Regulations", "Exempt from Tax || Real estate transactions mentioned in Article 30 of the VAT Regulations", "Zero rated goods || Export of goods", "Zero rated goods || Export of services", "Zero rated goods || The international transport of Goods", "Zero rated goods || International transport of passengers", "Zero rated goods || Services directly connected and incidental to a Supply of international passenger transport", "Zero rated goods || Supply of a qualifying means of transport", "Zero rated goods || Any services relating to Goods or passenger transportation as defined in article twenty five of these Regulations", "Zero rated goods || Medicines and medical equipment", "Zero rated goods || Qualifying metals", "Zero rated goods || Private education to citizen", "Zero rated goods || Private healthcare to citizen", "Zero rated goods || Supply of qualified military goods"]
     # end: auto-generated types
 
     def after_insert(self):
@@ -73,6 +80,16 @@ class ZATCABusinessSettings(Document):
         invoice_counting_doc.previous_invoice_hash = \
             "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
         invoice_counting_doc.insert(ignore_permissions=True)
+
+    def before_insert(self):
+        # Create Tax Account under Duties and Taxes Account
+        tax_account_id = self.create_tax_account()
+        # Create Tax Category based on ZATCA Tax Category in business settings
+        tax_category_id = self.create_zatca_tax_category()
+        # Create Sales Taxes and Charges Template
+        self.create_sales_taxes_and_charges_template(tax_category=tax_category_id, account_head=tax_account_id)
+        # Create Item Tax Template
+        self.create_item_tax_template(account_head=tax_account_id)
 
     @property
     def is_live_sync(self) -> bool:
@@ -125,6 +142,16 @@ class ZATCABusinessSettings(Document):
             with open(path, 'wb') as f:
                 f.write(key.encode('utf-8'))
         return path
+
+    @property
+    def fatoora_server_url(self) -> str:
+        if self.fatoora_server == "Sandbox":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/'
+        if self.fatoora_server == "Simulation":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/'
+        if self.fatoora_server == "Production":
+            return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core/'
+        frappe.throw(f"Invalid Fatoora Server, Please update {self.company} Fatoora Server in ZATCA Business Settings")
 
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,
@@ -255,6 +282,56 @@ class ZATCABusinessSettings(Document):
     def on_trash(self) -> None:
         frappe.throw(msg=_("You cannot Delete a configured ZATCA Business Settings"),
                      title=_("This Action Is Not Allowed"))
+
+    def create_tax_account(self) -> str:
+        account_doc = cast(Account, frappe.new_doc("Account"))
+        parent_account = frappe.get_value("Account", {"company": self.company, "account_name": "Duties and Taxes"}
+                                          , "name")
+        account_doc.parent_account = parent_account
+        account_doc.company = self.company
+        account_doc.account_name = self.account_name
+        account_doc.account_number = self.account_number
+        account_doc.account_type = "Tax"
+        account_doc.tax_rate = self.tax_rate
+        account_doc.insert(ignore_permissions=True)
+        self.linked_tax_account = account_doc.name
+        return account_doc.name
+
+    def create_zatca_tax_category(self) -> str:
+        tax_category_name = self.zatca_tax_category.split(' || ')[-1]
+        tax_category_id = frappe.db.exists('Tax Category', tax_category_name)
+        if tax_category_id:
+            return tax_category_id
+        tax_category_doc = cast(TaxCategory, frappe.new_doc("Tax Category"))
+        tax_category_doc.title = tax_category_name
+        tax_category_doc.custom_zatca_category = self.zatca_tax_category
+        tax_category_doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        return tax_category_doc.name
+
+    def create_sales_taxes_and_charges_template(self, tax_category: str, account_head: str):
+        sales_taxes_and_charges_template_doc = cast(SalesTaxesandChargesTemplate,
+                                                    frappe.new_doc("Sales Taxes and Charges Template"))
+        sales_taxes_and_charges_template_doc.title = f"VAT - {self.tax_rate}%"
+        sales_taxes_and_charges_template_doc.company = self.company
+        sales_taxes_and_charges_template_doc.tax_category = tax_category
+        sales_taxes_and_charges_template_doc.append("taxes", {
+            "charge_type": "On Net Total",
+            "account_head": account_head,
+            "description": "VAT Account",
+            "rate": self.tax_rate
+        })
+        sales_taxes_and_charges_template_doc.insert(ignore_permissions=True)
+
+    def create_item_tax_template(self, account_head: str):
+        item_tax_template_doc = cast(ItemTaxTemplate, frappe.new_doc("Item Tax Template"))
+        item_tax_template_doc.title = f"VAT - {self.tax_rate}%"
+        item_tax_template_doc.company = self.company
+        item_tax_template_doc.custom_zatca_item_tax_category = self.zatca_tax_category
+        item_tax_template_doc.append("taxes", {
+            "tax_type": account_head,
+            "tax_rate": self.tax_rate
+        })
+        item_tax_template_doc.insert(ignore_permissions=True, ignore_mandatory=True)
 
 
 @frappe.whitelist()

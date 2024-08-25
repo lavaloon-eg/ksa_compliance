@@ -7,10 +7,24 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+
 * Support multiple tax categories in sales invoice.
 * Add new ZATCA Tax Category
   * Code: VATEX-SA-DUTYFREE,
   * Reason: Qualified Supply of Goods in Duty Free area
+
+## 0.27.0
+
+* Add a new tab in ZATCA Phase 2 Business Settings for configuration of the tax account per company.
+* Create Tax Category, Sales Taxes and Charges template and Item tax template and link them to the tax account created on creating new ZATCA Business Settings
+* Set ZATCA Business Settings Fields to Be readonly only after onboarding except for system manager.
+  * Updated fields: Company, Unit Name, Unit Serial, Address, seller name, VAT Registration Number and additional ids.
+
+## 0.26.0
+
+* Remove `Fatoora Server Url` field and replace it with `Fatoora Server` Select Field with 3 options `['Sandbox', 'Simulation', 'Production']`
+* Automatic update of the new `Fatoora server` field with the server that was already in the `Fatoora Server Url` field. 
+
 ## 0.25.1
 
 * Merge hot fixes from master (from 0.23.2)
