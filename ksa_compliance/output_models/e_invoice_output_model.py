@@ -86,8 +86,7 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
             unique_tax_categories[key]["taxable_amount"] += item_tax_category_details["taxable_amount"]
         else:
             unique_tax_categories[key] = item_tax_category_details
-
-    return [val for i, val in unique_tax_categories.items()]
+    return list(unique_tax_categories.values())
 
 
 class Einvoice:

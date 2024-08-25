@@ -215,28 +215,28 @@
             {% endif %}
             <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ item.total_amount | round(2) }}</cbc:RoundingAmount>
 
-            {# TODO: This will be included when supporting prepayment amount on invoice #}
-            {# <cac:TaxSubtotal> #}
-            {#     <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount | round(2) }}</cbc:TaxableAmount> #}
-            {#     {% if item.tax_amount %}#}
-            {#     <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount> #}
-            {#     {% else %} #}
-            {#     <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ 0.00 }}</cbc:TaxAmount> #}
-            {#     {% endif %} #}
-            {#     <cac:TaxCategory> #}
-            {#         <cbc:ID>{{ item.tax_category_code }}</cbc:ID> #}
-            {#         <cbc:Percent>{{ item.tax_percent or 0 }}</cbc:Percent> #}
-            {#         {% if item.tax_exemption_reason_code %} #}
-            {#         <cbc:TaxExemptionReasonCode>{{ item.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode> #}
-            {#         {% endif %}#}
-            {#         {% if item.tax_exemption_reason %} #}
-            {#         <cbc:TaxExemptionReason>{{ item.tax_exemption_reason | escape }}</cbc:TaxExemptionReason> #}
-            {#         {% endif %} #}
-            {#         <cac:TaxScheme> #}
-            {#             <cbc:ID>VAT</cbc:ID> #}
-            {#         </cac:TaxScheme> #}
-            {#     </cac:TaxCategory> #}
-            {# </cac:TaxSubtotal> #}
+            {# TODO: This will be included when supporting prepayment amount on invoice
+             <cac:TaxSubtotal>
+                 <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount | round(2) }}</cbc:TaxableAmount>
+                 {% if item.tax_amount %}
+                 <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount>
+                 {% else %}
+                 <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ 0.00 }}</cbc:TaxAmount>
+                 {% endif %}
+                 <cac:TaxCategory>
+                     <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
+                     <cbc:Percent>{{ item.tax_percent or 0 }}</cbc:Percent>
+                     {% if item.tax_exemption_reason_code %}
+                     <cbc:TaxExemptionReasonCode>{{ item.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
+                     {% endif %}
+                     {% if item.tax_exemption_reason %}
+                     <cbc:TaxExemptionReason>{{ item.tax_exemption_reason | escape }}</cbc:TaxExemptionReason>
+                     {% endif %}
+                     <cac:TaxScheme>
+                         <cbc:ID>VAT</cbc:ID>
+                     </cac:TaxScheme>
+                 </cac:TaxCategory>
+             </cac:TaxSubtotal> #}
 
         </cac:TaxTotal>
         <cac:Item>
