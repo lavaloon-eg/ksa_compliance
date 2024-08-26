@@ -16,8 +16,9 @@ from ksa_compliance import logger
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
 
+DEFAULT_CLI_VERSION = '2.1.0'
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
-DEFAULT_CLI_URL = 'https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.1/zatca-cli-2.0.1.zip'
+DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
 CLI_DIRECTORY = 'zatca'  # Relative to the 'sites' directory
 
 
@@ -41,7 +42,7 @@ class ZatcaResult:
             for e in self.errors:
                 content += f"<li>{e}</li>"
             content += "</ul>"
-            frappe.throw(content)
+            frappe.throw(content, title=ft("ZATCA CLI Error"))
 
 
 @dataclass
@@ -67,10 +68,33 @@ class SigningResult:
 
 
 @dataclass
+class ValidationDetails:
+    is_valid: bool
+    is_valid_qr: bool
+    is_valid_signature: bool
+    errors: dict[str, str]
+    warnings: dict[str, str]
+
+    @staticmethod
+    def from_json(j: dict) -> 'ValidationDetails':
+        return ValidationDetails(j['isValid'], j['isValidQr'], j['isValidSignature'], j['errors'], j['warnings'])
+
+
+@dataclass
 class ValidationResult:
     """Result for validating an invoice through lava-zatca CLI"""
+
+    # The following fields are from CLI 2.0.1 and older
     messages: List[str]
     errors_and_warnings: List[str]
+
+    # The following fields are from 2.1.0 and later
+    details: Optional[ValidationDetails]
+
+    @staticmethod
+    def from_json(j: dict) -> 'ValidationResult':
+        details = ValidationDetails.from_json(j['details']) if 'details' in j else None
+        return ValidationResult(j['messages'], j['errorsAndWarnings'], details)
 
 
 @frappe.whitelist()
@@ -79,6 +103,18 @@ def check_setup(zatca_cli_path: str, java_home: Optional[str]) -> NoReturn:
     result = run_command(zatca_cli_path, ['-v'], java_home=java_home)
     result.throw_if_failure()
     frappe.msgprint(result.msg, ft("ZATCA CLI"))
+
+
+@frappe.whitelist()
+def check_validation_details_support(zatca_cli_path: str, java_home: Optional[str]) -> dict:
+    result = run_command(zatca_cli_path, ['-v'], java_home=java_home)
+    result.throw_if_failure()
+    # Version 2.1.0 is the first version to both support validation and include a 'version' in the data payload
+    is_supported = result.data and 'version' in result.data
+    return {
+        'is_supported': is_supported,
+        'error': '' if is_supported else ft("Please update ZATCA CLI to 2.1.0 or later to support blocking on validation")
+    }
 
 
 @frappe.whitelist()
@@ -183,7 +219,7 @@ def validate_invoice(zatca_cli_path: str, java_home: Optional[str], invoice_path
                                           previous_invoice_hash, invoice_path], java_home=java_home)
     logger.info(result.msg)
     result.throw_if_failure()
-    return ValidationResult(result.data['messages'], result.data['errorsAndWarnings'])
+    return ValidationResult.from_json(result.data)
 
 
 def run_command(zatca_cli_path: str, args: List[str], java_home: Optional[str]) -> ZatcaResult:

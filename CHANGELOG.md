@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support blocking sales invoice submission on ZATCA validation failure
+  * Add a new setting `Block Invoice on Invalid XML` to `ZATCA Business Settings`
+  * CLI setup now grabs version 2.1.0 (required for blocking support)
+  * Upon sales invoice submission, we now throw an exception and show errors/warnings from ZATCA validation if any
+
 ## 0.28.0
 
 * Support multiple tax categories in sales invoice.

@@ -89,8 +89,8 @@
   "tab_4_tab",
   "validation_section",
   "validation_messages",
-  "validation_errors",
-  "column_break_daqi"
+  "column_break_daqi",
+  "validation_errors"
  ],
  "fields": [
   {
@@ -475,7 +475,7 @@
   {
    "fieldname": "validation_section",
    "fieldtype": "Section Break",
-   "label": "Validation"
+   "label": "Captured ZATCA SDK Log Output"
   },
   {
    "fieldname": "validation_messages",
@@ -486,7 +486,7 @@
   {
    "fieldname": "validation_errors",
    "fieldtype": "Small Text",
-   "label": "Errors",
+   "label": "Errors and Warnings",
    "read_only": 1
   },
   {
@@ -602,7 +602,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2024-08-08 16:15:53.221975",
+ "modified": "2024-08-26 12:31:06.153716",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
