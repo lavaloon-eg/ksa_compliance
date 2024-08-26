@@ -35,6 +35,7 @@ class ZATCABusinessSettings(Document):
         account_name: DF.Data | None
         account_number: DF.Data | None
         additional_street: DF.Data | None
+        block_invoice_on_invalid_xml: DF.Check
         building_number: DF.Data | None
         city: DF.Data | None
         cli_setup: DF.Literal["Automatic", "Manual"]

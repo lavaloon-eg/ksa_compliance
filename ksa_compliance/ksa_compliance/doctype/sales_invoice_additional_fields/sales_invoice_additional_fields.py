@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import html
 import json
 import uuid
 from io import BytesIO
@@ -48,7 +49,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -66,7 +68,8 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
@@ -195,6 +198,28 @@ class SalesInvoiceAdditionalFields(Document):
                                                      settings.cert_path, self.previous_invoice_hash)
             self.validation_messages = '\n'.join(validation_result.messages)
             self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
+            if validation_result.details:
+                logger.info(f"Validation Errors: {validation_result.details.errors}")
+                logger.info(f"Validation Warnings: {validation_result.details.warnings}")
+
+                # In theory, we shouldn't have an invalid result without errors/warnings, but just in case an unknown
+                # error occurs that isn't captured
+                is_invalid = ((not validation_result.details.is_valid) or validation_result.details.errors or
+                              validation_result.details.warnings)
+                if settings.block_invoice_on_invalid_xml and is_invalid:
+                    message = f"<h4>{ft('Errors')}</h4>"
+                    message += "<ul>"
+                    for code, error in validation_result.details.errors.items():
+                        message += f"<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>"
+                    message += "</ul>"
+
+                    message += f"<h4>{ft('Warnings')}</h4>"
+                    message += "<ul>"
+                    for code, warning in validation_result.details.warnings.items():
+                        message += f"<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>"
+                    message += "</ul>"
+
+                    frappe.throw(title=ft("ZATCA Validation Error"), msg=message)
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code

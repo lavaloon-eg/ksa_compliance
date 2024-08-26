@@ -50,6 +50,7 @@
   "integration_tab",
   "configuration_section",
   "validate_generated_xml",
+  "block_invoice_on_invalid_xml",
   "column_break_cjdg",
   "fatoora_server",
   "onboarding_section",
@@ -347,7 +348,7 @@
   },
   {
    "depends_on": "eval:doc.cli_setup===\"Automatic\"",
-   "description": "If left empty, the CLI will be downloaded from <a href=\"https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.0/zatca-cli-2.0.0.zip\">https://github.com/lavaloon-eg/zatca-cli/releases/download/2.0.0/zatca-cli-2.0.0.zip</a>",
+   "description": "If left empty, the CLI will be downloaded from <a href=\"https://github.com/lavaloon-eg/zatca-cli/releases/\">https://github.com/lavaloon-eg/zatca-cli/releases/</a>. To override, place the full URL of a zip file from one of the releases (or a release you made from your fork)",
    "fieldname": "override_cli_download_url",
    "fieldtype": "Data",
    "label": "Override CLI Download URL"
@@ -443,11 +444,19 @@
    "label": "Account Number",
    "mandatory_depends_on": "eval:doc.__islocal == 1",
    "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.validate_generated_xml",
+   "description": "If enabled, submission of sales invoices that produce invalid XML will be blocked.<br>\nRequires ZATCA CLI 2.1.0 or later",
+   "fieldname": "block_invoice_on_invalid_xml",
+   "fieldtype": "Check",
+   "label": "Block Invoice on Invalid XML"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-25 13:32:15.217588",
+ "modified": "2024-08-26 11:59:18.534403",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",

@@ -35,6 +35,28 @@ frappe.ui.form.on("ZATCA Business Settings", {
             }
         })
     },
+    block_invoice_on_invalid_xml: async function (frm) {
+        if (frm.doc.block_invoice_on_invalid_xml) {
+            try {
+                let result = await frappe.call({
+                    freeze: true,
+                    freeze_message: __('Please wait. Checking ZATCA CLI version...'),
+                    method: "ksa_compliance.zatca_cli.check_validation_details_support",
+                    args: {
+                        zatca_cli_path: frm.doc.zatca_cli_path || '',
+                        java_home: frm.doc.java_home || '',
+                    }
+                });
+
+                if (!result.message.is_supported) {
+                    frappe.throw(result.message.error);
+                }
+            } catch (e) {
+                frm.set_value('block_invoice_on_invalid_xml', 0);
+                throw e;
+            }
+        }
+    },
     create_csr: function (frm) {
         frappe.prompt(__('OTP'), async ({value}) => {
             await frappe.call({
@@ -58,7 +80,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
 
         let simplified = frm.doc.type_of_business_transactions === 'Let the system decide (both)' ||
             frm.doc.type_of_business_transactions === 'Simplified Tax Invoices';
-        let standard  = frm.doc.type_of_business_transactions === 'Let the system decide (both)' ||
+        let standard = frm.doc.type_of_business_transactions === 'Let the system decide (both)' ||
             frm.doc.type_of_business_transactions === 'Standard Tax Invoices';
         let customer_fields = [];
         if (simplified)
