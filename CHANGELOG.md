@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.29.0
+
 * Support blocking sales invoice submission on ZATCA validation failure
   * Add a new setting `Block Invoice on Invalid XML` to `ZATCA Business Settings`
   * CLI setup now grabs version 2.1.0 (required for blocking support)
