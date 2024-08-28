@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Hot Fix for print format displaying last ZATCA Business Settings info. instead of current company settings.
+
 ## 0.23.2
 
 * Hot fix: Use seller name instead of company name when generating CSR. Seller name is meant to be the company name
