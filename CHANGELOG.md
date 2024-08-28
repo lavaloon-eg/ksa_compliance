@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Hot Fix for print format displaying last ZATCA Business Settings info. instead of current company settings.
 ## 0.29.0
 
 * Support blocking sales invoice submission on ZATCA validation failure
