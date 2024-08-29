@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add ZATCA Integration Summary and ZATCA Integration details reports.
+
 ## 0.29.1
 
 * Hot Fix for print format displaying last ZATCA Business Settings info. instead of current company settings.
