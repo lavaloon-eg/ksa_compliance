@@ -1,0 +1,86 @@
+{
+ "add_total_row": 0,
+ "columns": [
+  {
+   "fieldname": "integration_status",
+   "fieldtype": "Data",
+   "label": "ZATCA Integration status",
+   "width": 200
+  },
+  {
+   "fieldname": "records_count",
+   "fieldtype": "Int",
+   "label": "Total Number of invoices",
+   "width": 150
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total Amount",
+   "width": 150
+  },
+  {
+   "fieldname": "total_taxes_and_charges",
+   "fieldtype": "Currency",
+   "label": "VAT Total Amount",
+   "width": 150
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total Amount",
+   "width": 150
+  }
+ ],
+ "creation": "2024-08-29 11:13:47.816459",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "from_date_filter",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "to_date_filter",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "company_filter",
+   "fieldtype": "Link",
+   "label": "Company",
+   "mandatory": 1,
+   "options": "Company",
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2024-08-29 13:32:30.000855",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "Zatca Integration Summary",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Zatca Integration Summary",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ]
+}
