@@ -86,8 +86,8 @@ class ReportOrClearInvoiceResult:
         #   "reportingStatus":"NOT_REPORTED"
         #  }
         #
-        # So we're going to try to parse both
-        status = data.get('reportingStatus') or data.get('status')
+        # So we're going to try to parse both. Note that for clearance, it's clearanceStatus instead of reportingStatus
+        status = data.get('reportingStatus') or data.get('clearanceStatus') or data.get('status')
         invoice_hash = data.get('invoiceHash')
         cleared_invoice = data.get('clearedInvoice')
         warnings, errors = [], []

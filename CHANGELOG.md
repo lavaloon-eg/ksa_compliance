@@ -11,6 +11,8 @@ to a section with the version name.
 * Fix `ZATCA Integration Log` to store the actual raw response returned by ZATCA instead of a JSON serialization of
   a parsed response. This ensures we can catch bugs in our parsing logic, as well as unexpected changes in the ZATCA
   response format
+* Use `clearanceStatus` from ZATCA responses as `ZATCA Integration Log` status instead of `status`. This fixes
+  blank status for cleared invoices
 
 ## 0.30.1
 
