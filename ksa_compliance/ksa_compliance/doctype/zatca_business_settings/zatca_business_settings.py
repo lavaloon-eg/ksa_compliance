@@ -288,7 +288,7 @@ class ZATCABusinessSettings(Document):
 
     def create_tax_account(self) -> str:
         account_doc = cast(Account, frappe.new_doc("Account"))
-        parent_account = frappe.get_value("Account", {"company": self.company, "account_name": "Duties and Taxes"}
+        parent_account = frappe.get_value("Account", {"company": self.company, "account_name": _("Duties and Taxes")}
                                           , "name")
         account_doc.parent_account = parent_account
         account_doc.company = self.company
