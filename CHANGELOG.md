@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.30.1
+
 * Use ZATCA CLI 2.1.1 which includes updated schematrons for validation
 
 ## 0.30.0
