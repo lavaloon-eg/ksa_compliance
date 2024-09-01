@@ -9,6 +9,7 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Add ZATCA Integration Summary and ZATCA Integration details reports.
+* Add Checkbox for automatic configuration for VAT accounts in `ZATCA Business Settings`
 
 ## 0.29.1
 

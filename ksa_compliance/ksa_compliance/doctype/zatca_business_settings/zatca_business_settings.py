@@ -35,6 +35,7 @@ class ZATCABusinessSettings(Document):
         account_name: DF.Data | None
         account_number: DF.Data | None
         additional_street: DF.Data | None
+        automatic_vat_account_configuration: DF.Check
         block_invoice_on_invalid_xml: DF.Check
         building_number: DF.Data | None
         city: DF.Data | None
@@ -83,14 +84,15 @@ class ZATCABusinessSettings(Document):
         invoice_counting_doc.insert(ignore_permissions=True)
 
     def before_insert(self):
-        # Create Tax Account under Duties and Taxes Account
-        tax_account_id = self.create_tax_account()
-        # Create Tax Category based on ZATCA Tax Category in business settings
-        tax_category_id = self.create_zatca_tax_category()
-        # Create Sales Taxes and Charges Template
-        self.create_sales_taxes_and_charges_template(tax_category=tax_category_id, account_head=tax_account_id)
-        # Create Item Tax Template
-        self.create_item_tax_template(account_head=tax_account_id)
+        if self.automatic_vat_account_configuration == 1:
+            # Create Tax Account under Duties and Taxes Account
+            tax_account_id = self.create_tax_account()
+            # Create Tax Category based on ZATCA Tax Category in business settings
+            tax_category_id = self.create_zatca_tax_category()
+            # Create Sales Taxes and Charges Template
+            self.create_sales_taxes_and_charges_template(tax_category=tax_category_id, account_head=tax_account_id)
+            # Create Item Tax Template
+            self.create_item_tax_template(account_head=tax_account_id)
 
     @property
     def is_live_sync(self) -> bool:
