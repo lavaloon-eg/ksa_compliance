@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix `ZATCA Integration Log` to store the actual raw response returned by ZATCA instead of a JSON serialization of
+  a parsed response. This ensures we can catch bugs in our parsing logic, as well as unexpected changes in the ZATCA
+  response format
+
 ## 0.30.1
 
 * Use ZATCA CLI 2.1.1 which includes updated schematrons for validation
