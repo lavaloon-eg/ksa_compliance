@@ -30,7 +30,7 @@ class ComplianceResult:
     secret: str
 
     @staticmethod
-    def from_json(data: dict) -> 'ComplianceResult':
+    def from_json(data: dict, raw_response: str) -> 'ComplianceResult':
         """Create a [ComplianceResult] from JSON [data]"""
         return ComplianceResult(request_id=data['requestID'], disposition_message=data['dispositionMessage'],
                                 security_token=data['binarySecurityToken'], secret=data['secret'])
@@ -57,12 +57,15 @@ class ReportOrClearInvoiceResult:
     cleared_invoice: Optional[str]
     warnings: List[WarningOrError]
     errors: List[WarningOrError]
+    raw_response: str
 
     def to_json(self) -> dict:
-        return dataclasses.asdict(self)
+        result = dataclasses.asdict(self)
+        del result['raw_response']
+        return result
 
     @staticmethod
-    def from_json(data: dict) -> 'ReportOrClearInvoiceResult':
+    def from_json(data: dict, raw_response: str) -> 'ReportOrClearInvoiceResult':
         # The swagger documentation on  https://sandbox.zatca.gov.sa/IntegrationSandbox says the response should be
         # like this:
         # {
@@ -83,8 +86,8 @@ class ReportOrClearInvoiceResult:
         #   "reportingStatus":"NOT_REPORTED"
         #  }
         #
-        # So we're going to try to parse both
-        status = data.get('reportingStatus') or data.get('status')
+        # So we're going to try to parse both. Note that for clearance, it's clearanceStatus instead of reportingStatus
+        status = data.get('reportingStatus') or data.get('clearanceStatus') or data.get('status')
         invoice_hash = data.get('invoiceHash')
         cleared_invoice = data.get('clearedInvoice')
         warnings, errors = [], []
@@ -96,7 +99,8 @@ class ReportOrClearInvoiceResult:
             errors = [WarningOrError.from_json(e) for e in data['errors']]
         if data.get('validationResults') and data.get('validationResults').get('errorMessages'):
             errors = [WarningOrError.from_json(e) for e in data['validationResults']['errorMessages']]
-        return ReportOrClearInvoiceResult(status, invoice_hash, cleared_invoice, warnings, errors)
+        return ReportOrClearInvoiceResult(status, invoice_hash, cleared_invoice, warnings, errors,
+                                          raw_response=raw_response)
 
 
 @dataclass
@@ -172,7 +176,7 @@ TError = TypeVar('TError')
 
 
 def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, str],
-             result_builder: Callable[[dict], TOk],
+             result_builder: Callable[[dict, str], TOk],
              error_builder: Callable[[Response | None, Exception | None], TError],
              auth=None) -> Tuple[Result[TOk, TError], int]:
     """
@@ -196,7 +200,7 @@ def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, st
     try:
         response = requests.post(url, headers=final_headers, json=body, auth=auth)
         response.raise_for_status()
-        return Ok(result_builder(response.json())), response.status_code
+        return Ok(result_builder(response.json(), response.text)), response.status_code
     except HTTPError as e:
         error = error_builder(e.response, e)
         logger.error(f'An HTTP error occurred: {error}')
@@ -228,7 +232,7 @@ def try_get_csid_error(response: Response | None, exception: Exception | None) -
     try:
         data = response.json()
         if response.status_code == 400:
-            errors = [WarningOrError.from_json(e) for e in cast(List[dict|str], data.get('errors', []))]
+            errors = [WarningOrError.from_json(e) for e in cast(List[dict | str], data.get('errors', []))]
             if errors:
                 return ', '.join([e.message for e in errors])
 
