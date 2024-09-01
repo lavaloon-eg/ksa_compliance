@@ -10,6 +10,7 @@ to a section with the version name.
 
 * Add ZATCA Integration Summary and ZATCA Integration details reports.
 * Add Checkbox for automatic configuration for VAT accounts in `ZATCA Business Settings`
+* Fix automatic creation of Tax account on creating new `ZATCA Business Settings` when System Language is not English.
 
 ## 0.29.1
 

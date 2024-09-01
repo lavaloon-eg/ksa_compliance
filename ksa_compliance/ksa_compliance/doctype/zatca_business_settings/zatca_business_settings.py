@@ -288,6 +288,8 @@ class ZATCABusinessSettings(Document):
 
     def create_tax_account(self) -> str:
         account_doc = cast(Account, frappe.new_doc("Account"))
+
+        # Since ERPNext Translates account_name "_" in _("Duties and Taxes") must be used to translate the account_name to current system language.
         parent_account = frappe.get_value("Account", {"company": self.company, "account_name": _("Duties and Taxes")}
                                           , "name")
         account_doc.parent_account = parent_account
