@@ -15,11 +15,12 @@ def execute():
     }
     print("Updating Fatoora Server based on old urls")
     for url in old_urls:
-        if url["fatoora_server_url"].startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal'):
+        fatoora_server_url = url["fatoora_server_url"].strip()
+        if fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal'):
             fatoora_server = fatoora_servers["sandbox"]
-        elif url["fatoora_server_url"].startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation'):
+        elif fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation'):
             fatoora_server = fatoora_servers["simulation"]
-        elif url["fatoora_server_url"].startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/core'):
+        elif fatoora_server_url.startswith('https://gw-fatoora.zatca.gov.sa/e-invoicing/core'):
             fatoora_server = fatoora_servers["production"]
         else:
             fatoora_server = None

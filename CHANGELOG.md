@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Enhance Fatoora Server Url patch to remove spaces for each company fatoora server url.
 ## 0.30.2
 
 * Fix `ZATCA Integration Log` to store the actual raw response returned by ZATCA instead of a JSON serialization of
