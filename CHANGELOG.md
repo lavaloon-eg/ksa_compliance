@@ -9,6 +9,7 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Add ZATCA Integration Summary and ZATCA Integration details reports.
+* Support invoice discount on `Grand Total`.
 
 ## 0.29.1
 

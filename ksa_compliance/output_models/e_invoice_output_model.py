@@ -35,7 +35,7 @@ def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conver
             tax_percent = 0.0
             tax_amount = 0.0
 
-        item["amount"] = abs(item["amount"]) - tax_amount if is_tax_included else item["amount"]
+        item["amount"] = round(abs(item["amount"]) / (1 + (tax_percent/100)), 2) if is_tax_included else item["amount"]
         item["discount_amount"] = item["discount_amount"] * item["qty"]
         item["price_list_rate"] = item["amount"] + item["discount_amount"] if is_tax_included else item["price_list_rate"] * item["qty"]
         item["tax_percent"] = tax_percent
@@ -301,6 +301,7 @@ class Einvoice:
                                  xml_name="allowance_total_amount",
                                  rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
                                  parent="invoice")
+            self.compute_invoice_discount_amount()
         else:
             self.get_float_value(field_name="discount_amount",
                                  source_doc=self.sales_invoice_doc,
@@ -308,6 +309,7 @@ class Einvoice:
                                  xml_name="allowance_total_amount",
                                  rules=["BR-KSA-F-04", "BR-CO-11", "BR-DEC-10", "BT-107", "BG-22"],
                                  parent="invoice")
+            self.compute_invoice_discount_amount()
 
         # <----- end document level allowance ----->
 
@@ -721,6 +723,24 @@ class Einvoice:
 
     def get_customer_info(self, invoice_id):
         pass
+
+    def compute_invoice_discount_amount(self):
+        discount_amount = self.sales_invoice_doc.discount_amount
+        if self.sales_invoice_doc.apply_discount_on == "Net Total" or discount_amount == 0:
+            self.additional_fields_doc.fatoora_invoice_discount_amount = discount_amount
+            return
+
+        applied_discount_percent = self.sales_invoice_doc.additional_discount_percentage
+        total_without_vat = self.result["invoice"]["line_extension_amount"]
+        tax_amount = self.sales_invoice_doc.taxes[0].tax_amount
+        if applied_discount_percent == 0:
+            applied_discount_percent = (discount_amount / (total_without_vat + tax_amount)) * 100
+        applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
+        self.result["invoice"]["allowance_total_amount"] = applied_discount_amount
+        self.additional_fields_doc.fatoora_invoice_discount_amount = applied_discount_amount
+
+
+
 
     def get_business_settings_and_seller_details(self):
         # TODO: special validations handling
