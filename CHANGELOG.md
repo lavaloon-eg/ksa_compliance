@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.31.0
+
 * Support invoice discount on `Grand Total`.
 
 ## 0.30.3
