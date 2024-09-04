@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support invoice discount on `Grand Total`.
+
 ## 0.30.3
 
 * Enhance Fatoora Server Url patch to remove spaces for each company fatoora server url.

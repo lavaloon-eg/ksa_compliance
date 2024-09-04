@@ -56,8 +56,10 @@
   "reason_for_charge",
   "reason_for_charge_code",
   "section_break_ytrn",
-  "sum_of_charges",
   "column_break_bcho",
+  "fatoora_invoice_discount_amount",
+  "column_break_lmfr",
+  "sum_of_charges",
   "section_break_tsfk",
   "column_break_mest",
   "vat_exemption_reason_code",
@@ -592,6 +594,15 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Is Latest"
+  },
+  {
+   "fieldname": "column_break_lmfr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fatoora_invoice_discount_amount",
+   "fieldtype": "Float",
+   "label": "Fatoora Invoice Discount Amount"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -602,7 +613,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2024-08-26 12:31:06.153716",
+ "modified": "2024-09-01 15:02:37.561164",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

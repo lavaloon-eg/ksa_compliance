@@ -48,8 +48,7 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
-            AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -67,8 +66,8 @@ class SalesInvoiceAdditionalFields(Document):
         charge_indicator: DF.Check
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
-        integration_status: DF.Literal[
-            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        fatoora_invoice_discount_amount: DF.Float
+        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
