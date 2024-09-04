@@ -12,3 +12,4 @@ ksa_compliance.patches._2024_06_05_set_cli_setup_to_manual
 ksa_compliance.patches._2024_06_13_remove_custom_fields_from_sales_invoice #2024-06-13 11:25
 ksa_compliance.patches._2024_07_08_set_siaf_is_latest
 ksa_compliance.patches._2024_08_19_update_old_fatoora_url_in_business_settings #2024-08-19 11:41
+ksa_compliance.patches._2024_09_04_delete_obsolete_print_formats

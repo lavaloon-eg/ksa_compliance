@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Delete obsolete print formats
+
 ## 0.31.0
 
 * Support invoice discount on `Grand Total`.

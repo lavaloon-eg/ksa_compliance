@@ -233,13 +233,8 @@ scheduler_events = {
 # "ksa_compliance.auth.validate"
 # ]
 
-fixtures = [
-    {"dt": 'Print Format',
-     "filters":
-         [['name', "in",
-           ['ZATCA Simplified Sales Invoice', 'ZATCA Simplified Credit Invoice', 'ZATCA Simplified Debit Invoice',
-            'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit Invoice']]]},
-]
+# fixtures = [
+# ]
 
 # Auto generate type annotations for doctypes
 # Reference: https://github.com/frappe/frappe/pull/21776
