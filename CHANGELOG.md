@@ -8,8 +8,29 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Add ZATCA Integration Summary and ZATCA Integration details reports.
 * Support invoice discount on `Grand Total`.
+
+## 0.30.3
+
+* Enhance Fatoora Server Url patch to remove spaces for each company fatoora server url.
+
+## 0.30.2
+
+* Fix `ZATCA Integration Log` to store the actual raw response returned by ZATCA instead of a JSON serialization of
+  a parsed response. This ensures we can catch bugs in our parsing logic, as well as unexpected changes in the ZATCA
+  response format
+* Use `clearanceStatus` from ZATCA responses as `ZATCA Integration Log` status instead of `status`. This fixes
+  blank status for cleared invoices
+
+## 0.30.1
+
+* Use ZATCA CLI 2.1.1 which includes updated schematrons for validation
+
+## 0.30.0
+
+* Add ZATCA Integration Summary and ZATCA Integration details reports.
+* Add Checkbox for automatic configuration for VAT accounts in `ZATCA Business Settings`
+* Fix automatic creation of Tax account on creating new `ZATCA Business Settings` when System Language is not English.
 
 ## 0.29.1
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import base64
 import html
-import json
 import uuid
 from io import BytesIO
 from typing import cast, Optional, Literal
@@ -334,7 +333,7 @@ class SalesInvoiceAdditionalFields(Document):
             zatca_message = error.response or error.error
         else:
             value = cast(ReportOrClearInvoiceResult, result.ok_value)
-            zatca_message = json.dumps(value.to_json(), indent=2)
+            zatca_message = value.raw_response
             status = value.status
 
         self._add_integration_log_document(zatca_message=zatca_message, integration_status=integration_status,
