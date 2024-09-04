@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "invoice_doctype",
   "invoice_reference",
   "column_break_zzuv",
   "invoice_additional_fields_reference",
@@ -18,11 +19,12 @@
  "fields": [
   {
    "fieldname": "invoice_reference",
-   "fieldtype": "Link",
+   "fieldtype": "Dynamic Link",
    "label": "Invoice Reference",
-   "options": "Sales Invoice",
+   "options": "invoice_doctype",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_zzuv",
@@ -34,7 +36,8 @@
    "label": "Invoice Additional Fields Reference",
    "options": "Sales Invoice Additional Fields",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "section_break_iwip",
@@ -73,11 +76,22 @@
    "fieldname": "resend",
    "fieldtype": "Button",
    "label": "Resend"
+  },
+  {
+   "default": "Sales Invoice",
+   "fieldname": "invoice_doctype",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Invoice Doctype",
+   "options": "Sales Invoice\nPOS Invoice",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-18 14:52:20.484325",
+ "modified": "2024-09-04 13:13:24.391032",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Integration Log",

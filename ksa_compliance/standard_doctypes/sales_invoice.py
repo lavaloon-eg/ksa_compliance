@@ -2,6 +2,8 @@ from datetime import date
 
 import frappe
 import frappe.utils.background_jobs
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe import _
 from result import is_ok
 
@@ -28,12 +30,12 @@ def clear_additional_fields_ignore_list() -> None:
     IGNORED_INVOICES.clear()
 
 
-def create_sales_invoice_additional_fields_doctype(self, method):
-    if not _should_enable_zatca_for_invoice(self.name):
+def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoice, method):
+    if self.doctype == 'Sales Invoice' and not _should_enable_zatca_for_invoice(self.name):
         logger.info(f"Skipping additional fields for {self.name} because it's before start date")
         return
 
-    settings = ZATCABusinessSettings.for_invoice(self.name)
+    settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
         logger.info(f"Skipping additional fields for {self.name} because of missing ZATCA settings")
         return
@@ -43,7 +45,11 @@ def create_sales_invoice_additional_fields_doctype(self, method):
         logger.info(f"Skipping additional fields for {self.name} because it's in the ignore list")
         return
 
-    si_additional_fields_doc = SalesInvoiceAdditionalFields.create_for_invoice(self.name)
+    if self.doctype == 'Sales Invoice' and self.is_consolidated:
+        logger.info(f"Skipping additional fields for {self.name} because it's consolidated")
+        return
+
+    si_additional_fields_doc = SalesInvoiceAdditionalFields.create_for_invoice(self.name, self.doctype)
     precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
     is_live_sync = settings.is_live_sync
     if precomputed_invoice:
@@ -76,6 +82,7 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     start_date = date(2024, 3, 1)
 
     if frappe.db.table_exists('Vehicle Booking Item Info'):
+        # noinspection SqlResolve
         records = frappe.db.sql(
             "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii "
             "JOIN `tabBooking Vehicle` bv ON bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
@@ -88,12 +95,12 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     return posting_date >= start_date
 
 
-def prevent_cancellation_of_sales_invoice(self, method) -> None:
+def prevent_cancellation_of_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
     frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
                  title=_("This Action Is Not Allowed"))
 
 
-def validate_sales_invoice(self, method) -> None:
+def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
     valid = True
     is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
     if ZATCAPhase1BusinessSettings.is_enabled_for_company(self.company) or is_phase_2_enabled_for_company:

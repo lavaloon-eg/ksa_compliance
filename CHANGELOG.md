@@ -9,6 +9,11 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Delete obsolete print formats
+* Add phase 2 support for POS Invoice
+  * `Sales Invoice Additional Fields` and `ZATCA Integration Log` can now link to `POS Invoice`
+  * `Sales Invoice Additional Fields` are now created for POS invoices and skipped for consolidated sales invoice 
+    (created from POS invoices when closing the POS)
+  * Added phase 2 print format for POS Invoice that includes the QR from the corresponding additional fields doc
 
 ## 0.31.0
 

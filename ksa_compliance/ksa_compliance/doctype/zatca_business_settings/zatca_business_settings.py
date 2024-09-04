@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 import base64
 import os
-from typing import Optional, NoReturn, cast
+from typing import Optional, NoReturn, cast, Literal
 
 # import frappe
 import frappe
@@ -30,7 +30,8 @@ class ZATCABusinessSettings(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         account_name: DF.Data | None
         account_number: DF.Data | None
@@ -68,11 +69,14 @@ class ZATCABusinessSettings(Document):
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
         tax_rate: DF.Percent
-        type_of_business_transactions: DF.Literal["Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
+        type_of_business_transactions: DF.Literal[
+            "Let the system decide (both)", "Simplified Tax Invoices", "Standard Tax Invoices"]
         validate_generated_xml: DF.Check
         vat_registration_number: DF.Data
         zatca_cli_path: DF.Data | None
-        zatca_tax_category: DF.Literal["", "Standard rate", "Services outside scope of tax / Not subject to VAT || {manual entry}", "Exempt from Tax || Financial services mentioned in Article 29 of the VAT Regulations", "Exempt from Tax || Life insurance services mentioned in Article 29 of the VAT Regulations", "Exempt from Tax || Real estate transactions mentioned in Article 30 of the VAT Regulations", "Exempt from Tax || Qualified Supply of Goods in Duty Free area", "Zero rated goods || Export of goods", "Zero rated goods || Export of services", "Zero rated goods || The international transport of Goods", "Zero rated goods || International transport of passengers", "Zero rated goods || Services directly connected and incidental to a Supply of international passenger transport", "Zero rated goods || Supply of a qualifying means of transport", "Zero rated goods || Any services relating to Goods or passenger transportation as defined in article twenty five of these Regulations", "Zero rated goods || Medicines and medical equipment", "Zero rated goods || Qualifying metals", "Zero rated goods || Private education to citizen", "Zero rated goods || Private healthcare to citizen", "Zero rated goods || Supply of qualified military goods"]
+        zatca_tax_category: DF.Literal[
+            "", "Standard rate", "Services outside scope of tax / Not subject to VAT || {manual entry}", "Exempt from Tax || Financial services mentioned in Article 29 of the VAT Regulations", "Exempt from Tax || Life insurance services mentioned in Article 29 of the VAT Regulations", "Exempt from Tax || Real estate transactions mentioned in Article 30 of the VAT Regulations", "Exempt from Tax || Qualified Supply of Goods in Duty Free area", "Zero rated goods || Export of goods", "Zero rated goods || Export of services", "Zero rated goods || The international transport of Goods", "Zero rated goods || International transport of passengers", "Zero rated goods || Services directly connected and incidental to a Supply of international passenger transport", "Zero rated goods || Supply of a qualifying means of transport", "Zero rated goods || Any services relating to Goods or passenger transportation as defined in article twenty five of these Regulations", "Zero rated goods || Medicines and medical equipment", "Zero rated goods || Qualifying metals", "Zero rated goods || Private education to citizen", "Zero rated goods || Private healthcare to citizen", "Zero rated goods || Supply of qualified military goods"]
+
     # end: auto-generated types
 
     def after_insert(self):
@@ -232,8 +236,9 @@ class ZATCABusinessSettings(Document):
         }
 
     @staticmethod
-    def for_invoice(invoice_id: str) -> Optional['ZATCABusinessSettings']:
-        company_id = frappe.db.get_value("Sales Invoice", invoice_id, ["company"])
+    def for_invoice(invoice_id: str, doctype: Literal["Sales Invoice", "POS Invoice"]) -> Optional[
+        'ZATCABusinessSettings']:
+        company_id = frappe.db.get_value(doctype, invoice_id, ["company"])
         if not company_id:
             return None
 
