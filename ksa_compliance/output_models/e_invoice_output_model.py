@@ -35,6 +35,12 @@ def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conver
             tax_percent = 0.0
             tax_amount = 0.0
 
+        """
+            In case of tax included we should get the item amount exclusive of vat from the current 'item amount', 
+            and Since ERPNext discount on invoice affects the item tax amount we cannot simply subtract the item tax amount
+            from the item amount but we need to get the tax amount without being affected by applied discount, so we 
+            use this calculation to get the actual item amount exclusive of vat: "item_amount / 1 + tax_percent"
+        """
         item["amount"] = round(abs(item["amount"]) / (1 + (tax_percent/100)), 2) if is_tax_included else item["amount"]
         item["discount_amount"] = item["discount_amount"] * item["qty"]
         item["price_list_rate"] = item["amount"] + item["discount_amount"] if is_tax_included else item["price_list_rate"] * item["qty"]
@@ -726,7 +732,7 @@ class Einvoice:
 
     def compute_invoice_discount_amount(self):
         discount_amount = self.sales_invoice_doc.discount_amount
-        if self.sales_invoice_doc.apply_discount_on == "Net Total" or discount_amount == 0:
+        if self.sales_invoice_doc.apply_discount_on != "Grand Total" or discount_amount == 0:
             self.additional_fields_doc.fatoora_invoice_discount_amount = discount_amount
             return
 
