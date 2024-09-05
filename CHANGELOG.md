@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.32.0
+
 * Delete obsolete print formats
 * Add phase 2 support for POS Invoice
   * `Sales Invoice Additional Fields` and `ZATCA Integration Log` can now link to `POS Invoice`
