@@ -11,6 +11,7 @@ from typing import cast, Optional, Literal
 import frappe
 import frappe.utils.background_jobs
 import pyqrcode
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
 from frappe import _
@@ -69,6 +70,7 @@ class SalesInvoiceAdditionalFields(Document):
         fatoora_invoice_discount_amount: DF.Float
         integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
+        invoice_doctype: DF.Literal["Sales Invoice", "POS Invoice"]
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
         invoice_line_allowance_reason_code: DF.Data | None
@@ -100,7 +102,7 @@ class SalesInvoiceAdditionalFields(Document):
         reason_for_allowance: DF.Data | None
         reason_for_charge: DF.Data | None
         reason_for_charge_code: DF.Data | None
-        sales_invoice: DF.Link
+        sales_invoice: DF.DynamicLink
         sum_of_charges: DF.Float
         supply_end_date: DF.Data | None
         tax_currency: DF.Data | None
@@ -113,10 +115,12 @@ class SalesInvoiceAdditionalFields(Document):
     send_mode: ZatcaSendMode = ZatcaSendMode.Production
 
     @staticmethod
-    def create_for_invoice(invoice_id: str) -> 'SalesInvoiceAdditionalFields':
+    def create_for_invoice(invoice_id: str,
+                           doctype: Literal["Sales Invoice", "POS Invoice"]) -> 'SalesInvoiceAdditionalFields':
         doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc("Sales Invoice Additional Fields"))
         # We do not expect people to create SIAF manually, so nobody has permission to create one
         doc.flags.ignore_permissions = True
+        doc.invoice_doctype = doctype
         doc.sales_invoice = invoice_id
         return doc
 
@@ -156,11 +160,11 @@ class SalesInvoiceAdditionalFields(Document):
         if self.precomputed:
             return
 
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice, self.invoice_doctype)
         if not settings:
             frappe.throw(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
 
-        sales_invoice = cast(SalesInvoice, frappe.get_doc('Sales Invoice', self.sales_invoice))
+        sales_invoice = cast(SalesInvoice | POSInvoice, frappe.get_doc(self.invoice_doctype, self.sales_invoice))
         self.uuid = str(uuid.uuid4())
         self.tax_currency = "SAR"  # Review: Set as "SAR" as a default tax currency value
 
@@ -232,7 +236,7 @@ class SalesInvoiceAdditionalFields(Document):
         })
 
     def submit_to_zatca(self) -> Result[str, str]:
-        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice)
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice, self.invoice_doctype)
         if not settings:
             return Err(f"Missing ZATCA business settings for sales invoice: {self.sales_invoice}")
 
@@ -274,8 +278,9 @@ class SalesInvoiceAdditionalFields(Document):
 
         return Ok(f"Invoice sent to ZATCA. Integration status: {integration_status}")
 
-    def _get_invoice_type_code(self, invoice_doc: SalesInvoice) -> str:
-        if invoice_doc.is_debit_note:
+    def _get_invoice_type_code(self, invoice_doc: SalesInvoice | POSInvoice) -> str:
+        # POSInvoice doesn't have an is_debit_note field
+        if invoice_doc.doctype == 'Sales Invoice' and invoice_doc.is_debit_note:
             return "383"
 
         if invoice_doc.is_return:
@@ -283,7 +288,7 @@ class SalesInvoiceAdditionalFields(Document):
 
         return "388"
 
-    def _get_payment_means_type_code(self, invoice: SalesInvoice) -> Optional[str]:
+    def _get_payment_means_type_code(self, invoice: SalesInvoice | POSInvoice) -> Optional[str]:
         # An invoice can have multiple modes of payment, but we currently only support one. Therefore, we retrieve the
         # first one if any
         if not invoice.payments:
@@ -292,7 +297,7 @@ class SalesInvoiceAdditionalFields(Document):
         mode_of_payment = invoice.payments[0].mode_of_payment
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
-    def _set_buyer_details(self, sales_invoice: SalesInvoice):
+    def _set_buyer_details(self, sales_invoice: SalesInvoice | POSInvoice):
         customer_doc = cast(Customer, frappe.get_doc("Customer", sales_invoice.customer))
 
         self.buyer_vat_registration_number = customer_doc.get("custom_vat_registration_number")
@@ -380,6 +385,7 @@ class SalesInvoiceAdditionalFields(Document):
     def _add_integration_log_document(self, zatca_message, integration_status, zatca_status):
         integration_doc = cast(ZATCAIntegrationLog, frappe.get_doc({
             "doctype": "ZATCA Integration Log",
+            "invoice_doctype": self.invoice_doctype,
             "invoice_reference": self.sales_invoice,
             "invoice_additional_fields_reference": self.name,
             "zatca_message": zatca_message,
@@ -432,11 +438,11 @@ def fix_rejection(id: str):
         frappe.throw(ft("This is not the latest Sales Invoice Additional Fields for invoice $invoice. Please fix "
                         "rejection from the latest", invoice=siaf.sales_invoice))
 
-    settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice)
+    settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     if not settings:
         frappe.throw(ft("Missing ZATCA business settings for sales invoice: $invoice", invoice=siaf.sales_invoice))
 
-    new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice)
+    new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     new_siaf.insert()
 
     if settings.is_live_sync:

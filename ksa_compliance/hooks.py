@@ -137,6 +137,11 @@ doc_events = {
         "validate": "ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice",
         "before_cancel": "ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice"
     },
+    "POS Invoice": {
+        "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
+        "validate": "ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice",
+        "before_cancel": "ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice",
+    }
 }
 
 # Scheduled Tasks
@@ -233,13 +238,8 @@ scheduler_events = {
 # "ksa_compliance.auth.validate"
 # ]
 
-fixtures = [
-    {"dt": 'Print Format',
-     "filters":
-         [['name', "in",
-           ['ZATCA Simplified Sales Invoice', 'ZATCA Simplified Credit Invoice', 'ZATCA Simplified Debit Invoice',
-            'ZATCA Standard Sales Invoice', 'ZATCA Standard Credit Invoice', 'ZATCA Standard Debit Invoice']]]},
-]
+# fixtures = [
+# ]
 
 # Auto generate type annotations for doctypes
 # Reference: https://github.com/frappe/frappe/pull/21776

@@ -13,6 +13,7 @@
   "amended_from",
   "integration_status",
   "last_attempt",
+  "invoice_doctype",
   "sales_invoice",
   "is_latest",
   "uuid",
@@ -212,10 +213,10 @@
   },
   {
    "fieldname": "sales_invoice",
-   "fieldtype": "Link",
+   "fieldtype": "Dynamic Link",
    "in_standard_filter": 1,
-   "label": "Sales Invoice",
-   "options": "Sales Invoice",
+   "label": "Invoice",
+   "options": "invoice_doctype",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -603,6 +604,17 @@
    "fieldname": "fatoora_invoice_discount_amount",
    "fieldtype": "Float",
    "label": "Fatoora Invoice Discount Amount"
+  },
+  {
+   "default": "Sales Invoice",
+   "fieldname": "invoice_doctype",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Invoice Doctype",
+   "options": "Sales Invoice\nPOS Invoice",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -613,7 +625,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2024-09-01 15:02:37.561164",
+ "modified": "2024-09-04 12:29:16.406162",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

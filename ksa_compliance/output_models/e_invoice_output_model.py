@@ -41,9 +41,11 @@ def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conver
             from the item amount but we need to get the tax amount without being affected by applied discount, so we 
             use this calculation to get the actual item amount exclusive of vat: "item_amount / 1 + tax_percent"
         """
-        item["amount"] = round(abs(item["amount"]) / (1 + (tax_percent/100)), 2) if is_tax_included else item["amount"]
+        item["amount"] = round(abs(item["amount"]) / (1 + (tax_percent / 100)), 2) if is_tax_included \
+            else item["amount"]
         item["discount_amount"] = item["discount_amount"] * item["qty"]
-        item["price_list_rate"] = item["amount"] + item["discount_amount"] if is_tax_included else item["price_list_rate"] * item["qty"]
+        item["price_list_rate"] = item["amount"] + item["discount_amount"] if is_tax_included \
+            else item["price_list_rate"] * item["qty"]
         item["tax_percent"] = tax_percent
         item["tax_amount"] = tax_amount
         item["total_amount"] = tax_amount + abs(item["amount"])
@@ -107,9 +109,10 @@ class Einvoice:
         self.result = {}
         self.error_dic = {}
 
-        self.sales_invoice_doc = cast(SalesInvoice, frappe.get_doc("Sales Invoice",
+        self.sales_invoice_doc = cast(SalesInvoice, frappe.get_doc(sales_invoice_additional_fields_doc.invoice_doctype,
                                                                    sales_invoice_additional_fields_doc.sales_invoice))
-        self.business_settings_doc = ZATCABusinessSettings.for_invoice(self.sales_invoice_doc.name)
+        self.business_settings_doc = ZATCABusinessSettings.for_invoice(self.sales_invoice_doc.name,
+                                                                       sales_invoice_additional_fields_doc.invoice_doctype)
 
         # Get Business Settings and Seller Fields
         self.get_business_settings_and_seller_details()
@@ -744,9 +747,6 @@ class Einvoice:
         applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
         self.result["invoice"]["allowance_total_amount"] = applied_discount_amount
         self.additional_fields_doc.fatoora_invoice_discount_amount = applied_discount_amount
-
-
-
 
     def get_business_settings_and_seller_details(self):
         # TODO: special validations handling
