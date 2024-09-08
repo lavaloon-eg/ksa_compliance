@@ -1177,14 +1177,7 @@ class Einvoice:
             for it in req_fields:
                 if it not in ["item_name", "uom", "item_code", "item_tax_template"]:
                     if it in ["discount_percentage", "discount_amount"] and not has_discount:
-                        new_item[it] = self.get_float_value(
-                            field_name=it,
-                            source_doc=item,
-                            required=False,
-                            min_value=-999999999,
-                            max_value=999999999,
-                            xml_name=it
-                        )
+                        new_item[it] = 0.0
                     else:
                         new_item[it] = self.get_float_value(
                             field_name=it,

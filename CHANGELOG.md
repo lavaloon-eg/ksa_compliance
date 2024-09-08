@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* If item does have a negative value discount due to direct change in item rate on the invoice it is considered as item with 0 discount.
+
 ## 0.32.0
 
 * Delete obsolete print formats
