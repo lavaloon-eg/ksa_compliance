@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix invoice rejection when user increases the item rate on sales invoice.
+
 ## 0.32.0
 
 * Delete obsolete print formats
