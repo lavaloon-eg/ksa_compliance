@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.32.1
+
 * Fix invoice rejection when user increases the item rate on sales invoice.
 
 ## 0.32.0
