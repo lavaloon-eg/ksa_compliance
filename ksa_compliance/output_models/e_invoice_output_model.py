@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json
-from typing import cast
+from typing import cast, Optional
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
@@ -134,15 +134,17 @@ class Einvoice:
                             parent="invoice")
 
         if self.sales_invoice_doc.get("is_debit_note") or self.sales_invoice_doc.get("is_return"):
-            # TODO: handle conditional view and mandatory in sales invoice doctype
-            self.get_text_value(field_name="custom_return_reason",
-                                source_doc=self.sales_invoice_doc,
-                                required=True,
-                                xml_name="instruction_note",
-                                min_length=1,
-                                max_length=1000,
-                                rules=["BR-KSA-17", "BR-KSA-F-06", "KSA-10"],
-                                parent="invoice")
+            if self.sales_invoice_doc.doctype == 'Sales Invoice':
+                self.get_text_value(field_name="custom_return_reason",
+                                    source_doc=self.sales_invoice_doc,
+                                    required=True,
+                                    xml_name="instruction_note",
+                                    min_length=1,
+                                    max_length=1000,
+                                    rules=["BR-KSA-17", "BR-KSA-F-06", "KSA-10"],
+                                    parent="invoice")
+            else:
+                self.set_value('invoice', 'instruction_note', 'Return of goods')
 
         # TODO: payment mode return Payment by credit?
         # if self.sales_invoice_doc.get("mode_of_payment") == "Credit":
@@ -523,6 +525,10 @@ class Einvoice:
             return
 
         field_name = xml_name if xml_name else field_name
+        return self.set_value(parent, field_name, field_value)
+
+    # This is a transitional method without all the obsolete validation/rules boilerplate
+    def set_value(self, parent: Optional[str], field_name: str, field_value: any):
         if parent:
             if self.result.get(parent):
                 self.result[parent][field_name] = field_value
