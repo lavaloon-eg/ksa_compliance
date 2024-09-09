@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix print format company filter for POS Invoice Phase 2
+
 ## 0.32.1
 
 * Fix invoice rejection when user increases the item rate on sales invoice.
