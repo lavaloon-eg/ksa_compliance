@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.32.2
+
 * Fix print format company filter for POS Invoice Phase 2
 * Fix return POS invoices getting rejected due to missing reason
   * Use hard-coded return reason "Return of goods"
