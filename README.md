@@ -53,7 +53,7 @@ bench  --site [your.site.name] install-app ksa_compliance
 ```
 
 ```
-bench  --site [your.site.name] migrat
+bench  --site [your.site.name] migrate
 ```
 
 ### Support
