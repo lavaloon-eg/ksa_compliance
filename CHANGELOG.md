@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix compliance check not showing the error message if an exception occurs
+  * This happens for missing configurations, e.g. not having a sales taxes and charges template set for the company
+
 ## 0.32.2
 
 * Fix print format company filter for POS Invoice Phase 2
