@@ -16,11 +16,11 @@ from ksa_compliance import logger
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
+from ksa_compliance.zatca_files import get_csr_path, get_private_key_path, get_zatca_tool_path
 
 DEFAULT_CLI_VERSION = '2.1.1'
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
 DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
-CLI_DIRECTORY = 'zatca'  # Relative to the 'sites' directory
 
 
 @dataclass
@@ -114,7 +114,8 @@ def check_validation_details_support(zatca_cli_path: str, java_home: Optional[st
     is_supported = result.data and 'version' in result.data
     return {
         'is_supported': is_supported,
-        'error': '' if is_supported else ft("Please update ZATCA CLI to 2.1.0 or later to support blocking on validation")
+        'error': '' if is_supported else ft(
+            "Please update ZATCA CLI to 2.1.0 or later to support blocking on validation")
     }
 
 
@@ -126,7 +127,7 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         frappe.publish_progress(title=ft('Setting up CLI'), percent=percent, description=description)
 
     try:
-        directory = CLI_DIRECTORY
+        directory = get_zatca_tool_path()
         os.makedirs(directory, exist_ok=True)
         jre_url = override_jre_download_url or DEFAULT_JRE_URL
         cli_url = override_cli_download_url or DEFAULT_CLI_URL
@@ -180,17 +181,14 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         progress_callback(ft('Done'), 100)
 
 
-def generate_csr(zatca_cli_path: str, java_home: Optional[str], vat_registration_number: str, config: str,
+def generate_csr(zatca_cli_path: str, java_home: Optional[str], file_prefix: str, config: str,
                  simulation=False) -> CsrResult:
     """
-    Generates a CSR for a given VAT registration number. The VAT registration is used to name the resulting
-    CSR and private key files.
-
-    Currently, both files are stored in 'sites/' and named '{vat}-.csr' and '{vat}.privkey'
+    Generates a CSR. The given prefix is used to name the resulting CSR and private key files.
     """
-    config_path = write_temp_file(config, f'csr-{vat_registration_number}.properties')
-    csr_path = f'{vat_registration_number}.csr'
-    private_key_path = f'{vat_registration_number}.privkey'
+    config_path = write_temp_file(config, f'{file_prefix}-csr.properties')
+    csr_path = get_csr_path(file_prefix)
+    private_key_path = get_private_key_path(file_prefix)
     args = ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path]
     if simulation:
         args.append('-s')

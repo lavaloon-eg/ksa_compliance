@@ -14,10 +14,12 @@ from erpnext.accounts.doctype.tax_category.tax_category import TaxCategory
 # noinspection PyProtectedMember
 from frappe import _
 from frappe.model.document import Document
+from pathvalidate import sanitize_filename
 from result import is_err
 
 import ksa_compliance.zatca_api as api
 import ksa_compliance.zatca_cli as cli
+import ksa_compliance.zatca_files
 from ksa_compliance import logger
 from ksa_compliance.invoice import InvoiceMode
 from ksa_compliance.throw import fthrow
@@ -113,19 +115,26 @@ class ZATCABusinessSettings(Document):
                 bool(self.production_request_id))
 
     @property
+    def file_prefix(self) -> str:
+        """
+        Returns the prefix for generated ZATCA files related to this business settings instance (certificate, key, etc.)
+        """
+        return sanitize_filename(self.name)
+
+    @property
     def cert_path(self) -> str:
-        return f'{self.vat_registration_number}.pem'
+        return ksa_compliance.zatca_files.get_cert_path(self.file_prefix)
 
     @property
     def compliance_cert_path(self) -> str:
-        return f'{self.vat_registration_number}-compliance.pem'
+        return ksa_compliance.zatca_files.get_compliance_cert_path(self.file_prefix)
 
     @property
     def private_key_path(self) -> str:
         if self.is_sandbox_server:
             return self._sandbox_private_key_path
 
-        return f'{self.vat_registration_number}.privkey'
+        return ksa_compliance.zatca_files.get_private_key_path(self.file_prefix)
 
     @property
     def is_sandbox_server(self) -> bool:
@@ -145,7 +154,7 @@ class ZATCABusinessSettings(Document):
         """
         key = ("MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz"
                "+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA==")
-        path = 'sandbox_private_key.pem'
+        path = ksa_compliance.zatca_files.get_sandbox_private_key_path()
         if not os.path.isfile(path):
             with open(path, 'wb') as f:
                 f.write(key.encode('utf-8'))
@@ -263,7 +272,7 @@ class ZATCABusinessSettings(Document):
                                         context=self.csr_config)
 
         logger.info(f"CSR config: {config}")
-        return cli.generate_csr(self.zatca_cli_path, self.java_home, self.vat_registration_number, config,
+        return cli.generate_csr(self.zatca_cli_path, self.java_home, self.file_prefix, config,
                                 simulation=self.is_simulation_server)
 
     def _format_address(self) -> str:
@@ -290,7 +299,7 @@ class ZATCABusinessSettings(Document):
 
     def on_trash(self) -> NoReturn:
         fthrow(msg=_("You cannot Delete a configured ZATCA Business Settings"),
-                     title=_("This Action Is Not Allowed"))
+               title=_("This Action Is Not Allowed"))
 
     def create_tax_account(self) -> str:
         account_doc = cast(Account, frappe.new_doc("Account"))
