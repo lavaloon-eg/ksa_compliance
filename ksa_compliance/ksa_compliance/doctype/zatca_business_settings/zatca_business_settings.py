@@ -20,6 +20,7 @@ import ksa_compliance.zatca_api as api
 import ksa_compliance.zatca_cli as cli
 from ksa_compliance import logger
 from ksa_compliance.invoice import InvoiceMode
+from ksa_compliance.throw import fthrow
 
 
 class ZATCABusinessSettings(Document):
@@ -158,7 +159,7 @@ class ZATCABusinessSettings(Document):
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/'
         if self.fatoora_server == "Production":
             return 'https://gw-fatoora.zatca.gov.sa/e-invoicing/core/'
-        frappe.throw(f"Invalid Fatoora Server, Please update {self.company} Fatoora Server in ZATCA Business Settings")
+        fthrow(f"Invalid Fatoora Server, Please update {self.company} Fatoora Server in ZATCA Business Settings")
 
     def onboard(self, otp: str) -> NoReturn:
         """Creates a CSR and issues a compliance CSID request. On success, updates the document with the CSR,
@@ -166,14 +167,14 @@ class ZATCABusinessSettings(Document):
 
         This is meant for consumption from Desk. It displays an error or a success dialog."""
         if not self.zatca_cli_path:
-            frappe.throw(_("Please configure 'Zatca CLI Path'"))
+            fthrow(_("Please configure 'Zatca CLI Path'"))
 
         self._throw_if_api_config_missing()
 
         csr_result = self._generate_csr()
         compliance_result, status_code = api.get_compliance_csid(self.fatoora_server_url, csr_result.csr, otp)
         if is_err(compliance_result):
-            frappe.throw(compliance_result.err_value, title=_('Compliance API Error'))
+            fthrow(compliance_result.err_value, title=_('Compliance API Error'))
 
         self.csr = csr_result.csr
         self.security_token = compliance_result.ok_value.security_token
@@ -195,12 +196,12 @@ class ZATCABusinessSettings(Document):
         This is meant for consumption from Desk. It displays an error or a success dialog."""
         self._throw_if_api_config_missing()
         if not self.compliance_request_id:
-            frappe.throw(_("Please onboard first to generate a 'Compliance Request ID'"))
+            fthrow(_("Please onboard first to generate a 'Compliance Request ID'"))
 
         csid_result, status_code = api.get_production_csid(self.fatoora_server_url, self.compliance_request_id, otp,
                                                            self.security_token, self.get_password('secret'))
         if is_err(csid_result):
-            frappe.throw(csid_result.err_value, title=_('Production CSID Error'))
+            fthrow(csid_result.err_value, title=_('Production CSID Error'))
 
         self.production_request_id = csid_result.ok_value.request_id
         self.production_security_token = csid_result.ok_value.security_token
@@ -285,10 +286,10 @@ class ZATCABusinessSettings(Document):
 
     def _throw_if_api_config_missing(self) -> None:
         if not self.fatoora_server_url:
-            frappe.throw(_("Please configure 'Fatoora Server URL'"))
+            fthrow(_("Please configure 'Fatoora Server URL'"))
 
-    def on_trash(self) -> None:
-        frappe.throw(msg=_("You cannot Delete a configured ZATCA Business Settings"),
+    def on_trash(self) -> NoReturn:
+        fthrow(msg=_("You cannot Delete a configured ZATCA Business Settings"),
                      title=_("This Action Is Not Allowed"))
 
     def create_tax_account(self) -> str:

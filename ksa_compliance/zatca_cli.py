@@ -13,6 +13,7 @@ from frappe import _
 from result import is_err
 
 from ksa_compliance import logger
+from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
 
@@ -42,7 +43,7 @@ class ZatcaResult:
             for e in self.errors:
                 content += f"<li>{e}</li>"
             content += "</ul>"
-            frappe.throw(content, title=ft("ZATCA CLI Error"))
+            fthrow(content, title=ft("ZATCA CLI Error"))
 
 
 @dataclass
@@ -138,29 +139,33 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         jre_result = download_with_progress(jre_url, directory,
                                             lambda p: progress_callback(ft('Downloading JRE'), p / 4))
         if is_err(jre_result):
-            frappe.throw(jre_result.err_value)
+            fthrow(jre_result.err_value)
+
         jre_path = jre_result.ok_value
 
         progress_callback(ft('Extracting JRE'), 25)
         java_result = extract_archive(jre_path)
         if is_err(java_result):
-            frappe.throw(java_result.err_value)
+            fthrow(java_result.err_value)
+
         java_home = os.path.abspath(java_result.ok_value)
         progress_callback(ft('Extracting JRE'), 50)
 
         zatca_download_result = download_with_progress(cli_url, directory,
                                                        lambda p: progress_callback(ft('Downloading CLI'), 50 + (p / 4)))
         if is_err(zatca_download_result):
-            frappe.throw(zatca_download_result.err_value)
+            fthrow(zatca_download_result.err_value)
+
         zatca_path = zatca_download_result.ok_value
 
         progress_callback(ft('Extracting CLI'), 75)
         zatca_result = extract_archive(zatca_path)
         if is_err(zatca_result):
-            frappe.throw(zatca_result.err_value)
+            fthrow(zatca_result.err_value)
+
         zatca_bin = os.path.join(os.path.abspath(zatca_result.ok_value), 'bin/zatca-cli')
         if not os.path.isfile(zatca_bin):
-            frappe.throw(ft("Could not find $zatca_bin after extracting ZATCA archive", zatca_bin=zatca_bin))
+            fthrow(ft("Could not find $zatca_bin after extracting ZATCA archive", zatca_bin=zatca_bin))
 
         # Make ZATCA CLI executable for the current user
         os.chmod(zatca_bin, os.stat(zatca_bin).st_mode | stat.S_IEXEC)
@@ -236,7 +241,7 @@ def run_command(zatca_cli_path: str, args: List[str], java_home: Optional[str]) 
     errors as is.
     """
     if not os.path.isfile(zatca_cli_path):
-        frappe.throw(_("{0} does not exist or is not a file").format(zatca_cli_path))
+        fthrow(_("{0} does not exist or is not a file").format(zatca_cli_path))
 
     full_args = [zatca_cli_path] + args
     env = os.environ.copy()
