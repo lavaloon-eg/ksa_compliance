@@ -686,7 +686,10 @@ class Einvoice:
             return
 
         if xml_name == 'party_identifications':
-            party_list = ["CRN", "MOM", "MLS", "700", "SAG", "OTH"]
+            if parent == "seller_details":
+                party_list = ["CRN", "MOM", "MLS", "700", "SAG", "OTH"]
+            elif parent == "buyer_details":
+                party_list = ["TIN", "CRN", "MOM", "MLS", "700", "SAG", "NAT", "GCC", "IQA", "PAS", "OTH"]
             if field_value:
                 field_value = self.validate_scheme_with_order(field_value=field_value, ordered_list=party_list)
                 if not field_value:
@@ -727,7 +730,7 @@ class Einvoice:
                     f"Invalid scheme ID Order: "
                     f"for {field_value} in Additional IDs")
                 return False
-            elif value is not None:
+            elif value is not None and str(value).strip() != "":
                 res[type_code] = value
                 index = rem_ordered_list.index(type_code)
                 rem_ordered_list = rem_ordered_list[index:]
@@ -855,10 +858,10 @@ class Einvoice:
     def get_buyer_details(self, invoice_type):
         # --------------------------- START Buyer Details fields ------------------------------
         is_standard = (invoice_type == "Standard")
-        self.get_list_value(field_name="other_buyer_identification",
-                            source_doc=self.sales_invoice_doc,
+        self.get_list_value(field_name="other_buyer_ids",
+                            source_doc=self.additional_fields_doc,
                             required=is_standard and not self.additional_fields_doc.buyer_vat_registration_number,
-                            xml_name="PartyIdentification",
+                            xml_name="party_identifications",
                             rules=["BR-KSA-08", "BT-29", "BT-29-1", "BG-5"],
                             parent="buyer_details")
 
