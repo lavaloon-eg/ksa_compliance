@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.33.0
+
 * Fix compliance check not showing the error message if an exception occurs
   * This happens for missing configurations, e.g. not having a sales taxes and charges template set for the company
 * Migrate ZATCA files under the site directory to avoid loss upon update on frappe cloud
