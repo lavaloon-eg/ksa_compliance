@@ -115,7 +115,7 @@ def execute(dry_run=False, verbose=False):
                     settings.zatca_cli_path = new_cli_path
 
             if settings.java_home:
-                new_java_home = os.path.abspath(get_zatca_file_path(os.path.relpath(settings.java_home, 'zatca')))
+                new_java_home = os.path.abspath(get_zatca_tool_path(os.path.relpath(settings.java_home, 'zatca')))
                 if os.path.isdir(new_java_home):
                     print(f"Updating Java home from {settings.java_home} to {new_java_home}")
                     settings.java_home = new_java_home
