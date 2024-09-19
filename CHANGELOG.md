@@ -10,6 +10,11 @@ to a section with the version name.
 
 * Fix compliance check not showing the error message if an exception occurs
   * This happens for missing configurations, e.g. not having a sales taxes and charges template set for the company
+* Migrate ZATCA files under the site directory to avoid loss upon update on frappe cloud
+  * Certificates, keys, and CSRs are now stored in `{site}/zatca-files`
+  * Tools (CLI and JRE) are now stored in `{site}/zatca-tools`
+  * A patch migrates existing files if any, but it'll only work for self-hosted instances (on frappe cloud, the files
+    would be lost before the patch is run)
 
 ## 0.32.2
 
