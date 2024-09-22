@@ -7,8 +7,14 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-* fix seller additional ids were returned empty in the xml if not filled.
-* include buyer additional ids in case if no vat registration number is provided for the buyer.
+
+* Fix seller additional ids were returned empty in the xml if not filled.
+* Include buyer additional ids in case if no vat registration number is provided for the buyer.
+
+# 0.33.1
+
+* Fix JRE extraction error if it was previously extracted
+
 ## 0.33.0
 
 * Fix compliance check not showing the error message if an exception occurs
