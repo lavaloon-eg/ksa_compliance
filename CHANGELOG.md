@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+# 0.34.0
+
 * Fix seller additional ids were returned empty in the xml if not filled.
 * Include buyer additional ids in case if no vat registration number is provided for the buyer.
 
