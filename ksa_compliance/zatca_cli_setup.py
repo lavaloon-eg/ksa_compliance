@@ -66,7 +66,8 @@ def extract_archive(path: str) -> Result[str, str]:
     """
     base_dir = os.path.dirname(path)
     if path.endswith('.tar.gz'):
-        result = subprocess.run(['tar', 'zxvf', path, '-C', base_dir], capture_output=True)
+        # We get permissions error when overwriting existing files (previously extracted), so we recursively unlink first
+        result = subprocess.run(['tar', 'zxvf', path, '-C', base_dir, '--recursive-unlink'], capture_output=True)
         if result.returncode != 0:
             return Err(ft("Failed to extract archive: '$path'", path=path))
 

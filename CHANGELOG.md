@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix JRE extraction error if it was previously extracted
+
 ## 0.33.0
 
 * Fix compliance check not showing the error message if an exception occurs
