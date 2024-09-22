@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix seller additional ids were returned empty in the xml if not filled.
+* Include buyer additional ids in case if no vat registration number is provided for the buyer.
+
 # 0.33.1
 
 * Fix JRE extraction error if it was previously extracted
