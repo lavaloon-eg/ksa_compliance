@@ -721,7 +721,8 @@ class Einvoice:
 
         for value in field_value:
             type_code = value.get('type_code')
-            value = value.get('value')
+            additional_id_value = value.get('value').strip() or None if type(value.get('value')) is str else value.get('value')
+
             if type_code not in ordered_list:
                 self.error_dic['party_identification'] = f"Invalid scheme ID: {type_code} for Seller Additional IDs"
                 return False
@@ -730,8 +731,8 @@ class Einvoice:
                     f"Invalid scheme ID Order: "
                     f"for {field_value} in Additional IDs")
                 return False
-            elif value is not None and str(value).strip() != "":
-                res[type_code] = value
+            elif additional_id_value is not None:
+                res[type_code] = additional_id_value
                 index = rem_ordered_list.index(type_code)
                 rem_ordered_list = rem_ordered_list[index:]
         return res
