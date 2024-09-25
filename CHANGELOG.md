@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+# 0.35.0
+
 * Fix handling of B2B customers
   * A B2B customer has a VAT or at least one of the other IDs (TIN, CRN, etc.)
   * The compliance dialog now uses an updated filter for simplified/standard customers that respects this definition
