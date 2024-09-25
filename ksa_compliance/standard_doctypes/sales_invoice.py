@@ -5,6 +5,7 @@ import frappe.utils.background_jobs
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe import _
+from frappe.utils import strip
 from result import is_ok
 
 from ksa_compliance import logger
@@ -16,6 +17,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_phase_1_business_settings.zatca
     ZATCAPhase1BusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
     ZATCAPrecomputedInvoice
+from ksa_compliance.translation import ft
 
 IGNORED_INVOICES = set()
 
@@ -108,6 +110,18 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
             frappe.msgprint(msg=_("Please include tax rate in Sales Taxes and Charges Table"),
                             title=_("Validation Error"), indicator="red")
             valid = False
+
+    if is_phase_2_enabled_for_company:
+        settings = ZATCABusinessSettings.for_company(self.company)
+        if settings.type_of_business_transactions == 'Standard Tax Invoices':
+            customer = frappe.get_doc('Customer', self.customer)
+            if not customer.custom_vat_registration_number and not any(
+                    [strip(x.value) for x in customer.custom_additional_ids]):
+                frappe.msgprint(
+                    ft("Company <b>$company</b> is configured to use Standard Tax Invoices, which require customers to "
+                       "define a VAT number or one of the other IDs. Please update customer <b>$customer</b>",
+                       company=self.company, customer=self.customer))
+                valid = False
 
     if not valid:
         message_log = frappe.get_message_log()

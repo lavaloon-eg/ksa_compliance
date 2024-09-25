@@ -8,6 +8,14 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix handling of B2B customers
+  * A B2B customer has a VAT or at least one of the other IDs (TIN, CRN, etc.)
+  * The compliance dialog now uses an updated filter for simplified/standard customers that respects this definition
+  * When saving an invoice for a company configured to use "Standard Tax Invoices" only, we validate that the customer
+    has a valid ID (VAT or other)
+  * When generating XML for ZATCA, we no longer include other IDs as a `CompanyID` inside the `PartyTaxScheme` because 
+    it results in validation failure
+
 # 0.34.0
 
 * Fix seller additional ids were returned empty in the xml if not filled.
