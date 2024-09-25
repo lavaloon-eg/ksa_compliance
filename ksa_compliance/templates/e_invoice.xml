@@ -132,7 +132,6 @@
              {% else %}
                 {% if additional_buyer_key and additional_buyer_value %}
                 <cac:PartyTaxScheme>
-                    <cbc:CompanyID>{{ additional_buyer_value | escape }}</cbc:CompanyID>
                     <cac:TaxScheme>
                         <cbc:ID>{{ additional_buyer_key }}</cbc:ID>
                     </cac:TaxScheme>

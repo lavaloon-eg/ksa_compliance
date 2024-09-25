@@ -5,7 +5,7 @@ from typing import cast, Optional
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe.model.document import Document
-from frappe.utils import get_date_str, get_time
+from frappe.utils import get_date_str, get_time, strip
 
 from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
@@ -708,9 +708,8 @@ class Einvoice:
         return field_value
 
     def has_any_other_buyer_id(self):
-        buyer_id_list = self.additional_fields_doc.other_buyer_ids
-        for item in buyer_id_list:
-            if item.value not in (None, ""):
+        for item in self.additional_fields_doc.other_buyer_ids:
+            if strip(item.value):
                 return True
         return False
 

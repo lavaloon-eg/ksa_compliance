@@ -18,7 +18,7 @@ from frappe import _
 from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
-from frappe.utils import now_datetime, get_link_to_form
+from frappe.utils import now_datetime, get_link_to_form, strip
 from result import is_err, Result, Err, Ok, is_ok
 
 from ksa_compliance import logger
@@ -139,17 +139,16 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_xml = precomputed_invoice.invoice_xml
 
     def _get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
-        invoice_type: InvoiceType
         if settings.invoice_mode == InvoiceMode.Standard:
-            invoice_type = 'Standard'
-        elif settings.invoice_mode == InvoiceMode.Simplified:
-            invoice_type = 'Simplified'
-        else:
-            if self.buyer_vat_registration_number:
-                invoice_type = 'Standard'
-            else:
-                invoice_type = 'Simplified'
-        return invoice_type
+            return 'Standard'
+
+        if settings.invoice_mode == InvoiceMode.Simplified:
+            return 'Simplified'
+
+        if self.buyer_vat_registration_number or any([strip(x.value) for x in self.other_buyer_ids]):
+            return 'Standard'
+
+        return 'Simplified'
 
     def before_insert(self):
         self.integration_status = "Ready For Batch"
@@ -305,8 +304,9 @@ class SalesInvoiceAdditionalFields(Document):
             self._set_buyer_address(cast(Address, frappe.get_doc("Address", sales_invoice.customer_address)))
 
         for item in customer_doc.get("custom_additional_ids"):
-            self.append("other_buyer_ids",
-                        {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
+            if strip(item.value):
+                self.append("other_buyer_ids",
+                            {"type_name": item.type_name, "type_code": item.type_code, "value": item.value})
 
     def _set_buyer_address(self, address: Address):
         self.buyer_additional_number = "not available for now"
