@@ -56,6 +56,7 @@ def _perform_compliance_checks(business_settings_id: str, simplified_customer_id
     progress_per_step = 100.0 / num_steps
     progress = 0.0
 
+    has_error = False
     try:
         settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
         simplified_result = None
@@ -83,11 +84,17 @@ def _perform_compliance_checks(business_settings_id: str, simplified_customer_id
             message += standard_result.format(ft('Standard'))
         frappe.msgprint(message, realtime=True)
     except Exception as e:
+        has_error = True
         error_log = frappe.log_error(title='Compliance error')
         error_link = frappe.utils.get_link_to_form('Error Log', error_log.name)
-        frappe.msgprint(msg=f"{str(e)}.\nError log link: {error_link}", indicator='red', realtime=True)
+        # Hide progress before showing the error
+        _report_progress(ft('Error'), 100)
+        frappe.msgprint(title=ft('Compliance Error'), msg=f"{str(e)}.\nError log link: {error_link}", indicator='red',
+                        realtime=True)
     finally:
-        _report_progress(ft('Done'), 100)
+        # If an error occurs, we hide the progress before showing it, so no need to do it here
+        if not has_error:
+            _report_progress(ft('Done'), 100)
         clear_additional_fields_ignore_list()
         logger.info("Rolling back")
         frappe.db.rollback()

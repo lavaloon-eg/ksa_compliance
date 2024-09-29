@@ -13,13 +13,14 @@ from frappe import _
 from result import is_err
 
 from ksa_compliance import logger
+from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
+from ksa_compliance.zatca_files import get_csr_path, get_private_key_path, get_zatca_tool_path
 
 DEFAULT_CLI_VERSION = '2.1.1'
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
 DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
-CLI_DIRECTORY = 'zatca'  # Relative to the 'sites' directory
 
 
 @dataclass
@@ -42,7 +43,7 @@ class ZatcaResult:
             for e in self.errors:
                 content += f"<li>{e}</li>"
             content += "</ul>"
-            frappe.throw(content, title=ft("ZATCA CLI Error"))
+            fthrow(content, title=ft("ZATCA CLI Error"))
 
 
 @dataclass
@@ -113,7 +114,8 @@ def check_validation_details_support(zatca_cli_path: str, java_home: Optional[st
     is_supported = result.data and 'version' in result.data
     return {
         'is_supported': is_supported,
-        'error': '' if is_supported else ft("Please update ZATCA CLI to 2.1.0 or later to support blocking on validation")
+        'error': '' if is_supported else ft(
+            "Please update ZATCA CLI to 2.1.0 or later to support blocking on validation")
     }
 
 
@@ -125,7 +127,7 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         frappe.publish_progress(title=ft('Setting up CLI'), percent=percent, description=description)
 
     try:
-        directory = CLI_DIRECTORY
+        directory = get_zatca_tool_path()
         os.makedirs(directory, exist_ok=True)
         jre_url = override_jre_download_url or DEFAULT_JRE_URL
         cli_url = override_cli_download_url or DEFAULT_CLI_URL
@@ -138,29 +140,33 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         jre_result = download_with_progress(jre_url, directory,
                                             lambda p: progress_callback(ft('Downloading JRE'), p / 4))
         if is_err(jre_result):
-            frappe.throw(jre_result.err_value)
+            fthrow(jre_result.err_value)
+
         jre_path = jre_result.ok_value
 
         progress_callback(ft('Extracting JRE'), 25)
         java_result = extract_archive(jre_path)
         if is_err(java_result):
-            frappe.throw(java_result.err_value)
+            fthrow(java_result.err_value)
+
         java_home = os.path.abspath(java_result.ok_value)
         progress_callback(ft('Extracting JRE'), 50)
 
         zatca_download_result = download_with_progress(cli_url, directory,
                                                        lambda p: progress_callback(ft('Downloading CLI'), 50 + (p / 4)))
         if is_err(zatca_download_result):
-            frappe.throw(zatca_download_result.err_value)
+            fthrow(zatca_download_result.err_value)
+
         zatca_path = zatca_download_result.ok_value
 
         progress_callback(ft('Extracting CLI'), 75)
         zatca_result = extract_archive(zatca_path)
         if is_err(zatca_result):
-            frappe.throw(zatca_result.err_value)
+            fthrow(zatca_result.err_value)
+
         zatca_bin = os.path.join(os.path.abspath(zatca_result.ok_value), 'bin/zatca-cli')
         if not os.path.isfile(zatca_bin):
-            frappe.throw(ft("Could not find $zatca_bin after extracting ZATCA archive", zatca_bin=zatca_bin))
+            fthrow(ft("Could not find $zatca_bin after extracting ZATCA archive", zatca_bin=zatca_bin))
 
         # Make ZATCA CLI executable for the current user
         os.chmod(zatca_bin, os.stat(zatca_bin).st_mode | stat.S_IEXEC)
@@ -175,17 +181,14 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         progress_callback(ft('Done'), 100)
 
 
-def generate_csr(zatca_cli_path: str, java_home: Optional[str], vat_registration_number: str, config: str,
+def generate_csr(zatca_cli_path: str, java_home: Optional[str], file_prefix: str, config: str,
                  simulation=False) -> CsrResult:
     """
-    Generates a CSR for a given VAT registration number. The VAT registration is used to name the resulting
-    CSR and private key files.
-
-    Currently, both files are stored in 'sites/' and named '{vat}-.csr' and '{vat}.privkey'
+    Generates a CSR. The given prefix is used to name the resulting CSR and private key files.
     """
-    config_path = write_temp_file(config, f'csr-{vat_registration_number}.properties')
-    csr_path = f'{vat_registration_number}.csr'
-    private_key_path = f'{vat_registration_number}.privkey'
+    config_path = write_temp_file(config, f'{file_prefix}-csr.properties')
+    csr_path = get_csr_path(file_prefix)
+    private_key_path = get_private_key_path(file_prefix)
     args = ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path]
     if simulation:
         args.append('-s')
@@ -236,7 +239,7 @@ def run_command(zatca_cli_path: str, args: List[str], java_home: Optional[str]) 
     errors as is.
     """
     if not os.path.isfile(zatca_cli_path):
-        frappe.throw(_("{0} does not exist or is not a file").format(zatca_cli_path))
+        fthrow(_("{0} does not exist or is not a file").format(zatca_cli_path))
 
     full_args = [zatca_cli_path] + args
     env = os.environ.copy()
