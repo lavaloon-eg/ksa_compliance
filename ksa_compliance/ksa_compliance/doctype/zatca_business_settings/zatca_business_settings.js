@@ -92,10 +92,8 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 reqd: 1,
                 get_query: function () {
                     return {
-                        filters: [
-                            ["Additional Buyer IDs", "value", "is", "not set"],
-                            ["Customer", "custom_vat_registration_number", "is", "not set"]
-                        ]
+                        query: "ksa_compliance.compliance_checks.customer_query",
+                        filters: {"standard": false},
                     }
                 }
             });
@@ -109,10 +107,8 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 reqd: 1,
                 get_query: function () {
                     return {
-                        // TODO: We should also pick up customers who have other IDs, but or_filters don't work here
-                        filters: [
-                            ["Customer", "custom_vat_registration_number", "is", "set"]
-                        ]
+                        query: "ksa_compliance.compliance_checks.customer_query",
+                        filters: {"standard": true},
                     }
                 }
             });

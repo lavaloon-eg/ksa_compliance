@@ -17,6 +17,47 @@ from ksa_compliance.translation import ft
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def customer_query(doctype: str, txt: Optional[str], searchfield: str, start: int, page_len: int,
+                   filters: dict) -> list:
+    search_text = f'%{txt}%'
+    if filters.get('standard'):
+        # For standard (B2B) customers, we want customers who either have a VAT registration number or another ID
+        # defined in the additional IDs table. We want to return the VAT or ID formatted in the form: "Code: ..."
+        # e.g. "VAT: 12345666" or "CRN: 12345666"
+        # Note that we select one ID only, so we go through them in priority order (as defined by idx)
+        return frappe.db.sql(f"""
+SELECT name, customer_name, IFNULL(custom_vat_registration_number, other_id)
+FROM (SELECT c.name,
+             c.customer_name,
+             IF(c.custom_vat_registration_number = '', NULL,
+                CONCAT('VAT: ', c.custom_vat_registration_number)) AS custom_vat_registration_number,
+             (SELECT CONCAT(ids.type_code, ': ', ids.value)
+              FROM `tabAdditional Buyer IDs` ids
+              WHERE ids.parent = c.name
+                AND ids.value IS NOT NULL
+                AND ids.value != ''
+              ORDER BY ids.idx
+              LIMIT 1) AS other_id
+      FROM tabCustomer c
+      WHERE (%(txt)s = '' OR {searchfield} LIKE %(txt)s)
+      ORDER BY modified DESC
+      ) customers
+WHERE IFNULL(custom_vat_registration_number, '') != '' OR other_id IS NOT NULL
+LIMIT %(page_len)s OFFSET %(start)s
+""",
+                             {'txt': search_text, 'page_len': page_len, 'start': start})
+
+    return frappe.db.sql(
+        f"SELECT c.name, c.customer_name FROM tabCustomer c WHERE (%(txt)s = '' OR c.{searchfield} LIKE %(txt)s)"
+        " AND IFNULL(custom_vat_registration_number, '') = '' AND"
+        " NOT EXISTS (SELECT 1 FROM `tabAdditional Buyer IDs` ids WHERE ids.parent = c.name AND ids.value IS NOT NULL"
+        " AND ids.value != '')"
+        " ORDER BY modified DESC LIMIT %(page_len)s OFFSET %(start)s ",
+        {'txt': search_text, 'page_len': page_len, 'start': start})
+
+
+@frappe.whitelist()
 def perform_compliance_checks(business_settings_id: str, simplified_customer_id: Optional[str],
                               standard_customer_id: Optional[str], item_id: str, tax_category_id: str) -> NoReturn:
     frappe.utils.background_jobs.enqueue(

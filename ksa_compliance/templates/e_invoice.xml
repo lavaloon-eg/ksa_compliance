@@ -38,11 +38,10 @@
         <cac:Party>
             <!-- Additional seller IDs -->
             {% if seller_details.party_identifications %}
-            {% for key, val in seller_details.party_identifications.items() %}
-            <cac:PartyIdentification>
-                <cbc:ID schemeID="{{key}}">{{ val | escape }}</cbc:ID>
-            </cac:PartyIdentification>
-            {% endfor %}
+                {% set additional_seller_key, additional_seller_value = seller_details.party_identifications.items() | first %}
+                <cac:PartyIdentification>
+                    <cbc:ID schemeID="{{ additional_seller_key }}">{{ additional_seller_value | escape }}</cbc:ID>
+                </cac:PartyIdentification>
             {% endif %}
             <cac:PostalAddress>
                 <cbc:StreetName>{{ seller_details.street_name | escape }}</cbc:StreetName>
@@ -62,13 +61,25 @@
                     <cbc:IdentificationCode>{{ seller_details.country_code }}</cbc:IdentificationCode>
                 </cac:Country>
             </cac:PostalAddress>
-            <cac:PartyTaxScheme>
-                <!-- Vat Registration Number -->
-                <cbc:CompanyID>{{ business_settings.company_id | escape }}</cbc:CompanyID>
-                <cac:TaxScheme>
-                    <cbc:ID>VAT</cbc:ID>
-                </cac:TaxScheme>
-            </cac:PartyTaxScheme>
+            {% if business_settings.company_id %}
+                <cac:PartyTaxScheme>
+                    <!-- Vat Registration Number -->
+                    <cbc:CompanyID>{{ business_settings.company_id | escape }}</cbc:CompanyID>
+                    <cac:TaxScheme>
+                        <cbc:ID>VAT</cbc:ID>
+                    </cac:TaxScheme>
+                </cac:PartyTaxScheme>
+            {% else %}
+                {% if additional_seller_key and additional_seller_value %}
+                <cac:PartyTaxScheme>
+                    <!-- additional seller id -->
+                    <cbc:CompanyID>{{ additional_seller_value | escape }}</cbc:CompanyID>
+                    <cac:TaxScheme>
+                        <cbc:ID>{{ additional_seller_key }}</cbc:ID>
+                    </cac:TaxScheme>
+                </cac:PartyTaxScheme>
+                {% endif %}
+            {% endif %}
             <cac:PartyLegalEntity>
                 <cbc:RegistrationName>{{ business_settings.registration_name | escape }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
@@ -78,11 +89,10 @@
     <cac:AccountingCustomerParty>
         <cac:Party>
             {% if buyer_details.party_identifications %}
-            {% for it in buyer_details.party_identifications %}
-            <cac:PartyIdentification>
-                <cbc:ID schemeID="{{ it.code }}">{{ it.value | escape }}</cbc:ID>
-            </cac:PartyIdentification>
-            {% endfor %}
+                {% set additional_buyer_key, additional_buyer_value = buyer_details.party_identifications.items() | first %}
+                <cac:PartyIdentification>
+                    <cbc:ID schemeID="{{ additional_buyer_key }}">{{ additional_buyer_value | escape }}</cbc:ID>
+                </cac:PartyIdentification>
             {% endif %}
             <cac:PostalAddress>
                 {% if buyer_details.street_name %}
