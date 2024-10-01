@@ -842,30 +842,23 @@ class Einvoice:
             # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------
         item_lines = []
-        for item in self.sales_invoice_doc.get("items"):
-            new_item = {}
-            has_discount = False
-            req_fields = ["idx", "qty", "uom", "item_code", "item_name", "net_amount", "amount", "price_list_rate",
-                          "rate", "discount_percentage", "discount_amount", "item_tax_template"]
-            if isinstance(item.discount_amount, float) and item.discount_amount > 0:
-                has_discount = True
-            for it in req_fields:
-                if it not in ["item_name", "uom", "item_code", "item_tax_template"]:
-                    if it in ["discount_percentage", "discount_amount"] and not has_discount:
-                        new_item[it] = 0.0
-                    else:
-                        new_item[it] = self.get_float_value(
-                            field_name=it,
-                            source_doc=item,
-                            xml_name=it
-                        )
-                elif it in ["item_name", "uom", "item_code", "item_tax_template"]:
-                    new_item[it] = self.get_text_value(
-                        field_name=it,
-                        source_doc=item,
-                        xml_name=it
-                    )
-            item_lines.append(new_item)
+        for item in self.sales_invoice_doc.items:
+            # Negative discount is used to adjust price up, but it's not really a discount in that case
+            has_discount = isinstance(item.discount_amount, float) and item.discount_amount > 0
+            item_lines.append({
+                'idx': item.idx,
+                'qty': item.qty,
+                'uom': item.uom,
+                'item_code': item.item_code,
+                'item_name': item.item_name,
+                'net_amount': item.net_amount,
+                'amount': item.amount,
+                'price_list_rate': item.price_list_rate,
+                'rate': item.rate,
+                'discount_percentage': item.discount_percentage if has_discount else 0.0,
+                'discount_amount': item.discount_amount if has_discount else 0.0,
+                'item_tax_template': item.item_tax_template,
+            })
 
         # Add tax amount and tax percent on each item line
         is_tax_included = bool(self.sales_invoice_doc.taxes[0].included_in_print_rate)
