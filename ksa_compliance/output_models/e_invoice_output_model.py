@@ -145,100 +145,50 @@ class Einvoice:
                             source_doc=self.sales_invoice_doc,
                             xml_name="ID",
                             parent="invoice")
-        # TODO: handle conditional allowance indicator and for its child
 
         # <----- start document level allowance ----->
         # fields from 49 to 58  document level allowance
-        # self.get_bool_value(field_name="allowance_indicator",
-        #                     source_doc=self.additional_fields_doc,
-        #                     xml_name="multiplier_factor_numeric",
-        #                     parent="invoice")
+        self.get_float_value(field_name="document_level_allowance_percentage",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="charge_indicator",
+                             parent="invoice")
 
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_float_value(field_name="document_level_allowance_percentage",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="charge_indicator",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="document_level_allowance_percentage",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="charge_indicator",
-                                 parent="invoice")
+        self.get_float_value(field_name="document_level_allowance_amount",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="amount",
+                             parent="invoice")
 
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_float_value(field_name="document_level_allowance_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="amount",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="document_level_allowance_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="amount",
-                                 parent="invoice")
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_float_value(field_name="document_level_allowance_base_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="amount",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="document_level_allowance_base_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="amount",
-                                 parent="invoice")
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_text_value(field_name="document_level_allowance_vat_category_code",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="ID",
-                                parent="invoice")
-        else:
-            self.get_text_value(field_name="document_level_allowance_vat_category_code",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="ID",
-                                parent="invoice")
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_float_value(field_name="document_level_allowance_vat_rate",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="percent",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="document_level_allowance_vat_rate",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="percent",
-                                 parent="invoice")
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_text_value(field_name="reason_for_allowance",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason",
-                                parent="invoice")
-        else:
-            self.get_text_value(field_name="reason_for_allowance",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason",
-                                parent="invoice")
-        if self.additional_fields_doc.allowance_indicator:
-            self.get_text_value(field_name="code_for_allowance_reason",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason_code",
-                                parent="invoice")
-        else:
-            self.get_text_value(field_name="code_for_allowance_reason",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason_code",
-                                parent="invoice")
+        self.get_float_value(field_name="document_level_allowance_base_amount",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="amount",
+                             parent="invoice")
 
-        if self.additional_fields_doc.allowance_indicator:
-            # Allowance on invoice should be only the document level allowance without items allowances.
-            self.get_float_value(field_name="discount_amount",
-                                 source_doc=self.sales_invoice_doc,
-                                 xml_name="allowance_total_amount",
-                                 parent="invoice")
-            self.compute_invoice_discount_amount()
-        else:
-            self.get_float_value(field_name="discount_amount",
-                                 source_doc=self.sales_invoice_doc,
-                                 xml_name="allowance_total_amount",
-                                 parent="invoice")
-            self.compute_invoice_discount_amount()
+        self.get_text_value(field_name="document_level_allowance_vat_category_code",
+                            source_doc=self.additional_fields_doc,
+                            xml_name="ID",
+                            parent="invoice")
+
+        self.get_float_value(field_name="document_level_allowance_vat_rate",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="percent",
+                             parent="invoice")
+
+        self.get_text_value(field_name="reason_for_allowance",
+                            source_doc=self.additional_fields_doc,
+                            xml_name="allowance_charge_reason",
+                            parent="invoice")
+
+        self.get_text_value(field_name="code_for_allowance_reason",
+                            source_doc=self.additional_fields_doc,
+                            xml_name="allowance_charge_reason_code",
+                            parent="invoice")
+
+        # Allowance on invoice should be only the document level allowance without items allowances.
+        self.get_float_value(field_name="discount_amount",
+                             source_doc=self.sales_invoice_doc,
+                             xml_name="allowance_total_amount",
+                             parent="invoice")
+        self.compute_invoice_discount_amount()
 
         # <----- end document level allowance ----->
 
@@ -250,88 +200,46 @@ class Einvoice:
                             xml_name="charge_indicator",
                             parent="invoice")
 
-        if self.additional_fields_doc.charge_indicator:
-            self.get_float_value(field_name="charge_percentage",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="MultiplierFactorNumeric",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="charge_percentage",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="MultiplierFactorNumeric",
-                                 parent="invoice")
-        if self.additional_fields_doc.charge_indicator:
-            self.get_float_value(field_name="charge_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="amount",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="charge_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="amount",
-                                 parent="invoice")
-        if self.additional_fields_doc.charge_indicator:
-            self.get_float_value(field_name="charge_base_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="base_amount",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="charge_base_amount",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="base_amount",
-                                 parent="invoice")
-        if self.additional_fields_doc.charge_indicator:
-            self.get_text_value(field_name="charge_vat_category_code",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="ID",
-                                parent="invoice")
-        else:
-            self.get_text_value(field_name="charge_vat_category_code",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="ID",
-                                parent="invoice")
-        if self.additional_fields_doc.charge_indicator:
-            self.get_float_value(field_name="charge_vat_rate",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="Percent",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="charge_vat_rate",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="Percent",
-                                 parent="invoice")
-        if self.additional_fields_doc.charge_indicator:
-            self.get_text_value(field_name="reason_for_charge",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason",
-                                parent="invoice")
-        else:
-            self.get_text_value(field_name="reason_for_charge",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason",
-                                parent="invoice")
-        if self.additional_fields_doc.charge_indicator:
-            self.get_text_value(field_name="reason_for_charge_code",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason_code",
-                                parent="invoice")
-        else:
-            self.get_text_value(field_name="reason_for_charge_code",
-                                source_doc=self.additional_fields_doc,
-                                xml_name="allowance_charge_reason_code",
-                                parent="invoice")
+        self.get_float_value(field_name="charge_percentage",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="MultiplierFactorNumeric",
+                             parent="invoice")
+
+        self.get_float_value(field_name="charge_amount",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="amount",
+                             parent="invoice")
+
+        self.get_float_value(field_name="charge_base_amount",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="base_amount",
+                             parent="invoice")
+
+        self.get_text_value(field_name="charge_vat_category_code",
+                            source_doc=self.additional_fields_doc,
+                            xml_name="ID",
+                            parent="invoice")
+
+        self.get_float_value(field_name="charge_vat_rate",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="Percent",
+                             parent="invoice")
+
+        self.get_text_value(field_name="reason_for_charge",
+                            source_doc=self.additional_fields_doc,
+                            xml_name="allowance_charge_reason",
+                            parent="invoice")
+
+        self.get_text_value(field_name="reason_for_charge_code",
+                            source_doc=self.additional_fields_doc,
+                            xml_name="allowance_charge_reason_code",
+                            parent="invoice")
 
         # <----- end document level charge ----->
-        if self.additional_fields_doc.charge_indicator:
-            self.get_float_value(field_name="sum_of_charges",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="charge_total_amount",
-                                 parent="invoice")
-        else:
-            self.get_float_value(field_name="sum_of_charges",
-                                 source_doc=self.additional_fields_doc,
-                                 xml_name="charge_total_amount",
-                                 parent="invoice")
+        self.get_float_value(field_name="sum_of_charges",
+                             source_doc=self.additional_fields_doc,
+                             xml_name="charge_total_amount",
+                             parent="invoice")
 
         # Invoice Line
         self.get_bool_value(field_name="invoice_line_allowance_indicator",
@@ -437,23 +345,6 @@ class Einvoice:
 
         # Try to parse
         field_value = get_date_str(field_value)
-
-        field_name = xml_name if xml_name else field_name
-        if parent:
-            if self.result.get(parent):
-                self.result[parent][field_name] = field_value
-            else:
-                self.result[parent] = {}
-                self.result[parent][field_name] = field_value
-        return field_value
-
-    def get_float_child_value(self, field_name: str, field_value: float, xml_name: str = None, parent: str = None):
-        if field_value is None:
-            return
-
-        # Try to parse
-        field_value = float(field_value) if type(field_value) is int else field_value
-        field_value = abs(field_value)
 
         field_name = xml_name if xml_name else field_name
         if parent:
@@ -831,15 +722,8 @@ class Einvoice:
                             source_doc=self.sales_invoice_doc,
                             xml_name="purchase_order_reference",
                             parent="invoice")
-        try:
-            self.get_float_child_value(field_name="taxes_rate",
-                                       field_value=self.sales_invoice_doc.taxes[0].rate,
-                                       xml_name="taxes_rate",
-                                       parent="invoice")
-        except Exception:
-            pass
 
-            # --------------------------- END Invoice Basic info ------------------------------
+        # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------
         item_lines = []
         for item in self.sales_invoice_doc.items:
