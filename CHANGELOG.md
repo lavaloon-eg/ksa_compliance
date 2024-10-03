@@ -12,6 +12,7 @@ to a section with the version name.
   * We now only show errors/warnings headers if we actually have errors/warnings
   * The errors and generated XML is put into the `Error Log` to make it easier to troubleshoot instead of hunting for 
   the XML file in /tmp
+* Improve XML generation to avoid excessive blank lines
 
 ## 0.36.1
 

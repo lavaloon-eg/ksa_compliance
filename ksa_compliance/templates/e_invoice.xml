@@ -209,7 +209,6 @@
         {% endif %}
         <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total | round(2) }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
-
     <!-- Invoice item lines -->
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
@@ -247,7 +246,6 @@
                      </cac:TaxScheme>
                  </cac:TaxCategory>
              </cac:TaxSubtotal> #}
-
         </cac:TaxTotal>
         <cac:Item>
             <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
@@ -256,13 +254,11 @@
                 <cbc:ID>{{ item.buyer_item_identification | escape }}</cbc:ID>
             </cac:BuyersItemIdentification>
             {% endif %}
-
             {% if item.seller_item_identification %}
             <cac:SellersItemIdentification>
                 <cbc:ID>{{ item.seller_item_identification | escape }}</cbc:ID>
             </cac:SellersItemIdentification>
             {% endif %}
-
             <cac:ClassifiedTaxCategory>
                 <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
                 {% if item.tax_percent %}
@@ -282,7 +278,6 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
-
             <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ (item.amount) | round(2) }}</cbc:PriceAmount>
             <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
             {% if item.discount_amount %}
