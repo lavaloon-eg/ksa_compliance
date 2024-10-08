@@ -202,7 +202,7 @@
         {% if invoice.rounding_adjustment %}
         <cbc:PayableRoundingAmount currencyID="{{ invoice.currency_code }}">{{ invoice.rounding_adjustment | round(2) }}</cbc:PayableRoundingAmount>
         {% endif %}
-        <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total | round(2) }}</cbc:PayableAmount>
+        <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.payable_amount | round(2) }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>

@@ -103,7 +103,12 @@ class Einvoice:
                  invoice_type: InvoiceType = "Simplified"):
 
         self.additional_fields_doc = sales_invoice_additional_fields_doc
-        self.result = {}
+        self.result = {
+            'invoice': {},
+            'business_settings': {},
+            'seller_details': {},
+            'buyer_details': {},
+        }
 
         self.sales_invoice_doc = cast(SalesInvoice, frappe.get_doc(sales_invoice_additional_fields_doc.invoice_doctype,
                                                                    sales_invoice_additional_fields_doc.sales_invoice))
@@ -704,10 +709,12 @@ class Einvoice:
                              source_doc=self.sales_invoice_doc,
                              xml_name="prepaid_amount",
                              parent="invoice")
-        self.get_float_value(field_name="rounding_adjustment",
-                             source_doc=self.sales_invoice_doc,
-                             xml_name="rounding_adjustment",
-                             parent="invoice")
+
+        self.result['invoice']['rounding_adjustment'] = self.sales_invoice_doc.rounding_adjustment
+        if self.sales_invoice_doc.is_rounded_total_disabled():
+            self.result['invoice']['payable_amount'] = self.sales_invoice_doc.grand_total
+        else:
+            self.result['invoice']['payable_amount'] = self.sales_invoice_doc.rounded_total
 
         self.get_float_value(field_name="outstanding_amount",
                              source_doc=self.sales_invoice_doc,
