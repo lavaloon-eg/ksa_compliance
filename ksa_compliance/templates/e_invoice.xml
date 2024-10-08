@@ -210,11 +210,7 @@
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ (item.amount) | round(2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
-            {% if item.tax_amount %}
-            <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount>
-            {% else %}
-            <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ 0.00 }}</cbc:TaxAmount>
-            {% endif %}
+            <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ (item.tax_amount or 0.0) | round(2) }}</cbc:TaxAmount>
             <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ item.total_amount | round(2) }}</cbc:RoundingAmount>
         </cac:TaxTotal>
         <cac:Item>
@@ -231,11 +227,7 @@
             {% endif %}
             <cac:ClassifiedTaxCategory>
                 <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
-                {% if item.tax_percent %}
-                <cbc:Percent>{{ item.tax_percent }}</cbc:Percent>
-                {% else %}
-                <cbc:Percent>{{ 0.00 }}</cbc:Percent>
-                {% endif %}
+                <cbc:Percent>{{ (item.tax_percent or 0.0) | round(2) }}</cbc:Percent>
                 {% if item.tax_exemption_reason_code %}
                     <cbc:TaxExemptionReasonCode>{{ item.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
                 {% endif %}
