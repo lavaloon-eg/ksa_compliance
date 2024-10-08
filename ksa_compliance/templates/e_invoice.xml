@@ -207,7 +207,6 @@
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
         <cbc:ID>{{ item.idx | int }}</cbc:ID>
-        <cbc:Note>{{ item.item_name | escape }}</cbc:Note>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ (item.amount) | round(2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
