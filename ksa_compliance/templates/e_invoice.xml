@@ -33,10 +33,8 @@
             <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">{{ invoice.pih }}</cbc:EmbeddedDocumentBinaryObject>
         </cac:Attachment>
     </cac:AdditionalDocumentReference>
-    <!-- Seller info -->
     <cac:AccountingSupplierParty>
         <cac:Party>
-            <!-- Additional seller IDs -->
             {% if seller_details.party_identifications %}
                 {% set additional_seller_key, additional_seller_value = seller_details.party_identifications.items() | first %}
                 <cac:PartyIdentification>
@@ -63,7 +61,6 @@
             </cac:PostalAddress>
             {% if business_settings.company_id %}
                 <cac:PartyTaxScheme>
-                    <!-- Vat Registration Number -->
                     <cbc:CompanyID>{{ business_settings.company_id | escape }}</cbc:CompanyID>
                     <cac:TaxScheme>
                         <cbc:ID>VAT</cbc:ID>
@@ -72,7 +69,6 @@
             {% else %}
                 {% if additional_seller_key and additional_seller_value %}
                 <cac:PartyTaxScheme>
-                    <!-- additional seller id -->
                     <cbc:CompanyID>{{ additional_seller_value | escape }}</cbc:CompanyID>
                     <cac:TaxScheme>
                         <cbc:ID>{{ additional_seller_key }}</cbc:ID>
@@ -85,7 +81,6 @@
             </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingSupplierParty>
-    <!-- Buyer info -->
     <cac:AccountingCustomerParty>
         <cac:Party>
             {% if buyer_details.party_identifications %}
@@ -209,7 +204,6 @@
         {% endif %}
         <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ invoice.grand_total | round(2) }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
-    <!-- Invoice item lines -->
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
         <cbc:ID>{{ item.idx | int }}</cbc:ID>
@@ -223,29 +217,6 @@
             <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ 0.00 }}</cbc:TaxAmount>
             {% endif %}
             <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ item.total_amount | round(2) }}</cbc:RoundingAmount>
-
-            {# TODO: This will be included when supporting prepayment amount on invoice
-             <cac:TaxSubtotal>
-                 <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ item.net_amount | round(2) }}</cbc:TaxableAmount>
-                 {% if item.tax_amount %}
-                 <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ item.tax_amount | round(2) }}</cbc:TaxAmount>
-                 {% else %}
-                 <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ 0.00 }}</cbc:TaxAmount>
-                 {% endif %}
-                 <cac:TaxCategory>
-                     <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
-                     <cbc:Percent>{{ item.tax_percent or 0 }}</cbc:Percent>
-                     {% if item.tax_exemption_reason_code %}
-                     <cbc:TaxExemptionReasonCode>{{ item.tax_exemption_reason_code | escape }}</cbc:TaxExemptionReasonCode>
-                     {% endif %}
-                     {% if item.tax_exemption_reason %}
-                     <cbc:TaxExemptionReason>{{ item.tax_exemption_reason | escape }}</cbc:TaxExemptionReason>
-                     {% endif %}
-                     <cac:TaxScheme>
-                         <cbc:ID>VAT</cbc:ID>
-                     </cac:TaxScheme>
-                 </cac:TaxCategory>
-             </cac:TaxSubtotal> #}
         </cac:TaxTotal>
         <cac:Item>
             <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
