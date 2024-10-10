@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 from typing import cast, Optional
 
@@ -710,11 +711,29 @@ class Einvoice:
                              xml_name="prepaid_amount",
                              parent="invoice")
 
-        self.result['invoice']['rounding_adjustment'] = self.sales_invoice_doc.rounding_adjustment
         if self.sales_invoice_doc.is_rounded_total_disabled():
             self.result['invoice']['payable_amount'] = abs(self.sales_invoice_doc.grand_total)
+            self.result['invoice']['rounding_adjustment'] = 0.0
         else:
-            self.result['invoice']['payable_amount'] = abs(self.sales_invoice_doc.rounded_total)
+            # Tax inclusive amount + rounding adjustment = payable amount
+            # However, ZATCA doesn't accept negative values for tax inclusive amount or payable amount, so we put their
+            # absolute values.
+            # For return invoices, we can have a positive rounding adjustment (if it were negative in the original invoice)
+            # The calculation works out if tax inclusive amount and payable amount are negative, but it doesn't work with
+            # the abs values we send to ZATCA.
+            # For example:
+            # Original invoice: 100.25 + (-0.25) = 100
+            # Return invoice (ERPNext): -100.25 + 0.25 = -100
+            # Return invoice (XML): abs(-100.25) + 0.25 = 100.25
+            # So the calculation would be wrong if we just used the value of rounding adjustment. We need to recalculate
+            # it or adjust its sign to produce the right result in the return case
+            payable_amount = abs(self.sales_invoice_doc.rounded_total)
+            tax_inclusive_amount = abs(self.sales_invoice_doc.grand_total)
+            self.result['invoice']['payable_amount'] = payable_amount
+            if self.sales_invoice_doc.is_return:
+                self.result['invoice']['rounding_adjustment'] = payable_amount - tax_inclusive_amount
+            else:
+                self.result['invoice']['rounding_adjustment'] = self.sales_invoice_doc.rounding_adjustment
 
         self.get_float_value(field_name="outstanding_amount",
                              source_doc=self.sales_invoice_doc,
