@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix Return Invoice rejection when adding discount amount as amount (not percentage) on grand total
+
 ## 0.36.0
 
 * CLI setup now grabs version 2.2.0

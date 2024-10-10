@@ -743,14 +743,14 @@ class Einvoice:
         pass
 
     def compute_invoice_discount_amount(self):
-        discount_amount = self.sales_invoice_doc.discount_amount
+        discount_amount = abs(self.sales_invoice_doc.discount_amount)
         if self.sales_invoice_doc.apply_discount_on != "Grand Total" or discount_amount == 0:
             self.additional_fields_doc.fatoora_invoice_discount_amount = discount_amount
             return
 
         applied_discount_percent = self.sales_invoice_doc.additional_discount_percentage
         total_without_vat = self.result["invoice"]["line_extension_amount"]
-        tax_amount = self.sales_invoice_doc.taxes[0].tax_amount
+        tax_amount = abs(self.sales_invoice_doc.taxes[0].tax_amount)
         if applied_discount_percent == 0:
             applied_discount_percent = (discount_amount / (total_without_vat + tax_amount)) * 100
         applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
