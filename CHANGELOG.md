@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.37.1
+
+* Fix various return invoice regressions in 0.37.0
+  * Fix negative total and line value errors
+  * Fix payable and rounding adjustment amount warnings in case of return
+
 ## 0.37.0
 
 * Improve ZATCA validation error messages on submitting invoices (if blocking on invalid invoices is enabled)
