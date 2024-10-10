@@ -49,7 +49,8 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import \
+            AdditionalSellerIDs
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -68,7 +69,8 @@ class SalesInvoiceAdditionalFields(Document):
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
         fatoora_invoice_discount_amount: DF.Float
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            "", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
         invoice_counter: DF.Int
         invoice_doctype: DF.Literal["Sales Invoice", "POS Invoice"]
         invoice_hash: DF.Data | None
@@ -208,19 +210,31 @@ class SalesInvoiceAdditionalFields(Document):
                 is_invalid = ((not validation_result.details.is_valid) or validation_result.details.errors or
                               validation_result.details.warnings)
                 if settings.block_invoice_on_invalid_xml and is_invalid:
-                    message = f"<h4>{ft('Errors')}</h4>"
-                    message += "<ul>"
-                    for code, error in validation_result.details.errors.items():
-                        message += f"<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>"
-                    message += "</ul>"
+                    html_message = ''
+                    text_message = ''
+                    if validation_result.details.errors:
+                        text_message += ft('Errors') + '\n'
+                        html_message += f"<h4>{ft('Errors')}</h4>"
+                        html_message += "<ul>"
+                        for code, error in validation_result.details.errors.items():
+                            html_message += f"<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>"
+                            text_message += f"{code}: {error}\n"
+                        html_message += "</ul>"
 
-                    message += f"<h4>{ft('Warnings')}</h4>"
-                    message += "<ul>"
-                    for code, warning in validation_result.details.warnings.items():
-                        message += f"<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>"
-                    message += "</ul>"
+                    if validation_result.details.warnings:
+                        text_message += ft('Warnings') + '\n'
+                        html_message += f"<h4>{ft('Warnings')}</h4>"
+                        html_message += "<ul>"
+                        for code, warning in validation_result.details.warnings.items():
+                            html_message += f"<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>"
+                            text_message += f"{code}: {warning}\n"
+                        html_message += "</ul>"
 
-                    frappe.throw(title=ft("ZATCA Validation Error"), msg=message)
+                    frappe.log_error(title=ft("ZATCA Validation Error"),
+                                     message=text_message + '\n\n' + invoice_xml,
+                                     reference_doctype=self.invoice_doctype,
+                                     reference_name=self.sales_invoice)
+                    frappe.throw(title=ft("ZATCA Validation Error"), msg=html_message)
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code

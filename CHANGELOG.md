@@ -8,6 +8,16 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Improve ZATCA validation error messages on submitting invoices (if blocking on invalid invoices is enabled)
+  * We now only show errors/warnings headers if we actually have errors/warnings
+  * The errors and generated XML is put into the `Error Log` to make it easier to troubleshoot instead of hunting for 
+  the XML file in /tmp
+* Improve XML generation to avoid excessive blank lines
+* Support "Rounded Total" if enabled
+  * Output rounding adjustment as is (positive or negative); previously, we used the absolute value which is wrong
+  * Use the rounded total (`rounded_total`) as the payable amount instead of the grand total.
+    `rounded_total = grand_total + rounding adjustment`
+
 ## 0.36.1
 
 * Fix Return Invoice rejection when adding discount amount as amount (not percentage) on grand total
