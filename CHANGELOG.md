@@ -8,7 +8,7 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Fix Return Invoice when adding discount amount as amount not as percentage on grand total is rejected.
+* Fix Return Invoice rejection when adding discount amount as amount (not percentage) on grand total
 
 ## 0.36.0
 
