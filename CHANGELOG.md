@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.37.0
+
 * Improve ZATCA validation error messages on submitting invoices (if blocking on invalid invoices is enabled)
   * We now only show errors/warnings headers if we actually have errors/warnings
   * The errors and generated XML is put into the `Error Log` to make it easier to troubleshoot instead of hunting for 
