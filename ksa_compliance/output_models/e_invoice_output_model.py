@@ -712,9 +712,9 @@ class Einvoice:
 
         self.result['invoice']['rounding_adjustment'] = self.sales_invoice_doc.rounding_adjustment
         if self.sales_invoice_doc.is_rounded_total_disabled():
-            self.result['invoice']['payable_amount'] = self.sales_invoice_doc.grand_total
+            self.result['invoice']['payable_amount'] = abs(self.sales_invoice_doc.grand_total)
         else:
-            self.result['invoice']['payable_amount'] = self.sales_invoice_doc.rounded_total
+            self.result['invoice']['payable_amount'] = abs(self.sales_invoice_doc.rounded_total)
 
         self.get_float_value(field_name="outstanding_amount",
                              source_doc=self.sales_invoice_doc,
