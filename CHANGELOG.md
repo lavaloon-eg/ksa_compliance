@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix invalid tax amounts if an item is added to multiple lines
+
 ## 0.37.2
 
 * Fix invoice being rejected when pricing rule is applied with discount amount and margin.
