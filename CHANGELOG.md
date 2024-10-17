@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Fix invoice being rejected when pricing rule is applied with discount amount and margin.
 ## 0.37.1
 
 * Fix various return invoice regressions in 0.37.0
