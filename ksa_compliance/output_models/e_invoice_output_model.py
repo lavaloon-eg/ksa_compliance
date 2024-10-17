@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import cast, Optional
 
 import frappe
@@ -15,26 +14,10 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
 from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 
 
-def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conversion_rate: float,
-                                       is_tax_included: bool) -> list:
-    item_wise_tax_details = frappe.db.sql("""
-                SELECT item_wise_tax_detail  
-                FROM `tabSales Taxes and Charges` 
-                WHERE parent = %(invoice_id)s
-            """, {"invoice_id": invoice_id}, as_dict=1) or []
-
-    items_taxes = {}
-    if item_wise_tax_details:
-        items_taxes_json = cast(str | None, item_wise_tax_details[0]["item_wise_tax_detail"]) or '{}'
-        items_taxes = json.loads(items_taxes_json)
-
+def append_tax_details_into_item_lines(item_lines: list, is_tax_included: bool) -> list:
     for item in item_lines:
-        if item["item_code"] in items_taxes:
-            tax_percent = abs(items_taxes[item["item_code"]][0])
-            tax_amount = abs(items_taxes[item["item_code"]][1]) / conversion_rate
-        else:
-            tax_percent = 0.0
-            tax_amount = 0.0
+        tax_percent = item['tax_percent']
+        tax_amount = item['tax_amount']
 
         """
             In case of tax included we should get the item amount exclusive of vat from the current 'item amount', 
@@ -389,7 +372,7 @@ class Einvoice:
         if xml_name == 'party_identifications':
             if parent == "seller_details":
                 party_list = ["CRN", "MOM", "MLS", "700", "SAG", "OTH"]
-            elif parent == "buyer_details":
+            else: # buyer_details
                 party_list = ["TIN", "CRN", "MOM", "MLS", "700", "SAG", "NAT", "GCC", "IQA", "PAS", "OTH"]
             if field_value:
                 field_value = self.validate_scheme_with_order(field_value=field_value, ordered_list=party_list)
@@ -755,6 +738,11 @@ class Einvoice:
             # Negative discount is used to adjust price up, but it's not really a discount in that case
             has_discount = isinstance(item.discount_amount, float) and item.discount_amount > 0
 
+            # noinspection PyUnresolvedReferences
+            tax_percent = abs(item.tax_rate or 0.0)
+            # noinspection PyUnresolvedReferences
+            tax_amount = abs(item.tax_amount or 0.0) / self.sales_invoice_doc.conversion_rate
+
             # We use absolute values for int/float values because we want positive values in the XML in the return invoice
             # case
             item_lines.append({
@@ -769,13 +757,13 @@ class Einvoice:
                 'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
                 'discount_amount': abs(item.discount_amount) if has_discount else 0.0,
                 'item_tax_template': item.item_tax_template,
+                'tax_percent': tax_percent,
+                'tax_amount': tax_amount,
             })
 
         # Add tax amount and tax percent on each item line
         is_tax_included = bool(self.sales_invoice_doc.taxes[0].included_in_print_rate)
-        item_lines = append_tax_details_into_item_lines(invoice_id=self.sales_invoice_doc.name,
-                                                        item_lines=item_lines,
-                                                        conversion_rate=self.sales_invoice_doc.conversion_rate,
+        item_lines = append_tax_details_into_item_lines(item_lines=item_lines,
                                                         is_tax_included=is_tax_included)
         unique_tax_categories = append_tax_categories_to_item(item_lines, self.sales_invoice_doc.taxes_and_charges)
         # Append unique Tax categories to invoice

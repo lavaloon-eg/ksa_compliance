@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix invalid tax amounts if an item is added to multiple lines
+  * We now use ERPNext-computed line-level tax totals instead of item-wise tax details
+  * Print formats now use line-level tax totals if present and fall back to item-wise tax details if not, to accomodate
+    invoices issued prior to this change
+
 ## 0.37.2
 
 * Fix invoice being rejected when pricing rule is applied with discount amount and margin.
