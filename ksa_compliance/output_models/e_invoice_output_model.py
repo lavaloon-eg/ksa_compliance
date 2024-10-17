@@ -45,8 +45,7 @@ def append_tax_details_into_item_lines(invoice_id: str, item_lines: list, conver
         item["amount"] = round(abs(item["amount"]) / (1 + (tax_percent / 100)), 2) if is_tax_included \
             else item["amount"]
         item["discount_amount"] = item["discount_amount"] * item["qty"]
-        item["price_list_rate"] = item["amount"] + item["discount_amount"] if is_tax_included \
-            else item["price_list_rate"] * item["qty"]
+        item["base_amount"] = item["amount"] + item["discount_amount"]
         item["tax_percent"] = tax_percent
         item["tax_amount"] = tax_amount
         item["total_amount"] = tax_amount + abs(item["amount"])
@@ -766,7 +765,6 @@ class Einvoice:
                 'item_name': item.item_name,
                 'net_amount': abs(item.net_amount),
                 'amount': abs(item.amount),
-                'price_list_rate': abs(item.price_list_rate),
                 'rate': abs(item.rate),
                 'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
                 'discount_amount': abs(item.discount_amount) if has_discount else 0.0,
