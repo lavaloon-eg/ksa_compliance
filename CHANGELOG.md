@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.38.0
+
 * Fix invalid tax amounts if an item is added to multiple lines
   * We now use ERPNext-computed line-level tax totals instead of item-wise tax details
   * Print formats now use line-level tax totals if present and fall back to item-wise tax details if not, to accomodate
