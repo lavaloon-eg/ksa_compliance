@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.39.0
+
 * CLI setup now grabs version 2.3.0
 
 ## 0.38.0
