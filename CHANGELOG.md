@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* CLI setup now grabs version 2.3.0
+
 ## 0.38.0
 
 * Fix invalid tax amounts if an item is added to multiple lines
