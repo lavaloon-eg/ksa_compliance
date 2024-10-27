@@ -18,6 +18,7 @@ to a section with the version name.
   * We now use ERPNext-computed line-level tax totals instead of item-wise tax details
   * Print formats now use line-level tax totals if present and fall back to item-wise tax details if not, to accomodate
     invoices issued prior to this change
+* Prevent cancellation of invoices only when ZATCA phase 2 integration is enabled for the company
 
 ## 0.37.2
 
