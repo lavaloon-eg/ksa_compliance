@@ -215,16 +215,6 @@
         </cac:TaxTotal>
         <cac:Item>
             <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
-            {% if item.buyer_item_identification %}
-            <cac:BuyersItemIdentification>
-                <cbc:ID>{{ item.buyer_item_identification | escape }}</cbc:ID>
-            </cac:BuyersItemIdentification>
-            {% endif %}
-            {% if item.seller_item_identification %}
-            <cac:SellersItemIdentification>
-                <cbc:ID>{{ item.seller_item_identification | escape }}</cbc:ID>
-            </cac:SellersItemIdentification>
-            {% endif %}
             <cac:ClassifiedTaxCategory>
                 <cbc:ID>{{ item.tax_category_code }}</cbc:ID>
                 <cbc:Percent>{{ (item.tax_percent or 0.0) | round(2) }}</cbc:Percent>

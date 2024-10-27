@@ -42,6 +42,10 @@ def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoi
         logger.info(f"Skipping additional fields for {self.name} because of missing ZATCA settings")
         return
 
+    if not settings.enable_zatca_integration:
+        logger.info(f"Skipping additional fields for {self.name} because ZATCA integration is disabled in settings")
+        return
+
     global IGNORED_INVOICES
     if self.name in IGNORED_INVOICES:
         logger.info(f"Skipping additional fields for {self.name} because it's in the ignore list")
@@ -98,8 +102,10 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
 
 
 def prevent_cancellation_of_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
-    frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
-                 title=_("This Action Is Not Allowed"))
+    is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
+    if is_phase_2_enabled_for_company:
+        frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
+                     title=_("This Action Is Not Allowed"))
 
 
 def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
