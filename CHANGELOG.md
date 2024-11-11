@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix error messages not showing on frappe versions older than v15.17.0
+
 ## 0.39.1
 
 * Prevent cancellation of invoices only when ZATCA phase 2 integration is enabled for the company

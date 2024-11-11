@@ -9,8 +9,7 @@ def fthrow(msg: str,
            title: str | None = None,
            is_minimizable: bool = False,
            wide: bool = False,
-           as_list: bool = False,
-           primary_action=None) -> NoReturn:
+           as_list: bool = False) -> NoReturn:
     """
     A wrapper for frappe.throw that is annotated properly as having no return (i.e. throws an exception)
 
@@ -25,4 +24,4 @@ def fthrow(msg: str,
     The msgprint would result in an analysis warning because the analyzer doesn't see that the error case ends
     at the throw. We'd have to use an explicit else, which causes unnecessary nesting.
     """
-    frappe.throw(msg, exc, title, is_minimizable, wide, as_list, primary_action)
+    frappe.throw(msg, exc, title, is_minimizable, wide, as_list)
