@@ -14,20 +14,21 @@ def execute(filters=None):
     df = datetime.strptime(filters['from_date_filter'], '%Y-%m-%d')
     dt = datetime.strptime(filters['to_date_filter'], '%Y-%m-%d')
     if dt < df:
-        frappe.throw(msg=f"""To date must be after From date.
+        frappe.throw(
+            msg="""To date must be after From date.
                         error_code='InvalidDateRange',
                         code=400
                         """
-                     )
+        )
     try:
         data = get_zatca_integration_details_data(filters=filters)
         columns = get_columns()
         records_count = len(data)
         report_summary = [
             {
-                "value": records_count,
-                "label": "Number of records",
-                "datatype": "Number",
+                'value': records_count,
+                'label': 'Number of records',
+                'datatype': 'Number',
             },
         ]
 
@@ -51,12 +52,9 @@ def execute(filters=None):
                 colors.append('blue')
             elif label == 'Accepted with warnings':
                 colors.append('yellow')
-        chart = get_pie_chart_data(title='Zatca Integration Status',
-                                   labels=labels,
-                                   values=values,
-                                   height=250,
-                                   colors=colors
-                                   )
+        chart = get_pie_chart_data(
+            title='Zatca Integration Status', labels=labels, values=values, height=250, colors=colors
+        )
 
         # return columns, data, message, chart, report_summary, primitive_summary
         return columns, data, None, chart, report_summary
@@ -66,7 +64,7 @@ def execute(filters=None):
 
 
 def get_zatca_integration_details_data(filters):
-    query = f"""
+    query = """
                 SELECT 
                     inv.name AS invoice_id,
                     IFNULL(zi.integration_status,'N/A') integration_status,
@@ -89,68 +87,67 @@ def get_zatca_integration_details_data(filters):
                 )
             """
 
-    return frappe.db.sql(query=query,
-                         values={
-                             "from_date": filters['from_date_filter'],
-                             "to_date": filters['to_date_filter'],
-                             "company": filters['company_filter'],
-                             "integration_status_filter": filters['integration_status_filter']
-                         }, as_dict=1
-                         )
+    return frappe.db.sql(
+        query=query,
+        values={
+            'from_date': filters['from_date_filter'],
+            'to_date': filters['to_date_filter'],
+            'company': filters['company_filter'],
+            'integration_status_filter': filters['integration_status_filter'],
+        },
+        as_dict=1,
+    )
 
 
 def get_columns():
     return [
         {
-            "label": _("Invoice ID"),
-            "fieldname": "invoice_id",
-            "fieldtype": "Link",
-            "options": "Sales Invoice",
-            "width": 200,
+            'label': _('Invoice ID'),
+            'fieldname': 'invoice_id',
+            'fieldtype': 'Link',
+            'options': 'Sales Invoice',
+            'width': 200,
         },
         {
-            "label": _("ZATCA Integration Status"),
-            "fieldname": "integration_status",
-            "fieldtype": "Data",
-            "width": 200,
+            'label': _('ZATCA Integration Status'),
+            'fieldname': 'integration_status',
+            'fieldtype': 'Data',
+            'width': 200,
         },
         {
-            "label": _("Posting Date"),
-            "fieldname": "posting_date",
-            "fieldtype": "Date",
-            "width": 200,
+            'label': _('Posting Date'),
+            'fieldname': 'posting_date',
+            'fieldtype': 'Date',
+            'width': 200,
         },
         {
-            "label": _("Net Amount"),
-            "fieldname": "net_total",
-            "fieldtype": "Currency",
-            "width": 200,
+            'label': _('Net Amount'),
+            'fieldname': 'net_total',
+            'fieldtype': 'Currency',
+            'width': 200,
         },
         {
-            "label": _("VAT Amount"),
-            "fieldname": "total_taxes_and_charges",
-            "fieldtype": "Currency",
-            "width": 200,
+            'label': _('VAT Amount'),
+            'fieldname': 'total_taxes_and_charges',
+            'fieldtype': 'Currency',
+            'width': 200,
         },
         {
-            "label": _("Grand Total"),
-            "fieldname": "grand_total",
-            "fieldtype": "Currency",
-            "width": 200,
+            'label': _('Grand Total'),
+            'fieldname': 'grand_total',
+            'fieldtype': 'Currency',
+            'width': 200,
         },
     ]
 
 
 def get_pie_chart_data(title, labels: [], values: [], height=250, colors=None):
     options = {
-        "title": title,
-        "data": {
-            'labels': labels,
-            'datasets': [{'values': [values[label] for label in labels]}]
-        },
-        "type": 'pie',
-        "height": height,
-        "colors": colors
+        'title': title,
+        'data': {'labels': labels, 'datasets': [{'values': [values[label] for label in labels]}]},
+        'type': 'pie',
+        'height': height,
+        'colors': colors,
     }
 
     return options

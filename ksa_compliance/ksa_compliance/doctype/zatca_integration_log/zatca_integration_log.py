@@ -16,14 +16,16 @@ class ZATCAIntegrationLog(Document):
 
         e_invoice_file: DF.Attach | None
         invoice_additional_fields_reference: DF.Link
-        invoice_doctype: DF.Literal["Sales Invoice", "POS Invoice"]
+        invoice_doctype: DF.Literal['Sales Invoice', 'POS Invoice']
         invoice_reference: DF.DynamicLink
-        status: DF.Literal["", "Pending", "Resend", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        status: DF.Literal[
+            '', 'Pending', 'Resend', 'Accepted with warnings', 'Accepted', 'Rejected', 'Clearance switched off'
+        ]
         zatca_message: DF.LongText | None
         zatca_status: DF.Data | None
     # end: auto-generated types
     pass
 
     def autoname(self):
-        count = len(frappe.get_all(self.doctype, {"invoice_reference": self.invoice_reference}, pluck="name"))
+        count = len(frappe.get_all(self.doctype, {'invoice_reference': self.invoice_reference}, pluck='name'))
         self.name = f'log-{self.invoice_reference}-{count + 1}'

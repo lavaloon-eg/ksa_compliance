@@ -36,8 +36,9 @@ class ZATCAPrecomputedInvoice(Document):
         return cast('ZATCAPrecomputedInvoice', frappe.get_doc('ZATCA Precomputed Invoice', prepared_id))
 
     def on_trash(self) -> None:
-        frappe.throw(msg=_("You cannot Delete a configured ZATCA Precomputed Invoice"),
-                     title=_("This Action Is Not Allowed"))
+        frappe.throw(
+            msg=_('You cannot Delete a configured ZATCA Precomputed Invoice'), title=_('This Action Is Not Allowed')
+        )
 
 
 @frappe.whitelist()
@@ -51,5 +52,5 @@ def download_xml(id: str):
     # Reference: https://frappeframework.com/docs/user/en/python-api/response
     frappe.response.filename = doc.name + '.xml'
     frappe.response.filecontent = doc.invoice_xml
-    frappe.response.type = "download"
-    frappe.response.display_content_as = "attachment"
+    frappe.response.type = 'download'
+    frappe.response.display_content_as = 'attachment'

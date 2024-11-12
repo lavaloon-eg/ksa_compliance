@@ -4,12 +4,14 @@ import frappe
 from frappe import ValidationError
 
 
-def fthrow(msg: str,
-           exc: type[Exception] = ValidationError,
-           title: str | None = None,
-           is_minimizable: bool = False,
-           wide: bool = False,
-           as_list: bool = False) -> NoReturn:
+def fthrow(
+    msg: str,
+    exc: type[Exception] = ValidationError,
+    title: str | None = None,
+    is_minimizable: bool = False,
+    wide: bool = False,
+    as_list: bool = False,
+) -> NoReturn:
     """
     A wrapper for frappe.throw that is annotated properly as having no return (i.e. throws an exception)
 

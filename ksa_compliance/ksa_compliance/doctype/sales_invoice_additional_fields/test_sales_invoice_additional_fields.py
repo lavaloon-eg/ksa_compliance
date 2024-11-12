@@ -6,4 +6,4 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestSalesInvoiceAdditionalFields(FrappeTestCase):
-	pass
+    pass

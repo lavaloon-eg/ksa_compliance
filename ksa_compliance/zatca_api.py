@@ -17,6 +17,7 @@ from ksa_compliance import logger
 class ZatcaSendMode(Enum):
     """Mode used for sending invoice XML to ZATCA. Compliance is for passing compliance checks. Production is regular
     operation"""
+
     Compliance = 'Compliance'
     Production = 'Production'
 
@@ -24,6 +25,7 @@ class ZatcaSendMode(Enum):
 @dataclass
 class ComplianceResult:
     """A successful result from ZATCA for compliance and production CSID"""
+
     request_id: str
     disposition_message: str
     security_token: str
@@ -32,8 +34,12 @@ class ComplianceResult:
     @staticmethod
     def from_json(data: dict, raw_response: str) -> 'ComplianceResult':
         """Create a [ComplianceResult] from JSON [data]"""
-        return ComplianceResult(request_id=data['requestID'], disposition_message=data['dispositionMessage'],
-                                security_token=data['binarySecurityToken'], secret=data['secret'])
+        return ComplianceResult(
+            request_id=data['requestID'],
+            disposition_message=data['dispositionMessage'],
+            security_token=data['binarySecurityToken'],
+            secret=data['secret'],
+        )
 
 
 @dataclass
@@ -46,8 +52,11 @@ class WarningOrError:
     def from_json(data: dict | str) -> 'WarningOrError':
         if isinstance(data, str):
             return WarningOrError(category='No Category', code='No Code', message=data)
-        return WarningOrError(category=data.get('category', 'No Category'), code=data.get('code', 'No Code'),
-                              message=data.get('message', 'No Message'))
+        return WarningOrError(
+            category=data.get('category', 'No Category'),
+            code=data.get('code', 'No Code'),
+            message=data.get('message', 'No Message'),
+        )
 
 
 @dataclass
@@ -99,8 +108,9 @@ class ReportOrClearInvoiceResult:
             errors = [WarningOrError.from_json(e) for e in data['errors']]
         if data.get('validationResults') and data.get('validationResults').get('errorMessages'):
             errors = [WarningOrError.from_json(e) for e in data['validationResults']['errorMessages']]
-        return ReportOrClearInvoiceResult(status, invoice_hash, cleared_invoice, warnings, errors,
-                                          raw_response=raw_response)
+        return ReportOrClearInvoiceResult(
+            status, invoice_hash, cleared_invoice, warnings, errors, raw_response=raw_response
+        )
 
 
 @dataclass
@@ -119,8 +129,9 @@ def get_compliance_csid(server: str, csr: str, otp: str) -> Tuple[Result[Complia
     return api_call(server, 'compliance', headers, body, ComplianceResult.from_json, try_get_csid_error)
 
 
-def get_production_csid(server: str, compliance_request_id: str, otp: str, security_token: str,
-                        secret: str) -> Tuple[Result[ComplianceResult, str], int]:
+def get_production_csid(
+    server: str, compliance_request_id: str, otp: str, security_token: str, secret: str
+) -> Tuple[Result[ComplianceResult, str], int]:
     """Gets a production CSID from ZATCA for a compliance request."""
     headers = {
         'Accept-Version': 'V2',
@@ -128,57 +139,81 @@ def get_production_csid(server: str, compliance_request_id: str, otp: str, secur
     }
     body = {'compliance_request_id': compliance_request_id}
     auth = HTTPBasicAuth(security_token, secret)
-    return api_call(server, 'production/csids', headers, body, ComplianceResult.from_json, try_get_csid_error,
-                    auth=auth)
+    return api_call(
+        server, 'production/csids', headers, body, ComplianceResult.from_json, try_get_csid_error, auth=auth
+    )
 
 
-def report_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                   secret: str, mode: ZatcaSendMode) -> \
-        Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+def report_invoice(
+    server: str,
+    invoice_xml: str,
+    invoice_uuid: str,
+    invoice_hash: str,
+    security_token: str,
+    secret: str,
+    mode: ZatcaSendMode,
+) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a simplified invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
-    body = {
-        "invoiceHash": invoice_hash,
-        "uuid": invoice_uuid,
-        "invoice": b64_xml
-    }
+    body = {'invoiceHash': invoice_hash, 'uuid': invoice_uuid, 'invoice': b64_xml}
     headers = {
-        "Accept-Version": "V2",
+        'Accept-Version': 'V2',
     }
 
-    url = "invoices/reporting/single" if mode == ZatcaSendMode.Production else "compliance/invoices"
-    return api_call(server, url, headers, body, ReportOrClearInvoiceResult.from_json, try_get_report_or_clear_error,
-                    auth=HTTPBasicAuth(security_token, secret))
+    url = 'invoices/reporting/single' if mode == ZatcaSendMode.Production else 'compliance/invoices'
+    return api_call(
+        server,
+        url,
+        headers,
+        body,
+        ReportOrClearInvoiceResult.from_json,
+        try_get_report_or_clear_error,
+        auth=HTTPBasicAuth(security_token, secret),
+    )
 
 
-def clear_invoice(server: str, invoice_xml: str, invoice_uuid: str, invoice_hash: str, security_token: str,
-                  secret: str, mode: ZatcaSendMode) -> \
-        Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+def clear_invoice(
+    server: str,
+    invoice_xml: str,
+    invoice_uuid: str,
+    invoice_hash: str,
+    security_token: str,
+    secret: str,
+    mode: ZatcaSendMode,
+) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a standard invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
-    body = {
-        "invoiceHash": invoice_hash,
-        "uuid": invoice_uuid,
-        "invoice": b64_xml
-    }
+    body = {'invoiceHash': invoice_hash, 'uuid': invoice_uuid, 'invoice': b64_xml}
     headers = {
-        "Clearance-Status": "1",
-        "Accept-Version": "V2",
+        'Clearance-Status': '1',
+        'Accept-Version': 'V2',
     }
 
-    url = "invoices/clearance/single" if mode == ZatcaSendMode.Production else "compliance/invoices"
-    return api_call(server, url, headers, body, ReportOrClearInvoiceResult.from_json, try_get_report_or_clear_error,
-                    auth=HTTPBasicAuth(security_token, secret))
+    url = 'invoices/clearance/single' if mode == ZatcaSendMode.Production else 'compliance/invoices'
+    return api_call(
+        server,
+        url,
+        headers,
+        body,
+        ReportOrClearInvoiceResult.from_json,
+        try_get_report_or_clear_error,
+        auth=HTTPBasicAuth(security_token, secret),
+    )
 
 
 TOk = TypeVar('TOk')
 TError = TypeVar('TError')
 
 
-def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, str],
-             result_builder: Callable[[dict, str], TOk],
-             error_builder: Callable[[Response | None, Exception | None], TError],
-             auth=None) -> Tuple[Result[TOk, TError], int]:
+def api_call(
+    server: str,
+    path: str,
+    headers: Dict[str, str],
+    body: Dict[str, str],
+    result_builder: Callable[[dict, str], TOk],
+    error_builder: Callable[[Response | None, Exception | None], TError],
+    auth=None,
+) -> Tuple[Result[TOk, TError], int]:
     """
     Performs a ZATCA API call and builds a success result using [result_builder]. In case of 400 errors, the
     response is parsed and a combined error is returned.
@@ -191,10 +226,7 @@ def api_call(server: str, path: str, headers: Dict[str, str], body: Dict[str, st
     url = urljoin(server, path)
 
     final_headers = headers.copy()
-    final_headers.update({
-        'accept': 'application/json',
-        'accept-language': 'en'
-    })
+    final_headers.update({'accept': 'application/json', 'accept-language': 'en'})
 
     response: Response | None = None
     try:
@@ -251,8 +283,9 @@ def try_get_report_or_clear_error(response: Response | None, exception: Exceptio
         if exception:
             return ReportOrClearInvoiceError('', ''.join(traceback.format_exception_only(exception)))
 
-        return ReportOrClearInvoiceError('',
-                                         "API call failed but we don't have a response or an exception. This is a bug.")
+        return ReportOrClearInvoiceError(
+            '', "API call failed but we don't have a response or an exception. This is a bug."
+        )
 
     try:
         data = response.json()
@@ -260,8 +293,9 @@ def try_get_report_or_clear_error(response: Response | None, exception: Exceptio
             if data.get('validationResults'):
                 if data['validationResults'].get('errorMessages'):
                     errors = cast(List[dict], data['validationResults']['errorMessages'])
-                    return ReportOrClearInvoiceError(response.text,
-                                                     '\n'.join([e['code'] + ': ' + e['message'] for e in errors]))
+                    return ReportOrClearInvoiceError(
+                        response.text, '\n'.join([e['code'] + ': ' + e['message'] for e in errors])
+                    )
 
         if response.status_code == 500 and data.get('message'):
             return ReportOrClearInvoiceError(response.text, data['message'])
