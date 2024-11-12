@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Use flt instead of round when calculating line amount for tax included items to ensure we use the system-configured
+  rounding method
+
 ## 0.39.2
 
 * Fix error messages not showing on frappe versions older than v15.17.0

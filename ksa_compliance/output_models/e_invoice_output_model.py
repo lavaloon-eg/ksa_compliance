@@ -5,7 +5,7 @@ from typing import cast, Optional
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe.model.document import Document
-from frappe.utils import get_date_str, get_time, strip
+from frappe.utils import get_date_str, get_time, strip, flt
 
 from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
@@ -25,7 +25,7 @@ def append_tax_details_into_item_lines(item_lines: list, is_tax_included: bool) 
             from the item amount but we need to get the tax amount without being affected by applied discount, so we 
             use this calculation to get the actual item amount exclusive of vat: "item_amount / 1 + tax_percent"
         """
-        item["amount"] = round(abs(item["amount"]) / (1 + (tax_percent / 100)), 2) if is_tax_included \
+        item["amount"] = flt(abs(item["amount"]) / (1 + (tax_percent / 100)), 2) if is_tax_included \
             else item["amount"]
         item["discount_amount"] = item["discount_amount"] * item["qty"]
         item["base_amount"] = item["amount"] + item["discount_amount"]
