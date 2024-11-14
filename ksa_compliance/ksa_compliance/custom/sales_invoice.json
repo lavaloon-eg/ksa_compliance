@@ -35,7 +35,7 @@
    "insert_after": "is_debit_note",
    "is_system_generated": 0,
    "is_virtual": 0,
-   "label": "Return Reason",
+   "label": "Return/Debit Reason",
    "length": 0,
    "mandatory_depends_on": "eval:doc.is_return || doc.is_debit_note",
    "modified": "2024-01-24 17:38:26.701604",
