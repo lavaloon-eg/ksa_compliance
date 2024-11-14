@@ -249,3 +249,24 @@ Zero rated goods || Private education to citizen,التوريدات الخاضع
 Zero rated goods || Private healthcare to citizen,التوريدات الخاضعة للصفر || الخدمات الصحية الخاصة للمواطنين,
 Zero rated goods || Supply of qualified military goods,التوريدات الخاضعة للصفر || توريد السلع العسكرية المؤهلة,
 Customer does not have VAT registration Number, ليس لدى العميل رقم تسجيل لضريبة القيمة المضافة
+Standard Tax Invoice Credit Note, اشعار دائن للفاتورة الضريبية
+Standard Tax Invoice Debit Note, اشعار مدين للفاتورة الضريبية
+Simplified Tax Invoice Credit Note, اشعار دائن للفاتورة الضريبية المبسطة
+Simplified Tax Invoice Debit Note, اشعار مدين للفاتورة الضريبية المبسطة
+Standard Tax Invoice, فاتورة ضريبية
+Simplified Tax Invoice, فاتورة ضريبية مبسطة
+Posting Date, تاريخ اصدار الفاتورة
+Seller Name, اسم  البائع
+Address, عنوان المنشأة
+Vat Registration Number, رقم التسجيل الضريبي
+Buyer Name, اسم المشتري
+Commercial Registration Number, السجل التجاري
+Products, المنتجات
+Unit Price, سعر الوحده
+Quantity, الكمية
+VAT %, نسبة الضريبة
+VAT Amount, ضريبة القيمة المضافة
+Total With VAT, المجموع مع الضريبة
+Invoice ID, رقم الفاتورة
+Subtotal Before Tax, المجموع الفرعي قبل الضريبة
+Total Taxable Amount, اجمالي المبلغ الخاضع للضريبة
