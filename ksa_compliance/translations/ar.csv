@@ -1,4 +1,4 @@
-<p>This will create a new Sales Invoice Additional Fields document for the invoice '{0}' and submit it to ZATCA. <strong>Make sure you have updated any bad configuration that lead to the initial rejection</strong>.</p><p>Do you want to proceed?</p>,<p>This will create a new Sales Invoice Additional Fields document for the invoice '{0}' and submit it to ZATCA. <strong>Make sure you have updated any bad configuration that lead to the initial rejection</strong>.</p><p>Do you want to proceed?</p>,
+﻿<p>This will create a new Sales Invoice Additional Fields document for the invoice '{0}' and submit it to ZATCA. <strong>Make sure you have updated any bad configuration that lead to the initial rejection</strong>.</p><p>Do you want to proceed?</p>,<p>This will create a new Sales Invoice Additional Fields document for the invoice '{0}' and submit it to ZATCA. <strong>Make sure you have updated any bad configuration that lead to the initial rejection</strong>.</p><p>Do you want to proceed?</p>,
 "<pre style=""display:inline;"">JAVA_HOME</pre> path used for running the CLI. Leave blank to use the default system Java installation","<pre style=""display:inline;"">JAVA_HOME</pre> path used for running the CLI. Leave blank to use the default system Java installation",
 About,About,
 Accepted,مقبول,
@@ -248,26 +248,26 @@ Zero rated goods || Qualifying metals,التوريدات الخاضعة للصف
 Zero rated goods || Private education to citizen,التوريدات الخاضعة للصفر || الخدمات التعليمية الخاصة للمواطنين,
 Zero rated goods || Private healthcare to citizen,التوريدات الخاضعة للصفر || الخدمات الصحية الخاصة للمواطنين,
 Zero rated goods || Supply of qualified military goods,التوريدات الخاضعة للصفر || توريد السلع العسكرية المؤهلة,
-Customer does not have VAT registration Number, ليس لدى العميل رقم تسجيل لضريبة القيمة المضافة
-Standard Tax Invoice Credit Note, اشعار دائن للفاتورة الضريبية
-Standard Tax Invoice Debit Note, اشعار مدين للفاتورة الضريبية
-Simplified Tax Invoice Credit Note, اشعار دائن للفاتورة الضريبية المبسطة
-Simplified Tax Invoice Debit Note, اشعار مدين للفاتورة الضريبية المبسطة
-Standard Tax Invoice, فاتورة ضريبية
-Simplified Tax Invoice, فاتورة ضريبية مبسطة
-Posting Date, تاريخ اصدار الفاتورة
-Seller Name, اسم  البائع
-Address, عنوان المنشأة
-Vat Registration Number, رقم التسجيل الضريبي
-Buyer Name, اسم المشتري
-Commercial Registration Number, السجل التجاري
-Products, المنتجات
-Unit Price, سعر الوحده
-Quantity, الكمية
-VAT %, نسبة الضريبة
-VAT Amount, ضريبة القيمة المضافة
-Total With VAT, المجموع مع الضريبة
-Invoice ID, رقم الفاتورة
-Subtotal Before Tax, المجموع الفرعي قبل الضريبة
-Total Taxable Amount, اجمالي المبلغ الخاضع للضريبة
-Return/Debit Reason, سبب المرتجع/الخصم
+Customer does not have VAT registration Number, ليس لدى العميل رقم تسجيل لضريبة القيمة المضافة,
+Standard Tax Invoice Credit Note, إشعار دائن للفاتورة الضريبية,
+Standard Tax Invoice Debit Note, إشعار مدين للفاتورة الضريبية,
+Simplified Tax Invoice Credit Note, إشعار دائن للفاتورة الضريبية المبسطة,
+Simplified Tax Invoice Debit Note, إشعار مدين للفاتورة الضريبية المبسطة,
+Standard Tax Invoice, فاتورة ضريبية,
+Simplified Tax Invoice, فاتورة ضريبية مبسطة,
+Posting Date, تاريخ إصدار الفاتورة,
+Seller Name, اسم البائع,
+Address, عنوان المنشأة,
+Vat Registration Number, رقم التسجيل الضريبي,
+Buyer Name, اسم المشتري,
+Commercial Registration Number, السجل التجاري,
+Products, المنتجات,
+Unit Price, سعر الوحده,
+Quantity, الكمية,
+VAT %, نسبة الضريبة,
+VAT Amount, ضريبة القيمة المضافة,
+Total With VAT, المجموع مع الضريبة,
+Invoice ID, رقم الفاتورة,
+Subtotal Before Tax, المجموع الفرعي قبل الضريبة,
+Total Taxable Amount, إجمالي المبلغ الخاضع للضريبة,
+Return/Debit Reason, سبب المرتجع/الخصم,
