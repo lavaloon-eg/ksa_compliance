@@ -21,18 +21,18 @@ def get_zatca_phase_1_qr_for_invoice(invoice_name: str) -> str:
 
 def get_qr_inputs(invoice_name: str) -> list:
     invoice_doc: Optional[SalesInvoice] = None
-    if frappe.db.exists("POS Invoice", invoice_name):
-        invoice_doc = cast(POSInvoice, frappe.get_doc("POS Invoice", invoice_name))
-    elif frappe.db.exists("Sales Invoice", invoice_name):
-        invoice_doc = cast(SalesInvoice, frappe.get_doc("Sales Invoice", invoice_name))
+    if frappe.db.exists('POS Invoice', invoice_name):
+        invoice_doc = cast(POSInvoice, frappe.get_doc('POS Invoice', invoice_name))
+    elif frappe.db.exists('Sales Invoice', invoice_name):
+        invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', invoice_name))
     else:
         return None
     seller_name = invoice_doc.company
-    phase_1_name = frappe.get_value("ZATCA Phase 1 Business Settings", {"company": seller_name})
+    phase_1_name = frappe.get_value('ZATCA Phase 1 Business Settings', {'company': seller_name})
     if not phase_1_name:
         return None
-    phase_1_settings = frappe.get_doc("ZATCA Phase 1 Business Settings", phase_1_name)
-    if phase_1_settings.status == "Disabled":
+    phase_1_settings = frappe.get_doc('ZATCA Phase 1 Business Settings', phase_1_name)
+    if phase_1_settings.status == 'Disabled':
         return None
     seller_vat_reg_no = phase_1_settings.vat_registration_number
     time = invoice_doc.posting_time
@@ -44,7 +44,7 @@ def get_qr_inputs(invoice_name: str) -> list:
 
 
 def generate_decoded_string(values: list) -> str:
-    encoded_text = ""
+    encoded_text = ''
     for tag, value in enumerate(values, 1):
         encoded_text += encode_input(value, [tag])
     # Decode hex result string into base64 format
@@ -53,10 +53,10 @@ def generate_decoded_string(values: list) -> str:
 
 def encode_input(input: str, tag: int) -> str:
     """
-        1- Convert bytes of tag into hex format.
-        2- Convert bytes of encoded length of input into hex format.
-        3- Convert encoded input itself into hex format.
-        4- Concat All values into one string.
+    1- Convert bytes of tag into hex format.
+    2- Convert bytes of encoded length of input into hex format.
+    3- Convert encoded input itself into hex format.
+    4- Concat All values into one string.
     """
     encoded_tag = bytes(tag).hex()
     if type(input) is str:
@@ -70,7 +70,7 @@ def encode_input(input: str, tag: int) -> str:
 
 def format_date(date: str, time: str) -> str:
     """
-        Format date & time into UTC format something like : " 2021-12-13T10:39:15Z"
+    Format date & time into UTC format something like : " 2021-12-13T10:39:15Z"
     """
     posting_date = getdate(date)
     time = get_time(time)
@@ -87,5 +87,5 @@ def generate_qrcode(data: str) -> str:
     with BytesIO() as buffer:
         qr.png(buffer, scale=7)
         buffer.seek(0)
-        img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
         return img_str

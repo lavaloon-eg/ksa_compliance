@@ -1,9 +1,9 @@
-app_name = "ksa_compliance"
-app_title = "KSA Compliance"
-app_publisher = "LavaLoon"
-app_description = "KSA Compliance app for E-invoice"
-app_email = "info@lavaloon.com"
-app_license = "Copyright (c) 2023 LavaLoon"
+app_name = 'ksa_compliance'
+app_title = 'KSA Compliance'
+app_publisher = 'LavaLoon'
+app_description = 'KSA Compliance app for E-invoice'
+app_email = 'info@lavaloon.com'
+app_license = 'Copyright (c) 2023 LavaLoon'
 # required_apps = []
 
 # Includes in <head>
@@ -33,7 +33,7 @@ app_license = "Copyright (c) 2023 LavaLoon"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-doctype_js = {"Customer": "public/js/customer.js"}
+doctype_js = {'Customer': 'public/js/customer.js'}
 
 # Svg Icons
 # ------------------
@@ -62,7 +62,7 @@ doctype_js = {"Customer": "public/js/customer.js"}
 
 # add methods and filters to jinja environment
 jinja = {
-    "methods": "ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice",
+    'methods': 'ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice',
 }
 
 # Installation
@@ -132,26 +132,22 @@ jinja = {
 # }
 
 doc_events = {
-    "Sales Invoice": {
-        "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
-        "validate": "ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice",
-        "before_cancel": "ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice"
+    'Sales Invoice': {
+        'on_submit': 'ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype',
+        'validate': 'ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice',
+        'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
     },
-    "POS Invoice": {
-        "on_submit": "ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype",
-        "validate": "ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice",
-        "before_cancel": "ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice",
-    }
+    'POS Invoice': {
+        'on_submit': 'ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype',
+        'validate': 'ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice',
+        'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
+    },
 }
 
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {
-    "hourly_long": [
-        "ksa_compliance.background_jobs.sync_e_invoices"
-    ]
-}
+scheduler_events = {'hourly_long': ['ksa_compliance.background_jobs.sync_e_invoices']}
 # "all": [
 # "ksa_compliance.tasks.all"
 # ],

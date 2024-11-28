@@ -9,14 +9,17 @@ from frappe.utils import strip
 from result import is_ok
 
 from ksa_compliance import logger
-from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import \
-    SalesInvoiceAdditionalFields
+from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
+    SalesInvoiceAdditionalFields,
+)
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
-from ksa_compliance.ksa_compliance.doctype.zatca_phase_1_business_settings.zatca_phase_1_business_settings import \
-    ZATCAPhase1BusinessSettings
-from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import \
-    ZATCAPrecomputedInvoice
+from ksa_compliance.ksa_compliance.doctype.zatca_phase_1_business_settings.zatca_phase_1_business_settings import (
+    ZATCAPhase1BusinessSettings,
+)
+from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import (
+    ZATCAPrecomputedInvoice,
+)
 from ksa_compliance.translation import ft
 
 IGNORED_INVOICES = set()
@@ -39,11 +42,11 @@ def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoi
 
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
-        logger.info(f"Skipping additional fields for {self.name} because of missing ZATCA settings")
+        logger.info(f'Skipping additional fields for {self.name} because of missing ZATCA settings')
         return
 
     if not settings.enable_zatca_integration:
-        logger.info(f"Skipping additional fields for {self.name} because ZATCA integration is disabled in settings")
+        logger.info(f'Skipping additional fields for {self.name} because ZATCA integration is disabled in settings')
         return
 
     global IGNORED_INVOICES
@@ -59,12 +62,12 @@ def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoi
     precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
     is_live_sync = settings.is_live_sync
     if precomputed_invoice:
-        logger.info(f"Using precomputed invoice {precomputed_invoice.name} for {self.name}")
+        logger.info(f'Using precomputed invoice {precomputed_invoice.name} for {self.name}')
         si_additional_fields_doc.use_precomputed_invoice(precomputed_invoice)
 
         egs_settings = ZATCAEGS.for_device(precomputed_invoice.device_id)
         if not egs_settings:
-            logger.warning(f"Could not find EGS for device {precomputed_invoice.device_id}")
+            logger.warning(f'Could not find EGS for device {precomputed_invoice.device_id}')
         else:
             # EGS Setting overrides company-wide setting
             is_live_sync = egs_settings.is_live_sync
@@ -73,8 +76,9 @@ def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoi
     if is_live_sync:
         # We're running in the context of invoice submission (on_submit hook). We only want to run our ZATCA logic if
         # the invoice submits successfully after on_submit is run successfully from all apps.
-        frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=si_additional_fields_doc,
-                                             enqueue_after_commit=True)
+        frappe.utils.background_jobs.enqueue(
+            _submit_additional_fields, doc=si_additional_fields_doc, enqueue_after_commit=True
+        )
 
 
 def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
@@ -90,9 +94,11 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
     if frappe.db.table_exists('Vehicle Booking Item Info'):
         # noinspection SqlResolve
         records = frappe.db.sql(
-            "SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii "
-            "JOIN `tabBooking Vehicle` bv ON bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s",
-            {'invoice': invoice_id}, as_dict=True)
+            'SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii '
+            'JOIN `tabBooking Vehicle` bv ON bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s',
+            {'invoice': invoice_id},
+            as_dict=True,
+        )
         if records:
             local_date = records[0]['local_trx_date_time'].date()
             return local_date >= start_date
@@ -104,8 +110,10 @@ def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
 def prevent_cancellation_of_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
     is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
     if is_phase_2_enabled_for_company:
-        frappe.throw(msg=_("You cannot cancel sales invoice according to ZATCA Regulations."),
-                     title=_("This Action Is Not Allowed"))
+        frappe.throw(
+            msg=_('You cannot cancel sales invoice according to ZATCA Regulations.'),
+            title=_('This Action Is Not Allowed'),
+        )
 
 
 def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
@@ -113,8 +121,11 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
     is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
     if ZATCAPhase1BusinessSettings.is_enabled_for_company(self.company) or is_phase_2_enabled_for_company:
         if len(self.taxes) == 0:
-            frappe.msgprint(msg=_("Please include tax rate in Sales Taxes and Charges Table"),
-                            title=_("Validation Error"), indicator="red")
+            frappe.msgprint(
+                msg=_('Please include tax rate in Sales Taxes and Charges Table'),
+                title=_('Validation Error'),
+                indicator='red',
+            )
             valid = False
 
     if is_phase_2_enabled_for_company:
@@ -122,14 +133,19 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
         if settings.type_of_business_transactions == 'Standard Tax Invoices':
             customer = frappe.get_doc('Customer', self.customer)
             if not customer.custom_vat_registration_number and not any(
-                    [strip(x.value) for x in customer.custom_additional_ids]):
+                [strip(x.value) for x in customer.custom_additional_ids]
+            ):
                 frappe.msgprint(
-                    ft("Company <b>$company</b> is configured to use Standard Tax Invoices, which require customers to "
-                       "define a VAT number or one of the other IDs. Please update customer <b>$customer</b>",
-                       company=self.company, customer=self.customer))
+                    ft(
+                        'Company <b>$company</b> is configured to use Standard Tax Invoices, which require customers to '
+                        'define a VAT number or one of the other IDs. Please update customer <b>$customer</b>',
+                        company=self.company,
+                        customer=self.customer,
+                    )
+                )
                 valid = False
 
     if not valid:
         message_log = frappe.get_message_log()
-        error_messages = "\n".join(log["message"] for log in message_log)
+        error_messages = '\n'.join(log['message'] for log in message_log)
         raise frappe.ValidationError(error_messages)

@@ -34,7 +34,8 @@ def download_with_progress(url: str, target_dir: str, progress: Callable[[float]
             extension = os.path.splitext(file_name.ok_value)[1]
             if not extension or extension not in ['.gz', '.zip']:
                 return Err(
-                    ft("Only .zip and .gz files are supported. Extension deduced from server: $ext", ext=extension))
+                    ft('Only .zip and .gz files are supported. Extension deduced from server: $ext', ext=extension)
+                )
 
             current_size = 0
             total_size = int(response.headers.get('content-length', 0))
@@ -49,12 +50,12 @@ def download_with_progress(url: str, target_dir: str, progress: Callable[[float]
                     # noinspection PyBroadException
                     try:
                         progress(100 * float(current_size) / total_size)
-                    except:
+                    except Exception:
                         pass
 
             return Ok(file_path)
     except RequestException as e:
-        logger.error("Download failed", exc_info=True)
+        logger.error('Download failed', exc_info=True)
         frappe.log_error(title='ZATCA Setup Error')
         return Err(str(e))
 
@@ -81,7 +82,7 @@ def extract_archive(path: str) -> Result[str, str]:
             archive.extractall(base_dir)
             return Ok(os.path.join(base_dir, home_dir.name))
 
-    return Err(ft("Unsupported archive format: $path", path=path))
+    return Err(ft('Unsupported archive format: $path', path=path))
 
 
 def _extract_filename_from_headers(headers: CaseInsensitiveDict[str]) -> Result[str, str]:
@@ -91,8 +92,9 @@ def _extract_filename_from_headers(headers: CaseInsensitiveDict[str]) -> Result[
     """
     content_disposition = headers.get('content-disposition')
     if not content_disposition:
-        return Err(ft("Can't figure out file name because the server response is missing the "
-                      "'Content-Disposition' header"))
+        return Err(
+            ft("Can't figure out file name because the server response is missing the " "'Content-Disposition' header")
+        )
 
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#syntax
     # We're expecting something like:
@@ -105,7 +107,7 @@ def _extract_filename_from_headers(headers: CaseInsensitiveDict[str]) -> Result[
     if not parts[1].startswith('filename='):
         return Err(ft("'Content-Disposition' header doesn't specify a file name"))
 
-    filename = parts[1][len('filename='):].strip('"')
+    filename = parts[1][len('filename=') :].strip('"')
     if not filename:
         return Err(ft("'Content-Disposition' header doesn't specify a file name"))
 

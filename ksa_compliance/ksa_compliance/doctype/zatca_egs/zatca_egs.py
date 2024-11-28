@@ -19,14 +19,14 @@ class ZATCAEGS(Document):
         business_settings: DF.Link
         compliance_request_id: DF.Data | None
         csr: DF.SmallText | None
-        egs_type: DF.Literal["ERPNext", "POS Device"]
+        egs_type: DF.Literal['ERPNext', 'POS Device']
         enable_zatca_integration: DF.Check
         production_request_id: DF.Data | None
         production_secret: DF.Password | None
         production_security_token: DF.SmallText | None
         secret: DF.Password | None
         security_token: DF.SmallText | None
-        sync_with_zatca: DF.Literal["Live", "Batches"]
+        sync_with_zatca: DF.Literal['Live', 'Batches']
         unit_common_name: DF.Data
         unit_serial: DF.Data
         validate_generated_xml: DF.Check
@@ -45,5 +45,4 @@ class ZATCAEGS(Document):
         return None
 
     def on_trash(self) -> None:
-        frappe.throw(msg=_("You cannot Delete a configured ZATCA EGS"),
-                     title=_("This Action Is Not Allowed"))
+        frappe.throw(msg=_('You cannot Delete a configured ZATCA EGS'), title=_('This Action Is Not Allowed'))

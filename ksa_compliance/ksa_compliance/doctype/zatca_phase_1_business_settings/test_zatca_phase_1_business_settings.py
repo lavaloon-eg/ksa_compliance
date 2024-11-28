@@ -6,4 +6,4 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestZATCAPhase1BusinessSettings(FrappeTestCase):
-	pass
+    pass

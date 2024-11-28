@@ -7,20 +7,21 @@ from frappe.model.document import Document
 
 
 class ZATCAInvoiceCountingSettings(Document):
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
 
-	from typing import TYPE_CHECKING
+    from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
-		from frappe.types import DF
+    if TYPE_CHECKING:
+        from frappe.types import DF
 
-		business_settings_reference: DF.Link | None
-		invoice_counter: DF.Int
-		previous_invoice_hash: DF.Data | None
-		zatca_egs: DF.Link | None
-	# end: auto-generated types
+        business_settings_reference: DF.Link | None
+        invoice_counter: DF.Int
+        previous_invoice_hash: DF.Data | None
+        zatca_egs: DF.Link | None
+    # end: auto-generated types
 
-	def on_trash(self) -> None:
-		frappe.throw(msg=_("You cannot delete a configured Invoice Counting Settings"),
-					 title=_("This Action Is Not Allowed"))
+    def on_trash(self) -> None:
+        frappe.throw(
+            msg=_('You cannot delete a configured Invoice Counting Settings'), title=_('This Action Is Not Allowed')
+        )

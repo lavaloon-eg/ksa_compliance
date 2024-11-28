@@ -8,6 +8,7 @@ from json import JSONDecodeError
 from typing import cast, List, NoReturn, Optional
 
 import frappe
+
 # noinspection PyProtectedMember
 from frappe import _
 from result import is_err
@@ -26,6 +27,7 @@ DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{
 @dataclass
 class ZatcaResult:
     """Result for an invocation of lava-zatca CLI"""
+
     is_success: bool
     msg: str
     errors: List[str]
@@ -39,16 +41,17 @@ class ZatcaResult:
         if self.is_failure:
             content = self.msg
             if self.errors:
-                content += "<ul>"
+                content += '<ul>'
             for e in self.errors:
-                content += f"<li>{e}</li>"
-            content += "</ul>"
-            fthrow(content, title=ft("ZATCA CLI Error"))
+                content += f'<li>{e}</li>'
+            content += '</ul>'
+            fthrow(content, title=ft('ZATCA CLI Error'))
 
 
 @dataclass
 class CsrResult:
     """Result for CSR generation invocation to lava-zatca CLI"""
+
     csr: str
     """The CSR contents, ready to be sent to the compliance API"""
 
@@ -62,6 +65,7 @@ class CsrResult:
 @dataclass
 class SigningResult:
     """Result for an invoice signing invocation to lava-zatca CLI"""
+
     signed_invoice_xml: str
     signed_invoice_path: str
     invoice_hash: str
@@ -103,7 +107,7 @@ def check_setup(zatca_cli_path: str, java_home: Optional[str]) -> NoReturn:
     """Shows a desk dialog with the version of the Lava ZATCA CLI if found, or an error otherwise"""
     result = run_command(zatca_cli_path, ['-v'], java_home=java_home)
     result.throw_if_failure()
-    frappe.msgprint(result.msg, ft("ZATCA CLI"))
+    frappe.msgprint(result.msg, ft('ZATCA CLI'))
 
 
 @frappe.whitelist()
@@ -114,8 +118,9 @@ def check_validation_details_support(zatca_cli_path: str, java_home: Optional[st
     is_supported = result.data and 'version' in result.data
     return {
         'is_supported': is_supported,
-        'error': '' if is_supported else ft(
-            "Please update ZATCA CLI to 2.1.0 or later to support blocking on validation")
+        'error': ''
+        if is_supported
+        else ft('Please update ZATCA CLI to 2.1.0 or later to support blocking on validation'),
     }
 
 
@@ -137,8 +142,9 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         # 2. JRE extraction: 25 - 50%
         # 3. CLI download: 50 - 75%
         # 4. CLI extraction: 75 - 100%
-        jre_result = download_with_progress(jre_url, directory,
-                                            lambda p: progress_callback(ft('Downloading JRE'), p / 4))
+        jre_result = download_with_progress(
+            jre_url, directory, lambda p: progress_callback(ft('Downloading JRE'), p / 4)
+        )
         if is_err(jre_result):
             fthrow(jre_result.err_value)
 
@@ -152,8 +158,9 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         java_home = os.path.abspath(java_result.ok_value)
         progress_callback(ft('Extracting JRE'), 50)
 
-        zatca_download_result = download_with_progress(cli_url, directory,
-                                                       lambda p: progress_callback(ft('Downloading CLI'), 50 + (p / 4)))
+        zatca_download_result = download_with_progress(
+            cli_url, directory, lambda p: progress_callback(ft('Downloading CLI'), 50 + (p / 4))
+        )
         if is_err(zatca_download_result):
             fthrow(zatca_download_result.err_value)
 
@@ -166,7 +173,7 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
 
         zatca_bin = os.path.join(os.path.abspath(zatca_result.ok_value), 'bin/zatca-cli')
         if not os.path.isfile(zatca_bin):
-            fthrow(ft("Could not find $zatca_bin after extracting ZATCA archive", zatca_bin=zatca_bin))
+            fthrow(ft('Could not find $zatca_bin after extracting ZATCA archive', zatca_bin=zatca_bin))
 
         # Make ZATCA CLI executable for the current user
         os.chmod(zatca_bin, os.stat(zatca_bin).st_mode | stat.S_IEXEC)
@@ -181,8 +188,9 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
         progress_callback(ft('Done'), 100)
 
 
-def generate_csr(zatca_cli_path: str, java_home: Optional[str], file_prefix: str, config: str,
-                 simulation=False) -> CsrResult:
+def generate_csr(
+    zatca_cli_path: str, java_home: Optional[str], file_prefix: str, config: str, simulation=False
+) -> CsrResult:
     """
     Generates a CSR. The given prefix is used to name the resulting CSR and private key files.
     """
@@ -200,14 +208,17 @@ def generate_csr(zatca_cli_path: str, java_home: Optional[str], file_prefix: str
     return CsrResult(csr, csr_path, private_key_path)
 
 
-def sign_invoice(zatca_cli_path: str, java_home: str, invoice_xml: str, cert_path: str,
-                 private_key_path: str) -> SigningResult:
+def sign_invoice(
+    zatca_cli_path: str, java_home: str, invoice_xml: str, cert_path: str, private_key_path: str
+) -> SigningResult:
     base_path = os.path.normpath(os.path.join(os.path.dirname(zatca_cli_path), '../'))
-    invoice_path = write_temp_file(invoice_xml, "invoice.xml")
+    invoice_path = write_temp_file(invoice_xml, 'invoice.xml')
     signed_invoice_path = get_temp_path('signed_invoice.xml')
-    result = run_command(zatca_cli_path,
-                         ['sign', '-b', base_path, '-o', signed_invoice_path, '-c', cert_path,
-                          '-k', private_key_path, invoice_path], java_home=java_home)
+    result = run_command(
+        zatca_cli_path,
+        ['sign', '-b', base_path, '-o', signed_invoice_path, '-c', cert_path, '-k', private_key_path, invoice_path],
+        java_home=java_home,
+    )
     logger.info(result.msg)
     result.throw_if_failure()
     with open(signed_invoice_path, 'rt') as file:
@@ -215,11 +226,15 @@ def sign_invoice(zatca_cli_path: str, java_home: str, invoice_xml: str, cert_pat
     return SigningResult(signed_invoice, signed_invoice_path, result.data['hash'], result.data['qrCode'])
 
 
-def validate_invoice(zatca_cli_path: str, java_home: Optional[str], invoice_path: str, cert_path: str,
-                     previous_invoice_hash: str) -> ValidationResult:
+def validate_invoice(
+    zatca_cli_path: str, java_home: Optional[str], invoice_path: str, cert_path: str, previous_invoice_hash: str
+) -> ValidationResult:
     base_path = os.path.normpath(os.path.join(os.path.dirname(zatca_cli_path), '../'))
-    result = run_command(zatca_cli_path, ['validate', '-b', base_path, '-c', cert_path, '-p',
-                                          previous_invoice_hash, invoice_path], java_home=java_home)
+    result = run_command(
+        zatca_cli_path,
+        ['validate', '-b', base_path, '-c', cert_path, '-p', previous_invoice_hash, invoice_path],
+        java_home=java_home,
+    )
     logger.info(result.msg)
     result.throw_if_failure()
     return ValidationResult.from_json(result.data)
@@ -239,7 +254,7 @@ def run_command(zatca_cli_path: str, args: List[str], java_home: Optional[str]) 
     errors as is.
     """
     if not os.path.isfile(zatca_cli_path):
-        fthrow(_("{0} does not exist or is not a file").format(zatca_cli_path))
+        fthrow(_('{0} does not exist or is not a file').format(zatca_cli_path))
 
     full_args = [zatca_cli_path] + args
     env = os.environ.copy()

@@ -15,27 +15,26 @@ def execute(filters=None):
     df = datetime.strptime(filters['from_date_filter'], '%Y-%m-%d')
     dt = datetime.strptime(filters['to_date_filter'], '%Y-%m-%d')
     if dt < df:
-        frappe.throw(msg=f"""Date range must be from {filters['from_date_filter']} to {filters['to_date_filter']}.
+        frappe.throw(
+            msg=f"""Date range must be from {filters['from_date_filter']} to {filters['to_date_filter']}.
                         error_code='InvalidDateRange',
                         code=400
                         """
-                     )
+        )
 
     data = get_zatca_integration_summary_data(filters=filters)
 
     if data:
         labels = [row['integration_status'] for row in data]
         values = {row['integration_status']: row['records_count'] for row in data}
-        chart = get_pie_chart_data(title='Zatca Integration Status',
-                                   labels=labels,
-                                   values=values)
+        chart = get_pie_chart_data(title='Zatca Integration Status', labels=labels, values=values)
         records_count = sum(row['records_count'] for row in data)
 
         report_summary = [
             {
-                "value": records_count,
-                "label": "Number of records",
-                "datatype": "Number",
+                'value': records_count,
+                'label': 'Number of records',
+                'datatype': 'Number',
             },
         ]
 
@@ -45,40 +44,16 @@ def execute(filters=None):
 
 def get_columns():
     return [
-        {
-            "fieldname": "integration_status",
-            "fieldtype": "Data",
-            "label": "ZATCA Integration status",
-            "width": 200
-        },
-        {
-            "fieldname": "records_count",
-            "fieldtype": "Int",
-            "label": "Total Number of invoices",
-            "width": 150
-        },
-        {
-            "fieldname": "net_total",
-            "fieldtype": "Currency",
-            "label": "Net Total Amount",
-            "width": 150
-        },
-        {
-            "fieldname": "total_taxes_and_charges",
-            "fieldtype": "Currency",
-            "label": "VAT Total Amount",
-            "width": 150
-        },
-        {
-            "fieldname": "grand_total",
-            "fieldtype": "Currency",
-            "label": "Grand Total Amount",
-            "width": 150
-        }
+        {'fieldname': 'integration_status', 'fieldtype': 'Data', 'label': 'ZATCA Integration status', 'width': 200},
+        {'fieldname': 'records_count', 'fieldtype': 'Int', 'label': 'Total Number of invoices', 'width': 150},
+        {'fieldname': 'net_total', 'fieldtype': 'Currency', 'label': 'Net Total Amount', 'width': 150},
+        {'fieldname': 'total_taxes_and_charges', 'fieldtype': 'Currency', 'label': 'VAT Total Amount', 'width': 150},
+        {'fieldname': 'grand_total', 'fieldtype': 'Currency', 'label': 'Grand Total Amount', 'width': 150},
     ]
 
+
 def get_zatca_integration_summary_data(filters):
-    query = f"""
+    query = """
             SELECT IFNULL(zi.integration_status,'N/A') AS integration_status,
             COUNT(DISTINCT inv.name) AS records_count,
             SUM(inv.net_total) AS net_total,
@@ -95,9 +70,12 @@ def get_zatca_integration_summary_data(filters):
             GROUP BY zi.integration_status
           """
 
-    return frappe.db.sql(query=query,
-                         values={
-                             "from_date": filters['from_date_filter'],
-                             "to_date": filters['to_date_filter'],
-                             "company": filters['company_filter']
-                         }, as_dict=1)
+    return frappe.db.sql(
+        query=query,
+        values={
+            'from_date': filters['from_date_filter'],
+            'to_date': filters['to_date_filter'],
+            'company': filters['company_filter'],
+        },
+        as_dict=1,
+    )
