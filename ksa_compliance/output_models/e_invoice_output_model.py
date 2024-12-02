@@ -816,7 +816,7 @@ class Einvoice:
             # noinspection PyUnresolvedReferences
             tax_percent = abs(item.tax_rate or 0.0)
             # noinspection PyUnresolvedReferences
-            tax_amount = abs(item.tax_amount or 0.0) / self.sales_invoice_doc.conversion_rate
+            tax_amount = abs(item.tax_amount or 0.0)
 
             # We use absolute values for int/float values because we want positive values in the XML in the return invoice
             # case
