@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.39.4
+
 * Fix item line tax amount calculation if invoice is not in `SAR`.
 
 ## 0.39.3
