@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.39.4
+
+* Fix item line tax amount calculation if invoice is not in `SAR`.
+
 ## 0.39.3
 
 * Use flt instead of round when calculating line amount for tax included items to ensure we use the system-configured
