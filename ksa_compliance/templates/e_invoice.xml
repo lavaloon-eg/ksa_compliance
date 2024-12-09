@@ -170,7 +170,7 @@
         {% endfor %}
     </cac:AllowanceCharge>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ invoice.total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ (invoice.total_taxes_and_charges or 0) | round(2) }}</cbc:TaxAmount>
         {% for tax_category in invoice.tax_categories %}
             <cac:TaxSubtotal>
                 <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ tax_category.taxable_amount | round(2) }}</cbc:TaxableAmount>
@@ -192,7 +192,7 @@
         {% endfor %}
     </cac:TaxTotal>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ invoice.base_total_taxes_and_charges or 0 | round(2) }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="{{ invoice.tax_currency or 'SAR' }}">{{ (invoice.base_total_taxes_and_charges or 0) | round(2) }}</cbc:TaxAmount>
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ invoice.line_extension_amount | round(2) }}</cbc:LineExtensionAmount>
