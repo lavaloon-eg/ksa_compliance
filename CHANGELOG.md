@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix `TaxAmount` rounding in XML if system precision > 2.
+
 ## 0.40.0
 
 * CLI setup now grabs version 2.4.0
