@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.40.1
+
 * Fix `TaxAmount` rounding in XML if system precision > 2.
 
 ## 0.40.0
