@@ -7,7 +7,13 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+
 * Fix `TaxAmount` rounding in XML if system precision > 2.
+
+## 0.40.0
+
+* CLI setup now grabs version 2.4.0
+
 ## 0.39.4
 
 * Fix item line tax amount calculation if invoice is not in `SAR`.
