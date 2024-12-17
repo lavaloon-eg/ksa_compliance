@@ -33,7 +33,10 @@ app_license = 'Copyright (c) 2023 LavaLoon'
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-doctype_js = {'Customer': 'public/js/customer.js'}
+doctype_js = {
+    'Customer': 'public/js/customer.js',
+    'Branch': 'public/js/branch.js',
+}
 
 # Svg Icons
 # ------------------
@@ -145,6 +148,9 @@ doc_events = {
         'validate': 'ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice',
         'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
     },
+    'Branch': {
+        'validate': 'ksa_compliance.standard_doctypes.branch.validate_branch_doctype',
+    }
 }
 
 # Scheduled Tasks

@@ -29,6 +29,9 @@
   "seller_id_section",
   "seller_name",
   "vat_registration_number",
+  "column_break_abnh",
+  "enable_branch_configuration",
+  "section_break_muug",
   "other_ids",
   "vat_account_configuration_tab",
   "automatic_vat_account_configuration",
@@ -466,11 +469,26 @@
    "fieldtype": "Check",
    "label": "Automatic VAT Account Configuration",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_abnh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable in case of multiple branches with different commercial registration number.\n<br>\n<b>Warning:</b> This requires manual configuration of an Accounting Dimension for company branches.",
+   "fieldname": "enable_branch_configuration",
+   "fieldtype": "Check",
+   "label": "Enable Branch Configuration"
+  },
+  {
+   "fieldname": "section_break_muug",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-01 11:48:47.276189",
+ "modified": "2024-12-17 16:51:13.936364",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
