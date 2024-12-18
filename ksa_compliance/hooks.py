@@ -33,7 +33,10 @@ app_license = 'Copyright (c) 2023 LavaLoon'
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-doctype_js = {'Customer': 'public/js/customer.js'}
+doctype_js = {
+    'Customer': 'public/js/customer.js',
+    'Branch': 'public/js/branch.js',
+}
 
 # Svg Icons
 # ------------------
@@ -62,10 +65,7 @@ doctype_js = {'Customer': 'public/js/customer.js'}
 
 # add methods and filters to jinja environment
 jinja = {
-    'methods': [
-        'ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice',
-        'frappe.utils.data.rounded'
-    ],
+    'methods': ['ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice', 'frappe.utils.data.rounded'],
 }
 
 # Installation
@@ -144,6 +144,9 @@ doc_events = {
         'on_submit': 'ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype',
         'validate': 'ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice',
         'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
+    },
+    'Branch': {
+        'validate': 'ksa_compliance.standard_doctypes.branch.validate_branch',
     },
 }
 
