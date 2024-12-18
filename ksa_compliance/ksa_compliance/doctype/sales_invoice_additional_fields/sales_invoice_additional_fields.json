@@ -621,13 +621,15 @@
   {
    "fieldname": "branch_commercial_registration_number",
    "fieldtype": "Data",
-   "label": "Branch Commercial Registration Number"
+   "label": "Branch Commercial Registration Number",
+   "read_only": 1
   },
   {
    "fieldname": "branch",
    "fieldtype": "Link",
    "label": "Branch",
-   "options": "Branch"
+   "options": "Branch",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -638,7 +640,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2024-12-18 23:35:40.593643",
+ "modified": "2024-12-19 00:15:37.500408",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
