@@ -146,7 +146,7 @@ doc_events = {
         'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
     },
     'Branch': {
-        'validate': 'ksa_compliance.standard_doctypes.branch.validate_branch_doctype',
+        'validate': 'ksa_compliance.standard_doctypes.branch.validate_branch',
     },
 }
 

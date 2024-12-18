@@ -4,8 +4,8 @@ frappe.ui.form.on("Branch", {
         frm.set_df_property('custom_branch_ids', 'cannot_add_rows', 1);
     },
     refresh: async function (frm) {
-        await filter_company_address(frm)
         add_other_ids_if_new(frm)
+        await filter_company_address(frm)
     },
     custom_company: async function (frm) {
         await filter_company_address(frm)

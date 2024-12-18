@@ -5,7 +5,6 @@ from typing import cast, Optional
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.setup.doctype.branch.branch import Branch
-from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_date_str, get_time, strip, flt
 from ksa_compliance.invoice import InvoiceType
@@ -13,6 +12,7 @@ from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields impor
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
 
 
 def append_tax_details_into_item_lines(item_lines: list, is_tax_included: bool) -> list:
@@ -107,11 +107,11 @@ class Einvoice:
         )
 
         self.branch_doc = None
-        if self.business_settings_doc.enable_branch_configuration == 1:
+        if self.business_settings_doc.enable_branch_configuration:
             if not self.sales_invoice_doc.branch:
                 fthrow(
-                    msg=_('Branch is mandatory when ZATCA Branch configuration is enabled.'),
-                    title=_('Branch Is Mandatory'),
+                    msg=ft('Branch is mandatory when ZATCA Branch configuration is enabled.'),
+                    title=ft('Branch Is Mandatory'),
                 )
 
             self.branch_doc = cast(
@@ -123,10 +123,12 @@ class Einvoice:
             )
             if self.branch_doc.custom_company != self.sales_invoice_doc.company:
                 fthrow(
-                    msg=_(
-                        f'Select branch {self.sales_invoice_doc.branch} is not configured for company: {self.sales_invoice_doc.company}'
+                    msg=ft(
+                        'Selected branch $branch is not configured for company: $company.',
+                        branch=self.sales_invoice_doc.branch,
+                        company=self.sales_invoice_doc.company,
                     ),
-                    title=_('Invalid Branch For Company'),
+                    title=ft('Invalid Branch For Company'),
                 )
 
         # Get Business Settings and Seller Fields
@@ -517,8 +519,11 @@ class Einvoice:
             )
             if not party_identification:
                 fthrow(
-                    msg=_(f'Commercial registration number is mandatory for branch {self.sales_invoice_doc.branch}.'),
-                    title=_('Mandatory CRN Error'),
+                    msg=ft(
+                        'Commercial registration number is mandatory for branch $branch.',
+                        branch=self.sales_invoice_doc.branch,
+                    ),
+                    title=ft('Mandatory CRN Error'),
                 )
         else:
             self.get_list_value(
