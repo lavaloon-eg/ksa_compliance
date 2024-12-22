@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.41.1
+
+* Add Arabic translations for multi-branch support
+
 ## 0.41.0
 
 * Update ZATCA Business Settings and add checkbox `Enable Branch Configuration`.
