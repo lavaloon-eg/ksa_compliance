@@ -58,6 +58,7 @@ class ZATCABusinessSettings(Document):
         csr: DF.SmallText | None
         currency: DF.Link
         district: DF.Data | None
+        enable_branch_configuration: DF.Check
         enable_zatca_integration: DF.Check
         fatoora_server: DF.Literal['Sandbox', 'Simulation', 'Production']
         java_home: DF.Data | None
@@ -102,7 +103,6 @@ class ZATCABusinessSettings(Document):
             'Zero rated goods || Private healthcare to citizen',
             'Zero rated goods || Supply of qualified military goods',
         ]
-
     # end: auto-generated types
 
     def after_insert(self):
@@ -296,6 +296,14 @@ class ZATCABusinessSettings(Document):
         return bool(
             frappe.db.get_value(
                 'ZATCA Business Settings', filters={'company': company_id, 'enable_zatca_integration': True}
+            )
+        )
+
+    @staticmethod
+    def is_branch_config_enabled(company_id: str) -> bool:
+        return bool(
+            frappe.db.get_value(
+                'ZATCA Business Settings', filters={'company': company_id, 'enable_branch_configuration': True}
             )
         )
 

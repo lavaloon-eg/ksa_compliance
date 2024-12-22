@@ -4,13 +4,15 @@ from typing import cast, Optional
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from erpnext.setup.doctype.branch.branch import Branch
 from frappe.model.document import Document
 from frappe.utils import get_date_str, get_time, strip, flt
-
 from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.standard_doctypes.tax_category import map_tax_category
+from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
 
 
 def append_tax_details_into_item_lines(item_lines: list, is_tax_included: bool) -> list:
@@ -103,6 +105,31 @@ class Einvoice:
         self.business_settings_doc = ZATCABusinessSettings.for_invoice(
             self.sales_invoice_doc.name, sales_invoice_additional_fields_doc.invoice_doctype
         )
+
+        self.branch_doc = None
+        if self.business_settings_doc.enable_branch_configuration:
+            if not self.sales_invoice_doc.branch:
+                fthrow(
+                    msg=ft('Branch is mandatory when ZATCA Branch configuration is enabled.'),
+                    title=ft('Branch Is Mandatory'),
+                )
+
+            self.branch_doc = cast(
+                Branch,
+                frappe.get_doc(
+                    'Branch',
+                    self.sales_invoice_doc.branch,
+                ),
+            )
+            if self.branch_doc.custom_company != self.sales_invoice_doc.company:
+                fthrow(
+                    msg=ft(
+                        'Selected branch $branch is not configured for company: $company.',
+                        branch=self.sales_invoice_doc.branch,
+                        company=self.sales_invoice_doc.company,
+                    ),
+                    title=ft('Invalid Branch For Company'),
+                )
 
         # Get Business Settings and Seller Fields
         self.get_business_settings_and_seller_details()
@@ -479,27 +506,50 @@ class Einvoice:
 
     def get_business_settings_and_seller_details(self):
         # TODO: special validations handling
-        self.get_list_value(
-            field_name='other_ids',
-            source_doc=self.business_settings_doc,
-            xml_name='party_identifications',
+        has_branch_address = False
+        if self.branch_doc:
+            if self.branch_doc.custom_company_address:
+                has_branch_address = True
+
+            party_identification = self.get_list_value(
+                field_name='custom_branch_ids',
+                source_doc=self.branch_doc,
+                xml_name='party_identifications',
+                parent='seller_details',
+            )
+            if not party_identification:
+                fthrow(
+                    msg=ft(
+                        'Commercial registration number is mandatory for branch $branch.',
+                        branch=self.sales_invoice_doc.branch,
+                    ),
+                    title=ft('Mandatory CRN Error'),
+                )
+        else:
+            self.get_list_value(
+                field_name='other_ids',
+                source_doc=self.business_settings_doc,
+                xml_name='party_identifications',
+                parent='seller_details',
+            )
+
+        self.get_text_value(
+            field_name='custom_street' if has_branch_address else 'street',
+            source_doc=self.branch_doc if has_branch_address else self.business_settings_doc,
+            xml_name='street_name',
             parent='seller_details',
         )
 
         self.get_text_value(
-            field_name='street', source_doc=self.business_settings_doc, xml_name='street_name', parent='seller_details'
-        )
-
-        self.get_text_value(
-            field_name='additional_street',
-            source_doc=self.business_settings_doc,
+            field_name='custom_additional_street' if has_branch_address else 'additional_street',
+            source_doc=self.branch_doc if has_branch_address else self.business_settings_doc,
             xml_name='additional_street_name',
             parent='seller_details',
         )
 
         self.get_text_value(
-            field_name='building_number',
-            source_doc=self.business_settings_doc,
+            field_name='custom_building_number' if has_branch_address else 'building_number',
+            source_doc=self.branch_doc if has_branch_address else self.business_settings_doc,
             xml_name='building_number',
             parent='seller_details',
         )
@@ -512,12 +562,15 @@ class Einvoice:
         )
 
         self.get_text_value(
-            field_name='city', source_doc=self.business_settings_doc, xml_name='city_name', parent='seller_details'
+            field_name='custom_city' if has_branch_address else 'city',
+            source_doc=self.branch_doc if has_branch_address else self.business_settings_doc,
+            xml_name='city_name',
+            parent='seller_details',
         )
 
         self.get_text_value(
-            field_name='postal_code',
-            source_doc=self.business_settings_doc,
+            field_name='custom_postal_code' if has_branch_address else 'postal_code',
+            source_doc=self.branch_doc if has_branch_address else self.business_settings_doc,
             xml_name='postal_zone',
             parent='seller_details',
         )
@@ -530,8 +583,8 @@ class Einvoice:
         )
 
         self.get_text_value(
-            field_name='district',
-            source_doc=self.business_settings_doc,
+            field_name='custom_district' if has_branch_address else 'district',
+            source_doc=self.branch_doc if has_branch_address else self.business_settings_doc,
             xml_name='city_subdivision_name',
             parent='seller_details',
         )

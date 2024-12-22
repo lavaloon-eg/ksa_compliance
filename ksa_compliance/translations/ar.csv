@@ -271,3 +271,14 @@ Invoice ID, رقم الفاتورة,
 Subtotal Before Tax, المجموع الفرعي قبل الضريبة,
 Total Taxable Amount, إجمالي المبلغ الخاضع للضريبة,
 Return/Debit Reason, سبب المرتجع/الخصم,
+Branch is mandatory when ZATCA Branch configuration is enabled, الفرع إلزامي عند تفعيل إعدادات الفرع لمؤسسة الزكاة و الدخل
+Branch Is Mandatory, الفرع إلزامي
+Selected branch $branch is not configured for company: $company, الفرع $branch لا ينتمي إلى الشركة: $company
+Invalid Branch For Company, الفرع المحدد لا يتبع الشركة.
+Commercial registration number is mandatory for branch, رقم السجل التجاري إلزامي للفرع
+Mandatory CRN Error, رقم السجل التجاري (CRN) إلزامي
+Mandatory CRN, رقم السجل التجاري (CRN) إلزامي
+CRN is mandatory when ZATCA branch configuration is enabled for company, رقم السجل التجاري (CRN) إلزامي عندما تكون إعدادات الفرع الخاصة بـ مؤسسة الزكاة والدخل مفعلة للشركة.
+This CRN is configured for branch, رقم السجل التجاري (CRN) هذا مُعد للفرع.
+Duplicate CRN Error, خطأ: رقم السجل التجاري (CRN) مكرر.
+

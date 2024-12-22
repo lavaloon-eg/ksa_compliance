@@ -8,6 +8,20 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.41.1
+
+* Add Arabic translations for multi-branch support
+
+## 0.41.0
+
+* Update ZATCA Business Settings and add checkbox `Enable Branch Configuration`.
+* Update Branch doctype add fields for
+  * Company
+  * Address
+  * Branch Commercial Registration Number (CRN)
+* When enabling this configuration sales invoice will not be submittable without a branch specified in the sales invoice, 
+this requires manual configuration of an accounting dimension for branch and company.
+
 ## 0.40.1
 
 * Fix `TaxAmount` rounding in XML if system precision > 2.

@@ -56,6 +56,8 @@ class SalesInvoiceAdditionalFields(Document):
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
         amended_from: DF.Link | None
+        branch: DF.Link | None
+        branch_commercial_registration_number: DF.Data | None
         buyer_additional_number: DF.Data | None
         buyer_additional_street_name: DF.Data | None
         buyer_building_number: DF.Data | None
@@ -186,6 +188,9 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_type_transaction = '0100000' if self._get_invoice_type(settings) == 'Standard' else '0200000'
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
         self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
+
+        if settings.enable_branch_configuration:
+            self._set_branch_details(sales_invoice)
 
         self._prepare_for_zatca(settings)
 
@@ -456,6 +461,20 @@ class SalesInvoiceAdditionalFields(Document):
             ),
         )
         integration_doc.insert(ignore_permissions=True)
+
+    def _set_branch_details(self, invoice: SalesInvoice | POSInvoice):
+        if invoice.branch:
+            self.branch = invoice.branch
+            self.branch_commercial_registration_number = frappe.get_value(
+                'Additional Seller IDs',
+                {
+                    'parent': self.branch,
+                    'parenttype': 'Branch',
+                    'parentfield': 'custom_branch_ids',
+                    'type_code': 'CRN',
+                },
+                'value',
+            )
 
     @property
     def qr_image_src(self) -> str | None:
