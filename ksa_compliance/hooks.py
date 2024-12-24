@@ -65,7 +65,11 @@ doctype_js = {
 
 # add methods and filters to jinja environment
 jinja = {
-    'methods': ['ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice', 'frappe.utils.data.rounded'],
+    'methods': [
+        'ksa_compliance.jinja.get_zatca_phase_1_qr_for_invoice',
+        'frappe.utils.data.rounded',
+        'ksa_compliance.jinja.get_phase_2_print_format_details',
+    ],
 }
 
 # Installation
