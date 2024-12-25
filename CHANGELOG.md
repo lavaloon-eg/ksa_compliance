@@ -7,9 +7,13 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+
+## 0.41.2
+
 * Update ZATCA Phase 2 Print Format for both Sales Invoice and POS Invoice.
   * Consider missing seller and buyer other ids.
   * Consider New Feature `Enable Branch Configuration` to display branch CRN and Address.
+
 ## 0.41.1
 
 * Add Arabic translations for multi-branch support
