@@ -33,19 +33,11 @@ A free and open-source Frappe application for KSA Compliance (ZATCA Integration)
 -   **Self Hosting:**
 
 ```
-bench get-app git@github.com:lavaloon-eg/ksa_compliance.git --branch master
+bench get-app --branch master https://github.com/lavaloon-eg/ksa_compliance.git
 ```
 
 ```
 bench setup requirements
-```
-
-```
-bench build --app ksa_compliance
-```
-
-```
-bench restart
 ```
 
 ```
@@ -56,31 +48,38 @@ bench  --site [your.site.name] install-app ksa_compliance
 bench  --site [your.site.name] migrate
 ```
 
+```
+bench restart
+```
+
+
 ### Support
 
 ### Frappe Cloud:
 
--   If you are hosting on FC premium support is available
+- If you are hosting on FC premium support is available
 
 ### Self Hosting:
 
--   If you need premium support please email : Info@lavaloon.com
+- If you need premium support please email: Info@lavaloon.com
 
 ### Community Support:
 
--   Available in GitHub discussions <https://github.com/lavaloon-eg/ksa_compliance/discussions>
+- Available in GitHub discussions <https://github.com/lavaloon-eg/ksa_compliance/discussions>
 
 ### New Features and Bug report:
 
--   Please Create Github Issue <https://github.com/lavaloon-eg/ksa_compliance/issues> after checking the existing issues
--   For paid features, you can email us : <info@lavaloon.com>
+- Please Create Github Issue <https://github.com/lavaloon-eg/ksa_compliance/issues> after checking the existing issues
+  - Please include bench information (i.e. output of `bench version`)
+  - For invoice rejections, please attach or paste the generated invoice XML (from `Sales Invoice Additional Fields`), any validation warnings/errors, and screenshots of the `Sales Invoice` document
+- For paid features, you can email us: <info@lavaloon.com>
 
 ### **Contributing**
 
 Will using this the same guidelines from ERPNext
 
-1.  [**Issue Guidelines**](https://github.com/frappe/erpnext/wiki/Issue-Guidelines "https://github.com/frappe/erpnext/wiki/issue-guidelines")
-2.  [**Pull Request Requirements**](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines "https://github.com/frappe/erpnext/wiki/contribution-guidelines")
+1. [**Issue Guidelines**](https://github.com/frappe/erpnext/wiki/Issue-Guidelines "https://github.com/frappe/erpnext/wiki/issue-guidelines")
+2. [**Pull Request Requirements**](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines "https://github.com/frappe/erpnext/wiki/contribution-guidelines")
 
 ### License
 
