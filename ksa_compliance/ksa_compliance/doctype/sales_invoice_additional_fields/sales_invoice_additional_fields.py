@@ -8,11 +8,12 @@ import uuid
 from io import BytesIO
 from typing import cast, Optional, Literal
 
+import pyqrcode
 from pypdf import PdfWriter
+from result import is_err, Result, Err, Ok, is_ok
 
 import frappe
 import frappe.utils.background_jobs
-import pyqrcode
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.selling.doctype.customer.customer import Customer
@@ -21,8 +22,6 @@ from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from frappe.utils import now_datetime, get_link_to_form, strip
-from result import is_err, Result, Err, Ok, is_ok
-
 from frappe.utils.pdf import get_file_data_from_writer
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
@@ -38,6 +37,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_preco
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
+from ksa_compliance.zatca_cli import convert_to_pdf_a3_b
 
 # These are the possible statuses resulting from a submission to ZATCA. Note that this is a subset of
 # [SalesInvoiceAdditionalFields.integration_status]
@@ -574,9 +574,10 @@ def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
 
 
 @frappe.whitelist()
-def download_pdf_a(id: str):
+def download_zatca_pdf(id: str):
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     sales_invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', siaf.sales_invoice))
+    settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     pdf_writer = PdfWriter()
     pdf_writer = frappe.get_print(
         'Sales Invoice',
@@ -586,20 +587,15 @@ def download_pdf_a(id: str):
         as_pdf=True,
         output=pdf_writer,
     )
-    metadata = {
-        '/Title': 'Sample PDF',
-        '/Author': 'Test',
-        '/Subject': 'Testing PDF/A compliance',
-        '/Keywords': 'PDF, PyPDF, PDF/A',
-    }
-    pdf_writer.add_metadata(metadata)
-    xml_name = siaf.name + '.xml'
+
     xml_content = siaf.get_signed_xml()
-    pdf_writer.add_attachment(xml_name, xml_content)
     pdf_file = get_file_data_from_writer(pdf_writer)
-    # convert using CLI
+    zatca_pdf_path = convert_to_pdf_a3_b(settings.zatca_cli_path, settings.java_home, pdf_file, xml_content)
+
+    with open(zatca_pdf_path, 'rb') as f:
+        pdf_content = f.read()
 
     frappe.response.filename = f'{siaf.name}_a.pdf'
-    frappe.response.filecontent = pdf_file
+    frappe.response.filecontent = pdf_content
     frappe.response.type = 'download'
     frappe.response.display_content_as = 'attachment'

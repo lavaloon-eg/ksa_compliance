@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from json import JSONDecodeError
 from typing import cast, List, NoReturn, Optional
 
+from result import is_err
+
 import frappe
 
 # noinspection PyProtectedMember
 from frappe import _
-from result import is_err
-
 from ksa_compliance import logger
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
@@ -283,5 +283,25 @@ def write_temp_file(content: str, name: str) -> str:
     return path
 
 
+def write_binary_temp_file(content: bytes, name: str) -> str:
+    path = get_temp_path(name)
+    with open(path, 'wb+') as file:
+        file.write(content)
+    return path
+
+
 def get_temp_path(name: str) -> str:
     return tempfile.mktemp(suffix='-' + name)
+
+
+def convert_to_pdf_a3_b(zatca_cli_path: str, java_home: Optional[str], input_file: bytes, xml_file: str) -> str:
+    pdf = write_binary_temp_file(input_file, 'invoice-1.pdf')
+    invoice_xml = write_temp_file(xml_file, 'invoice-1.xml')
+
+    result = run_command(
+        zatca_cli_path,
+        ['convert-pdf', '-i', pdf, '-xml', invoice_xml],
+        java_home=java_home,
+    )
+    result.throw_if_failure()
+    return result.data.get('filePath')

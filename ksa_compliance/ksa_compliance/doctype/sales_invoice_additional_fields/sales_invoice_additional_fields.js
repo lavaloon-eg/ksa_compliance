@@ -10,6 +10,9 @@ frappe.ui.form.on("Sales Invoice Additional Fields", {
     download_xml: function (frm) {
         window.open("/api/method/ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields.download_xml?id=" + frm.doc.name);
     },
+    download_zatca_pdf: function (frm) {
+        window.open("/api/method/ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields.download_zatca_pdf?id=" + frm.doc.name);
+    }
 });
 
 async function fix_rejection(frm) {
