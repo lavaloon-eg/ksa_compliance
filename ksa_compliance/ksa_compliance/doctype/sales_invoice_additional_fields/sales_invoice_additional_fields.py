@@ -578,8 +578,16 @@ def download_zatca_pdf(id: str):
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     sales_invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', siaf.sales_invoice))
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
+    xml_content = siaf.get_signed_xml()
     pdf_writer = PdfWriter()
-    pdf_writer = frappe.get_print(
+    pdf_writer.add_metadata(
+        {
+            '/Author': settings.company,
+            '/Title': siaf.sales_invoice,
+            '/Subject': siaf.sales_invoice,
+        }
+    )
+    frappe.get_print(
         'Sales Invoice',
         siaf.sales_invoice,
         'ZATCA Phase 2 Print Format',
@@ -587,15 +595,16 @@ def download_zatca_pdf(id: str):
         as_pdf=True,
         output=pdf_writer,
     )
-
-    xml_content = siaf.get_signed_xml()
     pdf_file = get_file_data_from_writer(pdf_writer)
-    zatca_pdf_path = convert_to_pdf_a3_b(settings.zatca_cli_path, settings.java_home, pdf_file, xml_content)
+
+    zatca_pdf_path = convert_to_pdf_a3_b(
+        settings.zatca_cli_path, settings.java_home, siaf.sales_invoice, pdf_file, xml_content
+    )
 
     with open(zatca_pdf_path, 'rb') as f:
         pdf_content = f.read()
 
-    frappe.response.filename = f'{siaf.name}_a.pdf'
+    frappe.response.filename = f'{siaf.sales_invoice}_a3b.pdf'
     frappe.response.filecontent = pdf_content
     frappe.response.type = 'download'
     frappe.response.display_content_as = 'attachment'

@@ -294,14 +294,17 @@ def get_temp_path(name: str) -> str:
     return tempfile.mktemp(suffix='-' + name)
 
 
-def convert_to_pdf_a3_b(zatca_cli_path: str, java_home: Optional[str], input_file: bytes, xml_file: str) -> str:
-    pdf = write_binary_temp_file(input_file, 'invoice-1.pdf')
-    invoice_xml = write_temp_file(xml_file, 'invoice-1.xml')
+def convert_to_pdf_a3_b(
+    zatca_cli_path: str, java_home: Optional[str], invoice_id: str, pdf_content: bytes, xml_content: str
+) -> str:
+    pdf = write_binary_temp_file(pdf_content, f'{invoice_id}.pdf')
+    invoice_xml = write_temp_file(xml_content, f'{invoice_id}.xml')
 
     result = run_command(
         zatca_cli_path,
-        ['convert-pdf', '-i', pdf, '-xml', invoice_xml],
+        ['convert-pdf', '-i', invoice_id, '-x', invoice_xml, pdf],
         java_home=java_home,
     )
+    logger.info(result.msg)
     result.throw_if_failure()
-    return result.data.get('filePath')
+    return result.data['filePath']
