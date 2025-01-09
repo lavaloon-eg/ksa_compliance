@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from json import JSONDecodeError
 from typing import cast, List, NoReturn, Optional
 
+import semantic_version
 from result import is_err
 
 import frappe
@@ -19,7 +20,7 @@ from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
 from ksa_compliance.zatca_files import get_csr_path, get_private_key_path, get_zatca_tool_path
 
-DEFAULT_CLI_VERSION = '2.4.0'
+DEFAULT_CLI_VERSION = '2.5.0'
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
 DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
 
@@ -122,6 +123,18 @@ def check_validation_details_support(zatca_cli_path: str, java_home: Optional[st
         if is_supported
         else ft('Please update ZATCA CLI to 2.1.0 or later to support blocking on validation'),
     }
+
+
+def check_pdfa3b_support_or_throw(zatca_cli_path: str, java_home: Optional[str]) -> None:
+    """Checks whether PDF/A-3b support is available (version 2.5.0+). Throws a frappe error if it's not supported"""
+    result = run_command(zatca_cli_path, ['-v'], java_home=java_home)
+    result.throw_if_failure()
+    if result.data and 'version' in result.data:
+        version = semantic_version.Version(result.data['version'])
+        if version >= semantic_version.Version('2.5.0'):
+            return
+
+    fthrow(ft('Please update ZATCA CLI to $version or later to support PDF/A-3b generation', version='2.5.0'))
 
 
 @frappe.whitelist()
