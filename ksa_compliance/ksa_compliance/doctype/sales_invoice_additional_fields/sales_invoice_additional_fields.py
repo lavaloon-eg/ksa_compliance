@@ -19,6 +19,8 @@ from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from frappe.utils import now_datetime, get_link_to_form, strip
+from frappe.utils.pdf import get_file_data_from_writer
+from pypdf import PdfWriter
 from result import is_err, Result, Err, Ok, is_ok
 
 from ksa_compliance import logger
@@ -35,6 +37,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_preco
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
+from ksa_compliance.zatca_cli import convert_to_pdf_a3_b, check_pdfa3b_support_or_throw
 
 # These are the possible statuses resulting from a submission to ZATCA. Note that this is a subset of
 # [SalesInvoiceAdditionalFields.integration_status]
@@ -568,3 +571,47 @@ def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
     result = doc.submit_to_zatca()
     message = result.ok_value if is_ok(result) else result.err_value
     logger.info(f'Submission result: {message}')
+
+
+@frappe.whitelist()
+def check_pdf_a3b_support(id: str):
+    siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
+    settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
+    check_pdfa3b_support_or_throw(settings.zatca_cli_path, settings.java_home)
+
+
+@frappe.whitelist()
+def download_zatca_pdf(id: str):
+    siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
+    sales_invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', siaf.sales_invoice))
+    settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
+    xml_content = siaf.get_signed_xml()
+    pdf_writer = PdfWriter()
+    pdf_writer.add_metadata(
+        {
+            '/Author': settings.company,
+            '/Title': siaf.sales_invoice,
+            '/Subject': siaf.sales_invoice,
+        }
+    )
+    frappe.get_print(
+        'Sales Invoice',
+        siaf.sales_invoice,
+        'ZATCA Phase 2 Print Format',
+        doc=sales_invoice_doc,
+        as_pdf=True,
+        output=pdf_writer,
+    )
+    pdf_file = get_file_data_from_writer(pdf_writer)
+
+    zatca_pdf_path = convert_to_pdf_a3_b(
+        settings.zatca_cli_path, settings.java_home, siaf.sales_invoice, pdf_file, xml_content
+    )
+
+    with open(zatca_pdf_path, 'rb') as f:
+        pdf_content = f.read()
+
+    frappe.response.filename = f'{siaf.sales_invoice}_a3b.pdf'
+    frappe.response.filecontent = pdf_content
+    frappe.response.type = 'download'
+    frappe.response.display_content_as = 'attachment'

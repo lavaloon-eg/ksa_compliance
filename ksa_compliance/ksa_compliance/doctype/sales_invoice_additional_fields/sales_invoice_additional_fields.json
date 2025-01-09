@@ -91,6 +91,7 @@
   "xml_section",
   "invoice_xml",
   "download_xml",
+  "download_zatca_pdf",
   "tab_4_tab",
   "validation_section",
   "validation_messages",
@@ -630,6 +631,11 @@
    "label": "Branch",
    "options": "Branch",
    "read_only": 1
+  },
+  {
+   "fieldname": "download_zatca_pdf",
+   "fieldtype": "Button",
+   "label": "Download ZATCA PDF"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -640,7 +646,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2024-12-19 00:15:37.500408",
+ "modified": "2025-01-08 12:49:11.955579",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",

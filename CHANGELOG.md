@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add support to generate PDF/A-3b for invoices
+  * Uses ZATCA CLI 2.5.0
+
 ## 0.41.2
 
 * Update ZATCA Phase 2 Print Format for both Sales Invoice and POS Invoice.
