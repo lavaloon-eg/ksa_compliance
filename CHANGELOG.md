@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.42.0
+
 * Add support to generate PDF/A-3b for invoices
   * Uses ZATCA CLI 2.5.0
 
