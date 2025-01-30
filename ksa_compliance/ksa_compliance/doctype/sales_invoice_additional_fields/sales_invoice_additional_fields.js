@@ -61,25 +61,3 @@ async function fix_rejection(frm) {
     }, () => {
     });
 }
-
-async function get_print_format_and_lang() {
-    let fields = [
-        {
-            label: 'Print Format',
-            fieldname: 'print_format',
-            fieldtype: 'Link',
-            options: 'Print Format',
-            reqd: 1,
-        },
-        {
-            label: 'Language',
-            fieldname: 'lang',
-            fieldtype: 'Link',
-            options: 'Language',
-            reqd: 1,
-        }
-    ];
-    const values = await frappe.prompt(fields, values)
-    console.log(values)
-    return values
-}
