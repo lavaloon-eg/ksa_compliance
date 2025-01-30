@@ -18,6 +18,7 @@ from frappe import _
 from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
+from frappe.translate import print_language
 from frappe.utils import now_datetime, get_link_to_form, strip
 from frappe.utils.pdf import get_file_data_from_writer
 from pypdf import PdfWriter
@@ -581,7 +582,7 @@ def check_pdf_a3b_support(id: str):
 
 
 @frappe.whitelist()
-def download_zatca_pdf(id: str):
+def download_zatca_pdf(id: str, print_format: str = 'ZATCA Phase 2 Print Format', lang: str = 'en'):
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     sales_invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', siaf.sales_invoice))
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
@@ -594,14 +595,15 @@ def download_zatca_pdf(id: str):
             '/Subject': siaf.sales_invoice,
         }
     )
-    frappe.get_print(
-        'Sales Invoice',
-        siaf.sales_invoice,
-        'ZATCA Phase 2 Print Format',
-        doc=sales_invoice_doc,
-        as_pdf=True,
-        output=pdf_writer,
-    )
+    with print_language(lang):
+        frappe.get_print(
+            'Sales Invoice',
+            siaf.sales_invoice,
+            print_format,
+            doc=sales_invoice_doc,
+            as_pdf=True,
+            output=pdf_writer,
+        )
     pdf_file = get_file_data_from_writer(pdf_writer)
 
     zatca_pdf_path = convert_to_pdf_a3_b(
