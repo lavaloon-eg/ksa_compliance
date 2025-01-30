@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support selecting Print Format and Language when downloading PDF/A-3b.
+
 ## 0.42.0
 
 * Add support to generate PDF/A-3b for invoices
