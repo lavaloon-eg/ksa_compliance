@@ -65,7 +65,7 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
             'tax_amount': item['tax_amount'],
             'tax_percent': item['tax_percent'],
             'taxable_amount': item['net_amount'],
-            'items_total_amount': item['amount'],
+            'total_discount': item['amount'] - item['net_amount'],
         }
         if item_tax_category.reason_code:
             item['tax_exemption_reason_code'] = item_tax_category.reason_code
@@ -78,12 +78,9 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
         if key in unique_tax_categories:
             unique_tax_categories[key]['tax_amount'] += item_tax_category_details['tax_amount']
             unique_tax_categories[key]['taxable_amount'] += item_tax_category_details['taxable_amount']
-            unique_tax_categories[key]['items_total_amount'] += item_tax_category_details['items_total_amount']
+            unique_tax_categories[key]['total_discount'] += item_tax_category_details['total_discount']
         else:
             unique_tax_categories[key] = item_tax_category_details
-
-    for key, val in unique_tax_categories.items():
-        unique_tax_categories[key]['discount_per_category'] = val['items_total_amount'] - val['taxable_amount']
 
     return list(unique_tax_categories.values())
 

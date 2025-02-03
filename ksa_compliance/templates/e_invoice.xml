@@ -149,7 +149,7 @@
     <cac:AllowanceCharge>
         <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
         <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
-        <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(tax_category.discount_per_category, 2) }}</cbc:Amount>
+        <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(tax_category.total_discount, 2) }}</cbc:Amount>
             <cac:TaxCategory>
                 <cbc:ID>{{ tax_category.tax_category_code }}</cbc:ID>
                 {% if tax_category.tax_percent %}
