@@ -7,7 +7,7 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
-
+* Consider multiple tax categories in invoice allowance amount.
 ## 0.43.0
 
 * Support selecting Print Format and Language when downloading PDF/A-3b.

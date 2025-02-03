@@ -145,11 +145,11 @@
         {% endif %}
     </cac:PaymentMeans>
     {% endif %}
+    {% for tax_category in invoice.tax_categories %}
     <cac:AllowanceCharge>
         <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
         <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
-        <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.allowance_total_amount, 2) }}</cbc:Amount>
-        {% for tax_category in invoice.tax_categories %}
+        <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(tax_category.total_discount, 2) }}</cbc:Amount>
             <cac:TaxCategory>
                 <cbc:ID>{{ tax_category.tax_category_code }}</cbc:ID>
                 {% if tax_category.tax_percent %}
@@ -167,8 +167,8 @@
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
             </cac:TaxCategory>
-        {% endfor %}
     </cac:AllowanceCharge>
+    {% endfor %}
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.total_taxes_and_charges or 0.0, 2) }}</cbc:TaxAmount>
         {% for tax_category in invoice.tax_categories %}
