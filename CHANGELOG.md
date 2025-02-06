@@ -8,6 +8,19 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.43.1
+
+* Consider multiple tax categories in invoice allowance amount.
+
+## 0.43.0
+
+* Support selecting Print Format and Language when downloading PDF/A-3b.
+
+## 0.42.0
+
+* Add support to generate PDF/A-3b for invoices
+  * Uses ZATCA CLI 2.5.0
+
 ## 0.41.2
 
 * Update ZATCA Phase 2 Print Format for both Sales Invoice and POS Invoice.

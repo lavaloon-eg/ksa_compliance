@@ -10,6 +10,35 @@ frappe.ui.form.on("Sales Invoice Additional Fields", {
     download_xml: function (frm) {
         window.open("/api/method/ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields.download_xml?id=" + frm.doc.name);
     },
+    download_zatca_pdf: async function (frm) {
+        await frappe.call({
+            method: 'ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields.check_pdf_a3b_support',
+            args: {
+                id: frm.doc.name,
+            }
+        })
+        let fields = [
+            {
+                label: 'Print Format',
+                fieldname: 'print_format',
+                fieldtype: 'Link',
+                options: 'Print Format',
+                reqd: 1,
+            },
+            {
+                label: 'Language',
+                fieldname: 'lang',
+                fieldtype: 'Link',
+                options: 'Language',
+                reqd: 1,
+            }
+        ];
+        frappe.prompt(fields, values => {
+            let print_format = values.print_format,
+                lang = values.lang
+            window.location.assign("/api/method/ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields.download_zatca_pdf?id=" + frm.doc.name + "&print_format=" + print_format + "&lang=" + lang);
+        })
+    }
 });
 
 async function fix_rejection(frm) {
