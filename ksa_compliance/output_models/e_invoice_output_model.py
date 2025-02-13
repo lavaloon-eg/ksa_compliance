@@ -657,8 +657,8 @@ class Einvoice:
         )
 
         self.get_text_value(
-            field_name='postal_code',
-            source_doc=self.business_settings_doc,
+            field_name='buyer_postal_code',
+            source_doc=self.additional_fields_doc,
             xml_name='postal_zone',
             parent='buyer_details',
         )

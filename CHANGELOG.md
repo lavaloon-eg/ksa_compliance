@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fetch buyer postal zone from SIAF.
+
 ## 0.43.1
 
 * Consider multiple tax categories in invoice allowance amount.
