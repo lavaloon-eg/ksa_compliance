@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fetch buyer’s postal zone from buyer details in SIAF instead of incorrectly using the seller’s postal zone.
+
 ## 0.43.1
 
 * Consider multiple tax categories in invoice allowance amount.
