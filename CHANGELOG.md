@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.44.0
+
 * Support multiple billing references for return invoices
   * Add `Return Against Additional References` custom field to sales invoice
   * The field has no ERPNext impact. The additional references are included in the XML for ZATCA
