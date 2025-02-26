@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast, Optional
+from typing import cast, Optional, List
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
@@ -10,6 +10,9 @@ from frappe.utils import get_date_str, get_time, strip, flt
 from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
+from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_return_against_reference import (
+    ZATCAReturnAgainstReference,
+)
 from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
@@ -764,26 +767,19 @@ class Einvoice:
             field_name='previous_invoice_hash', source_doc=self.additional_fields_doc, xml_name='pih', parent='invoice'
         )
 
-        # QR code is a separate step after mapping
-        # self.get_text_value(field_name="qr_code",
-        #                     source_doc=self.additional_fields_doc,
-        #                     xml_name="qr_code",
-        #                     parent="invoice")
-
-        # Stamp is a separate step after mapping
-        # self.get_text_value(field_name="crypto_graphic_stamp",
-        #                     source_doc=self.additional_fields_doc,
-        #                     xml_name="crypto_graphic_stamp",
-        #                     parent="invoice")
-
-        # TODO: Purchasing Order Exists
         if self.sales_invoice_doc.get('is_debit_note') or self.sales_invoice_doc.get('is_return'):
-            self.get_text_value(
-                field_name='return_against',
-                source_doc=self.sales_invoice_doc,
-                xml_name='billing_reference_id',
-                parent='invoice',
+            billing_references = []
+            if self.sales_invoice_doc.return_against:
+                billing_references.append(self.sales_invoice_doc.return_against)
+
+            additional_references = cast(
+                List[ZATCAReturnAgainstReference] | None,
+                self.sales_invoice_doc.get('custom_return_against_additional_references'),
             )
+            if additional_references:
+                billing_references.extend([ref.sales_invoice for ref in additional_references])
+
+            self.result['invoice']['billing_references'] = billing_references
 
         # FIXME: Contracting (contract ID)
         if self.sales_invoice_doc.get('contract_id'):
