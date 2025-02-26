@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support multiple billing references for return invoices
+  * Add `Return Against Additional References` custom field to sales invoice
+  * The field has no ERPNext impact. The additional references are included in the XML for ZATCA
+  * The field allows submitted non-return invoices for the same company/customer/supplier as the current invoice
+
 ## 0.43.2
 
 * Fetch buyer’s postal zone from buyer details in SIAF instead of incorrectly using the seller’s postal zone.

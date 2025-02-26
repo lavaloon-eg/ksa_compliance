@@ -16,13 +16,13 @@
         <cbc:ID>{{ invoice.purchase_order_reference | escape }}</cbc:ID>
     </cac:OrderReference>
     {% endif %}
-    {% if invoice.is_return or invoice.is_debit_note %}
+    {% for billing_reference in invoice.billing_references %}
     <cac:BillingReference>
         <cac:InvoiceDocumentReference>
-            <cbc:ID>{{ invoice.billing_reference_id | escape }}</cbc:ID>
+            <cbc:ID>{{ billing_reference | escape }}</cbc:ID>
         </cac:InvoiceDocumentReference>
     </cac:BillingReference>
-    {% endif %}
+    {% endfor %}
     <cac:AdditionalDocumentReference>
         <cbc:ID>ICV</cbc:ID>
         <cbc:UUID>{{ invoice.invoice_counter_value }}</cbc:UUID>
