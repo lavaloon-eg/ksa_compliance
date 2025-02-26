@@ -36,6 +36,7 @@ app_license = 'Copyright (c) 2023 LavaLoon'
 doctype_js = {
     'Customer': 'public/js/customer.js',
     'Branch': 'public/js/branch.js',
+    'Sales Invoice': 'public/js/sales_invoice.js',
 }
 
 # Svg Icons
