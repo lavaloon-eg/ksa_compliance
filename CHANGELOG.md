@@ -7,6 +7,9 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+## 0.45.0
+
+* Add `Return Aganist` in `ZATCA Phase 2 Print Format` for Debit & Credit Notes.
 
 ## 0.44.0
 
