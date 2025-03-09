@@ -5,4 +5,5 @@ from frappe.utils.logger import get_logger
 logger = get_logger('zatca', max_size=1_000_000)
 logger.setLevel(logging.INFO)
 
-__version__ = '0.44.0'
+
+__version__ = '0.45.0'
