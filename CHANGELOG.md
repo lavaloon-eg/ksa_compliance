@@ -8,10 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Display `Return Against Additional References` as return against with `Return Against` Field in print format.
+
 ## 0.45.0
 
 * Add `Return Against` in `ZATCA Phase 2 Print Format` for Debit & Credit Notes.
-* Display `Return Against Additional References` as return against with `Return Against` Field in print format.
 
 ## 0.44.0
 
