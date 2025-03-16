@@ -7,6 +7,11 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+
+* Use ZATCA CLI 2.6.0
+  * This fixes an issue with invoice ZATCA validation prior to submission
+  * Refer to the [CLI release](https://github.com/lavaloon-eg/zatca-cli/releases/tag/2.6.0) for details
+
 ## 0.45.0
 
 * Add `Return Aganist` in `ZATCA Phase 2 Print Format` for Debit & Credit Notes.
