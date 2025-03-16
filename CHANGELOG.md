@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.45.1
+
 * Use ZATCA CLI 2.6.0
   * This fixes an issue with invoice ZATCA validation prior to submission
   * Refer to the [CLI release](https://github.com/lavaloon-eg/zatca-cli/releases/tag/2.6.0) for details
