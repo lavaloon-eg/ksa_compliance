@@ -20,7 +20,7 @@ from ksa_compliance.translation import ft
 from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archive
 from ksa_compliance.zatca_files import get_csr_path, get_private_key_path, get_zatca_tool_path
 
-DEFAULT_CLI_VERSION = '2.6.0'
+DEFAULT_CLI_VERSION = '2.7.0'
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
 DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
 
