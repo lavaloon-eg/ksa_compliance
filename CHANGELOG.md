@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Support displaying `Return Against Additional References` in `ZATCA Phase 2 print format`.
+
 ## 0.46.0
 
 * Use ZATCA CLI 2.7.0
@@ -20,14 +22,7 @@ to a section with the version name.
 
 ## 0.45.0
 
-* Add `Return Aganist` in `ZATCA Phase 2 Print Format` for Debit & Credit Notes.
-
-## 0.44.0
-
-* Support multiple billing references for return invoices
-  * Add `Return Against Additional References` custom field to sales invoice
-  * The field has no ERPNext impact. The additional references are included in the XML for ZATCA
-  * The field allows submitted non-return invoices for the same company/customer/supplier as the current invoice
+* Add `Return Against` in `ZATCA Phase 2 Print Format` for Debit & Credit Notes.
 
 ## 0.44.0
 
