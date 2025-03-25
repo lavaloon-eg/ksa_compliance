@@ -8,7 +8,17 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Display `Return Against Additional References` as return against with `Return Against` Field in print format.
+* Support displaying `Return Against Additional References` in `ZATCA Phase 2 print format`.
+
+## 0.46.0
+
+* Use ZATCA CLI 2.7.0
+
+## 0.45.1
+
+* Use ZATCA CLI 2.6.0
+  * This fixes an issue with invoice ZATCA validation prior to submission
+  * Refer to the [CLI release](https://github.com/lavaloon-eg/zatca-cli/releases/tag/2.6.0) for details
 
 ## 0.45.0
 
