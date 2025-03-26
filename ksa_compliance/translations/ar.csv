@@ -285,6 +285,11 @@ Duplicate CRN Error,خطأ: رقم السجل التجاري (CRN) مكرر.
 Please update ZATCA CLI to $version or later to support PDF/A-3b generation,يرجى تحديث ZATCA CLI للإصدار $version أو إصدار لاحق لدعم توليد ملفات PDF/A-3b
 MOMRAH License,رخصة وزارة الشؤون البلدية
 MHRSD License,رخصة وزارة الموارد البشرية
-700 Number,رخصة 700
+700 Number,رخصة رقم 700
 MISA License,رخصة وزارة الاستثمار
-Other OD,معرفات أخري
+Other ID,معرفات أخري
+Tax Identification Number,رقم المعرف الضريبي
+National ID,رقم القومي
+GCC ID, هوية مجلس التعاون الخليجي
+Iqama, الإقامة
+Passport ID, جواز السفر

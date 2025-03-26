@@ -57,7 +57,7 @@ function add_other_ids_if_new(frm) {
         type_code: "PAS",
       },
       {
-        type_name: "Other OD",
+        type_name: "Other ID",
         type_code: "OTH",
       }
     );
