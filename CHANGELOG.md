@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.47.0
+
 * Support displaying `Return Against Additional References` in `ZATCA Phase 2 print format`.
 * Fix letter head in ZATCA print formats.
 * Add Additional IDs translation.
