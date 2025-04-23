@@ -108,7 +108,6 @@ class ZATCABusinessSettings(Document):
             'Zero rated goods || Private healthcare to citizen',
             'Zero rated goods || Supply of qualified military goods',
         ]
-
     # end: auto-generated types
 
     def after_insert(self):
