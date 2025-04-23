@@ -202,16 +202,20 @@
         {% if invoice.rounding_adjustment %}
         <cbc:PayableRoundingAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.rounding_adjustment, 2) }}</cbc:PayableRoundingAmount>
         {% endif %}
+        {% if prepayment_invoice %}
+            <cbc:PrepaidAmount currencyID="{{prepayment_invoice.currency}}" >{{ rounded(prepayment_invoice.prepaid_amount, 2)}}</cbc:PrepaidAmount>
+        {% endif %}
+
         <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.payable_amount, 2) }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     {% for item in invoice.item_lines %}
     <cac:InvoiceLine>
         <cbc:ID>{{ item.idx | int }}</cbc:ID>
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.amount, 2) }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.line_extension_amount, 2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
             <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.tax_amount or 0.0, 2)}}</cbc:TaxAmount>
-            <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.total_amount, 2) }}</cbc:RoundingAmount>
+            <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.rounding_amount, 2) }}</cbc:RoundingAmount>
         </cac:TaxTotal>
         <cac:Item>
             <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
@@ -230,7 +234,8 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.amount, 2) }}</cbc:PriceAmount>
+
+            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.amount_after_discount, 2) }}</cbc:PriceAmount>
             <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
             {% if item.discount_amount %}
             <cac:AllowanceCharge>
@@ -242,4 +247,61 @@
         </cac:Price>
     </cac:InvoiceLine>
     {% endfor %}
+
+    {% if prepayment_invoice %}
+        {% for row in prepayment_invoice.invoice_lines %}
+    <cac:InvoiceLine>
+        <cbc:ID>{{row.idx}}</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PCE">0.00</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="{{prepayment_invoice.currency}}">0.00</cbc:LineExtensionAmount>
+
+        <cac:DocumentReference>
+            <cbc:ID>{{row.document_reference.id | escape}}</cbc:ID>
+            <cbc:UUID>{{row.uuid}}</cbc:UUID>
+
+            <cbc:IssueDate>{{row.document_reference.issue_date}}</cbc:IssueDate>
+
+            <cbc:IssueTime>{{row.document_reference.issue_time}}</cbc:IssueTime>
+
+            <cbc:DocumentTypeCode>{{row.document_reference.document_type_code}}</cbc:DocumentTypeCode>
+
+        </cac:DocumentReference>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="{{prepayment_invoice.currency}}">0.00</cbc:TaxAmount>
+
+            <cbc:RoundingAmount currencyID="{{prepayment_invoice.currency}}">0.00</cbc:RoundingAmount>
+
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="{{prepayment_invoice.currency}}">{{rounded(row.tax_total.tax_subtotal.taxable_amount, 2)}}</cbc:TaxableAmount>
+
+                <cbc:TaxAmount currencyID="{{prepayment_invoice.currency}}">{{rounded(row.tax_total.tax_subtotal.tax_amount, 2)}}</cbc:TaxAmount>
+
+                <cac:TaxCategory>
+                    <cbc:ID>{{row.tax_total.tax_subtotal.tax_category_id}}</cbc:ID>
+
+                    <cbc:Percent>{{row.tax_total.tax_subtotal.tax_percent}}</cbc:Percent>
+
+                    <cac:TaxScheme>
+                        <cbc:ID>{{row.tax_total.tax_subtotal.tax_scheme}}</cbc:ID>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Name>{{row.item.name}}</cbc:Name>
+            <cac:ClassifiedTaxCategory>
+                <cbc:ID>{{row.item.tax_category}}</cbc:ID>
+                <cbc:Percent>{{row.item.tax_percent}}</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:ID>{{row.item.tax_scheme}}</cbc:ID>
+                </cac:TaxScheme>
+            </cac:ClassifiedTaxCategory>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="{{prepayment_invoice.currency}}">0.00</cbc:PriceAmount> 
+
+        </cac:Price>
+    </cac:InvoiceLine>
+        {% endfor %}
+    {% endif %}
 </Invoice>

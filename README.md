@@ -40,11 +40,11 @@ bench setup requirements
 ```
 
 ```
-bench  --site [your.site.name] install-app ksa_compliance
+bench  --site [your.site.name] install-app ksa_compliance
 ```
 
 ```
-bench  --site [your.site.name] migrate
+bench  --site [your.site.name] migrate
 ```
 
 ```
