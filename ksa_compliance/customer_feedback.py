@@ -1,23 +1,30 @@
 import json
-
+from typing import cast
 import frappe
 from frappe import _
 import os
+from ksa_compliance.ksa_compliance.doctype.zatca_feedback_settings.zatca_feedback_settings import ZATCAFeedbackSettings
 
 
-CONFIG = {
-    "RECIPIENT_EMAIL": ["Khloud.aboelhasan@lavaloon.com", "Amr.Ashraf@lavaloon.com"], # FIXME: This should be a setting
-    "MAX_FILE_SIZE_MB": 5,
-    "ALLOWED_FILE_TYPES": ['.pdf', '.png', '.jpeg', '.docx'],
-    "MAX_FILES": 3,
-    "MAX_DESCRIPTION_LENGTH": 500,
-    "CONTACT_CENTER_PAGE": "https://lavaloon.com/contact-us"
-}
+@frappe.whitelist(methods=["GET"])
+def get_feedback_settings():
+    """Get feedback settings from ZATCA Feedback Settings"""
+    settings = cast(ZATCAFeedbackSettings, frappe.get_doc("ZATCA Feedback Settings"))
+    return {
+        "RECIPIENT_EMAIL": [email.strip() for email in settings.recipient_emails.split(",")],
+        "MAX_FILE_SIZE_MB": settings.max_file_size_mb,
+        "ALLOWED_FILE_TYPES": ['.pdf', '.png', '.jpeg', '.docx'],
+        "MAX_FILES": settings.max_number_of_files,
+        "MAX_DESCRIPTION_LENGTH": 500,
+        "CONTACT_CENTER_PAGE": settings.lavaloon_contact_page
+    }
 
 @frappe.whitelist()
 def send_feedback_email(sender_email, subject, description, attachments=None):
     """Send feedback email using the default email account"""
     try:
+        CONFIG = get_feedback_settings()
+
         email_content = f"""
         <h3>Feedback Details</h3>
         <p><strong>Subject:</strong> {subject}</p>

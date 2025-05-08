@@ -230,12 +230,17 @@ function add_other_ids_if_new(frm) {
 async function show_feedback_dialog(title) {
     const uploaded_files = [];
 
+    const settings = await frappe.call({
+        method: 'ksa_compliance.customer_feedback.get_feedback_settings',
+        type: 'GET'
+    });
+
     const CONFIG = {
-        CONTACT_CENTER_PAGE: "https://lavaloon.com/contact-us",
-        MAX_DESCRIPTION_LENGTH: 500,
-        MAX_FILES: 3,
-        MAX_FILE_SIZE_MB: 5,
-        ALLOWED_FILE_TYPES: ['.pdf', '.png', '.jpeg', '.docx']
+        CONTACT_CENTER_PAGE: settings.message.CONTACT_CENTER_PAGE,
+        MAX_DESCRIPTION_LENGTH: settings.message.MAX_DESCRIPTION_LENGTH,
+        MAX_FILES: settings.message.MAX_FILES,
+        MAX_FILE_SIZE_MB: settings.message.MAX_FILE_SIZE_MB,
+        ALLOWED_FILE_TYPES: settings.message.ALLOWED_FILE_TYPES
     };
 
     const email_accounts = await frappe.db.get_list('Email Account', {

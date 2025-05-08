@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-08 17:57:06.580853",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "recipient_emails",
+  "column_break_eglv",
+  "lavaloon_contact_page",
+  "max_file_size_mb",
+  "max_number_of_files"
+ ],
+ "fields": [
+  {
+   "fieldname": "recipient_emails",
+   "fieldtype": "Small Text",
+   "label": "Recipient Emails",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eglv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lavaloon_contact_page",
+   "fieldtype": "Data",
+   "label": "LavaLoon Contact Page",
+   "options": "URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "max_file_size_mb",
+   "fieldtype": "Int",
+   "label": "Max File Size (MB)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "max_number_of_files",
+   "fieldtype": "Int",
+   "label": "Max Number of Files",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-05-08 18:40:43.774668",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Feedback Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
