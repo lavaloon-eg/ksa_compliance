@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add a feedback dialog to make it easier for users to give feedback.
+* Add new button in ZATCA Business Settings form to use the new feedback dialog.
+* Add Arabic and English translations for feedback-related words.
+* Add `Feedback and Links` in zatca workspace.
+
 ## 0.47.0
 
 * Support displaying `Return Against Additional References` in `ZATCA Phase 2 print format`.
@@ -69,7 +74,7 @@ to a section with the version name.
   * Company
   * Address
   * Branch Commercial Registration Number (CRN)
-* When enabling this configuration sales invoice will not be submittable without a branch specified in the sales invoice, 
+* When enabling this configuration sales invoice will not be submittable without a branch specified in the sales invoice,
 this requires manual configuration of an accounting dimension for branch and company.
 
 ## 0.40.1
@@ -140,7 +145,7 @@ this requires manual configuration of an accounting dimension for branch and com
 
 * CLI setup now grabs version 2.2.0
 
-# 0.35.0
+## 0.35.0
 
 * Fix handling of B2B customers
   * A B2B customer has a VAT or at least one of the other IDs (TIN, CRN, etc.)
@@ -150,12 +155,12 @@ this requires manual configuration of an accounting dimension for branch and com
   * When generating XML for ZATCA, we no longer include other IDs as a `CompanyID` inside the `PartyTaxScheme` because 
     it results in validation failure
 
-# 0.34.0
+## 0.34.0
 
 * Fix seller additional ids were returned empty in the xml if not filled.
 * Include buyer additional ids in case if no vat registration number is provided for the buyer.
 
-# 0.33.1
+## 0.33.1
 
 * Fix JRE extraction error if it was previously extracted
 
