@@ -293,3 +293,36 @@ National ID,الرقم القومي
 GCC ID, هوية مجلس التعاون الخليجي
 Iqama, الإقامة
 Passport ID, جواز السفر
+Submit Feedback,إرسال الملاحظات
+Subject,الموضوع
+Bug Report,تقرير خطأ
+Feature Request,طلب ميزة
+General Feedback,ملاحظات عامة
+Compliance Issue,مشكلة في الامتثال
+Other,أخرى
+Description,الوصف
+Attachments,المرفقات
+Submit,إرسال
+Cancel,إلغاء
+Upload max 3 files as image PDF or document up to 5MB each,تحميل بحد أقصى 3 ملفات كصورة أو PDF أو مستند حتى 5 ميجابايت لكل منها
+How was your experience configuring these settings?,كيف كانت تجربتك في تكوين هذه الإعدادات؟
+Please create a default outgoing email account,يرجى إنشاء حساب بريد إلكتروني صادر افتراضي
+Our Contact Center is here to help you with any questions or issues you may have.,مركز الاتصال لدينا هنا لمساعدتك في أي أسئلة أو مشكلات قد تواجهها
+Description must be less than {0} characters,يجب أن يكون الوصف أقل من {0} حرفًا
+Maximum {0} characters,الحد الأقصى {0} حرف
+Feedback dialog will not be shown again for this document.,لن يتم عرض مربع حوار الملاحظات مرة أخرى لهذا المستند
+Failed to save preference. Please try again.,فشل في حفظ التفضيل. يرجى المحاولة مرة أخرى
+Failed to submit feedback. Please try again.,فشل في إرسال الملاحظات. يرجى المحاولة مرة أخرى
+Don't Show Again,لا تظهر مرة أخرى
+Please select a subject,يرجى اختيار موضوع
+Please provide a description,يرجى تقديم وصف
+Please upload a file,يرجى تحميل ملف
+Please wait...,يرجى الانتظار...
+Submitting...,جاري الإرسال...
+An error occurred while submitting your feedback: {0},حدث خطأ أثناء إرسال ملاحظاتك: {0}
+"Upload up to {0} files (PDF, PNG, JPEG, DOCX), max {1}MB each",تحميل حتى {0} ملفات (PDF، PNG، JPEG، DOCX)، بحد أقصى {1} ميجابايت لكل منها
+File uploaded: {0},تم تحميل الملف: {0}
+Failed to upload file: {0},فشل في تحميل الملف: {0}
+Set all private,تعيين كل ملفات خاصة
+Set all public,تعيين كل ملفات عامة
+Upload Files,تحميل الملفات
