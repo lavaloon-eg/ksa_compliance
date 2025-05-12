@@ -7,6 +7,8 @@ Add changes to the "Unreleased Changes" section. Once you create a version (and 
 to a section with the version name.
 
 ## Unreleased Changes
+* Prevent manual submission of `Sales Invoice Additional Fields` where user can submit with the intent of resending it ([Issue](https://github.com/lavaloon-eg/ksa_compliance/issues/233))
+  * It should only be submitted by the hourly job or the sync page.
 
 ## 0.47.0
 
