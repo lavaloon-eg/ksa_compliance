@@ -326,3 +326,5 @@ Failed to upload file: {0},فشل في تحميل الملف: {0}
 Set all private,تعيين كل ملفات خاصة
 Set all public,تعيين كل ملفات عامة
 Upload Files,تحميل الملفات
+You cannot submit SIAF manually; if you want to resubmit it to ZATCA use $sync_invoices_page, لا يمكنك التسجيل يدويا; اذا كنت ترغب في اعادة تقديم الفاتورة الى  هيئة الزكاة استخدم $sync_invoices_page
+Sync Invoices Page, صفحة مزامنة الفواتير
