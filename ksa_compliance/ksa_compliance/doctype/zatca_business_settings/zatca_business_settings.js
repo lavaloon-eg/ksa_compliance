@@ -10,11 +10,6 @@ frappe.ui.form.on("ZATCA Business Settings", {
             ksa_compliance.feedback_dialog.show_feedback_dialog(__("Submit Feedback"));
         });
     },
-    after_save: function (frm) {
-        if (!ksa_compliance.feedback_dialog.should_skip_feedback_dialog(frm.doc.name)) {
-            ksa_compliance.feedback_dialog.show_feedback_dialog(__("How was your experience configuring these settings?"), true, frm.doc.name);
-        }
-    },
     company: function (frm) {
         filter_company_address(frm);
     },
@@ -160,8 +155,8 @@ frappe.ui.form.on("ZATCA Business Settings", {
             return;
         }
 
-        frappe.prompt(__('OTP'), ({ value }) => {
-            frappe.call({
+        frappe.prompt(__('OTP'), async ({ value }) => {
+            const result = await frappe.call({
                 freeze: true,
                 freeze_message: 'Please wait...',
                 method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.get_production_csid",
@@ -170,6 +165,10 @@ frappe.ui.form.on("ZATCA Business Settings", {
                     otp: value
                 },
             });
+
+            if (result.message) {
+                ksa_compliance.feedback_dialog.show_feedback_dialog(__("KSA Compliance Feedback"), true);
+            }
         });
     },
 });

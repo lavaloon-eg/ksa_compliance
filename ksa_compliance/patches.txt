@@ -1,6 +1,7 @@
 [pre_model_sync]
 # Patches added in this section will be executed before doctypes are migrated
 # Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
+ksa_compliance.patches._2025_05_11_add_feedback_links_block # 2025-05-11 14:41
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
@@ -14,4 +15,3 @@ ksa_compliance.patches._2024_07_08_set_siaf_is_latest
 ksa_compliance.patches._2024_08_19_update_old_fatoora_url_in_business_settings #2024-08-19 11:41
 ksa_compliance.patches._2024_09_04_delete_obsolete_print_formats
 ksa_compliance.patches._2024_09_18_migrate_zatca_files_under_site
-ksa_compliance.patches._2025_05_8_add_zatca_feedback_settings # 2025-05-08 18:40

@@ -319,7 +319,7 @@ Please provide a description,يرجى تقديم وصف
 Please upload a file,يرجى تحميل ملف
 Please wait...,يرجى الانتظار...
 Submitting...,جاري الإرسال...
-An error occurred while submitting your feedback: {0},حدث خطأ أثناء إرسال ملاحظاتك: {0}
+An error occurred while submitting your feedback,حدث خطأ أثناء إرسال ملاحظاتك
 "Upload up to {0} files (PDF, PNG, JPEG, DOCX), max {1}MB each",تحميل حتى {0} ملفات (PDF، PNG، JPEG، DOCX)، بحد أقصى {1} ميجابايت لكل منها
 File uploaded: {0},تم تحميل الملف: {0}
 Failed to upload file: {0},فشل في تحميل الملف: {0}
@@ -328,3 +328,7 @@ Set all public,تعيين كل ملفات عامة
 Upload Files,تحميل الملفات
 You cannot submit SIAF manually; if you want to resubmit it to ZATCA use $sync_invoices_page, لا يمكنك التسجيل يدويا; اذا كنت ترغب في اعادة تقديم الفاتورة الى  هيئة الزكاة استخدم $sync_invoices_page
 Sync Invoices Page, صفحة مزامنة الفواتير
+This feedback will be sent to the Application vendor.,سيتم إرسال الملاحظات إلى منتج التطبيق
+How was your experience configuring these settings?,كيف كانت تجربتك في ضبط الإعدادات؟
+Need help?,هل تحتاج المساعدة؟
+Visit our Help Center,تصفح مركز الدعم

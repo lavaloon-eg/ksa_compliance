@@ -9,13 +9,16 @@ from frappe.core.doctype.file.file import File
 @frappe.whitelist(methods=["GET"])
 def get_feedback_settings():
     """Get feedback settings from ZATCA Feedback Settings"""
+    email_accounts = frappe.db.get_list('Email Account', fields=["email_id"], filters={"default_outgoing": 1}, limit=1)
+
     settings_dict = {
         "RECIPIENT_EMAILS": ["ksa_compliance@lavaloon.com"],
         "LAVALOON_CONTACT_PAGE": "https://lavaloon.com/contact-us",
         "MAX_FILE_SIZE_MB": 5,
         "MAX_NUMBER_OF_FILES": 3,
         "ALLOWED_FILE_TYPES": ['.pdf', '.png', '.jpeg', '.docx'],
-        "MAX_DESCRIPTION_LENGTH": 500,
+        "MAX_DESCRIPTION_LENGTH": 1500,
+        "EMAIL_ACCOUNT": email_accounts[0].email_id if email_accounts else ""
     }
 
     return settings_dict

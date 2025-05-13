@@ -1,56 +1,18 @@
 frappe.provide('ksa_compliance.feedback_dialog');
 
 ksa_compliance.feedback_dialog = {
-    show_feedback_dialog: async function (title, is_after_save = false, document_name = '') {
+    show_feedback_dialog: async function (title, is_onboard_feedback = false) {
         const uploaded_files = [];
         const feedback_config = await this.get_feedback_configuration();
-        const default_email_account = await this.get_default_email_account();
+        const default_email_account = feedback_config.EMAIL_ACCOUNT;
 
         if (!default_email_account) {
             this.show_email_account_error(feedback_config.LAVALOON_CONTACT_PAGE);
             return;
         }
 
-        const dialog = this.create_feedback_dialog(title, feedback_config, uploaded_files, default_email_account, is_after_save, document_name);
+        const dialog = this.create_feedback_dialog(title, is_onboard_feedback, feedback_config, uploaded_files, default_email_account);
         dialog.show();
-    },
-
-    should_skip_feedback_dialog: function (document_name) {
-        try {
-            const ignored_documents = localStorage.getItem('ignore_feedback_popup_setting_ids');
-            if (!ignored_documents) return false;
-
-            return ignored_documents.split(',').includes(document_name);
-        } catch (error) {
-            console.error('Error checking ignored documents:', error);
-            return false;
-        }
-    },
-
-    add_to_ignored_documents: function (document_name) {
-        try {
-            const ignored_documents = localStorage.getItem('ignore_feedback_popup_setting_ids');
-            let ignored_documents_list = [];
-
-            if (ignored_documents) {
-                ignored_documents_list = ignored_documents.split(',');
-            }
-
-            if (!ignored_documents_list.includes(document_name)) {
-                ignored_documents_list.push(document_name);
-                localStorage.setItem('ignore_feedback_popup_setting_ids', ignored_documents_list.join(','));
-                frappe.show_alert({
-                    message: __('Feedback dialog will not be shown again for this document.'),
-                    indicator: 'green'
-                });
-            }
-        } catch (error) {
-            console.error('Error adding document to ignored list:', error);
-            frappe.show_alert({
-                message: __('Failed to save preference. Please try again.'),
-                indicator: 'red'
-            });
-        }
     },
 
     get_feedback_configuration: async function () {
@@ -62,60 +24,72 @@ ksa_compliance.feedback_dialog = {
         return response.message
     },
 
-    get_default_email_account: async function () {
-        const email_accounts = await frappe.db.get_list('Email Account', {
-            fields: ['email_id'],
-            filters: { default_outgoing: 1 },
-            limit: 1
-        });
-
-        return email_accounts.length > 0 ? email_accounts[0].email_id : '';
-    },
-
     show_email_account_error: function (contact_center_page) {
         frappe.msgprint(__("Please create a default outgoing email account"));
         frappe.msgprint(__("Our Contact Center is here to help you with any questions or issues you may have."));
         frappe.msgprint(__("<a href='{0}' target='_blank'>Contact Us</a>", [contact_center_page]));
     },
 
-    create_feedback_dialog: function (title, config, uploaded_files, default_email_account, is_after_save, document_name) {
+    create_feedback_dialog: function (title, is_onboard_feedback, config, uploaded_files, default_email_account) {
+        const fields = [
+            {
+                label: __("Subject"),
+                fieldname: "subject",
+                fieldtype: "Select",
+                reqd: 1,
+                options: [
+                    __("Bug Report"),
+                    __("Feature Request"),
+                    __("General Feedback"),
+                    __("Compliance Issue"),
+                    __("Other")
+                ]
+            },
+            {
+                label: __("Description"),
+                fieldname: "description",
+                fieldtype: "Text",
+                reqd: 1,
+                description: __("Maximum {0} characters", [config.MAX_DESCRIPTION_LENGTH])
+            },
+            {
+                fieldtype: "HTML",
+                fieldname: "external_link",
+                options: `
+                    <div style="margin-top: 10px; margin-bottom: 10px;">
+                        ${__("Need help?")}
+                        <a href="${config.LAVALOON_CONTACT_PAGE}" target="_blank" rel="noopener noreferrer">
+                            ${__("Visit our Help Center")}
+                        </a>.
+                    </div>
+                `
+            },
+            {
+                fieldtype: "Button",
+                fieldname: "upload_button",
+                label: __("Upload Files"),
+                click() {
+                    ksa_compliance.feedback_dialog.create_file_uploader(config, uploaded_files);
+                }
+            }
+        ];
+
+        if (is_onboard_feedback) {
+            fields.unshift({
+                fieldtype: "HTML",
+                fieldname: "onboard_feedback_message",
+                options: `
+                    <div style="margin-bottom: 10px; font-weight: 400;">
+                        ${__("This feedback will be sent to the Application vendor.")}<br>
+                        ${__("How was your experience configuring these settings?")}
+                    </div>
+                `
+            });
+        }
+
         const dialog = new frappe.ui.Dialog({
             title: title,
-            fields: [
-                {
-                    label: __("Subject"),
-                    fieldname: "subject",
-                    fieldtype: "Select",
-                    reqd: 1,
-                    options: [
-                        __("Bug Report"),
-                        __("Feature Request"),
-                        __("General Feedback"),
-                        __("Compliance Issue"),
-                        __("Other")
-                    ]
-                },
-                {
-                    label: __("Description"),
-                    fieldname: "description",
-                    fieldtype: "Text",
-                    reqd: 1,
-                    description: __("Maximum {0} characters", [config.MAX_DESCRIPTION_LENGTH])
-                },
-                {
-                    fieldtype: "HTML",
-                    fieldname: "upload_area",
-                    label: __("Attachments")
-                },
-                {
-                    fieldtype: "Button",
-                    fieldname: "upload_button",
-                    label: __("Upload Files"),
-                    click() {
-                        ksa_compliance.feedback_dialog.create_file_uploader(config, uploaded_files);
-                    }
-                }
-            ],
+            fields: fields,
             size: 'large',
             primary_action_label: __('Submit'),
             async primary_action(values) {
@@ -135,31 +109,18 @@ ksa_compliance.feedback_dialog = {
                     dialog.set_primary_action(__('Submit'), () => dialog.primary_action(values));
                 }
             },
-            secondary_action_label: is_after_save ? __("Don't Show Again") : __("Cancel"),
+            secondary_action_label: __("Cancel"),
             secondary_action: () => {
-                if (is_after_save) {
-                    ksa_compliance.feedback_dialog.add_to_ignored_documents(document_name);
-                }
                 dialog.hide();
             }
         });
 
         return dialog;
-    },
+    },    
 
     validate_feedback_submission: function (values, config) {
-        if (!values.subject) {
-            frappe.throw(__("Please select a subject"));
-            return false;
-        }
-
-        if (!values.description) {
-            frappe.throw(__("Please provide a description"));
-            return false;
-        }
-
         if (values.description.length > config.MAX_DESCRIPTION_LENGTH) {
-            frappe.throw(__("Description must be less than {0} characters", [config.MAX_DESCRIPTION_LENGTH]));
+            frappe.msgprint(__("Description must be less than {0} characters", [config.MAX_DESCRIPTION_LENGTH]));
             return false;
         }
 
@@ -219,7 +180,7 @@ ksa_compliance.feedback_dialog = {
             }
         } catch (error) {
             frappe.show_alert({
-                message: __("An error occurred while submitting your feedback: {0}", [error.message]),
+                message: __("An error occurred while submitting your feedback"),
                 indicator: 'red'
             });
             console.error(error);
