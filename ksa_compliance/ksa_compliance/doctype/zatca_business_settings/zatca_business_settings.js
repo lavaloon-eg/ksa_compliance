@@ -6,6 +6,9 @@ frappe.ui.form.on("ZATCA Business Settings", {
     refresh: function (frm) {
         add_other_ids_if_new(frm);
         filter_company_address(frm);
+        frm.add_custom_button(__("Submit Feedback"), () => {
+            ksa_compliance.feedback_dialog.show_feedback_dialog(__("Submit Feedback"));
+        });
     },
     company: function (frm) {
         filter_company_address(frm);
@@ -58,7 +61,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
         }
     },
     create_csr: function (frm) {
-        frappe.prompt(__('OTP'), async ({value}) => {
+        frappe.prompt(__('OTP'), async ({ value }) => {
             await frappe.call({
                 freeze: true,
                 freeze_message: __('Please wait...'),
@@ -93,7 +96,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 get_query: function () {
                     return {
                         query: "ksa_compliance.compliance_checks.customer_query",
-                        filters: {"standard": false},
+                        filters: { "standard": false },
                     }
                 }
             });
@@ -108,7 +111,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 get_query: function () {
                     return {
                         query: "ksa_compliance.compliance_checks.customer_query",
-                        filters: {"standard": true},
+                        filters: { "standard": true },
                     }
                 }
             });
@@ -152,8 +155,8 @@ frappe.ui.form.on("ZATCA Business Settings", {
             return;
         }
 
-        frappe.prompt(__('OTP'), ({value}) => {
-            frappe.call({
+        frappe.prompt(__('OTP'), async ({ value }) => {
+            const result = await frappe.call({
                 freeze: true,
                 freeze_message: 'Please wait...',
                 method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.get_production_csid",
@@ -162,6 +165,10 @@ frappe.ui.form.on("ZATCA Business Settings", {
                     otp: value
                 },
             });
+
+            if (result.message) {
+                ksa_compliance.feedback_dialog.show_feedback_dialog(__("KSA Compliance Feedback"), true);
+            }
         });
     },
 });
