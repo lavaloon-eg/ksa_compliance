@@ -19,7 +19,7 @@ from frappe.contacts.doctype.address.address import Address
 from frappe.core.doctype.file.file import File
 from frappe.model.document import Document
 from frappe.translate import print_language
-from frappe.utils import now_datetime, get_link_to_form, strip
+from frappe.utils import now_datetime, get_link_to_form, strip, get_url
 from frappe.utils.pdf import get_file_data_from_writer
 from pypdf import PdfWriter
 from result import is_err, Result, Err, Ok, is_ok
@@ -36,6 +36,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_preco
     ZATCAPrecomputedInvoice,
 )
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
+from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
 from ksa_compliance.zatca_cli import convert_to_pdf_a3_b, check_pdfa3b_support_or_throw
@@ -57,6 +58,7 @@ class SalesInvoiceAdditionalFields(Document):
             AdditionalSellerIDs,
         )
 
+        allow_submit: DF.Check
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
         amended_from: DF.Link | None
@@ -323,9 +325,22 @@ class SalesInvoiceAdditionalFields(Document):
             )
         else:
             # Any case other than resend is submitted
+            self.allow_submit = 1
             self.submit()
 
         return Ok(f'Invoice sent to ZATCA. Integration status: {integration_status}')
+
+    def before_submit(self):
+        if not self.allow_submit:
+            sync_invoices_url = get_url(uri='/app/e-invoicing-sync')
+            sync_invoices_page = f'<a href="{sync_invoices_url}">{ft("Sync Invoices Page")}</a>'
+            fthrow(
+                msg=ft(
+                    'You cannot submit SIAF manually; if you want to resubmit it to ZATCA use $sync_invoices_page',
+                    sync_invoices_page=sync_invoices_page,
+                ),
+                title=ft('Validation Error'),
+            )
 
     def _get_invoice_type_code(self, invoice_doc: SalesInvoice | POSInvoice) -> str:
         # POSInvoice doesn't have an is_debit_note field
