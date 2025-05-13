@@ -7,7 +7,7 @@ ksa_compliance.feedback_dialog = {
         const default_email_account = await this.get_default_email_account();
 
         if (!default_email_account) {
-            this.show_email_account_error(feedback_config.CONTACT_CENTER_PAGE);
+            this.show_email_account_error(feedback_config.LAVALOON_CONTACT_PAGE);
             return;
         }
 
@@ -59,13 +59,7 @@ ksa_compliance.feedback_dialog = {
             type: 'GET'
         });
 
-        return {
-            CONTACT_CENTER_PAGE: response.message.CONTACT_CENTER_PAGE,
-            MAX_DESCRIPTION_LENGTH: response.message.MAX_DESCRIPTION_LENGTH,
-            MAX_FILES: response.message.MAX_FILES,
-            MAX_FILE_SIZE_MB: response.message.MAX_FILE_SIZE_MB,
-            ALLOWED_FILE_TYPES: response.message.ALLOWED_FILE_TYPES
-        };
+        return response.message
     },
 
     get_default_email_account: async function () {
@@ -177,11 +171,11 @@ ksa_compliance.feedback_dialog = {
             allow_multiple: true,
             make_attachments_public: true,
             upload_notes: __("Upload up to {0} files (PDF, PNG, JPEG, DOCX), max {1}MB each",
-                [config.MAX_FILES, config.MAX_FILE_SIZE_MB]),
+                [config.MAX_NUMBER_OF_FILES, config.MAX_FILE_SIZE_MB]),
             restrictions: {
                 allowed_file_types: config.ALLOWED_FILE_TYPES,
                 max_file_size: config.MAX_FILE_SIZE_MB * 1024 * 1024,
-                max_number_of_files: config.MAX_FILES,
+                max_number_of_files: config.MAX_NUMBER_OF_FILES,
             },
             on_success(file) {
                 uploaded_files.push(file.file_url);

@@ -114,7 +114,7 @@ jinja = {
 
 # permission_query_conditions = {
 # "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }Failed to save preference. Please try again. Error: {0}
+# }
 #
 # has_permission = {
 # "Event": "frappe.desk.doctype.event.event.has_permission",
