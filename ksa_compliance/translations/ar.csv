@@ -293,5 +293,5 @@ National ID,الرقم القومي
 GCC ID, هوية مجلس التعاون الخليجي
 Iqama, الإقامة
 Passport ID, جواز السفر
-You cannot submit SIAF manually if you want to resubmit it to ZATCA use $sync_invoices_page, لا يمكنك التسجيل يدويا اذا كنت ترغب في اعادة تقديم الفاتورة الى  هيئة الزكاة استخدم $sync_invoices_page
+You cannot submit SIAF manually; if you want to resubmit it to ZATCA use $sync_invoices_page, لا يمكنك التسجيل يدويا; اذا كنت ترغب في اعادة تقديم الفاتورة الى  هيئة الزكاة استخدم $sync_invoices_page
 Sync Invoices Page, صفحة مزامنة الفواتير

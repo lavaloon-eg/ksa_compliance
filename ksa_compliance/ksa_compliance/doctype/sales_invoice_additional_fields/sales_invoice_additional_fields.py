@@ -336,7 +336,7 @@ class SalesInvoiceAdditionalFields(Document):
             sync_invoices_page = f'<a href="{sync_invoices_url}">{ft("Sync Invoices Page")}</a>'
             fthrow(
                 msg=ft(
-                    'You cannot submit SIAF manually if you want to resubmit it to ZATCA use $sync_invoices_page',
+                    'You cannot submit SIAF manually; if you want to resubmit it to ZATCA use $sync_invoices_page',
                     sync_invoices_page=sync_invoices_page,
                 ),
                 title=ft('Validation Error'),
