@@ -333,9 +333,13 @@ class SalesInvoiceAdditionalFields(Document):
     def before_submit(self):
         if not self.allow_submit:
             sync_invoices_url = get_url(uri='/app/e-invoicing-sync')
+            sync_invoices_page = f'<a href="{sync_invoices_url}">{ft("Sync Invoices Page")}</a>'
             fthrow(
-                msg=f"You cannot submit SIAF manually, if you want to resubmit it to ZATCA use <a href='{sync_invoices_url}'>Sync Invoices Page</a>",
-                title='Validation Error',
+                msg=ft(
+                    'You cannot submit SIAF manually if you want to resubmit it to ZATCA use $sync_invoices_page',
+                    sync_invoices_page=sync_invoices_page,
+                ),
+                title=ft('Validation Error'),
             )
 
     def _get_invoice_type_code(self, invoice_doc: SalesInvoice | POSInvoice) -> str:
