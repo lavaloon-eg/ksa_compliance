@@ -10,6 +10,12 @@ from frappe.utils import get_date_str, get_time, strip, flt
 from ksa_compliance.invoice import InvoiceType
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
+from ksa_compliance.ksa_compliance.doctype.zatca_invoice_fix_rejection.zatca_invoice_fix_rejection import (
+    ZATCAInvoiceFixRejection,
+)
+from ksa_compliance.ksa_compliance.doctype.zatca_invoice_fix_rejection_item.zatca_invoice_fix_rejection_item import (
+    ZATCAInvoiceFixRejectionItem,
+)
 from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_return_against_reference import (
     ZATCAReturnAgainstReference,
 )
@@ -18,22 +24,42 @@ from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
 
-def append_tax_details_into_item_lines(item_lines: list, is_tax_included: bool) -> list:
+def append_tax_details_into_item_lines(
+    item_lines: list, is_tax_included: bool, items_fix: List[ZATCAInvoiceFixRejectionItem] = None
+) -> list:
     for item in item_lines:
         tax_percent = item['tax_percent']
         tax_amount = item['tax_amount']
+        item_fix = None
+        if items_fix:
+            item_fix = next((it for it in items_fix if it.item == item['item_code']), None)
 
-        """
-            In case of tax included we should get the item amount exclusive of vat from the current 'item amount', 
-            and Since ERPNext discount on invoice affects the item tax amount we cannot simply subtract the item tax amount
-            from the item amount but we need to get the tax amount without being affected by applied discount, so we 
-            use this calculation to get the actual item amount exclusive of vat: "item_amount / 1 + tax_percent"
-        """
-        item['amount'] = flt(abs(item['amount']) / (1 + (tax_percent / 100)), 2) if is_tax_included else item['amount']
-        item['discount_amount'] = item['discount_amount'] * item['qty']
+        if item_fix and item_fix.fix_amount_without_taxes:
+            item['amount'] = item_fix.fix_amount_without_taxes
+        else:
+            """
+                In case of tax included we should get the item amount exclusive of vat from the current 'item amount', 
+                and Since ERPNext discount on invoice affects the item tax amount we cannot simply subtract the item tax amount
+                from the item amount but we need to get the tax amount without being affected by applied discount, so we 
+                use this calculation to get the actual item amount exclusive of vat: "item_amount / 1 + tax_percent"
+            """
+            item['amount'] = (
+                flt(abs(item['amount']) / (1 + (tax_percent / 100)), 2) if is_tax_included else item['amount']
+            )
+
+        if item_fix and item_fix.fix_discount_amount:
+            item['discount_amount'] = item_fix.fix_discount_amount
+        else:
+            item['discount_amount'] = item['discount_amount'] * item['qty']
+
         item['base_amount'] = item['amount'] + item['discount_amount']
         item['tax_percent'] = tax_percent
-        item['tax_amount'] = tax_amount
+
+        if item_fix and item_fix.fix_tax_amount:
+            item['tax_amount'] = item_fix.fix_tax_amount
+        else:
+            item['tax_amount'] = tax_amount
+
         item['total_amount'] = tax_amount + abs(item['amount'])
 
     return item_lines
@@ -136,6 +162,20 @@ class Einvoice:
                     ),
                     title=ft('Invalid Branch For Company'),
                 )
+
+        # Get Rejection Fixes if invoice.
+        prev_rejected_siaf = frappe.db.exists(
+            'Sales Invoice Additional Fields',
+            {
+                'sales_invoice': self.sales_invoice_doc.name,
+                'is_latest': 1,
+                'integration_status': 'Rejected',
+            },
+        )
+        self.fix_invoice_doc = None
+        if prev_rejected_siaf:
+            fix_invoice_id = frappe.db.exists('ZATCA Invoice Fix Rejection', {'invoice': self.sales_invoice_doc.name})
+            self.fix_invoice_doc = cast(ZATCAInvoiceFixRejection, fix_invoice_id)
 
         # Get Business Settings and Seller Fields
         self.get_business_settings_and_seller_details()
@@ -506,7 +546,12 @@ class Einvoice:
         tax_amount = abs(self.sales_invoice_doc.taxes[0].tax_amount)
         if applied_discount_percent == 0:
             applied_discount_percent = (discount_amount / (total_without_vat + tax_amount)) * 100
-        applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
+
+        if self.fix_invoice_doc and self.fix_invoice_doc.fixed_total_discount_amount:
+            applied_discount_amount = self.fix_invoice_doc.fixed_total_discount_amount
+        else:
+            applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
+
         self.result['invoice']['allowance_total_amount'] = applied_discount_amount
         self.additional_fields_doc.fatoora_invoice_discount_amount = applied_discount_amount
 
@@ -792,27 +837,58 @@ class Einvoice:
 
         self.get_float_value(field_name='total', source_doc=self.sales_invoice_doc, xml_name='total', parent='invoice')
 
-        self.get_float_value(
-            field_name='net_total', source_doc=self.sales_invoice_doc, xml_name='net_total', parent='invoice'
-        )
+        if self.fix_invoice_doc and self.fix_invoice_doc.fixed_total_amount_without_taxes:
+            self.get_float_value(
+                field_name='fixed_total_amount_without_taxes',
+                source_doc=self.fix_invoice_doc,
+                xml_name='net_total',
+                parent='invoice',
+            )
+        else:
+            self.get_float_value(
+                field_name='net_total', source_doc=self.sales_invoice_doc, xml_name='net_total', parent='invoice'
+            )
 
-        self.get_float_value(
-            field_name='total_taxes_and_charges',
-            source_doc=self.sales_invoice_doc,
-            xml_name='total_taxes_and_charges',
-            parent='invoice',
-        )
-
-        self.get_float_value(
-            field_name='base_total_taxes_and_charges',
-            source_doc=self.sales_invoice_doc,
-            xml_name='base_total_taxes_and_charges',
-            parent='invoice',
-        )
+        if self.fix_invoice_doc and self.fix_invoice_doc.fixed_total_tax_amount:
+            self.get_float_value(
+                field_name='fixed_total_tax_amount',
+                source_doc=self.fix_invoice_doc,
+                xml_name='total_taxes_and_charges',
+                parent='invoice',
+            )
+            self.get_float_value(
+                field_name='fixed_total_tax_amount',
+                source_doc=self.fix_invoice_doc,
+                xml_name='base_total_taxes_and_charges',
+                parent='invoice',
+            )
+        else:
+            self.get_float_value(
+                field_name='total_taxes_and_charges',
+                source_doc=self.sales_invoice_doc,
+                xml_name='total_taxes_and_charges',
+                parent='invoice',
+            )
+            self.get_float_value(
+                field_name='base_total_taxes_and_charges',
+                source_doc=self.sales_invoice_doc,
+                xml_name='base_total_taxes_and_charges',
+                parent='invoice',
+            )
         # TODO: Tax Account Currency
-        self.get_float_value(
-            field_name='grand_total', source_doc=self.sales_invoice_doc, xml_name='grand_total', parent='invoice'
-        )
+
+        if self.fix_invoice_doc and self.fix_invoice_doc.fixed_total_amount_with_taxes_and_discount:
+            self.get_float_value(
+                field_name='fixed_total_amount_with_taxes_and_discount',
+                source_doc=self.fix_invoice_doc,
+                xml_name='grand_total',
+                parent='invoice',
+            )
+        else:
+            self.get_float_value(
+                field_name='grand_total', source_doc=self.sales_invoice_doc, xml_name='grand_total', parent='invoice'
+            )
+
         self.get_float_value(
             field_name='total_advance', source_doc=self.sales_invoice_doc, xml_name='prepaid_amount', parent='invoice'
         )
@@ -902,5 +978,11 @@ class Einvoice:
             it.rate for it in self.sales_invoice_doc.get('taxes', [])
         )
         self.result['invoice']['item_lines'] = item_lines
-        self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
+
+        if self.fix_invoice_doc and self.fix_invoice_doc.fixed_total_amount_without_taxes_and_discount:
+            self.result['invoice']['line_extension_amount'] = (
+                self.fix_invoice_doc.fixed_total_amount_without_taxes_and_discount
+            )
+        else:
+            self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
         # --------------------------- END Getting Invoice's item lines ------------------------------

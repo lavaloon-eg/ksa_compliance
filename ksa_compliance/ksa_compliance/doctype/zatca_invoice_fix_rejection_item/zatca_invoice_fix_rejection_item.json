@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-13 16:06:05.235628",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "qty",
+  "column_break_syds",
+  "amount_without_taxes",
+  "fixed_amount_without_taxes",
+  "section_break_lazr",
+  "tax_amount",
+  "fixed_tax_amount",
+  "column_break_yqpz",
+  "discount_amount",
+  "fixed_discount_amount"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "amount_without_taxes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount Without Taxes",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fixed_amount_without_taxes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Fixed Amount Without Taxes"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tax_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tax Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fixed_tax_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Fixed Tax Amount"
+  },
+  {
+   "columns": 1,
+   "fieldname": "discount_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Discount Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fixed_discount_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Fixed Discount Amount"
+  },
+  {
+   "fieldname": "column_break_syds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_lazr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_yqpz",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-14 15:15:43.664053",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Invoice Fix Rejection Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

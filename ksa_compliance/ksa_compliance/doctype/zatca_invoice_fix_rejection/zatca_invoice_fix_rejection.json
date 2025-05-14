@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:INV-FIX-{####}",
+ "creation": "2025-05-13 15:37:48.035520",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_type",
+  "invoice",
+  "column_break_ixli",
+  "fix_reason",
+  "invoice_amounts_section",
+  "total_tax_amount",
+  "fixed_total_tax_amount",
+  "column_break_wthx",
+  "total_amount_without_taxes_and_discount",
+  "fixed_total_amount_without_taxes_and_discount",
+  "column_break_gvtf",
+  "total_amount_without_taxes",
+  "fixed_total_amount_without_taxes",
+  "section_break_tyqw",
+  "total_amount_with_taxes_and_discount",
+  "fixed_total_amount_with_taxes_and_discount",
+  "column_break_wses",
+  "total_discount_amount",
+  "fixed_total_discount_amount",
+  "item_amounts_section",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Amounts"
+  },
+  {
+   "fieldname": "total_amount_without_taxes_and_discount",
+   "fieldtype": "Float",
+   "label": "Total Amount Without Taxes And Discount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_amount_without_taxes",
+   "fieldtype": "Float",
+   "label": "Total Amount Without Taxes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_amount_with_taxes_and_discount",
+   "fieldtype": "Float",
+   "label": "Total Amount With Taxes And Discount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_discount_amount",
+   "fieldtype": "Float",
+   "label": "Total Discount Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wthx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_gvtf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_tyqw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wses",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tax_amount",
+   "fieldtype": "Float",
+   "label": "Total Tax Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fixed_total_tax_amount",
+   "fieldtype": "Float",
+   "label": "Fixed Total Tax Amount"
+  },
+  {
+   "fieldname": "fixed_total_amount_without_taxes_and_discount",
+   "fieldtype": "Float",
+   "label": "Fixed Total Amount Without Taxes And Discount"
+  },
+  {
+   "fieldname": "fixed_total_amount_without_taxes",
+   "fieldtype": "Float",
+   "label": "Fixed Total Amount Without Taxes"
+  },
+  {
+   "fieldname": "fixed_total_amount_with_taxes_and_discount",
+   "fieldtype": "Float",
+   "label": "Fixed Total Amount With Taxes And Discount"
+  },
+  {
+   "fieldname": "fixed_total_discount_amount",
+   "fieldtype": "Float",
+   "label": "Fixed Total Discount Amount"
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Dynamic Link",
+   "label": "Invoice",
+   "options": "invoice_type"
+  },
+  {
+   "fieldname": "invoice_type",
+   "fieldtype": "Select",
+   "label": "Invoice Type",
+   "options": "Sales Invoice\nPOS Invoice"
+  },
+  {
+   "fieldname": "column_break_ixli",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fix_reason",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Fix Reason",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Item Amounts"
+  },
+  {
+   "depends_on": "eval:doc.invoice",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "ZATCA Invoice Fix Rejection Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-05-14 15:18:06.257791",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA Invoice Fix Rejection",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
