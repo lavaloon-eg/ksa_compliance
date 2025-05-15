@@ -244,7 +244,7 @@ class SalesInvoiceAdditionalFields(Document):
                     or validation_result.details.errors
                     or validation_result.details.warnings
                 )
-                if self.is_rejection_fix or (settings.block_invoice_on_invalid_xml and is_invalid):
+                if (self.is_rejection_fix or settings.block_invoice_on_invalid_xml) and is_invalid:
                     html_message = ''
                     text_message = ''
                     if validation_result.details.errors:
