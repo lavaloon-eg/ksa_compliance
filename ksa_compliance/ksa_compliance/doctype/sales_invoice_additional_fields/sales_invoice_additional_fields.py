@@ -103,6 +103,7 @@ class SalesInvoiceAdditionalFields(Document):
         invoice_type_transaction: DF.Data | None
         invoice_xml: DF.LongText | None
         is_latest: DF.Check
+        is_rejection_fix: DF.Check
         last_attempt: DF.Datetime | None
         other_buyer_ids: DF.Table[AdditionalSellerIDs]
         payment_means_type_code: DF.Data | None
@@ -135,13 +136,15 @@ class SalesInvoiceAdditionalFields(Document):
 
     @staticmethod
     def create_for_invoice(
-        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice']
+        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice'], is_rejection_fix: bool = False
     ) -> 'SalesInvoiceAdditionalFields':
         doc = cast(SalesInvoiceAdditionalFields, frappe.new_doc('Sales Invoice Additional Fields'))
         # We do not expect people to create SIAF manually, so nobody has permission to create one
         doc.flags.ignore_permissions = True
         doc.invoice_doctype = doctype
         doc.sales_invoice = invoice_id
+        if is_rejection_fix:
+            doc.is_rejection_fix = True
         return doc
 
     @property
@@ -220,7 +223,7 @@ class SalesInvoiceAdditionalFields(Document):
             settings.zatca_cli_path, settings.java_home, invoice_xml, cert_path, settings.private_key_path
         )
 
-        if settings.validate_generated_xml and not self.is_compliance_mode:
+        if self.is_rejection_fix or (settings.validate_generated_xml and not self.is_compliance_mode):
             validation_result = cli.validate_invoice(
                 settings.zatca_cli_path,
                 settings.java_home,
@@ -241,7 +244,7 @@ class SalesInvoiceAdditionalFields(Document):
                     or validation_result.details.errors
                     or validation_result.details.warnings
                 )
-                if settings.block_invoice_on_invalid_xml and is_invalid:
+                if self.is_rejection_fix or (settings.block_invoice_on_invalid_xml and is_invalid):
                     html_message = ''
                     text_message = ''
                     if validation_result.details.errors:
@@ -551,7 +554,7 @@ def fix_rejection(id: str):
     if not settings:
         frappe.throw(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
 
-    new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
+    new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype, True)
     new_siaf.insert()
 
     if settings.is_live_sync:

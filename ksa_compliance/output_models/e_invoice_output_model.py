@@ -94,7 +94,7 @@ def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | Non
             'tax_amount': item['tax_amount'],
             'tax_percent': item['tax_percent'],
             'taxable_amount': item['net_amount'],
-            'total_discount': item['amount'] - item['net_amount'],
+            'total_discount': abs(item['amount'] - item['net_amount']),
         }
         if item_tax_category.reason_code:
             item['tax_exemption_reason_code'] = item_tax_category.reason_code
@@ -163,19 +163,13 @@ class Einvoice:
                     title=ft('Invalid Branch For Company'),
                 )
 
-        # Get Rejection Fixes if invoice.
-        prev_rejected_siaf = frappe.db.exists(
-            'Sales Invoice Additional Fields',
-            {
-                'sales_invoice': self.sales_invoice_doc.name,
-                'is_latest': 1,
-                'integration_status': 'Rejected',
-            },
-        )
         self.fix_invoice_doc = None
-        if prev_rejected_siaf:
+        if self.additional_fields_doc.is_rejection_fix:
             fix_invoice_id = frappe.db.exists('ZATCA Invoice Fix Rejection', {'invoice': self.sales_invoice_doc.name})
-            self.fix_invoice_doc = cast(ZATCAInvoiceFixRejection, fix_invoice_id)
+            if fix_invoice_id:
+                self.fix_invoice_doc = cast(
+                    ZATCAInvoiceFixRejection, frappe.get_doc('ZATCA Invoice Fix Rejection', fix_invoice_id)
+                )
 
         # Get Business Settings and Seller Fields
         self.get_business_settings_and_seller_details()

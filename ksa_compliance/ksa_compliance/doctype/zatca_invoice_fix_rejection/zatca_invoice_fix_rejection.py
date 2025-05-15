@@ -38,10 +38,6 @@ class ZATCAInvoiceFixRejection(Document):
         total_tax_amount: DF.Float
     # end: auto-generated types
 
-    def before_save(self):
-        # self.fetch_invoice_amounts_details()
-        pass
-
 
 @frappe.whitelist()
 def fetch_invoice_amounts_details(invoice_type: Literal['Sales Invoice', 'POS Invoice'], invoice: str):

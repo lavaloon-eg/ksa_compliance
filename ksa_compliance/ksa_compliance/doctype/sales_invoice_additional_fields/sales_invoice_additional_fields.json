@@ -16,6 +16,7 @@
   "invoice_doctype",
   "sales_invoice",
   "is_latest",
+  "is_rejection_fix",
   "uuid",
   "invoice_type_code",
   "invoice_type_transaction",
@@ -645,6 +646,14 @@
    "hidden": 1,
    "label": "Allow Submit",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "is_rejection_fix",
+   "fieldtype": "Check",
+   "label": "Is Rejection Fix",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -655,7 +664,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2025-05-12 16:24:51.033038",
+ "modified": "2025-05-15 12:34:32.856433",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
