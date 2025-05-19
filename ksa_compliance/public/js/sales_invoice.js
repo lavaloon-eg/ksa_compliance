@@ -14,5 +14,20 @@ frappe.ui.form.on('Sales Invoice', {
                 filters: filters
             };
         });
+    },
+    async refresh(frm) {
+        await set_zatca_integration_status(frm)
     }
 })
+
+async function set_zatca_integration_status(frm) {
+    const res = await frappe.db.get_value("Sales Invoice Additional Fields", {
+            "sales_invoice": frm.doc.name,
+            "is_latest": 1
+    }, "integration_status");
+    const status = res.message.integration_status
+    if (status) {
+        let ind_color = status === "Accepted" ? "green": ["Rejected", "Resend"].includes(status) ? "red": "blue"
+        frm.set_intro(`<b>${status}</b>`, ind_color)
+    }
+}
