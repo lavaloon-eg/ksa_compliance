@@ -27,7 +27,12 @@ async function set_zatca_integration_status(frm) {
     }, "integration_status");
     const status = res.message.integration_status
     if (status) {
-        let ind_color = status === "Accepted" ? "green": ["Rejected", "Resend"].includes(status) ? "red": "blue"
-        frm.set_intro(`<b>${status}</b>`, ind_color)
+        let color = "blue"
+        if (status === 'Accepted') {
+            color = "green"
+        } else if (["Rejected", "Resend"].includes(status)) {
+            color = "red"
+        }
+        frm.set_intro(`<b>Zatca Status: ${status}</b>`, color)
     }
 }
