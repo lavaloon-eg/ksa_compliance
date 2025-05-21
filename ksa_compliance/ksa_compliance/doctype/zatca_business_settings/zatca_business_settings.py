@@ -25,6 +25,7 @@ import ksa_compliance.zatca_files
 from ksa_compliance import logger
 from ksa_compliance.invoice import InvoiceMode
 from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
 
 
 class ZATCABusinessSettings(Document):
@@ -73,6 +74,7 @@ class ZATCABusinessSettings(Document):
         secret: DF.Password | None
         security_token: DF.SmallText | None
         seller_name: DF.Data
+        status: DF.Literal['Active', 'Revoked']
         street: DF.Data | None
         sync_with_zatca: DF.Literal['Live', 'Batches']
         tax_rate: DF.Percent
@@ -285,17 +287,27 @@ class ZATCABusinessSettings(Document):
 
     @staticmethod
     def for_company(company_id: str) -> Optional['ZATCABusinessSettings']:
-        business_settings_id = frappe.db.get_value('ZATCA Business Settings', filters={'company': company_id})
+        business_settings_id = frappe.db.get_value(
+            'ZATCA Business Settings', filters={'company': company_id, 'status': 'Active'}
+        )
         if not business_settings_id:
             return None
 
         return cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
 
     @staticmethod
+    def revoked_for_company(company_id: str) -> bool:
+        business_settings_id = frappe.db.get_value(
+            'ZATCA Business Settings', filters={'company': company_id, 'status': 'Revoked'}
+        )
+        return bool(business_settings_id)
+
+    @staticmethod
     def is_enabled_for_company(company_id: str) -> bool:
         return bool(
             frappe.db.get_value(
-                'ZATCA Business Settings', filters={'company': company_id, 'enable_zatca_integration': True}
+                'ZATCA Business Settings',
+                filters={'company': company_id, 'status': 'Active', 'enable_zatca_integration': True},
             )
         )
 
@@ -303,7 +315,8 @@ class ZATCABusinessSettings(Document):
     def is_branch_config_enabled(company_id: str) -> bool:
         return bool(
             frappe.db.get_value(
-                'ZATCA Business Settings', filters={'company': company_id, 'enable_branch_configuration': True}
+                'ZATCA Business Settings',
+                filters={'company': company_id, 'status': 'Active', 'enable_branch_configuration': True},
             )
         )
 
@@ -414,3 +427,40 @@ def onboard(business_settings_id: str, otp: str) -> NoReturn:
 def get_production_csid(business_settings_id: str, otp: str) -> NoReturn:
     settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
     settings.get_production_csid(otp)
+
+
+@frappe.whitelist()
+def create_business_settings(source_name: str, target_doc=None):
+    from frappe.model.mapper import get_mapped_doc
+
+    doctype = 'ZATCA Business Settings'
+    doc = get_mapped_doc(
+        doctype,
+        source_name,
+        {
+            doctype: {
+                'doctype': doctype,
+            },
+            'Additional Seller IDs': {
+                'doctype': 'Additional Seller IDs',
+                'field_map': {'type_name': 'type_name', 'type_code': 'type_code', 'value': 'value'},
+            },
+        },
+    )
+    return doc
+
+
+@frappe.whitelist()
+def revoke_business_settings(settings_id: str):
+    if frappe.db.exists(
+        'Sales Invoice Additional Fields',
+        {'docstatus': 0},
+    ):
+        fthrow(
+            msg=ft('You cannot revoke CSID, please send not synchronized invoices to ZATCA.'),
+            title=ft('Cannot Revoke CSID'),
+        )
+
+    frappe.db.set_value('ZATCA Business Settings', settings_id, 'status', 'Revoked')
+
+    frappe.msgprint(ft('CSID and Business Settings is now revoked.'), ft('Successfully Revoked'))
