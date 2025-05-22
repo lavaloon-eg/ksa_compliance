@@ -3,9 +3,15 @@ frappe.ui.form.on("ZATCA Business Settings", {
         frm.set_df_property('other_ids', 'cannot_delete_rows', 1);
         frm.set_df_property('other_ids', 'cannot_add_rows', 1);
     },
-    refresh: function (frm) {
+    refresh: async function (frm) {
         add_other_ids_if_new(frm);
         filter_company_address(frm);
+        if (!frm.is_new() && frm.doc.status === "Active") {
+            await add_revoke_button(frm)
+        }
+        if (!frm.is_new() && frm.doc.status === "Revoked") {
+            add_create_business_settings_button(frm)
+        }
     },
     company: function (frm) {
         filter_company_address(frm);
@@ -219,4 +225,33 @@ function add_other_ids_if_new(frm) {
         );
         frm.set_value("other_ids", seller_id_list);
     }
+}
+
+function add_revoke_button(frm) {
+    frm.add_custom_button("Revoke", async () => {
+        frappe.confirm(
+            __("Are you sure you want to revoke this Business Settings and CSID? This cannot be undone."),
+            () => {
+                frappe.call({
+                    method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.revoke_business_settings",
+                    args: {
+                        settings_id: frm.doc.name,
+                        company: frm.doc.company
+                    },
+                    callback(r){
+                        frm.refresh()
+                    }
+                })
+            }
+        )
+    }).addClass("btn-danger")
+}
+
+function add_create_business_settings_button(frm) {
+    frm.add_custom_button("Create New Business Settings", () => {
+            frappe.model.open_mapped_doc({
+            method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.create_business_settings",
+            frm: cur_frm,
+        });
+    });
 }

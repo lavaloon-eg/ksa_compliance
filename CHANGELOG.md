@@ -11,6 +11,7 @@ to a section with the version name.
   * It should only be submitted by the hourly job or the sync page.
 * Display `ZATCA Integration Status` as Intro in the `Sales Invoice`
 
+* Add revocation option for zatca business settings and CSID.
 ## 0.47.0
 
 * Support displaying `Return Against Additional References` in `ZATCA Phase 2 print format`.
