@@ -302,3 +302,5 @@ Cannot Revoke CSID, لا يمكن إلغاء CSID
 CSID and Business Settings is now revoked.,تم الآن إلغاء CSID وإعدادات العمل
 Successfully Revoked,تم الإلغاء بنجاح
 Are you sure you want to revoke this Business Settings and CSID? This cannot be undone.,هل أنت متأكد أنك تريد إلغاء إعدادات العمل وCSID؟ لا يمكن التراجع عن هذا الإجراء
+You cannot revoke the CSID due to $num $draft_siaf_link. Please sync pending invoices with ZATCA first; use $sync_invoices_page.,لا يمكنك إلغاء CSID بسبب $num $draft_siaf_link. يرجى أولاً مزامنة الفواتير المعلّقة مع ZATCA؛ استخدم $sync_invoices_page.
+pending invoice(s),فواتير معلّقة

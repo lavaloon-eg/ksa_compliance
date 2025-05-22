@@ -235,7 +235,8 @@ function add_revoke_button(frm) {
                 frappe.call({
                     method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.revoke_business_settings",
                     args: {
-                        settings_id: frm.doc.name
+                        settings_id: frm.doc.name,
+                        company: frm.doc.company
                     },
                     callback(r){
                         frm.refresh()

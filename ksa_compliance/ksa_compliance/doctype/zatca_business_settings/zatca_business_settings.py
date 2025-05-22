@@ -4,6 +4,8 @@ import base64
 import os
 from typing import Optional, NoReturn, cast, Literal
 
+from pypika.functions import Count
+
 # import frappe
 import frappe
 from erpnext.accounts.doctype.account.account import Account
@@ -22,6 +24,7 @@ from result import is_err
 import ksa_compliance.zatca_api as api
 import ksa_compliance.zatca_cli as cli
 import ksa_compliance.zatca_files
+from frappe.utils import get_url, get_url_to_list
 from ksa_compliance import logger
 from ksa_compliance.invoice import InvoiceMode
 from ksa_compliance.throw import fthrow
@@ -296,7 +299,7 @@ class ZATCABusinessSettings(Document):
         return cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
 
     @staticmethod
-    def revoked_for_company(company_id: str) -> bool:
+    def is_revoked_for_company(company_id: str) -> bool:
         business_settings_id = frappe.db.get_value(
             'ZATCA Business Settings', filters={'company': company_id, 'status': 'Revoked'}
         )
@@ -451,13 +454,37 @@ def create_business_settings(source_name: str, target_doc=None):
 
 
 @frappe.whitelist()
-def revoke_business_settings(settings_id: str):
-    if frappe.db.exists(
-        'Sales Invoice Additional Fields',
-        {'docstatus': 0},
-    ):
+def revoke_business_settings(settings_id: str, company: str):
+    sales_invoice = frappe.qb.DocType('Sales Invoice')
+    pos_invoice = frappe.qb.DocType('POS Invoice')
+    siaf = frappe.qb.DocType('Sales Invoice Additional Fields')
+    q = (
+        frappe.qb.from_(siaf)
+        .select(Count(siaf.name).as_('draft_invoices_count'))
+        .left_join(sales_invoice)
+        .on((sales_invoice.name == siaf.sales_invoice))
+        .left_join(pos_invoice)
+        .on((pos_invoice.name == siaf.sales_invoice))
+        .where(
+            (siaf.invoice_doctype == 'Sales Invoice') & (sales_invoice.company == company)
+            | (siaf.invoice_doctype == 'POS Invoice') & (pos_invoice.company == company)
+        )
+        .where(siaf.docstatus == 0)
+    ).run(as_dict=True)
+
+    _draft_invoices_count = q[0]['draft_invoices_count']
+    if _draft_invoices_count > 0:
+        sync_invoices_url = get_url(uri='/app/e-invoicing-sync')
+        sync_invoices_page = f'<a href="{sync_invoices_url}">{ft("Sync Invoices Page")}</a>'
+        siaf_list_link = get_url_to_list('Sales Invoice Additional Fields')
+        draft_siaf_link = f'<a href="{siaf_list_link + "?docstatus=0"}"> {ft("pending invoice(s)")} </a>'
         fthrow(
-            msg=ft('You cannot revoke CSID, please send not synchronized invoices to ZATCA.'),
+            msg=ft(
+                'You cannot revoke the CSID due to $num $draft_siaf_link. Please sync pending invoices with ZATCA first; use $sync_invoices_page.',
+                num=_draft_invoices_count,
+                sync_invoices_page=sync_invoices_page,
+                draft_siaf_link=draft_siaf_link,
+            ),
             title=ft('Cannot Revoke CSID'),
         )
 
