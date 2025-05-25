@@ -78,7 +78,7 @@ jinja = {
 # ------------
 
 # before_install = "ksa_compliance.install.before_install"
-after_install = "ksa_compliance.patches._2025_05_11_add_feedback_links_block.execute"
+after_install = "ksa_compliance.setup.after_install"
 
 # Uninstallation
 # ------------
