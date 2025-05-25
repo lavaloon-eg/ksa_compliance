@@ -5,9 +5,14 @@
    "label": "Invoice Integration Statistics"
   }
  ],
- "content": "[{\"id\":\"pG_Xe2iMd-\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ZATCA Integration</span>\",\"col\":12}},{\"id\":\"yD-yvwj2Lu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Insights</b></span>\",\"col\":12}},{\"id\":\"58Jax4AthR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overall Integration Dashboard\",\"col\":4}},{\"id\":\"ubpMNkfpfI\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Invoice Integration Statistics\",\"col\":12}},{\"id\":\"cpqxKS7o2F\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Accepted Invoices\",\"col\":4}},{\"id\":\"G08r867GtY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Accepted With Warnings invoices\",\"col\":4}},{\"id\":\"KCm42hMPJA\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Rejected Invoices\",\"col\":4}},{\"id\":\"S_Qm7oFLV0\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Configuration &amp; Transactions</b></span>\",\"col\":12}},{\"id\":\"usnuiWNGFB\",\"type\":\"card\",\"data\":{\"card_name\":\"Business Configuration\",\"col\":4}},{\"id\":\"4hD6nr6Mev\",\"type\":\"card\",\"data\":{\"card_name\":\"Transactions\",\"col\":4}},{\"id\":\"AzDPNYsZQn\",\"type\":\"card\",\"data\":{\"card_name\":\"ZATCA Reports\",\"col\":4}},{\"id\":\"BWRXlzZMra\",\"type\":\"card\",\"data\":{\"card_name\":\"Logs\",\"col\":4}}]",
+ "content": "[{\"id\":\"pG_Xe2iMd-\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ZATCA Integration</span>\",\"col\":12}},{\"id\":\"yD-yvwj2Lu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Insights</b></span>\",\"col\":12}},{\"id\":\"58Jax4AthR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Overall Integration Dashboard\",\"col\":4}},{\"id\":\"ubpMNkfpfI\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Invoice Integration Statistics\",\"col\":12}},{\"id\":\"cpqxKS7o2F\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Accepted Invoices\",\"col\":4}},{\"id\":\"G08r867GtY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Accepted With Warnings invoices\",\"col\":4}},{\"id\":\"KCm42hMPJA\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Rejected Invoices\",\"col\":4}},{\"id\":\"S_Qm7oFLV0\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Configuration &amp; Transactions</b></span>\",\"col\":12}},{\"id\":\"usnuiWNGFB\",\"type\":\"card\",\"data\":{\"card_name\":\"Business Configuration\",\"col\":4}},{\"id\":\"4hD6nr6Mev\",\"type\":\"card\",\"data\":{\"card_name\":\"Transactions\",\"col\":4}},{\"id\":\"AzDPNYsZQn\",\"type\":\"card\",\"data\":{\"card_name\":\"ZATCA Reports\",\"col\":4}},{\"id\":\"BWRXlzZMra\",\"type\":\"card\",\"data\":{\"card_name\":\"Logs\",\"col\":4}},{\"id\":\"Whrwr_Opnr\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 18px; letter-spacing: 0.18px;\\\"><b>Feedback and Links</b></span>\",\"col\":12}},{\"id\":\"mOAvQf1p_j\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"ZATCA Workspace - Feedback and Link Section\",\"col\":12}}]",
  "creation": "2024-05-29 15:20:46.009593",
- "custom_blocks": [],
+ "custom_blocks": [
+  {
+   "custom_block_name": "ZATCA Workspace - Feedback and Link Section",
+   "label": "ZATCA Workspace - Feedback and Link Section"
+  }
+ ],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
@@ -182,6 +187,7 @@
    "link_to": "Zatca Integration Details",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Sales Invoice",
    "type": "Link"
   },
   {
@@ -192,10 +198,11 @@
    "link_to": "Zatca Integration Summary",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Sales Invoice",
    "type": "Link"
   }
  ],
- "modified": "2024-08-29 13:38:48.952561",
+ "modified": "2025-05-11 13:33:20.060060",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA",
