@@ -332,3 +332,12 @@ This feedback will be sent to the Application vendor.,سيتم إرسال الم
 How was your experience configuring these settings?,كيف كانت تجربتك في ضبط الإعدادات؟
 Need help?,هل تحتاج المساعدة؟
 Visit our Help Center,تصفح مركز الدعم
+CSID Is Revoked,تم إلغاء CSID
+Cannot submit sales invoice to ZATCA, لا يمكن تقديم فاتورة المبيعات إلى ZATCA
+"You cannot revoke CSID, please send not synchronized invoices to ZATCA.", لا يمكنك إلغاء CSID؛ يرجى إرسال الفواتير غير المتزامنة إلى ZATCA
+Cannot Revoke CSID, لا يمكن إلغاء CSID
+CSID and Business Settings is now revoked.,تم الآن إلغاء CSID وإعدادات العمل
+Successfully Revoked,تم الإلغاء بنجاح
+Are you sure you want to revoke this Business Settings and CSID? This cannot be undone.,هل أنت متأكد أنك تريد إلغاء إعدادات العمل وCSID؟ لا يمكن التراجع عن هذا الإجراء
+You cannot revoke the CSID due to $num $draft_siaf_link. Please sync pending invoices with ZATCA first; use $sync_invoices_page.,لا يمكنك إلغاء CSID بسبب $num $draft_siaf_link. يرجى أولاً مزامنة الفواتير المعلّقة مع ZATCA؛ استخدم $sync_invoices_page.
+pending invoice(s),فواتير معلّقة
