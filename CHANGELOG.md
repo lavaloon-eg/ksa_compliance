@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.49.0
+
+* Add a feedback dialog to make it easier for users to give feedback.
+    * Add new button in ZATCA Business Settings form to use the new feedback dialog.
+    * Add `Feedback and Links` in zatca workspace.
+
 ## 0.48.0
 
 * Prevent manual submission of `Sales Invoice Additional Fields` where user can submit with the intent of resending it ([Issue](https://github.com/lavaloon-eg/ksa_compliance/issues/233))
@@ -15,11 +21,6 @@ to a section with the version name.
 * Display `ZATCA Integration Status` as Intro in the `Sales Invoice`
 
 * Add revocation option for zatca business settings and CSID.
-
-* Add a feedback dialog to make it easier for users to give feedback.
-* Add new button in ZATCA Business Settings form to use the new feedback dialog.
-* Add Arabic and English translations for feedback-related words.
-* Add `Feedback and Links` in zatca workspace.
 
 ## 0.47.0
 
