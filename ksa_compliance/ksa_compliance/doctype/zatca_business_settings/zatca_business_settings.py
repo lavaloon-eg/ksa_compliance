@@ -108,6 +108,7 @@ class ZATCABusinessSettings(Document):
             'Zero rated goods || Private healthcare to citizen',
             'Zero rated goods || Supply of qualified military goods',
         ]
+
     # end: auto-generated types
 
     def after_insert(self):
@@ -289,10 +290,20 @@ class ZATCABusinessSettings(Document):
         return ZATCABusinessSettings.for_company(company_id)
 
     @staticmethod
-    def for_company(company_id: str) -> Optional['ZATCABusinessSettings']:
+    def for_company(company_id: str, include_revoked=False) -> Optional['ZATCABusinessSettings']:
         business_settings_id = frappe.db.get_value(
             'ZATCA Business Settings', filters={'company': company_id, 'status': 'Active'}
         )
+        if not business_settings_id and include_revoked:
+            # frappe.db.exists doesn't order, so it could return the oldest revoked settings. We want the most
+            # recent revoked settings instead
+            business_settings_id = frappe.db.get_value(
+                'ZATCA Business Settings',
+                {'company': company_id, 'status': 'Revoked'},
+                ignore=True,
+                order_by='modified desc',
+            )
+
         if not business_settings_id:
             return None
 

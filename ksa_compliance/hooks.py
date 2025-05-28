@@ -12,7 +12,7 @@ app_license = 'Copyright (c) 2023 LavaLoon'
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ksa_compliance/css/ksa_compliance.css"
 app_include_js = [
-    "/assets/ksa_compliance/js/feedback_dialog.js",
+    '/assets/ksa_compliance/js/feedback_dialog.js',
 ]
 # include js, css files in header of web template
 # web_include_css = "/assets/ksa_compliance/css/ksa_compliance.css"
@@ -78,7 +78,7 @@ jinja = {
 # ------------
 
 # before_install = "ksa_compliance.install.before_install"
-after_install = "ksa_compliance.setup.after_install"
+after_install = 'ksa_compliance.setup.after_install'
 
 # Uninstallation
 # ------------
