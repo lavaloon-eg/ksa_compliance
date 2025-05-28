@@ -6,4 +6,4 @@ logger = get_logger('zatca', max_size=1_000_000)
 logger.setLevel(logging.INFO)
 
 
-__version__ = '0.49.0'
+__version__ = '0.49.1'

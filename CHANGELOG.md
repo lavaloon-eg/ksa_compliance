@@ -10,7 +10,7 @@ to a section with the version name.
 
 * (Internal change) Allow retrieval of revoked ZATCA Business Settings
 
-## 0.49.0
+## 0.49.1
 
 * Add a feedback dialog to make it easier for users to give feedback.
     * Add new button in ZATCA Business Settings form to use the new feedback dialog.
