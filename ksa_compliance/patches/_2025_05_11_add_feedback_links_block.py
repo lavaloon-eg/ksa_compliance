@@ -1,10 +1,11 @@
 import frappe
 
+
 def execute():
     """
     Add a custom HTML block to the ZATCA Workspace for feedback and link section.
     """
-    block_name = "ZATCA Workspace - Feedback and Link Section"
+    block_name = 'ZATCA Workspace - Feedback and Link Section'
 
     html_content = """
                         <div>
@@ -61,20 +62,20 @@ def execute():
                     }
                 """
 
-    if frappe.db.exists("Custom HTML Block", block_name):
-        custom_block_doc = frappe.get_doc("Custom HTML Block", block_name)
+    if frappe.db.exists('Custom HTML Block', block_name):
+        custom_block_doc = frappe.get_doc('Custom HTML Block', block_name)
         custom_block_doc.html = html_content
         custom_block_doc.style = css_style
         custom_block_doc.save()
         frappe.db.commit()
-        print(f"Custom HTML Block {block_name} updated successfully.")
+        print(f'Custom HTML Block {block_name} updated successfully.')
     else:
-        custom_block_doc = frappe.new_doc("Custom HTML Block")
+        custom_block_doc = frappe.new_doc('Custom HTML Block')
         custom_block_doc.name = block_name
         custom_block_doc.html = html_content
         custom_block_doc.style = css_style
         custom_block_doc.insert()
         frappe.db.commit()
-        print(f"Custom HTML Block {block_name} created successfully.")
+        print(f'Custom HTML Block {block_name} created successfully.')
 
-    print("Done.")
+    print('Done.')
