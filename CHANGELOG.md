@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* (Internal change) Allow retrieval of revoked ZATCA Business Settings
+
 ## 0.49.0
 
 * Add a feedback dialog to make it easier for users to give feedback.
