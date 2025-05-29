@@ -151,6 +151,11 @@ doc_events = {
         'validate': 'ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice',
         'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
     },
+    'Payment Entry': {
+        'on_submit': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.create_prepayment_invoice_additional_fields_doctype',
+        'validate': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.validate_prepayment_invoice',
+        'before_cancel': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.prevent_cancellation_of_prepayment_invoice',
+    },
     'Branch': {
         'validate': 'ksa_compliance.standard_doctypes.branch.validate_branch',
     },

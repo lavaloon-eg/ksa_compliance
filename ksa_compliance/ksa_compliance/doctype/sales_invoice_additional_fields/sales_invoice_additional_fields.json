@@ -16,6 +16,7 @@
   "invoice_doctype",
   "sales_invoice",
   "is_latest",
+  "prepayment_invoice",
   "uuid",
   "invoice_type_code",
   "invoice_type_transaction",
@@ -615,7 +616,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Invoice Doctype",
-   "options": "Sales Invoice\nPOS Invoice",
+   "options": "Sales Invoice\nPOS Invoice\nPayment Entry",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -640,10 +641,12 @@
   },
   {
    "default": "0",
-   "fieldname": "allow_submit",
+   "fieldname": "prepayment_invoice",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Allow Submit",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Prepayment Invoice",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
@@ -655,7 +658,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2025-05-12 16:24:51.033038",
+ "modified": "2025-05-28 14:36:44.478487",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
@@ -673,6 +676,7 @@
    "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

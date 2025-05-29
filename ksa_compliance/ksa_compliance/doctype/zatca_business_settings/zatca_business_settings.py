@@ -3,6 +3,7 @@
 import base64
 import os
 from typing import Optional, NoReturn, cast, Literal
+from datetime import date
 
 from pypika.functions import Count
 
@@ -279,8 +280,18 @@ class ZATCABusinessSettings(Document):
         }
 
     @staticmethod
+    def is_prepayment_invoice(prepayment_invoice_id: str) -> bool:
+        return frappe.db.get_value('Payment Entry', prepayment_invoice_id, 'custom_prepayment_invoice')
+    
+    @staticmethod
+    def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
+        start_date = date(2024, 3, 1)
+        posting_date = frappe.db.get_value('Payment Entry', invoice_id, 'posting_date')
+        return posting_date >= start_date
+    
+    @staticmethod
     def for_invoice(
-        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice']
+        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice', 'Payment Entry'] 
     ) -> Optional['ZATCABusinessSettings']:
         company_id = frappe.db.get_value(doctype, invoice_id, ['company'])
         if not company_id:
