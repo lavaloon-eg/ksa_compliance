@@ -977,6 +977,8 @@ class Einvoice:
         # Append unique Tax categories to invoice
         self.result['invoice']['tax_categories'] = unique_tax_categories
 
+
+
         # Add invoice total taxes and charges percentage field
         self.result['invoice']['total_taxes_and_charges_percent'] = sum(
             it.rate for it in self.sales_invoice_doc.get('taxes', [])
