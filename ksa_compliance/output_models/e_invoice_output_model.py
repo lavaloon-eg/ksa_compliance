@@ -826,14 +826,12 @@ class Einvoice:
             
             if item.discount_amount and discount_amount:
                 tax_rate = item.tax_rate or 0.0
-                base_amount = (abs(item.base_rate) + discount_amount) / (1 + (tax_rate / 100))
-                amount_after_discount = base_amount - discount_amount
+                base_amount = ((abs(item.base_rate) ) / (1 + (tax_rate / 100))) + discount_amount
+                amount_after_discount = net_rate
         else:
             amount_after_discount = net_rate + discount_amount + (rate - net_rate)
             base_amount = amount_after_discount
         
-        if discount_amount:
-            amount_after_discount -= discount_amount
         
         return amount_after_discount, base_amount
 

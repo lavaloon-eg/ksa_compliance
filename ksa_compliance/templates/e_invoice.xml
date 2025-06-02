@@ -234,7 +234,13 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
+
+        {% if item.discount_amount %}
+            <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.base_amount_rate - item.discount_amount, 2) }}</cbc:PriceAmount>
+
+        {% else %}    
             <cbc:PriceAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.amount_after_discount, 2) }}</cbc:PriceAmount>
+        {% endif %}
             <cbc:BaseQuantity unitCode="PCE">{{ item.qty }}</cbc:BaseQuantity>
             {% if item.discount_amount %}
             <cac:AllowanceCharge>
