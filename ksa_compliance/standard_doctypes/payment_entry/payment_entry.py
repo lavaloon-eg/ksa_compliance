@@ -43,10 +43,6 @@ def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
     logger.info(f'Submission result: {message}')
 
 
-def validate_prepayment_invoice(self: PaymentEntry, method):
-    pass
-
-
 def prevent_cancellation_of_prepayment_invoice(self: PaymentEntry, method):
     is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
     if is_phase_2_enabled_for_company and self.custom_prepayment_invoice:

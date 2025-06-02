@@ -20,7 +20,6 @@ class PrePaymentServiceImp(PrepaymentInvoiceAbs):
         if doc.doctype == 'Sales Invoice' and not doc.advances:
             return
         self.validate_prepayment_invoice_is_sent(doc)
-        # may be i would need some filtering on result to be implemented
         zatca_fields_dto = result
         result['prepayment_invoice'] = self.prepayment_invoice_factory.create(zatca_fields_dto, doc)
         self.update_result(result, doc)

@@ -1,20 +1,6 @@
 from abc import ABC
 
 
-class Dictable:
-    def to_dict(self):
-        return Dictable._deep_dict_converter(self)
-
-    @staticmethod
-    def _deep_dict_converter(obj):
-        pass
-
-    @staticmethod
-    def _get_non_callable_non_private_attributes(obj):
-        lst = obj.items() if (type(obj) is dict) else obj.__dict__.items()
-        return {k: v for k, v in lst if not k.startswith('__') and not callable(v)}
-
-
 class ToDict:
     def to_dict(self):
         return {key: getattr(self, key) for key in vars(self) if not key.startswith('_')}
@@ -38,7 +24,7 @@ class Factory(ABC):
         raise NotImplementedError('Subclasses must implement this method.')
 
 
-class BuilderAbc(ABC, Dictable):
+class BuilderAbc(ABC):
     def _validate(self):
         pass
 

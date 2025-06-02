@@ -153,7 +153,6 @@ doc_events = {
     },
     'Payment Entry': {
         'on_submit': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.create_prepayment_invoice_additional_fields_doctype',
-        'validate': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.validate_prepayment_invoice',
         'before_cancel': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.prevent_cancellation_of_prepayment_invoice',
     },
     'Branch': {
