@@ -40,6 +40,9 @@ class PrepaymentInvoiceBuilder(BuilderAbc):
     def set_invoice_lines(self, invoice_lines:list)-> "PrepaymentInvoiceBuilder":
         self.invoice_lines = invoice_lines
         return self
+    def set_uuid(self, uuid: str) -> "PrepaymentInvoiceBuilder":
+        self.uuid = uuid
+        return self
 
     
     

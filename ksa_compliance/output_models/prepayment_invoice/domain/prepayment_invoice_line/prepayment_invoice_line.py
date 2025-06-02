@@ -35,6 +35,11 @@ class PrepaymentInvoiceLineBuilder(BuilderAbc):
     def set_id_xml_tag(self, id_xml_tag) -> "PrepaymentInvoiceLineBuilder":
         self.id_xml_tag = id_xml_tag
         return self
+    
+    def set_uuid(self, uuid: str) -> "PrepaymentInvoiceLineBuilder":
+        self.uuid = uuid
+        return self 
+    
     def set_invoice_quantity(self, invoice_quantity: float) -> "PrepaymentInvoiceLineBuilder":
         self.invoice_quantity = invoice_quantity
         return self

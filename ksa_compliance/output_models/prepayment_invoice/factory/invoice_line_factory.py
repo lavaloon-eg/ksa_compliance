@@ -30,8 +30,10 @@ class InvoiceLineFactory(Factory):
         document_reference = frappe.get_cached_doc(advance.reference_type, advance.reference_name)
 
         currency = doc.currency if hasattr(doc, 'currency') else 'SAR'
+        uuid = InvoiceLineFactory._get_uuid(advance, doc, document_reference)
+
         prepayment_invoice_line_builder.set_id(
-            advance.idx
+            advance.idx + len(doc.items) 
             ).set_id_xml_tag(
                 InvoiceLineFactory._get_idx_xml_tag(advance.idx)
             ).set_invoice_quantity(
@@ -42,6 +44,8 @@ class InvoiceLineFactory(Factory):
                 0.0
             ).set_line_extention_amount_xml_tag(
                 InvoiceLineFactory._get_line_extention_amount_xml_tag(0.0, currency)
+            ).set_uuid(
+                uuid
             )
         
         prepayment_invoice_line_builder.set_document_reference(
@@ -80,6 +84,15 @@ class InvoiceLineFactory(Factory):
             attributes={"currencyID": currency},
             text=float(line_extention_amount)
         )
+    @staticmethod
+    def _get_uuid(advance, doc, document_reference):
+        uuid = frappe.db.get_value(
+            "Sales Invoice Additional Fields",
+            {"invoice_doctype": document_reference.doctype,"sales_invoice": document_reference.name},
+            "uuid"
+        )
+        return uuid
+    
     @staticmethod
     def _get_document_reference(advance, doc, document_reference):
         document_reference_builder = DocumentReferenceBuilder()
