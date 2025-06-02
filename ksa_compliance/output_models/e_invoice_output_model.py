@@ -737,11 +737,19 @@ class Einvoice:
         )
 
         # --------------------------- END Buyer Details fields ------------------------------
+    def append_to_item_lines(self, item_lines: list, is_tax_included: bool, sales_invoice_doc: SalesInvoice) -> None:
+        """
+        Appends items to item_lines list based on document type (Payment Entry or Sales Invoice).
+        Handles tax-inclusive and tax-exclusive pricing calculations.
+        """
+        if sales_invoice_doc.doctype == 'Payment Entry':
+            self._append_payment_entry_item(item_lines, sales_invoice_doc)
+        else:
+            self._append_sales_invoice_items(item_lines, is_tax_included, sales_invoice_doc)
 
-    def append_to_item_lines(self, item_lines : list, is_tax_included: bool, sales_invoice_doc : SalesInvoice) -> None:
-        if self.sales_invoice_doc.doctype == 'Payment Entry':
-            item_lines.append(
-                {
+    def _append_payment_entry_item(self, item_lines: list, doc: SalesInvoice) -> None:
+        """Handles payment entry specific item formatting."""        
+        item_data={
                     'idx': 1,
                     'qty': 1.0,
                     'uom': 'Unit',
@@ -766,48 +774,68 @@ class Einvoice:
                     'tax_amount': self.sales_invoice_doc.taxes[0].base_tax_amount,
                     'total_amount': abs(self.sales_invoice_doc.base_received_amount_after_tax),
                 }
-                )
-
-        else:
-            for item in self.sales_invoice_doc.items:
-                discount_amount = max(0, abs(item.discount_amount))
-                if is_tax_included and abs(item.discount_amount):
-                    discount_amount = abs(item.discount_amount) / (1 + (item.tax_rate / 100))
-                amount_after_discount = (abs(item.net_rate)) + abs(discount_amount) + (abs(item.rate) - abs(item.net_rate))
-                if is_tax_included:
-                    # If tax is included, we need to calculate the amount after discount
-                    amount_after_discount = (abs(item.net_rate)) + abs(discount_amount) + (abs(item.rate) - abs(item.net_rate)) - abs(item.tax_amount)
                 
-                base_amount = (amount_after_discount + abs(discount_amount) )
-                if is_tax_included:
-                    base_amount = abs(item.net_rate) + abs(discount_amount)
-                if discount_amount:
-                    amount_after_discount = amount_after_discount - discount_amount
-                if is_tax_included and sales_invoice_doc.discount_amount and abs(item.discount_amount):
-                    base_amount = (abs(item.base_rate) + abs(item.discount_amount) ) / (1 + (item.tax_rate / 100))
-                    amount_after_discount = (base_amount)  - (discount_amount)
-                line_extension_amount = amount_after_discount
+        item_lines.append(item_data)
 
-                item_lines.append(
-                    {
-                        'idx': item.idx,
-                        'qty': abs(item.qty),
-                        'uom': item.uom,
-                        'item_code': item.item_code,
-                        'item_name': item.item_name,
-                        'net_amount': abs(item.base_net_amount),
-                        'amount_after_discount': abs((amount_after_discount)) * abs(item.qty),
-                        'base_amount_rate': abs(base_amount) * abs(item.qty),
-                        'line_extension_amount': abs(line_extension_amount) ,
-                        'rounding_amount': abs(amount_after_discount * abs(item.qty)) + abs(item.tax_amount),
-                        'amount': (item.base_amount) + discount_amount + item.tax_amount,
-                        'rate': (item.rate),
-                        'discount_amount': abs(discount_amount) * abs(item.qty),
-                        'item_tax_template': item.item_tax_template,
-                        'tax_percent': item.tax_rate or 0.0,
-                        'tax_amount': abs(item.tax_amount) or 0.0,
-                    }
-                )
+    def _append_sales_invoice_items(self, item_lines: list, is_tax_included: bool, doc: SalesInvoice) -> None:
+        """Processes regular sales invoice items with proper tax and discount calculations."""
+        for item in doc.items:
+            discount_amount = self._calculate_discount_amount(item, is_tax_included)
+            amount_after_discount, base_amount = self._calculate_amounts(item, discount_amount, is_tax_included)
+            line_extension_amount = amount_after_discount
+
+            item_data = {
+                'idx': item.idx,
+                'qty': abs(item.qty),
+                'uom': item.uom,
+                'item_code': item.item_code,
+                'item_name': item.item_name,
+                'net_amount': abs(item.base_net_amount),
+                'amount_after_discount': abs(amount_after_discount) * abs(item.qty),
+                'base_amount_rate': abs(base_amount) * abs(item.qty),
+                'line_extension_amount': abs(line_extension_amount) * abs(item.qty),
+                'rounding_amount': abs(amount_after_discount * abs(item.qty)) + abs(item.tax_amount or 0),
+                'amount': (item.base_amount or 0) + discount_amount + (item.tax_amount or 0),
+                'rate': item.rate,
+                'discount_amount': abs(discount_amount) * abs(item.qty),
+                'item_tax_template': item.item_tax_template,
+                'tax_percent': item.tax_rate or 0.0,
+                'tax_amount': abs(item.tax_amount or 0),
+            }
+            item_lines.append(item_data)
+
+    def _calculate_discount_amount(self, item, is_tax_included: bool) -> float:
+        """Calculates the proper discount amount considering tax inclusion."""
+        discount_amount = max(0, abs(item.discount_amount))
+        
+        if is_tax_included and discount_amount:
+            tax_rate = item.tax_rate or 0.0
+            discount_amount = discount_amount / (1 + (tax_rate / 100))
+            
+        return discount_amount
+
+    def _calculate_amounts(self, item, discount_amount: float, is_tax_included: bool) -> tuple:
+        """Calculates amount_after_discount and base_amount considering tax and discounts."""
+        net_rate = abs(item.net_rate)
+        rate = abs(item.rate)
+        tax_amount = abs(item.tax_amount or 0)
+        
+        if is_tax_included:
+            amount_after_discount = net_rate + discount_amount + (rate - net_rate) - tax_amount
+            base_amount = net_rate + discount_amount
+            
+            if item.discount_amount and discount_amount:
+                tax_rate = item.tax_rate or 0.0
+                base_amount = (abs(item.base_rate) + discount_amount) / (1 + (tax_rate / 100))
+                amount_after_discount = base_amount - discount_amount
+        else:
+            amount_after_discount = net_rate + discount_amount + (rate - net_rate)
+            base_amount = amount_after_discount
+        
+        if discount_amount:
+            amount_after_discount -= discount_amount
+        
+        return amount_after_discount, base_amount
 
 
     def get_e_invoice_details(self, invoice_type: str):
