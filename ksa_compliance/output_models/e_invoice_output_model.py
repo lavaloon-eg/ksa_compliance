@@ -20,7 +20,7 @@ from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
-
+from .prepayment_invoice.service import PrePaymentServiceImp
 
 
 def append_tax_categories_to_item(item_lines: list, taxes_and_charges: str | None, sales_invoice_doc: SalesInvoice, is_tax_included: bool) -> list:
@@ -110,6 +110,7 @@ class Einvoice:
             'business_settings': {},
             'seller_details': {},
             'buyer_details': {},
+            'prepayment_invoice': {}
         }
 
         self.sales_invoice_doc = cast(
@@ -995,6 +996,64 @@ class Einvoice:
         )
 
         # PrePayment Invoice
-        # service = PrePaymentServiceImp()
-        # service.update_result_with_prepayment_invoice(self.result, self.sales_invoice_doc)        
+        """
+        Prepayment Service Imp returns
+{'prepaid_amount': 1000.0, 'currency': 'SAR', 'prepaid_amount_xml_tag': , 
+'invoice_lines': [
+        {'id': 1, 'id_xml_tag': , 
+        'invoice_quantity': 0.0, 
+        'invoice_quantity_xml_tag': , 
+        'line_extention_amount': 0.0, 
+        'line_extention_amount_xml_tag': , 
+    'document_reference': 
+        {'id': 'ACC-PAY-DMSN-2025-03613', 
+        'issue_date': '2025-05-28', 
+        'issue_time': '18:39:41', 
+        'document_type_code': 386},
+    'tax_total': 
+        {'tax_amount': 0.0, 
+        'rounding_amount': 0.0, 
+    'tax_sub_total': 
+        {'taxable_amount': 500.0,
+          'tax_amount': 75.0, 
+            'tax_category_id': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None), 
+            'tax_percent': 15.0, 
+            'tax_scheme': 'VAT'}}, 
+    'item':     
+            {'name': '123', 
+            'item_tax_category': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None),
+              'item_tax_percent': 15.0, 
+              'item_tax_scheme': 'VAT'},
+                'price': 0.0}, 
+                {'id': 2, 
+                'id_xml_tag': ,
+                  'invoice_quantity': 0.0, 
+                  'invoice_quantity_xml_tag': , 
+                  'line_extention_amount': 0.0, 
+                  'line_extention_amount_xml_tag': ,
+        'document_reference': 
+            {'id': 'ACC-PAY-DMSN-2025-03614', 
+            'issue_date': '2025-05-28', 
+            'issue_time': '18:51:01',
+              'document_type_code': 386},
+        'tax_total': 
+            {'tax_amount': 0.0, 
+                'rounding_amount': 0.0, 
+                'tax_sub_total': 
+                {'taxable_amount': 500.0, 
+                'tax_amount': 75.0, 
+                'tax_category_id': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None), 
+                'tax_percent': 15.0, 'tax_scheme': 'VAT'}}, 
+        'item':
+                  {'name': 'asd', 
+                  'item_tax_category': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None), 
+                  'item_tax_percent': 15.0,
+                    'item_tax_scheme': 'VAT'}
+                , 'price': 0.0}]}
+
+
+        """  
+        prepayment_invoice = PrePaymentServiceImp()
+        prepayment_invoice.validate_prepayment_invoice(self.result, self.sales_invoice_doc)      
         # --------------------------- END Getting Invoice's item lines ------------------------------
+

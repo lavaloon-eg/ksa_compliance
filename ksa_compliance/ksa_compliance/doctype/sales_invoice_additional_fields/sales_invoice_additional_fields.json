@@ -16,7 +16,6 @@
   "invoice_doctype",
   "sales_invoice",
   "is_latest",
-  "prepayment_invoice",
   "uuid",
   "invoice_type_code",
   "invoice_type_transaction",
@@ -638,16 +637,6 @@
    "fieldname": "download_zatca_pdf",
    "fieldtype": "Button",
    "label": "Download ZATCA PDF"
-  },
-  {
-   "default": "0",
-   "fieldname": "prepayment_invoice",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Prepayment Invoice",
-   "no_copy": 1,
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -658,7 +647,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2025-05-28 14:36:44.478487",
+ "modified": "2025-06-02 03:24:10.996563",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
