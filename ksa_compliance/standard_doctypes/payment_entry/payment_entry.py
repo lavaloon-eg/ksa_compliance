@@ -1,14 +1,11 @@
 import frappe
+from frappe import _
 
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
     SalesInvoiceAdditionalFields,
 )
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
-from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import (
-    ZATCAPrecomputedInvoice,
-)
-from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 
 
 from ksa_compliance import logger
@@ -16,9 +13,6 @@ from result import is_ok
 
 
 def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, method: str = None):
-    if self.doctype == 'Payment Entry' and not ZATCABusinessSettings._should_enable_zatca_for_invoice(self.name):
-        logger.info(f"Skipping additional fields for {self.name} because it's before start date")
-        return
     if not ZATCABusinessSettings.is_prepayment_invoice(self.name):
         logger.info(f"Skipping additional fields for {self.name} because it's not a prepayment invoice")
         return
@@ -31,19 +25,7 @@ def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, meth
         logger.info(f'Skipping additional fields for {self.name} because ZATCA integration is disabled in settings')
         return
     prepayment_additional_fields_doc = SalesInvoiceAdditionalFields.create_for_invoice(self.name, self.doctype)
-    precomputed_invoice = ZATCAPrecomputedInvoice.for_invoice(self.name)
     is_live_sync = settings.is_live_sync
-    if precomputed_invoice:
-        logger.info(f'Using precomputed invoice {precomputed_invoice.name} for {self.name}')
-        prepayment_additional_fields_doc.use_precomputed_invoice(precomputed_invoice)
-
-        egs_settings = ZATCAEGS.for_device(precomputed_invoice.device_id)
-        if not egs_settings:
-            logger.warning(f'Could not find EGS for device {precomputed_invoice.device_id}')
-        else:
-            # EGS Setting overrides company-wide setting
-            is_live_sync = egs_settings.is_live_sync
-    prepayment_additional_fields_doc.prepayment_invoice = 1
     prepayment_additional_fields_doc.insert()
 
     if is_live_sync:
@@ -66,4 +48,9 @@ def validate_prepayment_invoice(self: PaymentEntry, method):
 
 
 def prevent_cancellation_of_prepayment_invoice(self: PaymentEntry, method):
-    pass
+    is_phase_2_enabled_for_company = ZATCABusinessSettings.is_enabled_for_company(self.company)
+    if is_phase_2_enabled_for_company and self.custom_prepayment_invoice:
+        frappe.throw(
+            msg=_('You cannot cancel Prepayment Invoice according to ZATCA Regulations.'),
+            title=_('This Action Is Not Allowed'),
+        )
