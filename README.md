@@ -1,9 +1,8 @@
-KSA Compliance
---------------
+# KSA Compliance
 
 A free and open-source Frappe application for KSA Compliance (ZATCA Integration), offering support for both Phase 1 and Phase 2.
 
-### Main Features
+## Main Features
 
 1.  ZATCA Phase 1 - compliance
 2.  ZATCA Phase 2 - compliance
@@ -26,7 +25,7 @@ A free and open-source Frappe application for KSA Compliance (ZATCA Integration)
 19. System XML validation
 20. Support ZATCA Sandbox
 
-### How to Install
+## How to Install
 
 -   **Frappe Cloud:**\
     One-click installing available if you are hosting on Frappe Cloud
@@ -53,7 +52,7 @@ bench restart
 ```
 
 
-### Support
+## Support
 
 ### Frappe Cloud:
 
@@ -74,13 +73,46 @@ bench restart
   - For invoice rejections, please attach or paste the generated invoice XML (from `Sales Invoice Additional Fields`), any validation warnings/errors, and screenshots of the `Sales Invoice` document
 - For paid features, you can email us: <info@lavaloon.com>
 
-### **Contributing**
+## **Contributing**
 
-Will using this the same guidelines from ERPNext
+### Issues
 
-1. [**Issue Guidelines**](https://github.com/frappe/erpnext/wiki/Issue-Guidelines "https://github.com/frappe/erpnext/wiki/issue-guidelines")
-2. [**Pull Request Requirements**](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines "https://github.com/frappe/erpnext/wiki/contribution-guidelines")
+[**Issue Guidelines**](https://github.com/frappe/erpnext/wiki/Issue-Guidelines "https://github.com/frappe/erpnext/wiki/issue-guidelines")
 
-### License
+### Development Setup (PRs)
+
+This project is configured to run `ruff lint` and `run format` before commits, but you have to set it up locally as
+follows. Setup development dependencies:
+
+```bash
+bench setup requirements --dev
+```
+
+Activate the bench environment:
+
+```bash
+source env/bin/activate
+```
+
+Install the pre-commit hook:
+
+```bash
+pre-commit install
+```
+
+This will generate a git hook at `.git/hooks/pre-commit`. This hook will run before committing and will fail if:
+* There are errors that can't be automatically fixed. In this case, fix them manually and commit
+* If formatting changes were applied. In this case, simply try to commit again and it should go through
+
+You can run either manually from bench after activating the environment using:
+
+```bash
+ruff lint
+ruff format
+```
+You can also add them as "External Tools" in PyCharm to be able to run them from the `Tools -> External Tools` menu
+(or assign them shortcuts from the action search menu)
+
+## License
 
 Copyright (c) 2024 LavaLoon, The KSA Compliance App code is licensed as AGPL
