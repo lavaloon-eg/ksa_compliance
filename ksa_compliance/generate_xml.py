@@ -15,7 +15,7 @@ def generate_xml_file(data: dict):
                 'seller_details': data.get('seller_details'),
                 'buyer_details': data.get('buyer_details'),
                 'business_settings': data.get('business_settings'),
-                "prepament_invoice": data.get('prepament_invoice'),
+                "prepayment_invoice": data.get('prepayment_invoice'),
             }
         )
     finally:

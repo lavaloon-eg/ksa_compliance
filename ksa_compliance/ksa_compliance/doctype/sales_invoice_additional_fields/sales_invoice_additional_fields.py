@@ -97,7 +97,6 @@ class SalesInvoiceAdditionalFields(Document):
         precomputed: DF.Check
         precomputed_invoice: DF.Link | None
         prepayment_id: DF.Data | None
-        prepayment_invoice: DF.Check
         prepayment_issue_date: DF.Date | None
         prepayment_issue_time: DF.Data | None
         prepayment_type_code: DF.Data | None
