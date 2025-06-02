@@ -54,7 +54,9 @@ class SalesInvoiceAdditionalFields(Document):
 
     if TYPE_CHECKING:
         from frappe.types import DF
-        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import AdditionalSellerIDs
+        from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import (
+            AdditionalSellerIDs,
+        )
 
         allowance_indicator: DF.Check
         allowance_vat_category_code: DF.Data | None
@@ -75,9 +77,18 @@ class SalesInvoiceAdditionalFields(Document):
         charge_vat_category_code: DF.Data | None
         code_for_allowance_reason: DF.Data | None
         fatoora_invoice_discount_amount: DF.Float
-        integration_status: DF.Literal["", "Ready For Batch", "Resend", "Corrected", "Accepted with warnings", "Accepted", "Rejected", "Clearance switched off"]
+        integration_status: DF.Literal[
+            '',
+            'Ready For Batch',
+            'Resend',
+            'Corrected',
+            'Accepted with warnings',
+            'Accepted',
+            'Rejected',
+            'Clearance switched off',
+        ]
         invoice_counter: DF.Int
-        invoice_doctype: DF.Literal["Sales Invoice", "POS Invoice", "Payment Entry"]
+        invoice_doctype: DF.Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']
         invoice_hash: DF.Data | None
         invoice_line_allowance_reason: DF.Data | None
         invoice_line_allowance_reason_code: DF.Data | None
@@ -170,7 +181,9 @@ class SalesInvoiceAdditionalFields(Document):
         if not settings:
             frappe.throw(f'Missing ZATCA business settings for sales invoice: {self.sales_invoice}')
 
-        sales_invoice = cast(SalesInvoice | POSInvoice | PaymentEntry, frappe.get_doc(self.invoice_doctype, self.sales_invoice))
+        sales_invoice = cast(
+            SalesInvoice | POSInvoice | PaymentEntry, frappe.get_doc(self.invoice_doctype, self.sales_invoice)
+        )
         self.uuid = str(uuid.uuid4())
         self.tax_currency = 'SAR'  # Review: Set as "SAR" as a default tax currency value
 
@@ -331,7 +344,7 @@ class SalesInvoiceAdditionalFields(Document):
     def _get_payment_means_type_code(self, invoice: SalesInvoice | POSInvoice | PaymentEntry) -> Optional[str]:
         if isinstance(invoice, PaymentEntry):
             return frappe.get_value('Mode of Payment', invoice.mode_of_payment, 'custom_zatca_payment_means_code')
-            
+
         # An invoice can have multiple modes of payment, but we currently only support one. Therefore, we retrieve the
         # first one if any
         if not invoice.payments:
@@ -340,7 +353,6 @@ class SalesInvoiceAdditionalFields(Document):
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
     def _set_buyer_details(self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry):
-
         if isinstance(sales_invoice, PaymentEntry):
             customer_name = sales_invoice.party
         else:

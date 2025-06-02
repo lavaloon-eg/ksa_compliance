@@ -7,10 +7,9 @@ class _ItemBuilder(ToDict):
         for key, value in attributes.items():
             setattr(self, key, value)
 
-class ItemBuilder(BuilderAbc):
-    mandatory_fields = [
 
-    ]
+class ItemBuilder(BuilderAbc):
+    mandatory_fields = []
 
     def _validate(self):
         for field in self.mandatory_fields:
@@ -21,15 +20,18 @@ class ItemBuilder(BuilderAbc):
         kwargs = self._get_non_callable_non_private_attributes(self)
         return _ItemBuilder(kwargs).to_dict()
 
-    def set_name(self, name: str) -> "ItemBuilder":
+    def set_name(self, name: str) -> 'ItemBuilder':
         self.name = name
         return self
-    def set_item_tax_category(self, item_tax_category) -> "ItemBuilder":
+
+    def set_item_tax_category(self, item_tax_category) -> 'ItemBuilder':
         self.item_tax_category = item_tax_category
         return self
-    def set_item_tax_percent(self, item_tax_percent: float) -> "ItemBuilder":
+
+    def set_item_tax_percent(self, item_tax_percent: float) -> 'ItemBuilder':
         self.item_tax_percent = item_tax_percent
         return self
-    def set_item_tax_scheme(self, item_tax_scheme) -> "ItemBuilder":
+
+    def set_item_tax_scheme(self, item_tax_scheme) -> 'ItemBuilder':
         self.item_tax_scheme = item_tax_scheme
         return self

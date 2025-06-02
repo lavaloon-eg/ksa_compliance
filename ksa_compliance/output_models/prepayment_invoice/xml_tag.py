@@ -1,4 +1,3 @@
-
 class XMLAttribute:
     def __init__(self, name, value):
         self.name = name
@@ -6,6 +5,7 @@ class XMLAttribute:
 
     def __repr__(self):
         return f'{self.name}="{self.value}"'
+
 
 class XMLTag:
     def __init__(self, tag_name, attributes=None, text=None):
