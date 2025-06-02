@@ -1013,7 +1013,7 @@ class Einvoice:
             it.rate for it in self.sales_invoice_doc.get('taxes', [])
         )
         self.result['invoice']['item_lines'] = item_lines
-        self.result['invoice']['line_extension_amount'] = sum(it['line_extension_amount'] * it['qty'] for it in item_lines)
+        self.result['invoice']['line_extension_amount'] = sum(it['line_extension_amount'] for it in item_lines)
         self.compute_invoice_discount_amount()
         self.result['invoice']['net_total'] = (
             self.result['invoice']['line_extension_amount'] 
