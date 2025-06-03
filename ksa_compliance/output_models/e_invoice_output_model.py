@@ -18,7 +18,8 @@ from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
-from .prepayment_invoice.service import PrePaymentServiceImp
+from .prepayment_invoice.service import validate_prepayment_invoice_is_sent, update_result
+from .prepayment_invoice.factory.prepayment_invoice_factory import prepayment_invoice_factory_create
 
 
 def append_tax_categories_to_item(
@@ -784,6 +785,9 @@ class Einvoice:
         for item in doc.items:
             discount_amount = self._calculate_discount_amount(item, is_tax_included)
             amount_after_discount, base_amount = self._calculate_amounts(item, discount_amount, is_tax_included)
+            amount_after_discount_cac = self._calculate_amount_after_discount(
+                item, discount_amount, amount_after_discount, base_amount
+            )
             line_extension_amount = amount_after_discount
 
             item_data = {
@@ -793,8 +797,8 @@ class Einvoice:
                 'item_code': item.item_code,
                 'item_name': item.item_name,
                 'net_amount': abs(item.base_net_amount),
-                'amount_after_discount': abs(amount_after_discount) * abs(item.qty),
-                'base_amount_rate': abs(base_amount) * abs(item.qty),
+                'amount_after_discount': abs(amount_after_discount_cac) * abs(item.qty),
+                'base_amount': abs(base_amount) * abs(item.qty),
                 'line_extension_amount': abs(line_extension_amount) * abs(item.qty),
                 'rounding_amount': abs(amount_after_discount * abs(item.qty)) + abs(item.tax_amount or 0),
                 'amount': (item.base_amount or 0) + discount_amount + (item.tax_amount or 0),
@@ -835,6 +839,14 @@ class Einvoice:
             base_amount = amount_after_discount
 
         return amount_after_discount, base_amount
+
+    def _calculate_amount_after_discount(
+        self, item, discount_amount: float, amount_after_discount: float, base_amount
+    ) -> float:
+        if discount_amount:
+            amount_after_discount = base_amount - item.discount_amount
+            return amount_after_discount
+        return amount_after_discount
 
     def get_e_invoice_details(self, invoice_type: str):
         is_standard = invoice_type == 'Standard'
@@ -1081,6 +1093,14 @@ class Einvoice:
 
 
         """
-        prepayment_invoice = PrePaymentServiceImp()
-        prepayment_invoice.validate_prepayment_invoice(self.result, self.sales_invoice_doc)
+
+        if self.sales_invoice_doc.doctype == 'Payment Entry':
+            return
+        if self.sales_invoice_doc.doctype == 'POS Invoice':
+            return
+        if self.sales_invoice_doc.doctype == 'Sales Invoice' and not self.sales_invoice_doc.advances:
+            return
+        validate_prepayment_invoice_is_sent(self.sales_invoice_doc)
+        self.result['prepayment_invoice'] = prepayment_invoice_factory_create(self.result, self.sales_invoice_doc)
+        update_result(self.result, self.sales_invoice_doc)
         # --------------------------- END Getting Invoice's item lines ------------------------------

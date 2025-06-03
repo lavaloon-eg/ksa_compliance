@@ -13,9 +13,10 @@ from result import is_ok
 
 
 def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, method: str = None):
-    if not ZATCABusinessSettings.is_prepayment_invoice(self.name):
+    if not self.custom_prepayment_invoice:
         logger.info(f"Skipping additional fields for {self.name} because it's not a prepayment invoice")
         return
+
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
         logger.info(f'Skipping additional fields for {self.name} because of missing ZATCA settings')
@@ -24,6 +25,7 @@ def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, meth
     if not settings.enable_zatca_integration:
         logger.info(f'Skipping additional fields for {self.name} because ZATCA integration is disabled in settings')
         return
+
     prepayment_additional_fields_doc = SalesInvoiceAdditionalFields.create_for_invoice(self.name, self.doctype)
     is_live_sync = settings.is_live_sync
     prepayment_additional_fields_doc.insert()

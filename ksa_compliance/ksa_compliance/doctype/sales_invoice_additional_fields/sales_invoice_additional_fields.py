@@ -357,7 +357,7 @@ class SalesInvoiceAdditionalFields(Document):
         return '388'
 
     def _get_payment_means_type_code(self, invoice: SalesInvoice | POSInvoice | PaymentEntry) -> Optional[str]:
-        if isinstance(invoice, PaymentEntry):
+        if invoice.doctype == 'Payment Entry':
             return frappe.get_value('Mode of Payment', invoice.mode_of_payment, 'custom_zatca_payment_means_code')
 
         # An invoice can have multiple modes of payment, but we currently only support one. Therefore, we retrieve the
@@ -368,7 +368,7 @@ class SalesInvoiceAdditionalFields(Document):
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
     def _set_buyer_details(self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry):
-        if isinstance(sales_invoice, PaymentEntry):
+        if sales_invoice.doctype == 'Payment Entry':
             customer_name = sales_invoice.party
         else:
             customer_name = sales_invoice.customer

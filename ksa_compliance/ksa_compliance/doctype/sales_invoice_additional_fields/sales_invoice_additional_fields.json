@@ -58,7 +58,6 @@
   "charge_vat_category_code",
   "reason_for_charge",
   "reason_for_charge_code",
-  "allow_submit",
   "section_break_ytrn",
   "column_break_bcho",
   "fatoora_invoice_discount_amount",
@@ -93,6 +92,7 @@
   "invoice_xml",
   "download_xml",
   "download_zatca_pdf",
+  "allow_submit",
   "tab_4_tab",
   "validation_section",
   "validation_messages",
@@ -637,6 +637,14 @@
    "fieldname": "download_zatca_pdf",
    "fieldtype": "Button",
    "label": "Download ZATCA PDF"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_submit",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Allow Submit",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -647,7 +655,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2025-06-02 03:24:10.996563",
+ "modified": "2025-06-03 09:36:36.706287",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
