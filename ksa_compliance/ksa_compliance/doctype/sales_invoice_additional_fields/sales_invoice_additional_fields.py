@@ -7,7 +7,7 @@ import html
 import uuid
 from io import BytesIO
 from typing import cast, Optional, Literal
-
+from ksa_compliance import SALES_INVOICE_CODE, DEBIT_NOTE_CODE, CREDIT_NOTE_CODE, PREPAYMENT_INVOICE_CODE
 import frappe
 import frappe.utils.background_jobs
 import pyqrcode
@@ -347,14 +347,12 @@ class SalesInvoiceAdditionalFields(Document):
     def _get_invoice_type_code(self, invoice_doc: SalesInvoice | POSInvoice | PaymentEntry) -> str:
         # POSInvoice doesn't have an is_debit_note field
         if invoice_doc.doctype == 'Payment Entry' and invoice_doc.custom_prepayment_invoice:
-            return '386'
+            return str(PREPAYMENT_INVOICE_CODE)
         if invoice_doc.doctype == 'Sales Invoice' and invoice_doc.is_debit_note:
-            return '383'
-
+            return str(DEBIT_NOTE_CODE)
         if invoice_doc.is_return:
-            return '381'
-
-        return '388'
+            return str(CREDIT_NOTE_CODE)
+        return str(SALES_INVOICE_CODE)
 
     def _get_payment_means_type_code(self, invoice: SalesInvoice | POSInvoice | PaymentEntry) -> Optional[str]:
         if invoice.doctype == 'Payment Entry':

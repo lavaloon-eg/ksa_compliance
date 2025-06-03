@@ -7,3 +7,9 @@ logger.setLevel(logging.INFO)
 
 
 __version__ = '0.49.1'
+
+
+SALES_INVOICE_CODE = 388
+DEBIT_NOTE_CODE = 383
+CREDIT_NOTE_CODE = 381
+PREPAYMENT_INVOICE_CODE = 386

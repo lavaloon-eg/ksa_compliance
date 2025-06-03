@@ -203,7 +203,7 @@
         <cbc:PayableRoundingAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.rounding_adjustment, 2) }}</cbc:PayableRoundingAmount>
         {% endif %}
         {% if prepayment_invoice %}
-            <cbc:PrepaidAmount currencyID="{{prepayment_invoice.currency}}" >{{ rounded(prepayment_invoice.prepaid_amount)}}</cbc:PrepaidAmount>
+            <cbc:PrepaidAmount currencyID="{{prepayment_invoice.currency}}" >{{ rounded(prepayment_invoice.prepaid_amount, 2)}}</cbc:PrepaidAmount>
         {% endif %}
 
         <cbc:PayableAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.payable_amount, 2) }}</cbc:PayableAmount>
@@ -272,17 +272,17 @@
             <cbc:RoundingAmount currencyID="{{prepayment_invoice.currency}}">0.00</cbc:RoundingAmount>
 
             <cac:TaxSubtotal>
-                <cbc:TaxableAmount currencyID="{{prepayment_invoice.currency}}">{{rounded(row.tax_total.tax_sub_total.taxable_amount)}}</cbc:TaxableAmount>
+                <cbc:TaxableAmount currencyID="{{prepayment_invoice.currency}}">{{rounded(row.tax_total.tax_subtotal.taxable_amount, 2)}}</cbc:TaxableAmount>
 
-                <cbc:TaxAmount currencyID="{{prepayment_invoice.currency}}">{{rounded(row.tax_total.tax_sub_total.tax_amount)}}</cbc:TaxAmount>
+                <cbc:TaxAmount currencyID="{{prepayment_invoice.currency}}">{{rounded(row.tax_total.tax_subtotal.tax_amount, 2)}}</cbc:TaxAmount>
 
                 <cac:TaxCategory>
-                    <cbc:ID>{{row.tax_total.tax_sub_total.tax_category_id}}</cbc:ID>
+                    <cbc:ID>{{row.tax_total.tax_subtotal.tax_category_id}}</cbc:ID>
 
-                    <cbc:Percent>{{row.tax_total.tax_sub_total.tax_percent}}</cbc:Percent>
+                    <cbc:Percent>{{row.tax_total.tax_subtotal.tax_percent}}</cbc:Percent>
 
                     <cac:TaxScheme>
-                        <cbc:ID>{{row.tax_total.tax_sub_total.tax_scheme}}</cbc:ID>
+                        <cbc:ID>{{row.tax_total.tax_subtotal.tax_scheme}}</cbc:ID>
                     </cac:TaxScheme>
                 </cac:TaxCategory>
             </cac:TaxSubtotal>
@@ -290,10 +290,10 @@
         <cac:Item>
             <cbc:Name>{{row.item.name}}</cbc:Name>
             <cac:ClassifiedTaxCategory>
-                <cbc:ID>{{row.item.item_tax_category}}</cbc:ID>
-                <cbc:Percent>{{row.item.item_tax_percent}}</cbc:Percent>
+                <cbc:ID>{{row.item.tax_category}}</cbc:ID>
+                <cbc:Percent>{{row.item.tax_percent}}</cbc:Percent>
                 <cac:TaxScheme>
-                    <cbc:ID>{{row.item.item_tax_scheme}}</cbc:ID>
+                    <cbc:ID>{{row.item.tax_scheme}}</cbc:ID>
                 </cac:TaxScheme>
             </cac:ClassifiedTaxCategory>
         </cac:Item>

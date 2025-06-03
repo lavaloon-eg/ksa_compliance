@@ -19,7 +19,7 @@ from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
 from .prepayment_invoice.service import validate_prepayment_invoice_is_sent, update_result
-from .prepayment_invoice.factory.prepayment_invoice_factory import prepayment_invoice_factory_create
+from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
 
 
 def append_tax_categories_to_item(
@@ -754,6 +754,7 @@ class Einvoice:
             self._append_sales_invoice_items(item_lines, is_tax_included, sales_invoice_doc)
 
     def _append_payment_entry_item(self, item_lines: list, doc: SalesInvoice) -> None:
+        values = self._calculate_payment_entry_values(doc)
         """Handles payment entry specific item formatting."""
         item_data = {
             'idx': 1,
@@ -761,12 +762,12 @@ class Einvoice:
             'uom': 'Unit',
             'item_code': 'Prepayment Invoice Item',
             'item_name': self.sales_invoice_doc.custom_prepayment_invoice_description or self.sales_invoice_doc.remarks,
-            'net_amount': abs(self.sales_invoice_doc.base_received_amount),
-            'amount_after_discount': abs(self.sales_invoice_doc.base_received_amount),
+            'net_amount': abs(values.net_amount),
+            'amount_after_discount': abs(values.amount_after_discount),
             'amount': abs(self.sales_invoice_doc.base_received_amount_after_tax),
             'base_net_rate': abs(self.sales_invoice_doc.base_received_amount),
             'base_net_amount': abs(self.sales_invoice_doc.base_received_amount),
-            'line_extension_amount': abs(self.sales_invoice_doc.base_received_amount),
+            'line_extension_amount': abs(values.line_extension_amount),
             'base_amount': abs(self.sales_invoice_doc.base_received_amount),
             'rounding_amount': abs(self.sales_invoice_doc.base_received_amount_after_tax),
             'rate': abs(self.sales_invoice_doc.base_received_amount),
@@ -780,16 +781,28 @@ class Einvoice:
 
         item_lines.append(item_data)
 
+    def _calculate_payment_entry_values(self, doc: SalesInvoice) -> dict:
+        values = frappe._dict()
+        included_in_paid_amount = doc.taxes[0].included_in_paid_amount
+        if included_in_paid_amount:
+            values.amount_after_discount = doc.paid_amount - doc.total_taxes_and_charges
+            values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
+            values.net_amount = doc.paid_amount - doc.total_taxes_and_charges
+        else:
+            values.amount_after_discount = doc.base_received_amount
+            values.line_extension_amount = doc.base_received_amount
+            values.net_amount = doc.base_received_amount
+        return values
+
     def _append_sales_invoice_items(self, item_lines: list, is_tax_included: bool, doc: SalesInvoice) -> None:
         """Processes regular sales invoice items with proper tax and discount calculations."""
         for item in doc.items:
             discount_amount = self._calculate_discount_amount(item, is_tax_included)
             amount_after_discount, base_amount = self._calculate_amounts(item, discount_amount, is_tax_included)
             amount_after_discount_cac = self._calculate_amount_after_discount(
-                item, discount_amount, amount_after_discount, base_amount
+                discount_amount, amount_after_discount, base_amount
             )
             line_extension_amount = amount_after_discount
-
             item_data = {
                 'idx': item.idx,
                 'qty': abs(item.qty),
@@ -841,10 +854,10 @@ class Einvoice:
         return amount_after_discount, base_amount
 
     def _calculate_amount_after_discount(
-        self, item, discount_amount: float, amount_after_discount: float, base_amount
+        self, discount_amount: float, amount_after_discount: float, base_amount
     ) -> float:
         if discount_amount:
-            amount_after_discount = base_amount - item.discount_amount
+            amount_after_discount = base_amount - discount_amount
             return amount_after_discount
         return amount_after_discount
 
@@ -1031,6 +1044,11 @@ class Einvoice:
         self.result['invoice']['net_total'] = (
             self.result['invoice']['line_extension_amount'] - self.result['invoice']['allowance_total_amount']
         )
+        if self.sales_invoice_doc.doctype == 'Payment Entry':
+            if self.sales_invoice_doc.taxes[0].included_in_paid_amount:
+                self.result['invoice']['net_total'] = (
+                    self.sales_invoice_doc.paid_amount - self.sales_invoice_doc.total_taxes_and_charges
+                )
         self.result['invoice']['grand_total'] = (
             self.result['invoice']['net_total'] + self.result['invoice']['total_taxes_and_charges']
         )
