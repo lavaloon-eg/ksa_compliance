@@ -12,4 +12,12 @@ class TaxSubtotal:
 
     def __post_init__(self):
         """Validation runs automatically after initialization"""
-        validate_mandatory_fields(self)
+        validate_mandatory_fields(
+            self,
+            {
+                'taxable_amount': 'Taxable amount is mandatory',
+                'tax_amount': 'Tax amount is mandatory',
+                'tax_category_id': 'Tax category ID is mandatory',
+                'tax_percent': 'Tax percent is mandatory',
+            },
+        )

@@ -1035,65 +1035,6 @@ class Einvoice:
             self.result['invoice']['net_total'] + self.result['invoice']['total_taxes_and_charges']
         )
 
-        # PrePayment Invoice
-        """
-        Prepayment Service Imp returns
-{'prepaid_amount': 1000.0, 'currency': 'SAR', 'prepaid_amount_xml_tag': , 
-'invoice_lines': [
-        {'id': 1, 'id_xml_tag': , 
-        'invoice_quantity': 0.0, 
-        'invoice_quantity_xml_tag': , 
-        'line_extention_amount': 0.0, 
-        'line_extention_amount_xml_tag': , 
-    'document_reference': 
-        {'id': 'ACC-PAY-DMSN-2025-03613', 
-        'issue_date': '2025-05-28', 
-        'issue_time': '18:39:41', 
-        'document_type_code': 386},
-    'tax_total': 
-        {'tax_amount': 0.0, 
-        'rounding_amount': 0.0, 
-    'tax_sub_total': 
-        {'taxable_amount': 500.0,
-          'tax_amount': 75.0, 
-            'tax_category_id': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None), 
-            'tax_percent': 15.0, 
-            'tax_scheme': 'VAT'}}, 
-    'item':     
-            {'name': '123', 
-            'item_tax_category': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None),
-              'item_tax_percent': 15.0, 
-              'item_tax_scheme': 'VAT'},
-                'price': 0.0}, 
-                {'id': 2, 
-                'id_xml_tag': ,
-                  'invoice_quantity': 0.0, 
-                  'invoice_quantity_xml_tag': , 
-                  'line_extention_amount': 0.0, 
-                  'line_extention_amount_xml_tag': ,
-        'document_reference': 
-            {'id': 'ACC-PAY-DMSN-2025-03614', 
-            'issue_date': '2025-05-28', 
-            'issue_time': '18:51:01',
-              'document_type_code': 386},
-        'tax_total': 
-            {'tax_amount': 0.0, 
-                'rounding_amount': 0.0, 
-                'tax_sub_total': 
-                {'taxable_amount': 500.0, 
-                'tax_amount': 75.0, 
-                'tax_category_id': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None), 
-                'tax_percent': 15.0, 'tax_scheme': 'VAT'}}, 
-        'item':
-                  {'name': 'asd', 
-                  'item_tax_category': ZatcaTaxCategory(tax_category_code='S', reason_code=None, arabic_reason=None), 
-                  'item_tax_percent': 15.0,
-                    'item_tax_scheme': 'VAT'}
-                , 'price': 0.0}]}
-
-
-        """
-
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             return
         if self.sales_invoice_doc.doctype == 'POS Invoice':
