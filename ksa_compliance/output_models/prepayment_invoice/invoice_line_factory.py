@@ -24,7 +24,7 @@ def _create_invoice_line(advance: SalesInvoicePayment, doc: SalesInvoice) -> Inv
     tax_category = map_tax_category(tax_category_id=tax_category_id)
 
     return InvoiceLine(
-        id=advance.idx
+        idx=advance.idx
         + len(
             doc.items
         ),  # Ensure unique ID by offsetting with number of items also zatca refused advance.reference_name as id here

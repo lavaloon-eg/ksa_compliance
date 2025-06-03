@@ -251,7 +251,7 @@
     {% if prepayment_invoice %}
         {% for row in prepayment_invoice.invoice_lines %}
     <cac:InvoiceLine>
-        <cbc:ID>{{row.id | escape}}</cbc:ID>
+        <cbc:ID>{{row.idx}}</cbc:ID>
         <cbc:InvoicedQuantity unitCode="PCE">0.00</cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="{{prepayment_invoice.currency}}">0.00</cbc:LineExtensionAmount>
 

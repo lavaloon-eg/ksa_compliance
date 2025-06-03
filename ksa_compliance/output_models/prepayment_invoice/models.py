@@ -88,7 +88,7 @@ class TaxTotal:
 
 @dataclass
 class InvoiceLine:
-    id: int
+    idx: int
     uuid: str
     document_reference: DocumentReference
     tax_total: TaxTotal
@@ -101,7 +101,7 @@ class InvoiceLine:
         validate_mandatory_fields(
             self,
             {
-                'id': 'Invoice line ID is mandatory',
+                'idx': 'Invoice line ID is mandatory',
                 'uuid': 'UUID is mandatory',
                 'document_reference': 'Document reference is mandatory',
                 'tax_total': 'Tax total is mandatory',
