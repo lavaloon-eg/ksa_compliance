@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from ...validators import validate_madatory_fields
+from ...validators import validate_mandatory_fields
 
 
 @dataclass
@@ -12,7 +12,7 @@ class PrepaymentInvoice:
 
     def __post_init__(self):
         """Validation runs automatically after initialization"""
-        validate_madatory_fields(
+        validate_mandatory_fields(
             self,
             {
                 'prepaid_amount': 'Prepaid amount is mandatory',
