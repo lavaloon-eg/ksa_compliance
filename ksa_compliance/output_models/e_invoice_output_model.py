@@ -753,7 +753,7 @@ class Einvoice:
         else:
             self._append_sales_invoice_items(item_lines, is_tax_included, sales_invoice_doc)
 
-    def _append_payment_entry_item(self, item_lines: list, doc: SalesInvoice) -> None:
+    def _append_payment_entry_item(self, item_lines: list, doc: PaymentEntry) -> None:
         values = self._calculate_payment_entry_values(doc)
         """Handles payment entry specific item formatting."""
         item_data = {
@@ -781,7 +781,7 @@ class Einvoice:
 
         item_lines.append(item_data)
 
-    def _calculate_payment_entry_values(self, doc: SalesInvoice) -> dict:
+    def _calculate_payment_entry_values(self, doc: PaymentEntry) -> dict:
         values = frappe._dict()
         included_in_paid_amount = doc.taxes[0].included_in_paid_amount
         if included_in_paid_amount:
