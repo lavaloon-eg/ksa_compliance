@@ -108,7 +108,6 @@ class ZATCABusinessSettings(Document):
             'Zero rated goods || Private healthcare to citizen',
             'Zero rated goods || Supply of qualified military goods',
         ]
-
     # end: auto-generated types
 
     def after_insert(self):
@@ -281,7 +280,7 @@ class ZATCABusinessSettings(Document):
 
     @staticmethod
     def for_invoice(
-        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice']
+        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']
     ) -> Optional['ZATCABusinessSettings']:
         company_id = frappe.db.get_value(doctype, invoice_id, ['company'])
         if not company_id:
