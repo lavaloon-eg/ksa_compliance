@@ -18,7 +18,7 @@ from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
-from .prepayment_invoice.service import validate_prepayment_invoice_is_sent, update_result
+from .prepayment_invoice.service import update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
 
 
@@ -975,7 +975,7 @@ class Einvoice:
             field_name='total_advance', source_doc=self.sales_invoice_doc, xml_name='prepaid_amount', parent='invoice'
         )
 
-        if self.sales_invoice_doc.is_rounded_total_disabled():
+        if self.sales_invoice_doc.doctype == 'Payment Entry' or self.sales_invoice_doc.is_rounded_total_disabled():
             self.result['invoice']['payable_amount'] = abs(
                 self.sales_invoice_doc.get(self.get_right_fieldname('grand_total', self.sales_invoice_doc.doctype))
             )
@@ -1059,7 +1059,6 @@ class Einvoice:
             return
         if self.sales_invoice_doc.doctype == 'Sales Invoice' and not self.sales_invoice_doc.advances:
             return
-        validate_prepayment_invoice_is_sent(self.sales_invoice_doc)
         self.result['prepayment_invoice'] = prepayment_invoice_factory_create(self.result, self.sales_invoice_doc)
         update_result(self.result, self.sales_invoice_doc)
         # --------------------------- END Getting Invoice's item lines ------------------------------

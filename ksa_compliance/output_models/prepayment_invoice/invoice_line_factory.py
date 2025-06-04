@@ -14,7 +14,11 @@ from typing import cast
 
 def invoice_line_create(doc: SalesInvoice) -> list[dict]:
     """Create invoice lines from document advances"""
-    return [asdict(_create_invoice_line(advance, doc)) for advance in doc.advances]
+    return [
+        asdict(_create_invoice_line(advance, doc))
+        for advance in doc.advances
+        if frappe.db.get_value('Payment Entry', advance.reference_name, 'custom_prepayment_invoice')
+    ]
 
 
 def _create_invoice_line(advance: SalesInvoicePayment, doc: SalesInvoice) -> InvoiceLine:
