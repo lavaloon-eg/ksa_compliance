@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.50.1
+
+* Fix prepayment issues
+
 ## 0.50.0
 
 * (Internal change) Allow retrieval of revoked ZATCA Business Settings
