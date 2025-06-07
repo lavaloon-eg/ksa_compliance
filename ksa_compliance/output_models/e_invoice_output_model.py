@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast, Optional, List, Literal
+from typing import cast, Optional, List
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
@@ -20,7 +20,8 @@ from ksa_compliance.translation import ft
 from .service import get_right_fieldname, update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
 
-from .tax import create_tax_categories, create_allowance_charge ,create_tax_total
+from .tax import create_tax_categories, create_allowance_charge, create_tax_total
+
 
 class Einvoice:
     def __init__(
@@ -880,7 +881,6 @@ class Einvoice:
             field_name='total_advance', source_doc=self.sales_invoice_doc, xml_name='prepaid_amount', parent='invoice'
         )
 
-        
         self.get_float_value(
             field_name='outstanding_amount',
             source_doc=self.sales_invoice_doc,
@@ -935,7 +935,6 @@ class Einvoice:
 
         self.result['invoice']['payable_amount'] = self.result['invoice']['grand_total'] + rounding_adjustment
         self.result['invoice']['rounding_adjustment'] = rounding_adjustment
-
 
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             return

@@ -4,6 +4,7 @@ import frappe
 
 from ..output_models.models import ZatcaTaxCategory
 
+
 def map_tax_category(
     tax_category_id: Optional[str] = None, item_tax_template_id: Optional[str] = None
 ) -> ZatcaTaxCategory:

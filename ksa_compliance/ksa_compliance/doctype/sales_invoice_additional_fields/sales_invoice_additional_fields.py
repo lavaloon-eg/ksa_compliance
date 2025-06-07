@@ -376,8 +376,9 @@ class SalesInvoiceAdditionalFields(Document):
         if customer_doc.customer_primary_address:
             self._set_buyer_address(cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address)))
         else:
-            address = frappe.db.get_all("Dynamic Link", {"link_doctype": "Customer",
-                                                         "link_name": customer_doc.name}, pluck="parent")
+            address = frappe.db.get_all(
+                'Dynamic Link', {'link_doctype': 'Customer', 'link_name': customer_doc.name}, pluck='parent'
+            )
             if address:
                 self._set_buyer_address(cast(Address, frappe.get_doc('Address', address[0])))
 

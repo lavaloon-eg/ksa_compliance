@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, List
 from erpnext.stock.doctype.item.item import Item
 
+
 @dataclass
 class ZatcaTaxCategory:
     """Holds ZATCA tax category code, reason and reason code"""
@@ -14,8 +15,9 @@ class ZatcaTaxCategory:
 @dataclass
 class TaxCategory:
     id: ZatcaTaxCategory
-    percent : int
+    percent: int
     tax_scheme_id: str = 'VAT'
+
 
 @dataclass
 class TaxCategoryByItems:
@@ -30,15 +32,16 @@ class AllowanceCharge:
     charge_indicator: str = 'fales'
     allowance_charge_reason: str = 'discount'
 
+
 @dataclass
 class TaxSubtotal:
     taxable_amount: float
     tax_amount: float
     tax_category: TaxCategory
 
+
 @dataclass
 class TaxTotal:
     tax_amount: float
     taxable_amount: float
     tax_subtotal: List[TaxSubtotal]
-
