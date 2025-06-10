@@ -14,7 +14,7 @@ class ZatcaTaxCategory:
 
 @dataclass
 class TaxCategory:
-    id: ZatcaTaxCategory
+    zatca_tax_category_id: ZatcaTaxCategory
     percent: int
     tax_scheme_id: str = 'VAT'
 

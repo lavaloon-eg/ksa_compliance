@@ -151,13 +151,13 @@
         <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
         <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(allowance_charge.amount, 2) }}</cbc:Amount>
             <cac:TaxCategory>
-                <cbc:ID>{{ allowance_charge.tax_category.id.tax_category_code }}</cbc:ID>
+                <cbc:ID>{{ allowance_charge.tax_category.zatca_tax_category_id.tax_category_code }}</cbc:ID>
                 <cbc:Percent>{{ allowance_charge.tax_category.percent }}</cbc:Percent>
-                {% if allowance_charge.tax_category.id.reason_code %}
-                <cbc:TaxExemptionReasonCode>{{allowance_charge.tax_category.id.reason_code }}</cbc:TaxExemptionReasonCode>
+                {% if allowance_charge.tax_category.zatca_tax_category_id.reason_code %}
+                <cbc:TaxExemptionReasonCode>{{allowance_charge.tax_category.zatca_tax_category_id.reason_code }}</cbc:TaxExemptionReasonCode>
                 {% endif %}
-                {% if allowance_charge.tax_category.id.arabic_reason %}
-                <cbc:TaxExemptionReason>{{ allowance_charge.tax_category.id.arabic_reason }}</cbc:TaxExemptionReason>
+                {% if allowance_charge.tax_category.zatca_tax_category_id.arabic_reason %}
+                <cbc:TaxExemptionReason>{{ allowance_charge.tax_category.zatca_tax_category_id.arabic_reason }}</cbc:TaxExemptionReason>
                 {% endif %}
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
@@ -175,13 +175,13 @@
                 <cbc:TaxableAmount currencyID="{{ invoice.currency_code }}">{{ rounded(tax_subtotal.taxable_amount, 2) }}</cbc:TaxableAmount>
                 <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ rounded(tax_subtotal.tax_amount, 2) }}</cbc:TaxAmount>
                 <cac:TaxCategory>
-                    <cbc:ID>{{ tax_subtotal.tax_category.id.tax_category_code }}</cbc:ID>
+                    <cbc:ID>{{ tax_subtotal.tax_category.zatca_tax_category_id.tax_category_code }}</cbc:ID>
                     <cbc:Percent>{{ tax_subtotal.tax_category.percent }}</cbc:Percent>
-                    {% if tax_subtotal.tax_category.id.reason_code %}
-                    <cbc:TaxExemptionReasonCode>{{ tax_subtotal.tax_category.id.reason_code }}</cbc:TaxExemptionReasonCode>
+                    {% if tax_subtotal.tax_category.zatca_tax_category_id.reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ tax_subtotal.tax_category.zatca_tax_category_id.reason_code }}</cbc:TaxExemptionReasonCode>
                     {% endif %}
-                    {% if tax_subtotal.tax_category.id.arabic_reason %}
-                    <cbc:TaxExemptionReason>{{ tax_subtotal.tax_category.id.arabic_reason }}</cbc:TaxExemptionReason>
+                    {% if tax_subtotal.tax_category.zatca_tax_category_id.arabic_reason %}
+                    <cbc:TaxExemptionReason>{{ tax_subtotal.tax_category.zatca_tax_category_id.arabic_reason }}</cbc:TaxExemptionReason>
                     {% endif %}
                     <cac:TaxScheme>
                         <cbc:ID>VAT</cbc:ID>
@@ -217,13 +217,13 @@
         <cac:Item>
             <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
             <cac:ClassifiedTaxCategory>
-                <cbc:ID>{{ item.tax_category.id.tax_category_code }}</cbc:ID>
+                <cbc:ID>{{ item.tax_category.zatca_tax_category_id.tax_category_code }}</cbc:ID>
                 <cbc:Percent>{{ rounded(item.tax_percent or 0.0, 2)}}</cbc:Percent>
-                {% if item.tax_category.id.reason_code %}
-                    <cbc:TaxExemptionReasonCode>{{ item.tax_category.id.reason_code | escape }}</cbc:TaxExemptionReasonCode>
+                {% if item.tax_category.zatca_tax_category_id.reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ item.tax_category.zatca_tax_category_id.reason_code | escape }}</cbc:TaxExemptionReasonCode>
                 {% endif %}
-                {% if item.tax_category.id.arabic_reason %}
-                    <cbc:TaxExemptionReason>{{ item.tax_category.id.arabic_reason | escape }}</cbc:TaxExemptionReason>
+                {% if item.tax_category.zatca_tax_category_id.arabic_reason %}
+                    <cbc:TaxExemptionReason>{{ item.tax_category.zatca_tax_category_id.arabic_reason | escape }}</cbc:TaxExemptionReason>
                 {% endif %}
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
