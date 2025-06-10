@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Refactor tax handling and multi-currency support
+
 ## 0.50.1
 
 * Fix prepayment issues
