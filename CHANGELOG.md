@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.50.2
+
 * Refactor tax handling and multi-currency support
 
 ## 0.50.1
