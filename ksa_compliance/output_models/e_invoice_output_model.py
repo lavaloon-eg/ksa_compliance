@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast, Optional, List, Literal
+from typing import cast, Optional, List
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
@@ -14,89 +14,13 @@ from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_busines
 from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_return_against_reference import (
     ZATCAReturnAgainstReference,
 )
-from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
-from .prepayment_invoice.service import update_result
+from .service import get_right_fieldname, update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
 
-
-def append_tax_categories_to_item(
-    item_lines: list, taxes_and_charges: str | None, sales_invoice_doc: SalesInvoice, is_tax_included: bool
-) -> list:
-    """
-    Append tax category of each item based on item tax template or sales taxes and charges template in sales invoice.
-    Returns unique Tax Categories with sum of item taxable amount and item tax amount per tax category.
-    """
-
-    if taxes_and_charges:
-        tax_category_id = frappe.get_value('Sales Taxes and Charges Template', taxes_and_charges, 'tax_category')
-    else:
-        tax_category_id = None
-    unique_tax_categories = {}
-
-    for item in item_lines:
-        if item['item_tax_template']:
-            item_tax_category = map_tax_category(item_tax_template_id=item['item_tax_template'])
-        else:
-            if tax_category_id:
-                item_tax_category = map_tax_category(tax_category_id=tax_category_id)
-            else:
-                item_tax_category = None
-                frappe.throw(
-                    "Please Include Sales Taxes and Charges Template on invoice\n"
-                    f"Or include Item Tax Template on {item['item_name']}"
-                )
-
-        item['tax_category_code'] = item_tax_category.tax_category_code
-        item_tax_category_details = {
-            'tax_category_code': item['tax_category_code'],
-            'tax_amount': abs(item['net_amount']) * item['tax_percent'] / 100,
-            'tax_percent': item['tax_percent'],
-            'taxable_amount': item['net_amount'],
-            'total_discount': 0.0,
-        }
-        if item_tax_category.reason_code:
-            item['tax_exemption_reason_code'] = item_tax_category.reason_code
-            item_tax_category_details['tax_exemption_reason_code'] = item_tax_category.reason_code
-        if item_tax_category.arabic_reason:
-            item['tax_exemption_reason'] = item_tax_category.arabic_reason
-            item_tax_category_details['tax_exemption_reason'] = item_tax_category.arabic_reason
-
-        key = item_tax_category.tax_category_code + str(item_tax_category.reason_code) + str(item['tax_percent'])
-        if key in unique_tax_categories:
-            unique_tax_categories[key]['tax_amount'] += item_tax_category_details['tax_amount']
-            unique_tax_categories[key]['taxable_amount'] += item_tax_category_details['taxable_amount']
-            # unique_tax_categories[key]['total_discount'] += item_tax_category_details['total_discount']
-        else:
-            unique_tax_categories[key] = item_tax_category_details
-    update_total_discount(unique_tax_categories, sales_invoice_doc, is_tax_included)
-
-    return list(unique_tax_categories.values())
-
-
-def update_total_discount(unique_tax_categories: dict, sales_invoice_doc: SalesInvoice, is_tax_included: bool) -> None:
-    if sales_invoice_doc.doctype == 'Payment Entry':
-        # Payment Entry does not have discount amount
-        return
-    discount_to_be_distrubuted = max(0, abs(sales_invoice_doc.discount_amount))
-
-    if not discount_to_be_distrubuted:
-        return
-
-    total_taxable_amount = {}
-    for key, value in unique_tax_categories.items():
-        taxable_amount = total_taxable_amount.setdefault(key, 0)
-        taxable_amount += value['taxable_amount']
-        total_taxable_amount[key] = taxable_amount
-
-    for key in total_taxable_amount:
-        if total_taxable_amount[key] == 0:
-            continue
-        unique_tax_categories[key]['total_discount'] = (
-            unique_tax_categories[key]['taxable_amount'] / total_taxable_amount[key]
-        ) * discount_to_be_distrubuted
+from .tax import create_tax_categories, create_allowance_charge, create_tax_total
 
 
 class Einvoice:
@@ -153,7 +77,7 @@ class Einvoice:
         self.get_business_settings_and_seller_details()
 
         # Get Buyer Fields
-        self.get_buyer_details(invoice_type=invoice_type)
+        self.get_buyer_details()
 
         # Get E-Invoice Fields
 
@@ -334,29 +258,11 @@ class Einvoice:
         )
 
     # --------------------------- START helper functions ------------------------------
-    def get_right_fieldname(self, field_name: str, source_doc: Literal['Sales Invoice', 'Payment Entry']):
-        """
-        This method is used to get the right field name and value from the source document.
-        """
-        pe_field_map = {
-            'grand_total': 'base_received_amount_after_tax',
-            'included_in_print_rate': 'included_in_paid_amount',
-            'taxes_and_charges': 'sales_taxes_and_charges_template',
-            'net_total': 'base_received_amount',
-            'posting_time': 'custom_posting_time',
-            'currency': 'paid_from_account_currency',
-            'tax_currency': 'paid_from_account_currency',
-            'customer_name': 'party_name',
-        }
-        if source_doc == 'Payment Entry':
-            if field_name in pe_field_map:
-                field_name = pe_field_map[field_name]
-        return field_name
 
     def get_text_value(self, field_name: str, source_doc: Document, xml_name: str = None, parent: str = None):
         field_value = (
-            source_doc.get(self.get_right_fieldname(field_name, source_doc.doctype)).strip()
-            if source_doc.get(self.get_right_fieldname(field_name, source_doc.doctype))
+            source_doc.get(get_right_fieldname(field_name, source_doc.doctype)).strip()
+            if source_doc.get(get_right_fieldname(field_name, source_doc.doctype))
             else None
         )
 
@@ -413,7 +319,7 @@ class Einvoice:
         return field_value
 
     def get_float_value(self, field_name: str, source_doc: Document, xml_name: str = None, parent: str = None) -> float:
-        field_value = cast(any, source_doc.get(self.get_right_fieldname(field_name, source_doc.doctype)))
+        field_value = cast(any, source_doc.get(get_right_fieldname(field_name, source_doc.doctype)))
 
         if field_value is None:
             return 0.0
@@ -451,7 +357,7 @@ class Einvoice:
         return field_value
 
     def get_time_value(self, field_name, source_doc, xml_name, parent) -> str | None:
-        field_value = source_doc.get(self.get_right_fieldname(field_name, source_doc.doctype), None)
+        field_value = source_doc.get(get_right_fieldname(field_name, source_doc.doctype), None)
 
         if not field_value:
             return
@@ -658,7 +564,7 @@ class Einvoice:
 
         # --------------------------- END Business Settings and Seller Details fields ------------------------------
 
-    def get_buyer_details(self, invoice_type):
+    def get_buyer_details(self):
         # --------------------------- START Buyer Details fields ------------------------------
         self.get_list_value(
             field_name='other_buyer_ids',
@@ -764,22 +670,22 @@ class Einvoice:
             'item_name': self.sales_invoice_doc.custom_prepayment_invoice_description or self.sales_invoice_doc.remarks,
             'net_amount': abs(values.net_amount),
             'amount_after_discount': abs(values.amount_after_discount),
-            'amount': abs(self.sales_invoice_doc.base_received_amount_after_tax),
-            'base_net_rate': abs(self.sales_invoice_doc.base_received_amount),
-            'base_net_amount': abs(self.sales_invoice_doc.base_received_amount),
+            'amount': abs(self.sales_invoice_doc.received_amount_after_tax),
+            'base_net_rate': abs(self.sales_invoice_doc.received_amount),
+            'base_net_amount': abs(self.sales_invoice_doc.received_amount),
             'line_extension_amount': abs(values.line_extension_amount),
-            'base_amount': abs(self.sales_invoice_doc.base_received_amount),
-            'rounding_amount': abs(self.sales_invoice_doc.base_received_amount_after_tax),
-            'rate': abs(self.sales_invoice_doc.base_received_amount),
+            'base_amount': abs(self.sales_invoice_doc.received_amount),
+            'rounding_amount': abs(self.sales_invoice_doc.received_amount_after_tax),
+            'rate': abs(self.sales_invoice_doc.received_amount),
             'discount_percentage': 0.0,
             'discount_amount': 0.0,
             'item_tax_template': None,
             'tax_percent': self.sales_invoice_doc.taxes[0].rate,
-            'tax_amount': self.sales_invoice_doc.taxes[0].base_tax_amount,
-            'total_amount': abs(self.sales_invoice_doc.base_received_amount_after_tax),
+            'tax_amount': self.sales_invoice_doc.total_taxes_and_charges,
+            'total_amount': abs(self.sales_invoice_doc.received_amount_after_tax),
         }
 
-        item_lines.append(item_data)
+        item_lines.append(frappe._dict(item_data))
 
     def _calculate_payment_entry_values(self, doc: PaymentEntry) -> dict:
         values = frappe._dict()
@@ -789,9 +695,9 @@ class Einvoice:
             values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
             values.net_amount = doc.paid_amount - doc.total_taxes_and_charges
         else:
-            values.amount_after_discount = doc.base_received_amount
-            values.line_extension_amount = doc.base_received_amount
-            values.net_amount = doc.base_received_amount
+            values.amount_after_discount = doc.received_amount
+            values.line_extension_amount = doc.received_amount
+            values.net_amount = doc.received_amount
         return values
 
     def _append_sales_invoice_items(self, item_lines: list, is_tax_included: bool, doc: SalesInvoice) -> None:
@@ -809,19 +715,19 @@ class Einvoice:
                 'uom': item.uom,
                 'item_code': item.item_code,
                 'item_name': item.item_name,
-                'net_amount': abs(item.base_net_amount),
+                'net_amount': abs(item.net_amount),
                 'amount_after_discount': abs(amount_after_discount_cac) * abs(item.qty),
                 'base_amount': abs(base_amount) * abs(item.qty),
                 'line_extension_amount': abs(line_extension_amount) * abs(item.qty),
                 'rounding_amount': abs(amount_after_discount * abs(item.qty)) + abs(item.tax_amount or 0),
-                'amount': (item.base_amount or 0) + discount_amount + (item.tax_amount or 0),
+                'amount': (item.amount or 0) + discount_amount + (item.tax_amount or 0),
                 'rate': item.rate,
                 'discount_amount': abs(discount_amount) * abs(item.qty),
                 'item_tax_template': item.item_tax_template,
                 'tax_percent': item.tax_rate or 0.0,
                 'tax_amount': abs(item.tax_amount or 0),
             }
-            item_lines.append(item_data)
+            item_lines.append(frappe._dict(item_data))
 
     def _calculate_discount_amount(self, item, is_tax_included: bool) -> float:
         """Calculates the proper discount amount considering tax inclusion."""
@@ -845,7 +751,7 @@ class Einvoice:
 
             if item.discount_amount and discount_amount:
                 tax_rate = item.tax_rate or 0.0
-                base_amount = ((abs(item.base_rate)) / (1 + (tax_rate / 100))) + discount_amount
+                base_amount = ((abs(item.rate)) / (1 + (tax_rate / 100))) + discount_amount
                 amount_after_discount = net_rate
         else:
             amount_after_discount = net_rate + discount_amount + (rate - net_rate)
@@ -975,32 +881,6 @@ class Einvoice:
             field_name='total_advance', source_doc=self.sales_invoice_doc, xml_name='prepaid_amount', parent='invoice'
         )
 
-        if self.sales_invoice_doc.doctype == 'Payment Entry' or self.sales_invoice_doc.is_rounded_total_disabled():
-            self.result['invoice']['payable_amount'] = abs(
-                self.sales_invoice_doc.get(self.get_right_fieldname('grand_total', self.sales_invoice_doc.doctype))
-            )
-            self.result['invoice']['rounding_adjustment'] = 0.0
-        else:
-            # Tax inclusive amount + rounding adjustment = payable amount
-            # However, ZATCA doesn't accept negative values for tax inclusive amount or payable amount, so we put their
-            # absolute values.
-            # For return invoices, we can have a positive rounding adjustment (if it were negative in the original invoice)
-            # The calculation works out if tax inclusive amount and payable amount are negative, but it doesn't work with
-            # the abs values we send to ZATCA.
-            # For example:
-            # Original invoice: 100.25 + (-0.25) = 100
-            # Return invoice (ERPNext): -100.25 + 0.25 = -100
-            # Return invoice (XML): abs(-100.25) + 0.25 = 100.25
-            # So the calculation would be wrong if we just used the value of rounding adjustment. We need to recalculate
-            # it or adjust its sign to produce the right result in the return case
-            payable_amount = abs(self.sales_invoice_doc.rounded_total)
-            tax_inclusive_amount = abs(self.sales_invoice_doc.grand_total)
-            self.result['invoice']['payable_amount'] = payable_amount
-            if self.sales_invoice_doc.is_return:
-                self.result['invoice']['rounding_adjustment'] = payable_amount - tax_inclusive_amount
-            else:
-                self.result['invoice']['rounding_adjustment'] = self.sales_invoice_doc.rounding_adjustment
-
         self.get_float_value(
             field_name='outstanding_amount',
             source_doc=self.sales_invoice_doc,
@@ -1022,17 +902,14 @@ class Einvoice:
         # --------------------------- Start Getting Invoice's item lines ------------------------------
         item_lines = []
         is_tax_included = self.sales_invoice_doc.taxes[0].get(
-            self.get_right_fieldname('included_in_print_rate', self.sales_invoice_doc.doctype)
+            get_right_fieldname('included_in_print_rate', self.sales_invoice_doc.doctype)
         )
         self.append_to_item_lines(item_lines, is_tax_included, self.sales_invoice_doc)
-        unique_tax_categories = append_tax_categories_to_item(
-            item_lines,
-            self.sales_invoice_doc.get(self.get_right_fieldname('taxes_and_charges', self.sales_invoice_doc.doctype)),
-            self.sales_invoice_doc,
-            is_tax_included,
-        )
-        # Append unique Tax categories to invoice
-        self.result['invoice']['tax_categories'] = unique_tax_categories
+        tax_categories = create_tax_categories(self.sales_invoice_doc, item_lines)
+        tax_total = create_tax_total(self.sales_invoice_doc, tax_categories)
+        self.result['invoice']['tax_total'] = tax_total
+        allowance_charge = create_allowance_charge(self.sales_invoice_doc, tax_total)
+        self.result['invoice']['allowance_charge'] = allowance_charge
 
         # Add invoice total taxes and charges percentage field
         self.result['invoice']['total_taxes_and_charges_percent'] = sum(
@@ -1052,6 +929,12 @@ class Einvoice:
         self.result['invoice']['grand_total'] = (
             self.result['invoice']['net_total'] + self.result['invoice']['total_taxes_and_charges']
         )
+        rounding_adjustment = 0
+        if self.sales_invoice_doc.doctype != 'Payment Entry':
+            rounding_adjustment = self.sales_invoice_doc.rounding_adjustment
+
+        self.result['invoice']['payable_amount'] = self.result['invoice']['grand_total'] + rounding_adjustment
+        self.result['invoice']['rounding_adjustment'] = rounding_adjustment
 
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             return

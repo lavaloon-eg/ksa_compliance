@@ -375,6 +375,19 @@ class SalesInvoiceAdditionalFields(Document):
         self.buyer_vat_registration_number = customer_doc.get('custom_vat_registration_number')
         if customer_doc.customer_primary_address:
             self._set_buyer_address(cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address)))
+        else:
+            address = frappe.db.get_all(
+                'Dynamic Link',
+                {
+                    'parenttype': 'Address',
+                    'parentfield': 'links',
+                    'link_doctype': 'Customer',
+                    'link_name': customer_doc.name,
+                },
+                pluck='parent',
+            )
+            if address:
+                self._set_buyer_address(cast(Address, frappe.get_doc('Address', address[0])))
 
         for item in customer_doc.get('custom_additional_ids'):
             if strip(item.value):
