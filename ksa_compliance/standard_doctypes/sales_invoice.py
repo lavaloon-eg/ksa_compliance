@@ -43,7 +43,7 @@ def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoi
 
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
-        if ZATCABusinessSettings.revoked_for_company(self.company):
+        if ZATCABusinessSettings.is_revoked_for_company(self.company):
             fthrow(msg=ft('Cannot submit sales invoice to ZATCA'), title=ft('CSID Is Revoked'))
         logger.info(f'Skipping additional fields for {self.name} because of missing ZATCA settings')
         return

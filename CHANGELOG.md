@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix invoice creation failure when checking for ZATCA CSID revocation
+
 ## 0.50.2
 
 * Refactor tax handling and multi-currency support
