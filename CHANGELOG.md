@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.50.3
+
 * Fix invoice creation failure when checking for ZATCA CSID revocation
 
 ## 0.50.2
