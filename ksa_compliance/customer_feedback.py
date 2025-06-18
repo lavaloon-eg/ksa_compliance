@@ -32,7 +32,9 @@ def get_feedback_settings():
 
 
 @frappe.whitelist()
-def send_feedback_email(company: str, subject: str, description: str, vat_registration_number: str=None, attachments: str=None):
+def send_feedback_email(
+    company: str, subject: str, description: str, vat_registration_number: str = None, attachments: str = None
+):
     """Send feedback email using the default email account"""
     try:
         config = get_feedback_settings()
@@ -72,10 +74,7 @@ def send_feedback_email(company: str, subject: str, description: str, vat_regist
             email_content += '</ul>'
 
         api_url = config['API_URL']
-        body = {
-            'subject': f'KSA Compliance App Feedback: {subject}',
-            'content': email_content
-        }
+        body = {'subject': f'KSA Compliance App Feedback: {subject}', 'content': email_content}
 
         try:
             response = requests.post(api_url, json=body)

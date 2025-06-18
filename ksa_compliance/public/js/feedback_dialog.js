@@ -42,6 +42,17 @@ ksa_compliance.feedback_dialog = {
             },
             {
                 fieldtype: "HTML",
+                fieldname: "company_info",
+                options: `
+                    <div style="margin-top: 10px; margin-bottom: 10px;">
+                        <strong>${__("Company Information")}</strong><br>
+                        ${__("Company Name")}: ${company}<br>
+                        ${vat_registration_number ? `${__("VAT Registration Number")}: ${vat_registration_number}` : ""}
+                    </div>
+                `
+            },
+            {
+                fieldtype: "HTML",
                 fieldname: "external_link",
                 options: `
                     <div style="margin-top: 10px; margin-bottom: 10px;">

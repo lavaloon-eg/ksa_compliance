@@ -365,3 +365,4 @@ Issue time is mandatory, وقت الإصدار إلزامي
 Document type code is mandatory, كود نوع المستند إلزامي
 Prepayment Invoice Not Sent,فاتورة الدفع المسبق لم يتم إرسالها
 By checking this box, you acknowledge that this Payment Entry will be treated as a Prepayment Invoice and submitted to ZATCA.,باختيار هذا المربع، فإنك تقر بأن إدخال الدفع هذا سيتم معاملته كفاتورة مسبقة وسيتم تقديمه إلى الهيئة العامة للزكاة والدخل (ZATCA).
+Company Name, اسم الشركة
