@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Update ksa compliance feedback feature:
+  * Enhance the feedback functionality by integrating company details in body.
+  * submit feedback through the LavaLoon system instead of sending it via email.
+
 ## 0.50.3
 
 * Fix invoice creation failure when checking for ZATCA CSID revocation
