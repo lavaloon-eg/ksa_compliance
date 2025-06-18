@@ -1,9 +1,16 @@
+import os
 import json
 from typing import cast
+import requests
+from requests import HTTPError
+
 import frappe
 from frappe import _
-import os
+from frappe.utils import get_url
 from frappe.core.doctype.file.file import File
+from erpnext.setup.doctype.company.company import Company
+
+from ksa_compliance import logger
 
 
 @frappe.whitelist(methods=['GET'])
@@ -12,7 +19,7 @@ def get_feedback_settings():
     email_accounts = frappe.db.get_list('Email Account', fields=['email_id'], filters={'default_outgoing': 1}, limit=1)
 
     settings_dict = {
-        'RECIPIENT_EMAILS': ['ksa_compliance@lavaloon.com'],
+        'API_URL': 'https://lavaloon.com/api/method/frappe_feedback.api.create_customer_feedback',
         'LAVALOON_CONTACT_PAGE': 'https://lavaloon.com/contact-us',
         'MAX_FILE_SIZE_MB': 5,
         'MAX_NUMBER_OF_FILES': 3,
@@ -25,7 +32,7 @@ def get_feedback_settings():
 
 
 @frappe.whitelist()
-def send_feedback_email(sender_email, subject, description, attachments=None):
+def send_feedback_email(company: str, subject: str, description: str, vat_registration_number: str=None, attachments: str=None):
     """Send feedback email using the default email account"""
     try:
         config = get_feedback_settings()
@@ -33,6 +40,17 @@ def send_feedback_email(sender_email, subject, description, attachments=None):
         email_content = f"""
         <h3>Feedback Details</h3>
         <p>{description}</p>
+        """
+
+        company_doc = cast(Company, frappe.get_doc('Company', company))
+        company_email = company_doc.email
+        company_phone = company_doc.phone_no
+        email_content += f"""
+            <h4>Company Information:</h4>
+            <p>Company Name: {company}</p>
+            <p>Vat Registration Number: {vat_registration_number if vat_registration_number else 'N/A'}</p>
+            <p>Company Email: {company_email if company_email else 'N/A'}</p>
+            <p>Company Phone: {company_phone if company_phone else 'N/A'}</p>
         """
 
         if attachments:
@@ -49,22 +67,27 @@ def send_feedback_email(sender_email, subject, description, attachments=None):
                             config['MAX_FILE_SIZE_MB'], file_doc.file_name
                         )
                     )
-                email_content += f"<li><a href='{attachment}'>{attachment}</a></li>"
+                full_url = get_url(file_doc.file_url)
+                email_content += f"<li><a href='{full_url}'>{attachment}</a></li>"
             email_content += '</ul>'
 
-        frappe.sendmail(
-            recipients=config['RECIPIENT_EMAILS'],
-            sender=sender_email,
-            subject=f'Feedback: {subject}',
-            message=email_content,
-            now=True,
-            with_container=True,
-        )
+        api_url = config['API_URL']
+        body = {
+            'subject': f'KSA Compliance App Feedback: {subject}',
+            'content': email_content
+        }
 
-        frappe.response['message'] = _('Feedback email sent successfully')
-        frappe.response['http_status_code'] = 200
-        frappe.response['success'] = True
-        return
+        try:
+            response = requests.post(api_url, json=body)
+            response.raise_for_status()
+            frappe.response['message'] = _('Feedback email sent successfully')
+            frappe.response['http_status_code'] = 200
+            frappe.response['success'] = True
+        except HTTPError as e:
+            error = e.response
+            logger.error(f'An HTTP error occurred: {error}')
+            if e.response.text:
+                logger.info(f'Response: {e.response.text}')
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), 'Feedback Email Error')
