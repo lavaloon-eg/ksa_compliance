@@ -158,12 +158,17 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_qr = precomputed_invoice.invoice_qr
         self.invoice_xml = precomputed_invoice.invoice_xml
 
-    def _get_invoice_type(self, settings: ZATCABusinessSettings) -> InvoiceType:
-        if settings.invoice_mode == InvoiceMode.Standard:
+    def _get_invoice_type(self, settings: ZATCABusinessSettings = None, customer: Customer = None) -> InvoiceType:
+        if settings and settings.invoice_mode == InvoiceMode.Standard:
             return 'Standard'
 
-        if settings.invoice_mode == InvoiceMode.Simplified:
+        if settings and settings.invoice_mode == InvoiceMode.Simplified:
             return 'Simplified'
+
+        if customer and (
+            customer.custom_vat_registration_number or any([strip(x.value) for x in customer.custom_additional_ids])
+        ):
+            return 'Standard'
 
         if self.buyer_vat_registration_number or any([strip(x.value) for x in self.other_buyer_ids]):
             return 'Standard'
@@ -191,7 +196,7 @@ class SalesInvoiceAdditionalFields(Document):
 
         # FIXME: Buyer details must come before invoice type and code, since this information relies on buyer details
         #   This temporal dependency is not great
-        self._set_buyer_details(sales_invoice, settings)
+        self._set_buyer_details(sales_invoice)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = '0100000' if self._get_invoice_type(settings) == 'Standard' else '0200000'
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
@@ -365,20 +370,17 @@ class SalesInvoiceAdditionalFields(Document):
         mode_of_payment = invoice.payments[0].mode_of_payment
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
-    def _set_buyer_details(
-        self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry, settings: ZATCABusinessSettings
-    ):
+    def _set_buyer_details(self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry):
         if sales_invoice.doctype == 'Payment Entry':
             customer_name = sales_invoice.party
         else:
             customer_name = sales_invoice.customer
         customer_doc = cast(Customer, frappe.get_doc('Customer', customer_name))
-
+        invoice_type = self._get_invoice_type(customer=customer_doc)
         self.buyer_vat_registration_number = customer_doc.get('custom_vat_registration_number')
         if customer_doc.customer_primary_address:
-            self._set_buyer_address(
-                cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address)), settings
-            )
+            address_doc = cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address))
+            self._set_buyer_address(address_doc, invoice_type == 'Standard')
         else:
             address = frappe.db.get_all(
                 'Dynamic Link',
@@ -391,7 +393,8 @@ class SalesInvoiceAdditionalFields(Document):
                 pluck='parent',
             )
             if address:
-                self._set_buyer_address(cast(Address, frappe.get_doc('Address', address[0])), settings)
+                address_doc = cast(Address, frappe.get_doc('Address', address[0]))
+                self._set_buyer_address(address_doc, invoice_type == 'Standard')
 
         for item in customer_doc.get('custom_additional_ids'):
             if strip(item.value):
@@ -399,10 +402,9 @@ class SalesInvoiceAdditionalFields(Document):
                     'other_buyer_ids', {'type_name': item.type_name, 'type_code': item.type_code, 'value': item.value}
                 )
 
-    def _set_buyer_address(self, address: Address, settings: ZATCABusinessSettings):
-        if self._get_invoice_type(settings) == 'Standard':
+    def _set_buyer_address(self, address: Address, validate: bool = False):
+        if validate:
             self.validate_buyer_address(address)
-
         self.buyer_additional_number = 'not available for now'
         self.buyer_street_name = address.address_line1
         self.buyer_additional_street_name = address.address_line2
@@ -563,7 +565,7 @@ class SalesInvoiceAdditionalFields(Document):
             msg_list.append(msg)
 
         if msg_list:
-            msg_list.append(frappe.utils.get_link_to_form('Address', address.name, _('Go To Address')))
+            msg_list.append(frappe.utils.get_link_to_form('Address', address.name, _('Update Address')))
             message = '<hr>'.join(msg_list)
             fthrow(
                 msg=message,
