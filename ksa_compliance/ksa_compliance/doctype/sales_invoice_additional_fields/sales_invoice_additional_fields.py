@@ -191,12 +191,9 @@ class SalesInvoiceAdditionalFields(Document):
 
         # FIXME: Buyer details must come before invoice type and code, since this information relies on buyer details
         #   This temporal dependency is not great
-        self._set_buyer_details(sales_invoice)
+        self._set_buyer_details(sales_invoice, settings)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
-        invoice_type = self._get_invoice_type(settings)
-        if invoice_type == 'Standard':
-            self.validate_seller_address(settings)
-        self.invoice_type_transaction = '0100000' if invoice_type == 'Standard' else '0200000'
+        self.invoice_type_transaction = '0100000' if self._get_invoice_type(settings) == 'Standard' else '0200000'
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
         self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
 
@@ -368,7 +365,9 @@ class SalesInvoiceAdditionalFields(Document):
         mode_of_payment = invoice.payments[0].mode_of_payment
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
-    def _set_buyer_details(self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry):
+    def _set_buyer_details(
+        self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry, settings: ZATCABusinessSettings
+    ):
         if sales_invoice.doctype == 'Payment Entry':
             customer_name = sales_invoice.party
         else:
@@ -377,7 +376,9 @@ class SalesInvoiceAdditionalFields(Document):
 
         self.buyer_vat_registration_number = customer_doc.get('custom_vat_registration_number')
         if customer_doc.customer_primary_address:
-            self._set_buyer_address(cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address)))
+            self._set_buyer_address(
+                cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address)), settings
+            )
         else:
             address = frappe.db.get_all(
                 'Dynamic Link',
@@ -390,7 +391,7 @@ class SalesInvoiceAdditionalFields(Document):
                 pluck='parent',
             )
             if address:
-                self._set_buyer_address(cast(Address, frappe.get_doc('Address', address[0])))
+                self._set_buyer_address(cast(Address, frappe.get_doc('Address', address[0])), settings)
 
         for item in customer_doc.get('custom_additional_ids'):
             if strip(item.value):
@@ -398,7 +399,10 @@ class SalesInvoiceAdditionalFields(Document):
                     'other_buyer_ids', {'type_name': item.type_name, 'type_code': item.type_code, 'value': item.value}
                 )
 
-    def _set_buyer_address(self, address: Address):
+    def _set_buyer_address(self, address: Address, settings: ZATCABusinessSettings):
+        if self._get_invoice_type(settings) == 'Standard':
+            self.validate_buyer_address(address)
+
         self.buyer_additional_number = 'not available for now'
         self.buyer_street_name = address.address_line1
         self.buyer_additional_street_name = address.address_line2
@@ -536,29 +540,30 @@ class SalesInvoiceAdditionalFields(Document):
         )
 
     @staticmethod
-    def validate_seller_address(settings: ZATCABusinessSettings):
+    def validate_buyer_address(address: Address):
         msg_list = []
-        if not settings.street:
-            msg = _('Please set street for seller address in ZATCA business settings.')
+        if not address.address_line1:
+            msg = _('Please set Address Line 1 for customer address.')
             msg_list.append(msg)
 
-        if not settings.building_number or len(settings.building_number) != 4:
-            msg = _('Please make sure that building number is set and is 4 digits exactly.')
+        if not address.get('custom_building_number') or len(address.get('custom_building_number')) != 4:
+            msg = _('Please make sure that building number is set and is 4 digits exactly in customer address.')
             msg_list.append(msg)
 
-        if not settings.city:
-            msg = _('Please set city for seller address in ZATCA business settings.')
+        if not address.city:
+            msg = _('Please set city for customer address.')
             msg_list.append(msg)
 
-        if not settings.postal_code or len(settings.postal_code) != 5:
-            msg = _('Please make sure that postal code is set and is 5 digits exactly.')
+        if not address.pincode or len(address.pincode) != 5:
+            msg = _('Please make sure that postal code is set and is 5 digits exactly in customer address.')
             msg_list.append(msg)
 
-        if not settings.district:
-            msg = _('Please set district for seller address in ZATCA business settings.')
+        if not address.get('custom_area'):
+            msg = _('Please set district for customer address.')
             msg_list.append(msg)
 
         if msg_list:
+            msg_list.append(frappe.utils.get_link_to_form('Address', address.name, _('Go To Address')))
             message = '<hr>'.join(msg_list)
             fthrow(
                 msg=message,

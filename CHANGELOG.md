@@ -8,7 +8,7 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Validate address details on submitting `Standard Tax Invoice`.
+* Validate buyer address details on submitting `Standard Tax Invoice`.
 * Fix error on invoice creation showing validation message
 
 ## 0.50.3
