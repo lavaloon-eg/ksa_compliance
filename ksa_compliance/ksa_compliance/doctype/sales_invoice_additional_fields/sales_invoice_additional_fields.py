@@ -158,11 +158,11 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_qr = precomputed_invoice.invoice_qr
         self.invoice_xml = precomputed_invoice.invoice_xml
 
-    def _get_invoice_type(self, settings: ZATCABusinessSettings = None, customer: Customer = None) -> InvoiceType:
-        if settings and settings.invoice_mode == InvoiceMode.Standard:
+    def _get_invoice_type(self, settings: ZATCABusinessSettings, customer: Customer = None) -> InvoiceType:
+        if settings.invoice_mode == InvoiceMode.Standard:
             return 'Standard'
 
-        if settings and settings.invoice_mode == InvoiceMode.Simplified:
+        if settings.invoice_mode == InvoiceMode.Simplified:
             return 'Simplified'
 
         if customer and (
@@ -196,7 +196,7 @@ class SalesInvoiceAdditionalFields(Document):
 
         # FIXME: Buyer details must come before invoice type and code, since this information relies on buyer details
         #   This temporal dependency is not great
-        self._set_buyer_details(sales_invoice)
+        self._set_buyer_details(sales_invoice, settings)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = '0100000' if self._get_invoice_type(settings) == 'Standard' else '0200000'
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
@@ -370,13 +370,15 @@ class SalesInvoiceAdditionalFields(Document):
         mode_of_payment = invoice.payments[0].mode_of_payment
         return frappe.get_value('Mode of Payment', mode_of_payment, 'custom_zatca_payment_means_code')
 
-    def _set_buyer_details(self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry):
+    def _set_buyer_details(
+        self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry, settings: ZATCABusinessSettings
+    ):
         if sales_invoice.doctype == 'Payment Entry':
             customer_name = sales_invoice.party
         else:
             customer_name = sales_invoice.customer
         customer_doc = cast(Customer, frappe.get_doc('Customer', customer_name))
-        invoice_type = self._get_invoice_type(customer=customer_doc)
+        invoice_type = self._get_invoice_type(settings, customer=customer_doc)
         self.buyer_vat_registration_number = customer_doc.get('custom_vat_registration_number')
         if customer_doc.customer_primary_address:
             address_doc = cast(Address, frappe.get_doc('Address', customer_doc.customer_primary_address))
