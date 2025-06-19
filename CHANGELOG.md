@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Validate address details on submitting `Standard Tax Invoice`.
+
 ## 0.50.3
 
 * Fix invoice creation failure when checking for ZATCA CSID revocation
