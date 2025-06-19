@@ -365,3 +365,8 @@ Issue time is mandatory, وقت الإصدار إلزامي
 Document type code is mandatory, كود نوع المستند إلزامي
 Prepayment Invoice Not Sent,فاتورة الدفع المسبق لم يتم إرسالها
 By checking this box, you acknowledge that this Payment Entry will be treated as a Prepayment Invoice and submitted to ZATCA.,باختيار هذا المربع، فإنك تقر بأن إدخال الدفع هذا سيتم معاملته كفاتورة مسبقة وسيتم تقديمه إلى الهيئة العامة للزكاة والدخل (ZATCA).
+Please set street for seller address in ZATCA business settings.,يرجى تعيين اسم الشارع لعنوان البائع في إعدادات ZATCA.,
+Please make sure that building number is set and is 4 digits exactly.,يرجى التأكد من تعيين رقم المبنى وأن يتكون من 4 أرقام بالضبط.,
+Please set city for seller address in ZATCA business settings.,يرجى تعيين المدينة لعنوان البائع في إعدادات ZATCA.,
+Please make sure that postal code is set and is 5 digits exactly.,يرجى التأكد من تعيين الرمز البريدي وأن يتكون من 5 أرقام بالضبط.,
+Please set district for seller address in ZATCA business settings.,يرجى تعيين الحي لعنوان البائع  في إعدادات ZATCA.,
