@@ -1,11 +1,11 @@
 frappe.provide('ksa_compliance.feedback_dialog');
 
 ksa_compliance.feedback_dialog = {
-    show_feedback_dialog: async function (title, company=frappe.defaults.get_user_default("Company"), vat_registration_number=null, is_onboard_feedback = false) {
+    show_feedback_dialog: async function (title, company=frappe.defaults.get_user_default("Company"), is_onboard_feedback = false) {
         const uploaded_files = [];
         const feedback_config = await this.get_feedback_configuration();
 
-        const dialog = this.create_feedback_dialog(title, is_onboard_feedback, feedback_config, uploaded_files, company, vat_registration_number);
+        const dialog = this.create_feedback_dialog(title, is_onboard_feedback, feedback_config, uploaded_files, company);
         dialog.show();
     },
 
@@ -18,7 +18,7 @@ ksa_compliance.feedback_dialog = {
         return response.message
     },
 
-    create_feedback_dialog: function (title, is_onboard_feedback, config, uploaded_files, company, vat_registration_number) {
+    create_feedback_dialog: function (title, is_onboard_feedback, config, uploaded_files, company) {
         const fields = [
             {
                 label: __("Subject"),
@@ -47,7 +47,6 @@ ksa_compliance.feedback_dialog = {
                     <div style="margin-top: 10px; margin-bottom: 10px;">
                         <strong>${__("Company Information")}</strong><br>
                         ${__("Company Name")}: ${company}<br>
-                        ${vat_registration_number ? `${__("VAT Registration Number")}: ${vat_registration_number}` : ""}
                     </div>
                 `
             },
@@ -70,6 +69,31 @@ ksa_compliance.feedback_dialog = {
                 click() {
                     ksa_compliance.feedback_dialog.create_file_uploader(config, uploaded_files);
                 }
+            },
+            {
+                fieldtype: "HTML",
+                fieldname: "upload_warning",
+                options: `<div class="alert alert-warning">
+                    <strong>${__("Notes")}:</strong> ${__("Uploaded files will be publicly accessible and visible to us from your server. Please do not upload sensitive information.")}
+                    <br>
+                    ${__("We will use the company phone number and email to contact you regarding your feedback if they are provided.")}
+                </div>`
+            },
+            {
+                fieldtype: "HTML",
+                fieldname: "file_preview",
+                options: `
+                    <div style="margin-top: 10px; margin-bottom: 10px;">
+                        <strong>${__("Uploaded Files")}</strong><br>
+                        <div id="file-preview-list">
+                            ${uploaded_files.length ? uploaded_files.map(file => `
+                                <div style="margin-top: 5px;">
+                                    <a href="${file}" target="_blank">${file.split('/').pop()}</a>
+                                </div>
+                            `).join('') : __("No files uploaded yet.")}
+                        </div>
+                    </div>
+                `
             }
         ];
 
@@ -98,7 +122,7 @@ ksa_compliance.feedback_dialog = {
                     }
 
                     dialog.set_primary_action(__('Submitting...'), null);
-                    await ksa_compliance.feedback_dialog.submit_feedback(values, uploaded_files, dialog, company, vat_registration_number);
+                    await ksa_compliance.feedback_dialog.submit_feedback(values, uploaded_files, dialog, company);
                 } catch (error) {
                     console.error('Error submitting feedback:', error);
                     frappe.show_alert({
@@ -143,6 +167,14 @@ ksa_compliance.feedback_dialog = {
                     message: __("File uploaded: {0}", [file.file_name]),
                     indicator: 'green'
                 });
+                const file_preview = document.querySelector('#file-preview-list');
+                if (file_preview) {
+                    file_preview.innerHTML = uploaded_files.length ? uploaded_files.map(file => `
+                        <div style="margin-top: 5px;">
+                            <a href="${file}" target="_blank">${file.split('/').pop()}</a>
+                        </div>
+                    `).join('') : __("No files uploaded yet.");
+                }
             },
             on_error(error) {
                 frappe.show_alert({
@@ -153,7 +185,7 @@ ksa_compliance.feedback_dialog = {
         });
     },
 
-    submit_feedback: async function (values, uploaded_files, dialog, company, vat_registration_number) {
+    submit_feedback: async function (values, uploaded_files, dialog, company) {
         dialog.set_primary_action(__('Submitting...'), null);
         values.attachments = uploaded_files;
 
@@ -162,7 +194,6 @@ ksa_compliance.feedback_dialog = {
                 method: 'ksa_compliance.customer_feedback.send_feedback_email',
                 args: {
                     company: company,
-                    vat_registration_number: vat_registration_number,
                     subject: values.subject,
                     description: values.description,
                     attachments: values.attachments
@@ -188,4 +219,4 @@ ksa_compliance.feedback_dialog = {
             dialog.set_primary_action(__('Submit'), () => dialog.primary_action(values));
         }
     }
-}; 
+};

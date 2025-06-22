@@ -33,7 +33,7 @@ def get_feedback_settings():
 
 @frappe.whitelist()
 def send_feedback_email(
-    company: str, subject: str, description: str, vat_registration_number: str = None, attachments: str = None
+    company: str, subject: str, description: str, attachments: str = None
 ):
     """Send feedback email using the default email account"""
     try:
@@ -50,7 +50,6 @@ def send_feedback_email(
         email_content += f"""
             <h4>Company Information:</h4>
             <p>Company Name: {company}</p>
-            <p>Vat Registration Number: {vat_registration_number if vat_registration_number else 'N/A'}</p>
             <p>Company Email: {company_email if company_email else 'N/A'}</p>
             <p>Company Phone: {company_phone if company_phone else 'N/A'}</p>
         """
@@ -69,8 +68,16 @@ def send_feedback_email(
                             config['MAX_FILE_SIZE_MB'], file_doc.file_name
                         )
                     )
+   
+                if file_doc.is_private:
+                    existing_file = frappe.db.exists('File', {'file_name': file_doc.file_name, 'is_private': 0})
+                    if existing_file:
+                        file_doc = cast(File, frappe.get_doc('File', existing_file))
+                else:
+                    file_doc.is_private = 0
+                    file_doc.save(ignore_permissions=True)
                 full_url = get_url(file_doc.file_url)
-                email_content += f"<li><a href='{full_url}'>{attachment}</a></li>"
+                email_content += f"<li><a href='{full_url}'>{file_doc.file_name}</a></li>"
             email_content += '</ul>'
 
         api_url = config['API_URL']
@@ -83,12 +90,14 @@ def send_feedback_email(
             frappe.response['http_status_code'] = 200
             frappe.response['success'] = True
         except HTTPError as e:
+            frappe.log_error(frappe.get_traceback(), 'Feedback Email Error')
             error = e.response
             logger.error(f'An HTTP error occurred: {error}')
             if e.response.text:
                 logger.info(f'Response: {e.response.text}')
 
     except Exception as e:
+        logger.error(f'An error occurred while sending feedback email: {e}')
         frappe.log_error(frappe.get_traceback(), 'Feedback Email Error')
         frappe.response['message'] = str(e)
         frappe.response['http_status_code'] = 500

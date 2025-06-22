@@ -14,7 +14,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
         }
 
         frm.add_custom_button(__("Submit Feedback"), () => {
-            ksa_compliance.feedback_dialog.show_feedback_dialog(__("Submit Feedback"), frm.doc.company, frm.doc.vat_registration_number);
+            ksa_compliance.feedback_dialog.show_feedback_dialog(__("Submit Feedback"), frm.doc.company);
         });
     },
     company: function (frm) {
@@ -174,7 +174,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
             });
 
             if (result.message) {
-                ksa_compliance.feedback_dialog.show_feedback_dialog(__("KSA Compliance Feedback"), frm.doc.company, frm.doc.vat_registration_number, true);
+                ksa_compliance.feedback_dialog.show_feedback_dialog(__("KSA Compliance Feedback"), frm.doc.company, true);
             }
         });
     },
