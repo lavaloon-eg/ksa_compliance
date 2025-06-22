@@ -11,6 +11,8 @@ to a section with the version name.
 * Update ksa compliance feedback feature:
   * Enhance the feedback functionality by integrating company details in body.
   * submit feedback through the LavaLoon system instead of sending it via email.
+* Validate buyer address details on submitting `Standard Tax Invoice`.
+* Fix error on invoice creation showing validation message
 
 ## 0.50.3
 

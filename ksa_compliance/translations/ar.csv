@@ -372,3 +372,9 @@ No files uploaded yet.,لم يتم رفع أي ملفات حتى الآن.
 We will use the company phone number and email to contact you regarding your feedback if they are provided.,سنستخدم رقم هاتف الشركة والبريد الإلكتروني للتواصل معك بخصوص ملاحظاتك إذا تم توفيرهما.
 Company Information,معلومات الشركة
 Uploaded Files,الملفات المرفوعة
+Please set Address Line 1 for customer address.,يرجى تعيين Address Line 1 لعنوان العميل.,
+Please make sure that building number is set and is 4 digits exactly in customer address.,يرجى التأكد من تعيين رقم المبنى في عنوان العميل، وأن يتكون من 4 أرقام بالضبط.,
+Please set city for customer address.,يرجى تعيين المدينة لعنوان العميل.,
+Please make sure that postal code is set and is 5 digits exactly in customer address.,يرجى التأكد من تعيين الرمز البريدي في عنوان العميل، وأن يتكون من 5 أرقام بالضبط.,
+Please set district for customer address.,يرجى تعيين الحي لعنوان العميل.,
+Update Address,تعديل العنوان,
