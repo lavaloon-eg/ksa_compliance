@@ -31,7 +31,7 @@ def map_tax_category(
         reason_data = _reason_to_code_and_arabic(reason, custom_category_reason)
     else:
         reason_data = _reason_to_code_and_arabic(reason)
-    return ZatcaTaxCategory(_category_to_code(category), reason_data['code'], reason_data['arabic_reason'])
+    return ZatcaTaxCategory(_category_to_code(category), reason_data['reason_code'], reason_data['arabic_reason'])
 
 
 def _category_to_code(category: str) -> str:
@@ -48,70 +48,70 @@ def _reason_to_code_and_arabic(reason: str, input_reason: Optional[str] = None) 
     # TODO: Update the lookup to use reason code instead of text decoded from the select field in tax category doctype.
     reasons = {
         'Financial services mentioned in Article 29 of the VAT Regulations': {
-            'code': 'VATEX-SA-29',
+            'reason_code': 'VATEX-SA-29',
             'arabic_reason': 'عقد تأمين على الحياة',
         },
         'Life insurance services mentioned in Article 29 of the VAT Regulations': {
-            'code': 'VATEX-SA-29-7',
+            'reason_code': 'VATEX-SA-29-7',
             'arabic_reason': 'الخدمات المالية',
         },
         'Real estate transactions mentioned in Article 30 of the VAT Regulations': {
-            'code': 'VATEX-SA-30',
+            'reason_code': 'VATEX-SA-30',
             'arabic_reason': 'التوريدات العقارية المعفاة من الضريبة',
         },
         'Export of goods': {
-            'code': 'VATEX-SA-32',
+            'reason_code': 'VATEX-SA-32',
             'arabic_reason': 'صادرات السلع من المملكة',
         },
         'Export of services': {
-            'code': 'VATEX-SA-33',
+            'reason_code': 'VATEX-SA-33',
             'arabic_reason': 'صادرات الخدمات من المملكة',
         },
         'The international transport of Goods': {
-            'code': 'VATEX-SA-34-1',
+            'reason_code': 'VATEX-SA-34-1',
             'arabic_reason': 'النقل الدولي للسلع',
         },
         'International transport of passengers': {
-            'code': 'VATEX-SA-34-2',
+            'reason_code': 'VATEX-SA-34-2',
             'arabic_reason': 'النقل الدولي للركاب',
         },
         'Services directly connected and incidental to a Supply of international passenger transport': {
-            'code': 'VATEX-SA-34-3',
+            'reason_code': 'VATEX-SA-34-3',
             'arabic_reason': 'الخدمات المرتبطة مباشرة او عرضيًا بتوريد النقل الدولي للركاب',
         },
         'Supply of a qualifying means of transport': {
-            'code': 'VATEX-SA-34-4',
+            'reason_code': 'VATEX-SA-34-4',
             'arabic_reason': 'توريد وسائل النقل المؤهلة',
         },
         'Any services relating to Goods or passenger transportation as defined in article twenty five of these '
         'Regulations': {
-            'code': 'VATEX-SA-34-5',
+            'reason_code': 'VATEX-SA-34-5',
             'arabic_reason': 'الخدمات ذات الصلة بنقل السلع او الركاب، وفقاً للتعريف الوارد بالمادة الخامسة و العشرين '
             'من اللائحة التنفيذية لنظام ضريبة القيمة المضافة',
         },
         'Medicines and medical equipment': {
-            'code': 'VATEX-SA-35',
+            'reason_code': 'VATEX-SA-35',
             'arabic_reason': 'الادوية والمعدات الطبية',
         },
         'Qualifying metals': {
-            'code': 'VATEX-SA-36',
+            'reason_code': 'VATEX-SA-36',
             'arabic_reason': 'المعادن المؤهلة',
         },
         'Private education to citizen': {
-            'code': 'VATEX-SA-EDU',
+            'reason_code': 'VATEX-SA-EDU',
             'arabic_reason': 'الخدمات التعليمية الخاصة للمواطنين',
         },
         'Private healthcare to citizen': {
-            'code': 'VATEX-SA-HEA',
+            'reason_code': 'VATEX-SA-HEA',
             'arabic_reason': 'الخدمات الصحية الخاصة للمواطنين',
         },
         'Supply of qualified military goods': {
-            'code': 'VATEX-SA-MLTRY',
+            'reason_code': 'VATEX-SA-MLTRY',
             'arabic_reason': 'توريد السلع العسكرية المؤهلة',
         },
-        '{manual entry}': {'code': 'VATEX-SA-OOS', 'arabic_reason': input_reason},
+        '{manual entry}': {'reason_code': 'VATEX-SA-OOS', 'arabic_reason': input_reason},
         'Qualified Supply of Goods in Duty Free area': {
-            'code': 'VATEX-SA-DUTYFREE',
+            'reason_code': 'VATEX-SA-DUTYFREE',
             'arabic_reason': 'التوريد المؤهل للسلع في الأسواق الحرة',
         },
     }
