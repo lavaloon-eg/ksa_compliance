@@ -6,6 +6,7 @@ from .models import TaxCategory, TaxCategoryByItems, TaxTotal, TaxSubtotal, Allo
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
+from ..invoice import get_zatca_discount_reason
 
 
 def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list) -> dict:
@@ -105,12 +106,19 @@ def _get_tax_amounts(tax_category: TaxCategoryByItems) -> float:
 
 def create_allowance_charge(doc: SalesInvoice | PaymentEntry, tax_total: frappe._dict) -> list:
     allowance_charges = []
+    discount_reason, discount_reason_code = None, None
+    if doc.discount_amount:
+        zatca_discount_reason = get_zatca_discount_reason(name=doc.get('custom_zatca_discount_reason'))
+        discount_reason = zatca_discount_reason.reason_name
+        discount_reason_code = zatca_discount_reason.reason_code
+
     for row in tax_total.tax_subtotal:
         proportional = row.taxable_amount / tax_total.taxable_amount
         allowance_charge = AllowanceCharge(
             tax_category=row.tax_category,
             charge_indicator='false',
-            allowance_charge_reason='discount',
+            allowance_charge_reason=discount_reason,
+            allowance_charge_reason_code=discount_reason_code,
             amount=_get_allowance_amount(doc, proportional),
         )
         allowance_charges.append(dataclass_to_frappe_dict(allowance_charge))

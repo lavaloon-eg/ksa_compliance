@@ -29,8 +29,9 @@ class TaxCategoryByItems:
 class AllowanceCharge:
     tax_category: TaxCategory
     amount: float = 0.0
-    charge_indicator: str = 'fales'
-    allowance_charge_reason: str = 'discount'
+    charge_indicator: str = 'false'
+    allowance_charge_reason: str | None = None
+    allowance_charge_reason_code: int | None = None
 
 
 @dataclass
