@@ -73,9 +73,9 @@ def send_feedback_email(
                     existing_file = frappe.db.exists('File', {'file_name': file_doc.file_name, 'is_private': 0})
                     if existing_file:
                         file_doc = cast(File, frappe.get_doc('File', existing_file))
-                else:
-                    file_doc.is_private = 0
-                    file_doc.save(ignore_permissions=True)
+                    else:
+                        file_doc.is_private = 0
+                        file_doc.save(ignore_permissions=True)
                 full_url = get_url(file_doc.file_url)
                 email_content += f"<li><a href='{full_url}'>{file_doc.file_name}</a></li>"
             email_content += '</ul>'
@@ -89,6 +89,11 @@ def send_feedback_email(
             frappe.response['message'] = _('Feedback email sent successfully')
             frappe.response['http_status_code'] = 200
             frappe.response['success'] = True
+        except frappe.exceptions.RateLimitExceededError as e:
+            logger.error(f'Rate limit exceeded: {e}')
+            frappe.response['message'] = _('Rate limit exceeded. Please try again later.')
+            frappe.response['http_status_code'] = 429
+            frappe.response['success'] = False
         except HTTPError as e:
             frappe.log_error(frappe.get_traceback(), 'Feedback Email Error')
             error = e.response
