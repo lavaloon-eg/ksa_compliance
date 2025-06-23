@@ -23,13 +23,8 @@ InvoiceType = Literal['Standard', 'Simplified']
 
 @dataclass
 class InvoiceDiscountReason:
-    reason_name: str | None
-    reason_code: int | None
-
-
-@frappe.whitelist()
-def get_zatca_invoice_discount_reason_list():
-    return get_zatca_discount_reason(as_list=True)
+    name: str | None
+    code: int | None
 
 
 ZATCA_DISCOUNT_REASONS = [
@@ -55,12 +50,10 @@ ZATCA_DISCOUNT_REASONS = [
 ]
 
 
-def get_zatca_discount_reason(
-    name: str = None, code: int = None, as_list=False
-) -> InvoiceDiscountReason | List[str] | None:
-    if name:
-        return next((v for v in ZATCA_DISCOUNT_REASONS if v.reason_name == name), InvoiceDiscountReason(None, None))
-    if code:
-        return next((v for v in ZATCA_DISCOUNT_REASONS if v.code == code), InvoiceDiscountReason(None, None))
-    if as_list:
-        return [v.reason_name for v in ZATCA_DISCOUNT_REASONS]
+@frappe.whitelist()
+def get_zatca_invoice_discount_reason_list() -> List[str]:
+    return [v.name for v in ZATCA_DISCOUNT_REASONS]
+
+
+def get_zatca_discount_reason_by_name(name: str) -> InvoiceDiscountReason:
+    return next((v for v in ZATCA_DISCOUNT_REASONS if v.name == name), InvoiceDiscountReason(None, None))

@@ -8,7 +8,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from erpnext.setup.doctype.branch.branch import Branch
 from frappe.model.document import Document
 from frappe.utils import get_date_str, get_time, strip
-from ksa_compliance.invoice import InvoiceType, get_zatca_discount_reason
+from ksa_compliance.invoice import InvoiceType, get_zatca_discount_reason_by_name
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_return_against_reference import (
@@ -716,11 +716,11 @@ class Einvoice:
                 'allowance_charge_reason_code': None,
             }
             if item_data['discount_amount']:
-                zatca_discount_reason = get_zatca_discount_reason(
+                zatca_discount_reason = get_zatca_discount_reason_by_name(
                     item.get('custom_zatca_discount_reason') or 'Discount'
                 )
-                item_data['allowance_charge_reason'] = zatca_discount_reason.reason_name
-                item_data['allowance_charge_reason_code'] = zatca_discount_reason.reason_code
+                item_data['allowance_charge_reason'] = zatca_discount_reason.name
+                item_data['allowance_charge_reason_code'] = zatca_discount_reason.code
             item_lines.append(frappe._dict(item_data))
 
     def _calculate_discount_amount(self, item, is_tax_included: bool) -> float:
