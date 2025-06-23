@@ -70,7 +70,7 @@ def send_feedback_email(
                     )
    
                 if file_doc.is_private:
-                    existing_file = frappe.db.exists('File', {'file_name': file_doc.file_name, 'is_private': 0})
+                    existing_file = frappe.db.exists('File', {'content_hash': file_doc.content_hash, 'is_private': 0})
                     if existing_file:
                         file_doc = cast(File, frappe.get_doc('File', existing_file))
                     else:
