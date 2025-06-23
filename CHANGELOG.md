@@ -9,6 +9,8 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Fix error on invoice creation showing validation message
+* Support all ZATCA discount reasons.
+* Add `ZATCA Discount Reason` field to `Sales Invoice` and `Sales Invoice Item`.
 
 ## 0.50.3
 
