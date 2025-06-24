@@ -8,7 +8,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from erpnext.setup.doctype.branch.branch import Branch
 from frappe.model.document import Document
 from frappe.utils import get_date_str, get_time, strip
-from ksa_compliance.invoice import InvoiceType
+from ksa_compliance.invoice import InvoiceType, get_zatca_discount_reason_by_name
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_return_against_reference import (
@@ -147,20 +147,6 @@ class Einvoice:
             parent='invoice',
         )
 
-        self.get_text_value(
-            field_name='reason_for_allowance',
-            source_doc=self.additional_fields_doc,
-            xml_name='allowance_charge_reason',
-            parent='invoice',
-        )
-
-        self.get_text_value(
-            field_name='code_for_allowance_reason',
-            source_doc=self.additional_fields_doc,
-            xml_name='allowance_charge_reason_code',
-            parent='invoice',
-        )
-
         # Allowance on invoice should be only the document level allowance without items allowances.
         self.get_float_value(
             field_name='discount_amount',
@@ -215,14 +201,14 @@ class Einvoice:
         self.get_text_value(
             field_name='reason_for_charge',
             source_doc=self.additional_fields_doc,
-            xml_name='allowance_charge_reason',
+            xml_name='reason_for_charge',
             parent='invoice',
         )
 
         self.get_text_value(
             field_name='reason_for_charge_code',
             source_doc=self.additional_fields_doc,
-            xml_name='allowance_charge_reason_code',
+            xml_name='reason_for_charge_code',
             parent='invoice',
         )
 
@@ -726,7 +712,15 @@ class Einvoice:
                 'item_tax_template': item.item_tax_template,
                 'tax_percent': item.tax_rate or 0.0,
                 'tax_amount': abs(item.tax_amount or 0),
+                'allowance_charge_reason': None,
+                'allowance_charge_reason_code': None,
             }
+            if item_data['discount_amount']:
+                zatca_discount_reason = get_zatca_discount_reason_by_name(
+                    item.get('custom_zatca_discount_reason') or 'Discount'
+                )
+                item_data['allowance_charge_reason'] = zatca_discount_reason.name
+                item_data['allowance_charge_reason_code'] = zatca_discount_reason.code
             item_lines.append(frappe._dict(item_data))
 
     def _calculate_discount_amount(self, item, is_tax_included: bool) -> float:

@@ -17,8 +17,14 @@ frappe.ui.form.on('Sales Invoice', {
     },
     async refresh(frm) {
         await set_zatca_integration_status(frm)
-    }
+        await set_zatca_discount_reason(frm)
+    },
 })
+
+async function set_zatca_discount_reason(frm) {
+    const zatca_discount_reasons = await get_zatca_discount_reason_codes()
+    frm.fields_dict.custom_zatca_discount_reason.set_data(zatca_discount_reasons)
+}
 
 async function set_zatca_integration_status(frm) {
     const res = await frappe.db.get_value("Sales Invoice Additional Fields", {
@@ -35,4 +41,11 @@ async function set_zatca_integration_status(frm) {
         }
         frm.set_intro(`<b>Zatca Status: ${status}</b>`, color)
     }
+}
+
+async function get_zatca_discount_reason_codes() {
+    const res = await frappe.call({
+        method: "ksa_compliance.invoice.get_zatca_invoice_discount_reason_list"
+    })
+    return res.message
 }

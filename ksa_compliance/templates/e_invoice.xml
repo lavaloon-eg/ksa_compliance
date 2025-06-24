@@ -148,7 +148,12 @@
     {% for allowance_charge in invoice.allowance_charge %}
     <cac:AllowanceCharge>
         <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-        <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
+        {% if allowance_charge.allowance_charge_reason_code %}
+        <cbc:AllowanceChargeReasonCode>{{ allowance_charge.allowance_charge_reason_code }}</cbc:AllowanceChargeReasonCode>
+        {% endif %}
+        {% if allowance_charge.allowance_charge_reason %}
+        <cbc:AllowanceChargeReason>{{ allowance_charge.allowance_charge_reason }}</cbc:AllowanceChargeReason>
+        {% endif %}
         <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(allowance_charge.amount, 2) }}</cbc:Amount>
             <cac:TaxCategory>
                 <cbc:ID>{{ allowance_charge.tax_category.zatca_tax_category_id.tax_category_code }}</cbc:ID>
@@ -237,6 +242,12 @@
             {% if item.discount_amount %}
             <cac:AllowanceCharge>
                 <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+                {% if item.allowance_charge_reason_code %}
+                <cbc:AllowanceChargeReasonCode>{{ item.allowance_charge_reason_code }}</cbc:AllowanceChargeReasonCode>
+                {% endif %}
+                {% if item.allowance_charge_reason %}
+                <cbc:AllowanceChargeReason>{{ item.allowance_charge_reason }}</cbc:AllowanceChargeReason>
+                {% endif %}
                 <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(item.discount_amount, 2) }}</cbc:Amount>
                 <cbc:BaseAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.base_amount, 2) }}</cbc:BaseAmount>
             </cac:AllowanceCharge>
