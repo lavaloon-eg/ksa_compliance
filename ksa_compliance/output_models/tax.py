@@ -7,9 +7,10 @@ from .models import TaxCategory, TaxCategoryByItems, TaxTotal, TaxSubtotal, Allo
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from ksa_compliance.invoice import get_zatca_discount_reason_by_name
+from frappe.utils import flt
 
 
-def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list) -> dict:
+def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is_tax_included: bool) -> dict:
     tax_category_map = frappe._dict()
     sales_taxes_and_charges_template = doc.get(get_right_fieldname('taxes_and_charges', doc.doctype))
     if sales_taxes_and_charges_template:
@@ -30,9 +31,13 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list) ->
             row.tax_percent = tax_category_percent
             row.tax_category = dataclass_to_frappe_dict(tax_category)
             if doc.doctype != 'Payment Entry':
-                row.tax_amount = row.amount_after_discount * (tax_category_percent / 100)
-                row.rounding_amount = row.amount_after_discount + row.tax_amount
-
+                row.tax_percent = tax_category_percent
+                row.amount = (
+                    flt(abs(row.amount) / (1 + (tax_category_percent / 100)), 2) if is_tax_included else row.amount
+                )
+                row.discount_amount = row.discount_amount * row.qty
+                row.base_amount = row.amount + row.discount_amount
+                row.rounding_amount = row.tax_amount + abs(row.amount)
         tax_category_by_items = TaxCategoryByItems(tax_category=tax_category, items=[row for row in item_lines])
         tax_category_by_items_cls = tax_category_map.setdefault(zatca_category, tax_category_by_items)
         return tax_category_map
@@ -52,8 +57,10 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list) ->
             zatca_tax_category_id=tax_category_id, percent=tax_category_percent, tax_scheme_id='VAT'
         )
         row.tax_percent = tax_category_percent
-        row.tax_amount = row.amount_after_discount * (tax_category_percent / 100)
-        row.rounding_amount = row.amount_after_discount + row.tax_amount
+        row.amount = flt(abs(row.amount) / (1 + (tax_category_percent / 100)), 2) if is_tax_included else row.amount
+        row.discount_amount = row.discount_amount * row.qty
+        row.base_amount = row.amount + row.discount_amount
+        row.rounding_amount = row.tax_amount + abs(row.amount)
         row.tax_category = dataclass_to_frappe_dict(tax_category)
         tax_category_by_items = TaxCategoryByItems(tax_category=tax_category, items=[])
         tax_category_by_items_cls = tax_category_map.setdefault(zatca_category, tax_category_by_items)
@@ -65,7 +72,7 @@ def check_item_tax_template(doc: SalesInvoice, item_lines: list) -> None:
     invalid_items = [row.item_name for row in item_lines if not row.item_tax_template]
     if invalid_items:
         frappe.throw(
-            'Please Include Sales Taxes and Charges Template on invoice\n' 'Or include Item Tax Template on {0}'.format(
+            'Please Include Sales Taxes and Charges Template on invoice\nOr include Item Tax Template on {0}'.format(
                 ', '.join(invalid_items)
             )
         )
@@ -75,15 +82,18 @@ def create_tax_total(doc: SalesInvoice | PaymentEntry, tax_categories: dict) -> 
     tax_sub_totals = []
     tax_amount = 0
     taxable_amount = 0
+    total_discount = 0
     for key in tax_categories:
-        tax_amounts = _get_tax_amounts(tax_categories[key])
+        amounts = _get_amounts(tax_categories[key])
         tax_sub_total = TaxSubtotal(
-            taxable_amount=tax_amounts.taxable_amount,
-            tax_amount=tax_amounts.tax_amount,
+            taxable_amount=amounts.taxable_amount,
+            tax_amount=amounts.tax_amount,
             tax_category=tax_categories[key].tax_category,
+            total_discount=amounts.total_discount,
         )
-        tax_amount += tax_amounts.tax_amount
-        taxable_amount += tax_amounts.taxable_amount
+        tax_amount += amounts.tax_amount
+        taxable_amount += amounts.taxable_amount
+        total_discount += amounts.total_discount
         tax_sub_totals.append(tax_sub_total)
 
     return dataclass_to_frappe_dict(
@@ -91,46 +101,39 @@ def create_tax_total(doc: SalesInvoice | PaymentEntry, tax_categories: dict) -> 
     )
 
 
-def _get_tax_amounts(tax_category: TaxCategoryByItems) -> float:
+def _get_amounts(tax_category: TaxCategoryByItems) -> float:
     taxable_amount = 0
     tax_amount = 0
-    tax_amounts = frappe._dict()
+    total_discount = 0
+    amounts = frappe._dict()
     for row in tax_category.items:
         taxable_amount += row.net_amount
-        tax_amount += row.net_amount * (tax_category.tax_category.percent / 100)
-    tax_amounts.taxable_amount = taxable_amount
-    tax_amounts.tax_amount = tax_amount
+        tax_amount += row.tax_amount
+        total_discount += row.amount - row.net_amount
+    amounts.taxable_amount = taxable_amount
+    amounts.tax_amount = tax_amount
+    amounts.total_discount = total_discount
 
-    return tax_amounts
+    return amounts
 
 
 def create_allowance_charge(doc: SalesInvoice | PaymentEntry, tax_total: frappe._dict) -> list:
     allowance_charges = []
     discount_reason, discount_reason_code = None, None
-    if doc.discount_amount:
+    if doc.doctype == 'Sales Invoice' and doc.discount_amount:
         zatca_discount_reason = get_zatca_discount_reason_by_name(name=doc.custom_zatca_discount_reason)
         discount_reason = zatca_discount_reason.name
         discount_reason_code = zatca_discount_reason.code
 
     for row in tax_total.tax_subtotal:
-        proportional = row.taxable_amount / tax_total.taxable_amount
+        if doc.doctype == 'Payment Entry':
+            row.total_discount = 0
         allowance_charge = AllowanceCharge(
             tax_category=row.tax_category,
             charge_indicator='false',
             allowance_charge_reason=discount_reason,
             allowance_charge_reason_code=discount_reason_code,
-            amount=_get_allowance_amount(doc, proportional),
+            amount=row.total_discount,
         )
         allowance_charges.append(dataclass_to_frappe_dict(allowance_charge))
     return allowance_charges
-
-
-def _get_allowance_amount(doc: SalesInvoice | PaymentEntry, proportional: float) -> float:
-    if doc.doctype == 'Payment Entry':
-        # Payment Entry does not have discount amount
-        return 0.0
-    discount_amount = max(0, abs(doc.discount_amount))
-
-    if not discount_amount:
-        return 0.0
-    return discount_amount * proportional
