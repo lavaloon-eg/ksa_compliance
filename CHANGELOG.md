@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.51.0
+
 * Update ksa compliance feedback feature:
   * Enhance the feedback functionality by integrating company details in body.
   * submit feedback through the LavaLoon system instead of sending it via email.
