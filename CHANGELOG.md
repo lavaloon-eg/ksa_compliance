@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Update ksa compliance feedback feature:
+  * Enhance the feedback functionality by integrating company details in body.
+  * submit feedback through the LavaLoon system instead of sending it via email.
+  * Add error handling for rate limits.
+* Validate buyer address details on submitting `Standard Tax Invoice`.
 * Fix error on invoice creation showing validation message
 * Support all ZATCA discount reasons.
 * Add `ZATCA Discount Reason` field to `Sales Invoice` and `Sales Invoice Item`.
