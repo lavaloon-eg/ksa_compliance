@@ -32,12 +32,8 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
             row.tax_category = dataclass_to_frappe_dict(tax_category)
             if doc.doctype != 'Payment Entry':
                 row.tax_percent = tax_category_percent
-                row.amount = (
-                    flt(abs(row.amount) / (1 + (tax_category_percent / 100)), 2) if is_tax_included else row.amount
-                )
-                row.discount_amount = row.discount_amount * row.qty
-                row.base_amount = row.amount + row.discount_amount
-                row.rounding_amount = row.tax_amount + abs(row.amount)
+                update_item_line_data(row, tax_category_percent, is_tax_included)
+
         tax_category_by_items = TaxCategoryByItems(tax_category=tax_category, items=[row for row in item_lines])
         tax_category_by_items_cls = tax_category_map.setdefault(zatca_category, tax_category_by_items)
         return tax_category_map
@@ -57,15 +53,20 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
             zatca_tax_category_id=tax_category_id, percent=tax_category_percent, tax_scheme_id='VAT'
         )
         row.tax_percent = tax_category_percent
-        row.amount = flt(abs(row.amount) / (1 + (tax_category_percent / 100)), 2) if is_tax_included else row.amount
-        row.discount_amount = row.discount_amount * row.qty
-        row.base_amount = row.amount + row.discount_amount
-        row.rounding_amount = row.tax_amount + abs(row.amount)
+        update_item_line_data(row, tax_category_percent, is_tax_included)
         row.tax_category = dataclass_to_frappe_dict(tax_category)
         tax_category_by_items = TaxCategoryByItems(tax_category=tax_category, items=[])
         tax_category_by_items_cls = tax_category_map.setdefault(zatca_category, tax_category_by_items)
         tax_category_by_items_cls.items.append(row)
     return tax_category_map
+
+
+def update_item_line_data(row: frappe._dict, tax_category_percent: float, is_tax_included: bool) -> None:
+    row.amount = flt(abs(row.amount) / (1 + (tax_category_percent / 100)), 2) if is_tax_included else row.amount
+    row.item_tax_amount = flt(row.amount * (tax_category_percent / 100) / 100, 2)
+    row.discount_amount = row.discount_amount * row.qty
+    row.base_amount = row.amount + row.discount_amount
+    row.rounding_amount = row.item_tax_amount + abs(row.amount)
 
 
 def check_item_tax_template(doc: SalesInvoice, item_lines: list) -> None:

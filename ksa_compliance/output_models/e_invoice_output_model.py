@@ -434,7 +434,7 @@ class Einvoice:
 
         applied_discount_percent = self.sales_invoice_doc.additional_discount_percentage
         total_without_vat = self.result['invoice']['line_extension_amount']
-        tax_amount = abs(sum([row.tax_amount for row in self.sales_invoice_doc.taxes]))
+        tax_amount = abs(self.sales_invoice_doc.taxes[0].tax_amount)
         if applied_discount_percent == 0:
             applied_discount_percent = (discount_amount / (total_without_vat + tax_amount)) * 100
         applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
@@ -666,6 +666,7 @@ class Einvoice:
             'item_tax_template': None,
             'tax_percent': self.sales_invoice_doc.taxes[0].rate,
             'tax_amount': self.sales_invoice_doc.total_taxes_and_charges,
+            'item_tax_amount': self.sales_invoice_doc.total_taxes_and_charges,
             'total_amount': abs(self.sales_invoice_doc.received_amount_after_tax),
         }
 
@@ -699,17 +700,13 @@ class Einvoice:
                 'item_code': item.item_code,
                 'item_name': item.item_name,
                 'net_amount': abs(item.net_amount),
-                'amount_after_discount': abs(item.rate) * abs(item.qty),
-                'base_amount': abs(item.base_rate) * abs(item.qty),
-                'line_extension_amount': abs(item.rate) * abs(item.qty),
-                'rounding_amount': abs(item.rate * abs(item.qty)) + abs(item.tax_amount or 0),
                 'amount': abs(item.amount),
                 'rate': abs(item.rate),
                 'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
                 'discount_amount': abs(item.discount_amount) if has_discount else 0.0,
-                'item_tax_template': item.item_tax_template,
                 'tax_percent': tax_percent,
                 'tax_amount': tax_amount,
+                'item_tax_amount': 0,
                 'allowance_charge_reason': None,
                 'allowance_charge_reason_code': None,
             }
