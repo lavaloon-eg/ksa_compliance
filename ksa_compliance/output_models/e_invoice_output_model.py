@@ -666,7 +666,6 @@ class Einvoice:
             'item_tax_template': None,
             'tax_percent': self.sales_invoice_doc.taxes[0].rate,
             'tax_amount': self.sales_invoice_doc.total_taxes_and_charges,
-            'item_tax_amount': self.sales_invoice_doc.total_taxes_and_charges,
             'total_amount': abs(self.sales_invoice_doc.received_amount_after_tax),
         }
 
@@ -706,7 +705,7 @@ class Einvoice:
                 'discount_amount': abs(item.discount_amount) if has_discount else 0.0,
                 'tax_percent': tax_percent,
                 'tax_amount': tax_amount,
-                'item_tax_amount': 0,
+                'item_tax_template': item.item_tax_template,
                 'allowance_charge_reason': None,
                 'allowance_charge_reason_code': None,
             }
@@ -857,7 +856,7 @@ class Einvoice:
         )
         self.append_to_item_lines(item_lines, is_tax_included, self.sales_invoice_doc)
         tax_categories = create_tax_categories(self.sales_invoice_doc, item_lines, is_tax_included)
-        tax_total = create_tax_total(self.sales_invoice_doc, tax_categories)
+        tax_total = create_tax_total(tax_categories)
         self.result['invoice']['tax_total'] = tax_total
         allowance_charge = create_allowance_charge(self.sales_invoice_doc, tax_total)
         self.result['invoice']['allowance_charge'] = allowance_charge

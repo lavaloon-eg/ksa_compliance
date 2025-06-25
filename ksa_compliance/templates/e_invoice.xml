@@ -216,7 +216,7 @@
         <cbc:InvoicedQuantity unitCode="PCE">{{ item.qty }}</cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.amount, 2) }}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.item_tax_amount or 0.0, 2)}}</cbc:TaxAmount>
+            <cbc:TaxAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.tax_amount or 0.0, 2)}}</cbc:TaxAmount>
             <cbc:RoundingAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.rounding_amount, 2) }}</cbc:RoundingAmount>
         </cac:TaxTotal>
         <cac:Item>
