@@ -223,7 +223,7 @@
             <cbc:Name>{{ item.item_name | escape }}</cbc:Name>
             <cac:ClassifiedTaxCategory>
                 <cbc:ID>{{ item.tax_category.zatca_tax_category_id.tax_category_code }}</cbc:ID>
-                <cbc:Percent>{{ rounded(item.tax_percent or 0.0, 2)}}</cbc:Percent>
+                <cbc:Percent>{{ rounded(item.tax_category.percent or 0.0, 2)}}</cbc:Percent>
                 {% if item.tax_category.zatca_tax_category_id.reason_code %}
                     <cbc:TaxExemptionReasonCode>{{ item.tax_category.zatca_tax_category_id.reason_code | escape }}</cbc:TaxExemptionReasonCode>
                 {% endif %}

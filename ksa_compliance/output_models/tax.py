@@ -13,6 +13,7 @@ from frappe.utils import flt
 def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is_tax_included: bool) -> dict:
     tax_category_map = frappe._dict()
     sales_taxes_and_charges_template = doc.get(get_right_fieldname('taxes_and_charges', doc.doctype))
+
     if sales_taxes_and_charges_template:
         tax_category_id = frappe.db.get_value(
             'Sales Taxes and Charges Template', sales_taxes_and_charges_template, 'tax_category'
