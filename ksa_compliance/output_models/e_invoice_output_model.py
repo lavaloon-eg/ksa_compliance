@@ -693,7 +693,9 @@ class Einvoice:
             tax_percent = abs(item.tax_rate or 0.0)
             tax_amount_with_qty = abs(item.tax_amount or 0.0)
             discount_with_qty = abs(item.discount_amount * item.qty) if has_discount else 0.0
-            amount_with_qty = abs(item.amount)
+            amount_with_qty = abs(
+                flt(abs(item.amount) / (1 + (tax_percent / 100)), 2) if is_tax_included else item.amount
+            )
             net_amount_with_qty = abs(item.net_amount)
             rate_without_qty = abs(item.rate)
             item_data = {
@@ -706,9 +708,7 @@ class Einvoice:
                 'rate': rate_without_qty,
                 'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
                 'tax_percent': tax_percent,
-                'amount': flt(abs(amount_with_qty) / (1 + (tax_percent / 100)), 2)
-                if is_tax_included
-                else amount_with_qty,
+                'amount': amount_with_qty,
                 'rounding_amount': tax_amount_with_qty + amount_with_qty,
                 'base_amount': amount_with_qty + discount_with_qty,
                 'discount_amount': discount_with_qty if has_discount else 0.0,
