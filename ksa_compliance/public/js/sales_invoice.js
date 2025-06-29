@@ -21,6 +21,8 @@ frappe.ui.form.on('Sales Invoice', {
     },
 })
 
+
+
 async function set_zatca_discount_reason(frm) {
     const zatca_discount_reasons = await get_zatca_discount_reason_codes()
     frm.fields_dict.custom_zatca_discount_reason.set_data(zatca_discount_reasons)
@@ -28,8 +30,8 @@ async function set_zatca_discount_reason(frm) {
 
 async function set_zatca_integration_status(frm) {
     const res = await frappe.db.get_value("Sales Invoice Additional Fields", {
-            "sales_invoice": frm.doc.name,
-            "is_latest": 1
+        "sales_invoice": frm.doc.name,
+        "is_latest": 1
     }, "integration_status");
     const status = res.message.integration_status
     if (status) {

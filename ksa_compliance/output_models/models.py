@@ -38,6 +38,7 @@ class AllowanceCharge:
 class TaxSubtotal:
     taxable_amount: float
     tax_amount: float
+    total_discount: float
     tax_category: TaxCategory
 
 
