@@ -16,6 +16,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_
 )
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
+from frappe.utils import flt
 
 from .service import get_right_fieldname, update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
@@ -699,11 +700,13 @@ class Einvoice:
                 'item_code': item.item_code,
                 'item_name': item.item_name,
                 'net_amount': abs(item.net_amount),
-                'amount': abs(item.amount),
                 'rate': abs(item.rate),
                 'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
-                'discount_amount': abs(item.discount_amount) if has_discount else 0.0,
                 'tax_percent': tax_percent,
+                'amount': flt(abs(item.amount) / (1 + (tax_percent / 100)), 2) if is_tax_included else item.amount,
+                'rounding_amount': item.tax_amount + abs(item.amount),
+                'base_amount': item.amount + item.discount_amount,
+                'discount_amount': abs(item.discount_amount * item.qty) if has_discount else 0.0,
                 'tax_amount': tax_amount,
                 'item_tax_template': item.item_tax_template,
                 'allowance_charge_reason': None,
