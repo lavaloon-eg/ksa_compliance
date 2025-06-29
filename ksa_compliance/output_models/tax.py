@@ -14,7 +14,7 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
     tax_category_map = frappe._dict()
     sales_taxes_and_charges_template = doc.get(get_right_fieldname('taxes_and_charges', doc.doctype))
     item_tax_templates = [row.item_tax_template for row in item_lines if row.item_tax_template]
-    if sales_taxes_and_charges_template and len(item_tax_templates) != len(item_lines):
+    if sales_taxes_and_charges_template and not item_tax_templates:
         tax_category_id = frappe.db.get_value(
             'Sales Taxes and Charges Template', sales_taxes_and_charges_template, 'tax_category'
         )
@@ -36,16 +36,26 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
         )
         return tax_category_map
 
-    check_item_tax_template(doc, item_lines)
+    check_item_tax_template(doc, item_lines, sales_taxes_and_charges_template)
 
     for row in item_lines:
-        tax_category_id = map_tax_category(item_tax_template_id=row.item_tax_template)
-        tax_category_percent = frappe.db.get_value(
-            'Item Tax Template Detail', {'parent': row.item_tax_template}, 'tax_rate'
-        )
-        zatca_category = frappe.db.get_value(
-            'Item Tax Template', row.item_tax_template, 'custom_zatca_item_tax_category'
-        )
+        if not row.item_tax_template and sales_taxes_and_charges_template:
+            tax_category_id = frappe.db.get_value(
+                'Sales Taxes and Charges Template', sales_taxes_and_charges_template, 'tax_category'
+            )
+            tax_category_id = map_tax_category(tax_category_id=tax_category_id)
+            tax_category_percent = frappe.db.get_value(
+                'Sales Taxes and Charges', {'parent': sales_taxes_and_charges_template}, 'rate'
+            )
+            zatca_category = frappe.db.get_value('Tax Category', tax_category_id, 'custom_zatca_category')
+        else:
+            tax_category_id = map_tax_category(item_tax_template_id=row.item_tax_template)
+            tax_category_percent = frappe.db.get_value(
+                'Item Tax Template Detail', {'parent': row.item_tax_template}, 'tax_rate'
+            )
+            zatca_category = frappe.db.get_value(
+                'Item Tax Template', row.item_tax_template, 'custom_zatca_item_tax_category'
+            )
         tax_category = TaxCategory(
             zatca_tax_category_id=tax_category_id, percent=tax_category_percent, tax_scheme_id='VAT'
         )
@@ -59,9 +69,9 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
     return tax_category_map
 
 
-def check_item_tax_template(doc: SalesInvoice, item_lines: list) -> None:
+def check_item_tax_template(doc: SalesInvoice, item_lines: list, sales_taxes_and_charges_template: str) -> None:
     invalid_items = [row.item_name for row in item_lines if not row.item_tax_template]
-    if invalid_items:
+    if invalid_items and not sales_taxes_and_charges_template:
         frappe.throw(
             'Please Include Sales Taxes and Charges Template on invoice\nOr include Item Tax Template on {0}'.format(
                 ', '.join(invalid_items)
