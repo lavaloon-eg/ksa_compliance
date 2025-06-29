@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.51.1
+
+* Fix calculation issues related to item, tax, and discount amounts
+
 ## 0.51.0
 
 * Update ksa compliance feedback feature:
