@@ -691,23 +691,28 @@ class Einvoice:
             has_discount = isinstance(item.discount_amount, float) and item.discount_amount > 0
 
             tax_percent = abs(item.tax_rate or 0.0)
-            tax_amount = abs(item.tax_amount or 0.0)
-
+            tax_amount_with_qty = abs(item.tax_amount or 0.0)
+            discount_with_qty = abs(item.discount_amount * item.qty) if has_discount else 0.0
+            amount_with_qty = abs(item.amount)
+            net_amount_with_qty = abs(item.net_amount)
+            rate_without_qty = abs(item.rate)
             item_data = {
                 'idx': item.idx,
                 'qty': abs(item.qty),
                 'uom': item.uom,
                 'item_code': item.item_code,
                 'item_name': item.item_name,
-                'net_amount': abs(item.net_amount),
-                'rate': abs(item.rate),
+                'net_amount': net_amount_with_qty,
+                'rate': rate_without_qty,
                 'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
                 'tax_percent': tax_percent,
-                'amount': flt(abs(item.amount) / (1 + (tax_percent / 100)), 2) if is_tax_included else item.amount,
-                'rounding_amount': item.tax_amount + abs(item.amount),
-                'base_amount': item.amount + item.discount_amount,
-                'discount_amount': abs(item.discount_amount * item.qty) if has_discount else 0.0,
-                'tax_amount': tax_amount,
+                'amount': flt(abs(amount_with_qty) / (1 + (tax_percent / 100)), 2)
+                if is_tax_included
+                else amount_with_qty,
+                'rounding_amount': tax_amount_with_qty + amount_with_qty,
+                'base_amount': amount_with_qty + discount_with_qty,
+                'discount_amount': discount_with_qty if has_discount else 0.0,
+                'tax_amount': tax_amount_with_qty,
                 'item_tax_template': item.item_tax_template,
                 'allowance_charge_reason': None,
                 'allowance_charge_reason_code': None,

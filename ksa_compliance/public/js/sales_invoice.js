@@ -21,15 +21,7 @@ frappe.ui.form.on('Sales Invoice', {
     },
 })
 
-frappe.ui.form.on('Payment Entry', {
 
-    async refresh(frm) {
-        console.log("ss")
-        if (frm.doc.custom_prepayment_invoice && frm.doc.docstatus == 1) {
-            await set_zatca_integration_status(frm)
-        }
-    },
-})
 
 async function set_zatca_discount_reason(frm) {
     const zatca_discount_reasons = await get_zatca_discount_reason_codes()

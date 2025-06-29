@@ -7,7 +7,6 @@ from .models import TaxCategory, TaxCategoryByItems, TaxTotal, TaxSubtotal, Allo
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from ksa_compliance.invoice import get_zatca_discount_reason_by_name
-from frappe.utils import flt
 
 
 def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is_tax_included: bool) -> dict:
