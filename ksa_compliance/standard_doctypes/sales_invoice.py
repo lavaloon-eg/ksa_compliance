@@ -1,16 +1,18 @@
 from datetime import date
+from typing import cast
 
 import frappe
 import frappe.utils.background_jobs
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from erpnext.selling.doctype.customer.customer import Customer
 from frappe import _
-from frappe.utils import strip
 from result import is_ok
 
 from ksa_compliance import logger
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
     SalesInvoiceAdditionalFields,
+    is_b2b_customer,
 )
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
@@ -134,10 +136,8 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
     if is_phase_2_enabled_for_company:
         settings = ZATCABusinessSettings.for_company(self.company)
         if settings.type_of_business_transactions == 'Standard Tax Invoices':
-            customer = frappe.get_doc('Customer', self.customer)
-            if not customer.custom_vat_registration_number and not any(
-                [strip(x.value) for x in customer.custom_additional_ids]
-            ):
+            customer = cast(Customer, frappe.get_doc('Customer', self.customer))
+            if not is_b2b_customer(customer):
                 frappe.msgprint(
                     ft(
                         'Company <b>$company</b> is configured to use Standard Tax Invoices, which require customers to '

@@ -32,9 +32,7 @@ def get_feedback_settings():
 
 
 @frappe.whitelist()
-def send_feedback_email(
-    company: str, subject: str, description: str, attachments: str = None
-):
+def send_feedback_email(company: str, subject: str, description: str, attachments: str = None):
     """Send feedback email using the default email account"""
     try:
         config = get_feedback_settings()
@@ -68,7 +66,7 @@ def send_feedback_email(
                             config['MAX_FILE_SIZE_MB'], file_doc.file_name
                         )
                     )
-   
+
                 if file_doc.is_private:
                     existing_file = frappe.db.exists('File', {'content_hash': file_doc.content_hash, 'is_private': 0})
                     if existing_file:
