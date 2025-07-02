@@ -165,7 +165,7 @@ class SalesInvoiceAdditionalFields(Document):
         if settings.invoice_mode == InvoiceMode.Simplified:
             return 'Simplified'
 
-        if customer.custom_vat_registration_number or any([strip(x.value) for x in customer.custom_additional_ids]):
+        if is_b2b_customer(customer):
             return 'Standard'
 
         return 'Simplified'
@@ -695,3 +695,9 @@ def download_zatca_pdf(id: str, print_format: str = 'ZATCA Phase 2 Print Format'
     frappe.response.filecontent = pdf_content
     frappe.response.type = 'download'
     frappe.response.display_content_as = 'attachment'
+
+
+def is_b2b_customer(customer: Customer) -> bool:
+    return bool(customer.custom_vat_registration_number) or any(
+        [strip(x.value) for x in customer.custom_additional_ids]
+    )
