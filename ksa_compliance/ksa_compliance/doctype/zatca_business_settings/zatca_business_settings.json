@@ -286,14 +286,12 @@
   {
    "fieldname": "production_security_token",
    "fieldtype": "Small Text",
-   "label": "Production Security Token",
-   "read_only": 1
+   "label": "Production Security Token"
   },
   {
    "fieldname": "production_secret",
    "fieldtype": "Password",
-   "label": "Production Secret",
-   "read_only": 1
+   "label": "Production Secret"
   },
   {
    "fieldname": "configuration_section",
@@ -308,8 +306,7 @@
   {
    "fieldname": "production_request_id",
    "fieldtype": "Data",
-   "label": "Production Request ID",
-   "read_only": 1
+   "label": "Production Request ID"
   },
   {
    "fieldname": "column_break_cjdg",
@@ -488,7 +485,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-17 16:51:13.936364",
+ "modified": "2025-06-29 20:53:26.270025",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
@@ -508,6 +505,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

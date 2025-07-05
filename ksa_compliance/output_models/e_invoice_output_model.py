@@ -811,14 +811,14 @@ class Einvoice:
         )
         # TODO: Tax Account Currency
         self.get_float_value(
-            field_name='grand_total', source_doc=self.sales_invoice_doc, xml_name='grand_total', parent='invoice'
+            field_name='custom_grand_total_without_rounding', source_doc=self.sales_invoice_doc, xml_name='grand_total', parent='invoice'
         )
         self.get_float_value(
             field_name='total_advance', source_doc=self.sales_invoice_doc, xml_name='prepaid_amount', parent='invoice'
         )
 
         if self.sales_invoice_doc.is_rounded_total_disabled():
-            self.result['invoice']['payable_amount'] = abs(self.sales_invoice_doc.grand_total)
+            self.result['invoice']['payable_amount'] = abs(self.sales_invoice_doc.custom_grand_total_without_rounding)
             self.result['invoice']['rounding_adjustment'] = 0.0
         else:
             # Tax inclusive amount + rounding adjustment = payable amount
@@ -834,7 +834,7 @@ class Einvoice:
             # So the calculation would be wrong if we just used the value of rounding adjustment. We need to recalculate
             # it or adjust its sign to produce the right result in the return case
             payable_amount = abs(self.sales_invoice_doc.rounded_total)
-            tax_inclusive_amount = abs(self.sales_invoice_doc.grand_total)
+            tax_inclusive_amount = abs(self.sales_invoice_doc.custom_grand_total_without_rounding)
             self.result['invoice']['payable_amount'] = payable_amount
             if self.sales_invoice_doc.is_return:
                 self.result['invoice']['rounding_adjustment'] = payable_amount - tax_inclusive_amount

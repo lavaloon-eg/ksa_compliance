@@ -71,7 +71,7 @@ def get_zatca_integration_details_data(filters):
                     inv.posting_date,
                     inv.net_total,
                     inv.total_taxes_and_charges,
-                    inv.grand_total
+                    inv.custom_grand_total_without_rounding
                 FROM
                     `tabSales Invoice Additional Fields` zi
                 RIGHT JOIN `tabSales Invoice` inv
@@ -134,7 +134,7 @@ def get_columns():
         },
         {
             'label': _('Grand Total'),
-            'fieldname': 'grand_total',
+            'fieldname': 'custom_grand_total_without_rounding',
             'fieldtype': 'Currency',
             'width': 200,
         },

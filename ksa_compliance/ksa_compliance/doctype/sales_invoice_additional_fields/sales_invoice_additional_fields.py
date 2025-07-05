@@ -531,7 +531,10 @@ def fix_rejection(id: str):
                 invoice=siaf.sales_invoice,
             )
         )
-
+    
+    invoice_doc = frappe.get_doc(siaf.invoice_doctype, siaf.sales_invoice)
+    invoice_doc.save()
+    
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     if not settings:
         frappe.throw(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))

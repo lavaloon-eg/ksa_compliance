@@ -40,7 +40,7 @@ def get_qr_inputs(invoice_name: str) -> list:
     seller_vat_reg_no = phase_1_settings.vat_registration_number
     time = invoice_doc.posting_time
     timestamp = format_date(invoice_doc.posting_date, time)
-    grand_total = invoice_doc.grand_total
+    grand_total = invoice_doc.custom_grand_total_without_rounding
     total_vat = invoice_doc.total_taxes_and_charges
     # returned values should be ordered based on ZATCA Qr Specifications
     return [seller_name, seller_vat_reg_no, timestamp, grand_total, total_vat]

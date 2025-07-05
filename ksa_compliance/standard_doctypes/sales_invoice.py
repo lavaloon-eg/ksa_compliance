@@ -144,8 +144,17 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
                     )
                 )
                 valid = False
-
+ 
     if not valid:
         message_log = frappe.get_message_log()
         error_messages = '\n'.join(log['message'] for log in message_log)
         raise frappe.ValidationError(error_messages)
+    
+    validate_grand_total_sales_invoice(self, method)
+
+
+def validate_grand_total_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
+    if self.disable_rounded_total:   
+        self.custom_grand_total_without_rounding = sum(
+            [row.total_amount for row in self.items if row.total_amount]
+        )    

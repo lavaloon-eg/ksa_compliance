@@ -48,7 +48,7 @@ def get_columns():
         {'fieldname': 'records_count', 'fieldtype': 'Int', 'label': 'Total Number of invoices', 'width': 150},
         {'fieldname': 'net_total', 'fieldtype': 'Currency', 'label': 'Net Total Amount', 'width': 150},
         {'fieldname': 'total_taxes_and_charges', 'fieldtype': 'Currency', 'label': 'VAT Total Amount', 'width': 150},
-        {'fieldname': 'grand_total', 'fieldtype': 'Currency', 'label': 'Grand Total Amount', 'width': 150},
+        {'fieldname': 'custom_grand_total_without_rounding', 'fieldtype': 'Currency', 'label': 'Grand Total Amount', 'width': 150},
     ]
 
 
@@ -58,7 +58,7 @@ def get_zatca_integration_summary_data(filters):
             COUNT(DISTINCT inv.name) AS records_count,
             SUM(inv.net_total) AS net_total,
             SUM(inv.total_taxes_and_charges) AS total_taxes_and_charges,
-            SUM(inv.grand_total) AS grand_total
+            SUM(inv.custom_grand_total_without_rounding) AS grand_total
             FROM
             `tabSales Invoice` inv
             LEFT JOIN `tabSales Invoice Additional Fields` zi
