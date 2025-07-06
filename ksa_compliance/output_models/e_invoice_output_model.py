@@ -904,3 +904,10 @@ class Einvoice:
         self.result['invoice']['item_lines'] = item_lines
         self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
         # --------------------------- END Getting Invoice's item lines ------------------------------
+        if not self.result["invoice"].get("grand_total"):
+            if not self.sales_invoice_doc.custom_grand_total_without_rounding:
+                self.sales_invoice_doc.custom_grand_total_without_rounding = sum(
+                    [row.total_amount for row in self.sales_invoice_doc.items if row.total_amount]
+                )
+            self.result["invoice"]["grand_total"] = self.sales_invoice_doc.custom_grand_total_without_rounding
+

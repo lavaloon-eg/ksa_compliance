@@ -154,7 +154,10 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
 
 
 def validate_grand_total_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
-    if self.disable_rounded_total:   
-        self.custom_grand_total_without_rounding = sum(
-            [row.total_amount for row in self.items if row.total_amount]
-        )    
+    if not self.disable_rounded_total:
+        self.custom_grand_total_without_rounding = None
+        return
+
+    self.custom_grand_total_without_rounding = sum(
+        [row.total_amount for row in self.items if row.total_amount]
+    )
