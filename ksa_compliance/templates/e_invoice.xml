@@ -197,7 +197,8 @@
     <cac:LegalMonetaryTotal>
         <cbc:LineExtensionAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.line_extension_amount, 2) }}</cbc:LineExtensionAmount>
         <cbc:TaxExclusiveAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.net_total, 2) }}</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.grand_total, 2) }}</cbc:TaxInclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.custom_grand_total_without_rounding, 2) }}</cbc:TaxInclusiveAmount>
+
         <cbc:AllowanceTotalAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.allowance_total_amount, 2) }}</cbc:AllowanceTotalAmount>
         {% if invoice.rounding_adjustment %}
         <cbc:PayableRoundingAmount currencyID="{{ invoice.currency_code }}">{{ rounded(invoice.rounding_adjustment, 2) }}</cbc:PayableRoundingAmount>
