@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.52.0
+
+* Add `is_b2b_customer` used by other apps to check whether a customer is a business customer
+
 ## 0.51.1
 
 * Fix calculation issues related to item, tax, and discount amounts
