@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix prepayment calculation based on Business need
+
 ## 0.53.0
 
 * Use ZATCA CLI 2.8.0

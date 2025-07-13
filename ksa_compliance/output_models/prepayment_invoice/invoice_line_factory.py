@@ -45,8 +45,8 @@ def _create_invoice_line(advance: SalesInvoicePayment, doc: SalesInvoice) -> Inv
             tax_amount=0.0,
             rounding_amount=0.0,
             tax_subtotal=TaxSubtotal(
-                taxable_amount=abs(advance.allocated_amount),
-                tax_amount=abs(advance.allocated_amount * (tax_percent / 100)),
+                taxable_amount=abs(advance.allocated_amount) / (1 + (tax_percent / 100)),
+                tax_amount=abs(abs(advance.allocated_amount) / (1 + (tax_percent / 100))) * (tax_percent / 100),
                 tax_category_id=tax_category.tax_category_code,
                 tax_percent=tax_percent,
             ),
