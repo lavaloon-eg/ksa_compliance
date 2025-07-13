@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Use ZATCA CLI 2.8.0
+
 ## 0.52.0
 
 * Add `is_b2b_customer` used by other apps to check whether a customer is a business customer
