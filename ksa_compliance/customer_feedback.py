@@ -17,9 +17,10 @@ from ksa_compliance import logger
 def get_feedback_settings():
     """Get feedback settings from ZATCA Feedback Settings"""
     email_accounts = frappe.db.get_list('Email Account', fields=['email_id'], filters={'default_outgoing': 1}, limit=1)
+    base_destination_site_url = frappe.conf.get("base_destination_site_url", "https://lavaloon.com")
 
     settings_dict = {
-        'API_URL': 'https://lavaloon.com/api/method/frappe_feedback.api.create_customer_feedback',
+        'API_URL': f'{base_destination_site_url}/api/method/frappe_feedback.api.create_customer_feedback',
         'LAVALOON_CONTACT_PAGE': 'https://lavaloon.com/contact-us',
         'MAX_FILE_SIZE_MB': 5,
         'MAX_NUMBER_OF_FILES': 3,
