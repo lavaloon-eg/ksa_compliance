@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix feedback destination URL formatting.
+
 ## 0.54.0
 
 * On Creating Prepayment, This change ensures users manually calculate the tax amount, eliminating reliance on standard Payment Entry tax allocation logic. It prevents unintended tax duplication or misallocation when the prepayment is later linked to a Sales Invoice.
