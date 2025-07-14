@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Update the feedback settings to send feedback securely to the correct server.
+
 ## 0.53.0
 
 * Use ZATCA CLI 2.8.0
