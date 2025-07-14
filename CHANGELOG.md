@@ -8,12 +8,14 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.54.0
+
 * On Creating Prepayment, This change ensures users manually calculate the tax amount, eliminating reliance on standard Payment Entry tax allocation logic. It prevents unintended tax duplication or misallocation when the prepayment is later linked to a Sales Invoice.
 The prepayment tax line is now strictly enforced with the following settings:
   * Add or Deduct: Deduct
   * Considered in Paid Amount: False
   * Type: Actual
-* Update the feedback settings to send feedback securely to the correct server.
+* Allow overriding feedback destination through site config to enable testing
 
 ## 0.53.0
 
