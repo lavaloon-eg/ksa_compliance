@@ -678,11 +678,9 @@ class Einvoice:
         if included_in_paid_amount:
             values.amount_after_discount = doc.paid_amount - doc.total_taxes_and_charges
             values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
-            values.net_amount = doc.paid_amount - doc.total_taxes_and_charges
         else:
             values.amount_after_discount = doc.received_amount
             values.line_extension_amount = doc.received_amount
-            values.net_amount = doc.received_amount
         return values
 
     def _append_sales_invoice_items(self, item_lines: list, is_tax_included: bool, doc: SalesInvoice) -> None:
