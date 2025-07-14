@@ -13,6 +13,7 @@ The prepayment tax line is now strictly enforced with the following settings:
   * Add or Deduct: Deduct
   * Considered in Paid Amount: False
   * Type: Actual
+* Update the feedback settings to send feedback securely to the correct server.
 
 ## 0.53.0
 
