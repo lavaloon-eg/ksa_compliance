@@ -397,3 +397,8 @@ Fixed long term,ثابت طويل الأجل
 Temporary,مؤقت
 Standard,قياسي
 Yearly turnover,معدل دوران سنوي
+You cannot set Included in Paid Amount for Prepayment Invoice.,لا يمكنك تحديد مضمن في المبلغ المدفوع لفاتورة الدفع المسبق.
+You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.,لا يمكنك تحديد نوع الإضافة أو الخصم إلى: إضافة لفاتورة الدفع المسبق. النوع المسموح به هو خصم.
+You cannot set Charge Type to: On Net Total for Prepayment Invoice. Allowed type is Actual.,لا يمكنك تحديد نوع التكلفة إلى: على الإجمالي الصافي لفاتورة الدفع المسبق. النوع المسموح به هو فعلي.
+This Action Is Not Allowed,هذا الإجراء غير مسموح به
+Prepayment Invoice Acknowledgment,إقرار فاتورة الدفع المسبق
