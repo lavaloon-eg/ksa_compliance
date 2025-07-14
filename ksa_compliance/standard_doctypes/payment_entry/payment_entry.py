@@ -12,6 +12,32 @@ from ksa_compliance import logger
 from result import is_ok
 
 
+def validate_payment_entry(self: PaymentEntry, method: str = None):
+    if not self.custom_prepayment_invoice:
+        return
+
+    # Force the tax to be Deduct and not included_in_paid_amount
+    if self.taxes:
+        for row in self.get('taxes'):
+            if row.included_in_paid_amount:
+                frappe.throw(
+                    msg=_('You cannot set Included in Paid Amount for Prepayment Invoice.'),
+                    title=_('This Action Is Not Allowed'),
+                )
+            if row.add_deduct_tax != 'Deduct':
+                frappe.throw(
+                    msg=_('You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.'),
+                    title=_('This Action Is Not Allowed'),
+                )
+            if row.charge_type != 'Actual':
+                frappe.throw(
+                    msg=_(
+                        'You cannot set Charge Type to: On Net Total for Prepayment Invoice. Allowed type is Actual.'
+                    ),
+                    title=_('This Action Is Not Allowed'),
+                )
+
+
 def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, method: str = None):
     if not self.custom_prepayment_invoice:
         logger.info(f"Skipping additional fields for {self.name} because it's not a prepayment invoice")

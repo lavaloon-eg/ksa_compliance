@@ -123,6 +123,5 @@ class PrepaymentInvoice:
             {
                 'prepaid_amount': 'Prepaid amount is mandatory',
                 'currency': 'Currency is mandatory',
-                'invoice_lines': 'Invoice lines are mandatory',
             },
         )
