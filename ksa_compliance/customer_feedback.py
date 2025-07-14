@@ -1,10 +1,9 @@
 import os
 import json
-from typing import cast
 import urllib.parse
+from typing import cast
 import requests
 from requests import HTTPError
-import urllib
 
 import frappe
 from frappe import _
@@ -19,8 +18,10 @@ from ksa_compliance import logger
 def get_feedback_settings():
     """Get feedback settings from ZATCA Feedback Settings"""
     email_accounts = frappe.db.get_list('Email Account', fields=['email_id'], filters={'default_outgoing': 1}, limit=1)
-    feedback_destination_site_url = frappe.conf.get("feedback_destination_site_url", "https://lavaloon.com")
-    api_url = urllib.parse.urljoin(feedback_destination_site_url, 'api/method/frappe_feedback.api.create_customer_feedback')
+    feedback_destination_site_url = frappe.conf.get('feedback_destination_site_url', 'https://lavaloon.com')
+    api_url = urllib.parse.urljoin(
+        feedback_destination_site_url, 'api/method/frappe_feedback.api.create_customer_feedback'
+    )
 
     settings_dict = {
         'API_URL': api_url,
