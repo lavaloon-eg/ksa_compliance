@@ -8,6 +8,9 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from ksa_compliance.invoice import get_zatca_discount_reason_by_name
 
+from ksa_compliance.translation import ft
+from ksa_compliance.throw import fthrow
+
 
 def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is_tax_included: bool) -> dict:
     tax_category_map = frappe._dict()
@@ -18,14 +21,20 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
             'Sales Taxes and Charges Template', sales_taxes_and_charges_template, 'tax_category'
         )
         if not tax_category_id:
-            frappe.throw(
-                'Please set Tax Category on Sales Taxes and Charges Template {0}'.format(
-                    sales_taxes_and_charges_template
+            fthrow(
+                msg=ft(
+                    'Please set Tax Category on Sales Taxes and Charges Template $sales_taxes_and_charges_template.',
+                    sales_taxes_and_charges_template=sales_taxes_and_charges_template,
                 )
             )
         zatca_category = frappe.db.get_value('Tax Category', tax_category_id, 'custom_zatca_category')
         if not zatca_category:
-            frappe.throw('Please set custom ZATCA category on Tax Category {0}'.format(tax_category_id))
+            fthrow(
+                msg=ft(
+                    'Please set custom ZATCA category on Tax Category $tax_category_id.',
+                    tax_category_id=tax_category_id,
+                )
+            )
         tax_category_percent = frappe.db.get_value(
             'Sales Taxes and Charges', {'parent': sales_taxes_and_charges_template}, 'rate'
         )
