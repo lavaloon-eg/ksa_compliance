@@ -17,7 +17,15 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
         tax_category_id = frappe.db.get_value(
             'Sales Taxes and Charges Template', sales_taxes_and_charges_template, 'tax_category'
         )
+        if not tax_category_id:
+            frappe.throw(
+                'Please set Tax Category on Sales Taxes and Charges Template {0}'.format(
+                    sales_taxes_and_charges_template
+                )
+            )
         zatca_category = frappe.db.get_value('Tax Category', tax_category_id, 'custom_zatca_category')
+        if not zatca_category:
+            frappe.throw('Please set custom ZATCA category on Tax Category {0}'.format(tax_category_id))
         tax_category_percent = frappe.db.get_value(
             'Sales Taxes and Charges', {'parent': sales_taxes_and_charges_template}, 'rate'
         )

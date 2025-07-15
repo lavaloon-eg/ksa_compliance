@@ -19,6 +19,8 @@ def prepayment_invoice_factory_create(zatca_fields_dto: dict, doc: SalesInvoice)
 def _get_prepaid_amount(doc: SalesInvoice) -> float:
     prepaid_amount = 0
     for row in doc.advances:
+        if frappe.db.get_value('Payment Entry', row.reference_name, 'custom_prepayment_invoice'):
+            continue
         tax_amount = frappe.db.get_value(
             row.reference_type,
             row.reference_name,
