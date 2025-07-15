@@ -115,13 +115,3 @@ class PrepaymentInvoice:
     prepaid_amount: float
     currency: str
     invoice_lines: List[dict]
-
-    def __post_init__(self):
-        """Validation runs automatically after initialization"""
-        validate_mandatory_fields(
-            self,
-            {
-                'prepaid_amount': 'Prepaid amount is mandatory',
-                'currency': 'Currency is mandatory',
-            },
-        )
