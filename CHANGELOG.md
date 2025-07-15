@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.54.1
+
 * Improved Error Messaging: Enhanced the clarity of the error message shown when a Tax Category is not selected in the Sales Taxes and Charges Template.
 * Prepayment Validation: Added validation to ensure that allocated Prepayment Amounts selected in the Sales Invoice have been properly submitted to ZATCA, While skipping uncompliant prepayment invoices.
 * Fix feedback destination URL formatting.
