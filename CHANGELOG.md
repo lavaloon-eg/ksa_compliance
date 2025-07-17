@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.55.0
+
 * Added Support to Prepayment Invoices on Sales Order with charge type On Paid Amount
 
 ## 0.54.1
