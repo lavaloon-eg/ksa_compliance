@@ -409,3 +409,4 @@ You cannot set Included in Paid Amount for Prepayment Invoice.,لا يمكنك �
 You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.,لا يمكنك تعيين نوع الإضافة أو الخصم (Add Or Deduct) إلى: "Add" لفاتورة الدفع المسبق. النوع المسموح به هو "Deduct".
 You cannot set Charge Type to anything other than Actual or On Paid Amount for Prepayment Invoice.,لا يمكنك تعيين نوع الرسوم (Charge Type) إلى أي قيمة غير "Actual" أو "On Paid Amount" لفاتورة الدفع المسبق.
 This Action Is Not Allowed,هذا الإجراء غير مسموح به.
+Payment Entry $name does not have any taxes. Please add taxes to the Payment Entry.,إدخال الدفع $name لا يحتوي على أي ضرائب. يُرجى إضافة الضرائب إلى إدخال الدفع.

@@ -674,9 +674,11 @@ class Einvoice:
 
     def _calculate_payment_entry_values(self, doc: PaymentEntry) -> dict:
         values = frappe._dict()
-        charge_type = ''
-        for row in doc.taxes:
-            charge_type = row.charge_type
+        if not doc.taxes:
+            fthrow(
+                msg=ft('Payment Entry $name does not have any taxes. Please add taxes to the Payment Entry.', name=doc.name)
+            )
+        charge_type = doc.taxes[0].charge_type
         sales_order_found = False
         for row in doc.references:
             if row.reference_doctype == 'Sales Order':
