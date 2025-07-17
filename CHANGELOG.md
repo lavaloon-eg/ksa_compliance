@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Added Support to Prepayment Invoices on Sales Order with charge type On Paied Amount
+
 ## 0.54.1
 
 * Improved Error Messaging: Enhanced the clarity of the error message shown when a Tax Category is not selected in the Sales Taxes and Charges Template.
