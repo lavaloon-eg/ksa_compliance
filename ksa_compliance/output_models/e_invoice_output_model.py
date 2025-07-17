@@ -653,14 +653,14 @@ class Einvoice:
             'uom': 'Unit',
             'item_code': 'Prepayment Invoice Item',
             'item_name': self.sales_invoice_doc.custom_prepayment_invoice_description or self.sales_invoice_doc.remarks,
-            'net_amount': abs(self.sales_invoice_doc.received_amount_after_tax),
+            'net_amount': abs(values.net_amount),
             'amount_after_discount': abs(values.amount_after_discount),
             'amount': abs(values.amount),
             'base_net_rate': abs(self.sales_invoice_doc.received_amount),
             'base_net_amount': abs(self.sales_invoice_doc.received_amount),
             'line_extension_amount': abs(values.line_extension_amount),
             'base_amount': abs(self.sales_invoice_doc.received_amount),
-            'rounding_amount': abs(values.line_extension_amount),
+            'rounding_amount': abs(values.rounding_amount),
             'rate': abs(self.sales_invoice_doc.received_amount),
             'discount_percentage': 0.0,
             'discount_amount': 0.0,
@@ -674,9 +674,32 @@ class Einvoice:
 
     def _calculate_payment_entry_values(self, doc: PaymentEntry) -> dict:
         values = frappe._dict()
-        values.amount_after_discount = doc.paid_amount - doc.total_taxes_and_charges
-        values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
-        values.amount = abs(self.sales_invoice_doc.received_amount_after_tax)
+        charge_type = ''
+        for row in doc.taxes:
+            charge_type = row.charge_type
+        sales_order_found = False
+        for row in doc.references:
+            if row.reference_doctype == 'Sales Order':
+                sales_order_found = True
+                break
+        if charge_type == 'Actual':
+            values.amount_after_discount = doc.paid_amount - doc.total_taxes_and_charges
+            values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
+            values.amount = abs(self.sales_invoice_doc.received_amount_after_tax)
+            values.rounding_amount = doc.paid_amount
+            values.net_amount = abs(self.sales_invoice_doc.received_amount_after_tax)
+        else:
+            if not sales_order_found:
+                fthrow(
+                    msg=ft(
+                        'You cannot set Charge Type to anything other than Actual for Prepayment Invoice. If there is no Sales Order, please set Charge Type to Actual.'
+                    )
+                )
+            values.amount_after_discount = doc.paid_amount
+            values.line_extension_amount = doc.paid_amount
+            values.rounding_amount = abs(self.sales_invoice_doc.received_amount) + abs(doc.total_taxes_and_charges)
+            values.amount = abs(self.sales_invoice_doc.received_amount)
+            values.net_amount = abs(self.sales_invoice_doc.received_amount)
 
         return values
 
