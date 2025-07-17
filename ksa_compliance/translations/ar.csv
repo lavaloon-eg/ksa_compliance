@@ -404,3 +404,9 @@ This Action Is Not Allowed,هذا الإجراء غير مسموح به
 Prepayment Invoice Acknowledgment,إقرار فاتورة الدفع المسبق
 Please set Tax Category on Sales Taxes and Charges Template $sales_taxes_and_charges_template.,الرجاء تعيين فئة الضريبة (Tax Category) في قالب الضرائب والرسوم: $sales_taxes_and_charges_template.
 Please set custom ZATCA category on Tax Category $tax_category_id.,الرجاء تعيين فئة ZATCA المخصصة في فئة الضريبة: $tax_category_id.
+You cannot set Charge Type to anything other than Actual for Prepayment Invoice. If there is no Sales Order, please set Charge Type to Actual.,لا يمكنك تعيين نوع الرسوم (Charge Type) إلى أي قيمة غير "Actual" لفاتورة الدفع المسبق. إذا لم يكن هناك أمر بيع، يُرجى تعيين نوع الرسوم إلى "Actual".
+You cannot set Included in Paid Amount for Prepayment Invoice.,لا يمكنك تحديد "Included in Paid Amount" لفاتورة الدفع المسبق.
+You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.,لا يمكنك تعيين نوع الإضافة أو الخصم (Add Or Deduct) إلى: "Add" لفاتورة الدفع المسبق. النوع المسموح به هو "Deduct".
+You cannot set Charge Type to anything other than Actual or On Paid Amount for Prepayment Invoice.,لا يمكنك تعيين نوع الرسوم (Charge Type) إلى أي قيمة غير "Actual" أو "On Paid Amount" لفاتورة الدفع المسبق.
+This Action Is Not Allowed,هذا الإجراء غير مسموح به.
+Payment Entry $name does not have any taxes. Please add taxes to the Payment Entry.,إدخال الدفع $name لا يحتوي على أي ضرائب. يُرجى إضافة الضرائب إلى إدخال الدفع.
