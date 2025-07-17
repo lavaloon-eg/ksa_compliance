@@ -29,13 +29,6 @@ def validate_payment_entry(self: PaymentEntry, method: str = None):
                     msg=_('You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.'),
                     title=_('This Action Is Not Allowed'),
                 )
-            if row.charge_type != 'Actual':
-                frappe.throw(
-                    msg=_(
-                        'You cannot set Charge Type to: On Net Total for Prepayment Invoice. Allowed type is Actual.'
-                    ),
-                    title=_('This Action Is Not Allowed'),
-                )
 
 
 def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, method: str = None):
