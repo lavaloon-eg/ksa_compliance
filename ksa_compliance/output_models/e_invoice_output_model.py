@@ -679,11 +679,6 @@ class Einvoice:
                 msg=ft('Payment Entry $name does not have any taxes. Please add taxes to the Payment Entry.', name=doc.name)
             )
         charge_type = doc.taxes[0].charge_type
-        sales_order_found = False
-        for row in doc.references:
-            if row.reference_doctype == 'Sales Order':
-                sales_order_found = True
-                break
         if charge_type == 'Actual':
             values.amount_after_discount = doc.paid_amount - doc.total_taxes_and_charges
             values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
@@ -691,6 +686,11 @@ class Einvoice:
             values.rounding_amount = doc.paid_amount
             values.net_amount = abs(self.sales_invoice_doc.received_amount_after_tax)
         else:
+            sales_order_found = False
+            for row in doc.references:
+                if row.reference_doctype == 'Sales Order':
+                    sales_order_found = True
+                    break
             if not sales_order_found:
                 fthrow(
                     msg=ft(
