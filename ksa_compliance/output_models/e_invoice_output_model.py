@@ -666,7 +666,7 @@ class Einvoice:
             'discount_amount': 0.0,
             'item_tax_template': None,
             'tax_percent': self.sales_invoice_doc.taxes[0].rate,
-            'tax_amount': abs(self.sales_invoice_doc.total_taxes_and_charges),
+            'tax_amount': abs(values.tax_amount),
             'total_amount': abs(self.sales_invoice_doc.received_amount_after_tax),
         }
 
@@ -679,12 +679,14 @@ class Einvoice:
                 msg=ft('Payment Entry $name does not have any taxes. Please add taxes to the Payment Entry.', name=doc.name)
             )
         charge_type = doc.taxes[0].charge_type
+        tax_percent = abs(doc.taxes[0].rate) / 100
         if charge_type == 'Actual':
             values.amount_after_discount = doc.paid_amount - doc.total_taxes_and_charges
             values.line_extension_amount = doc.paid_amount - doc.total_taxes_and_charges
             values.amount = abs(self.sales_invoice_doc.received_amount_after_tax)
             values.rounding_amount = doc.paid_amount
             values.net_amount = abs(self.sales_invoice_doc.received_amount_after_tax)
+            values.tax_amount = abs(doc.total_taxes_and_charges)
         else:
             sales_order_found = False
             for row in doc.references:
@@ -697,11 +699,13 @@ class Einvoice:
                         'You cannot set Charge Type to anything other than Actual for Prepayment Invoice. If there is no Sales Order, please set Charge Type to Actual.'
                     )
                 )
-            values.amount_after_discount = doc.paid_amount
-            values.line_extension_amount = doc.paid_amount
-            values.rounding_amount = abs(self.sales_invoice_doc.received_amount) + abs(doc.total_taxes_and_charges)
-            values.amount = abs(self.sales_invoice_doc.received_amount)
-            values.net_amount = abs(self.sales_invoice_doc.received_amount)
+            tax_amount = abs(self.sales_invoice_doc.received_amount) - (abs(self.sales_invoice_doc.received_amount) / (1 + tax_percent))
+            values.amount_after_discount = abs(self.sales_invoice_doc.received_amount)
+            values.line_extension_amount = abs(self.sales_invoice_doc.received_amount)
+            values.rounding_amount = abs(self.sales_invoice_doc.received_amount)
+            values.amount = abs(self.sales_invoice_doc.received_amount) - abs(tax_amount)
+            values.net_amount = abs(self.sales_invoice_doc.received_amount) - abs(tax_amount)
+            values.tax_amount = abs(tax_amount)
 
         return values
 
@@ -893,6 +897,14 @@ class Einvoice:
         self.result['invoice']['total_taxes_and_charges_percent'] = sum(
             it.rate for it in self.sales_invoice_doc.get('taxes', [])
         )
+        if self.sales_invoice_doc.doctype == 'Payment Entry':
+            charge_type = self.sales_invoice_doc.taxes[0].charge_type
+            tax_percent = abs(self.sales_invoice_doc.taxes[0].rate) / 100
+            # Recalculated prepayment on Sales Order to include tax in the paid amount.
+            if charge_type != 'Actual':
+                self.result['invoice']['base_total_taxes_and_charges'] = abs(self.sales_invoice_doc.base_total_taxes_and_charges) / (1 + tax_percent)
+                self.result['invoice']['total_taxes_and_charges'] = abs(self.sales_invoice_doc.total_taxes_and_charges) / (1 + tax_percent)
+
         self.result['invoice']['item_lines'] = item_lines
         self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
         self.compute_invoice_discount_amount()

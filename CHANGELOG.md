@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Recalculated prepayment on Sales Order to include tax in the paid amount.
+
 ## 0.55.0
 
 * Added Support to Prepayment Invoices on Sales Order with charge type On Paid Amount
