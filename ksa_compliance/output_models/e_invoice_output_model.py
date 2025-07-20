@@ -900,6 +900,7 @@ class Einvoice:
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             charge_type = self.sales_invoice_doc.taxes[0].charge_type
             tax_percent = abs(self.sales_invoice_doc.taxes[0].rate) / 100
+            # Recalculated prepayment on Sales Order to include tax in the paid amount.
             if charge_type != 'Actual':
                 self.result['invoice']['base_total_taxes_and_charges'] = abs(self.sales_invoice_doc.base_total_taxes_and_charges) / (1 + tax_percent)
                 self.result['invoice']['total_taxes_and_charges'] = abs(self.sales_invoice_doc.total_taxes_and_charges) / (1 + tax_percent)
