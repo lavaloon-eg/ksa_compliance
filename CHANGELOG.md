@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.55.2
+
 * Fix B2B customer address validation
   * If B2B customer had a linked address this address was validated against ZATCA requirements, but if B2B customer has no address linked the submission of invoice was not failing.
 * Allow submitting of invoices without stamping and sending to zatca in case of revoked business settings and no re-onboarding.
