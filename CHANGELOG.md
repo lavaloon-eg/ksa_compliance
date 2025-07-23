@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Allow submitting of invoices without stamping and sending to zatca in case of revoked business settings and no re-onboarding.
+
 ## 0.55.1
 
 * Recalculated prepayment on Sales Order to include tax in the paid amount.

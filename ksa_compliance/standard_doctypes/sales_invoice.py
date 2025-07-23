@@ -22,7 +22,7 @@ from ksa_compliance.ksa_compliance.doctype.zatca_phase_1_business_settings.zatca
 from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_precomputed_invoice import (
     ZATCAPrecomputedInvoice,
 )
-from ksa_compliance.throw import fthrow
+
 from ksa_compliance.translation import ft
 
 IGNORED_INVOICES = set()
@@ -46,7 +46,8 @@ def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoi
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
         if ZATCABusinessSettings.is_revoked_for_company(self.company):
-            fthrow(msg=ft('Cannot submit sales invoice to ZATCA'), title=ft('CSID Is Revoked'))
+            logger.info(f'Skipping additional fields for {self.name} because of revoked ZATCA settings')
+            return
         logger.info(f'Skipping additional fields for {self.name} because of missing ZATCA settings')
         return
 
