@@ -48,6 +48,9 @@ def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, meth
 
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
+        if ZATCABusinessSettings.is_revoked_for_company(self.company):
+            logger.info(f'Skipping additional fields for {self.name} because of revoked ZATCA settings')
+            return
         logger.info(f'Skipping additional fields for {self.name} because of missing ZATCA settings')
         return
 
