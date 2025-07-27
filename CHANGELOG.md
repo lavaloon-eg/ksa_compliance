@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix permission issue for `ZATCA integration status` in `Sales Invoice` and `Payment Entry` forms.
+
 ## 0.55.2
 
 * Fix B2B customer address validation
