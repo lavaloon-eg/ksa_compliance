@@ -11,11 +11,15 @@ frappe.ui.form.on('Payment Entry', {
 
 
 async function set_zatca_integration_status(frm) {
-    const res = await frappe.db.get_value("Sales Invoice Additional Fields", {
-        "sales_invoice": frm.doc.name,
-        "is_latest": 1
-    }, "integration_status");
-    const status = res.message.integration_status
+    const res = await frappe.call({
+        method: "ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields.get_zatca_integration_status",
+        args: {
+            invoice_id: frm.doc.name,
+            doctype: frm.doc.doctype
+        },
+    });
+
+    const status = res.integration_status;
     if (status) {
         let color = "blue"
         if (status === 'Accepted') {
