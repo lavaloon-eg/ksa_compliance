@@ -940,6 +940,6 @@ class Einvoice:
             return
         if self.sales_invoice_doc.doctype == 'Sales Invoice' and not self.sales_invoice_doc.advances:
             return
-        self.result['prepayment_invoice'] = prepayment_invoice_factory_create(self.result, self.sales_invoice_doc)
+        self.result['prepayment_invoice'] = prepayment_invoice_factory_create(self.sales_invoice_doc)
         update_result(self.result, self.sales_invoice_doc)
         # --------------------------- END Getting Invoice's item lines ------------------------------

@@ -58,6 +58,7 @@ def _create_invoice_line(advance: SalesInvoicePayment, doc: SalesInvoice) -> Inv
             tax_percent=tax_percent,
             tax_scheme='VAT',
         ),
+        tax_category=tax_category,
         price=0.0,
     )
 
