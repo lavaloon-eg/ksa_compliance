@@ -1,16 +1,8 @@
-from dataclasses import dataclass
 from typing import Optional
 
 import frappe
 
-
-@dataclass
-class ZatcaTaxCategory:
-    """Holds ZATCA tax category code, reason and reason code"""
-
-    tax_category_code: str = None
-    reason_code: Optional[str] = None
-    arabic_reason: Optional[str] = None
+from ..output_models.models import ZatcaTaxCategory
 
 
 def map_tax_category(

@@ -4,6 +4,8 @@ import base64
 import os
 from typing import Optional, NoReturn, cast, Literal
 
+from pypika.functions import Count
+
 # import frappe
 import frappe
 from erpnext.accounts.doctype.account.account import Account
@@ -22,9 +24,11 @@ from result import is_err
 import ksa_compliance.zatca_api as api
 import ksa_compliance.zatca_cli as cli
 import ksa_compliance.zatca_files
+from frappe.utils import get_url, get_url_to_list
 from ksa_compliance import logger
 from ksa_compliance.invoice import InvoiceMode
 from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
 
 
 class ZATCABusinessSettings(Document):
@@ -73,6 +77,7 @@ class ZATCABusinessSettings(Document):
         secret: DF.Password | None
         security_token: DF.SmallText | None
         seller_name: DF.Data
+        status: DF.Literal['Active', 'Revoked']
         street: DF.Data | None
         sync_with_zatca: DF.Literal['Live', 'Batches']
         tax_rate: DF.Percent
@@ -275,7 +280,7 @@ class ZATCABusinessSettings(Document):
 
     @staticmethod
     def for_invoice(
-        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice']
+        invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']
     ) -> Optional['ZATCABusinessSettings']:
         company_id = frappe.db.get_value(doctype, invoice_id, ['company'])
         if not company_id:
@@ -284,18 +289,38 @@ class ZATCABusinessSettings(Document):
         return ZATCABusinessSettings.for_company(company_id)
 
     @staticmethod
-    def for_company(company_id: str) -> Optional['ZATCABusinessSettings']:
-        business_settings_id = frappe.db.get_value('ZATCA Business Settings', filters={'company': company_id})
+    def for_company(company_id: str, include_revoked=False) -> Optional['ZATCABusinessSettings']:
+        business_settings_id = frappe.db.get_value(
+            'ZATCA Business Settings', filters={'company': company_id, 'status': 'Active'}
+        )
+        if not business_settings_id and include_revoked:
+            # frappe.db.exists doesn't order, so it could return the oldest revoked settings. We want the most
+            # recent revoked settings instead
+            business_settings_id = frappe.db.get_value(
+                'ZATCA Business Settings',
+                {'company': company_id, 'status': 'Revoked'},
+                ignore=True,
+                order_by='modified desc',
+            )
+
         if not business_settings_id:
             return None
 
         return cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
 
     @staticmethod
+    def is_revoked_for_company(company_id: str) -> bool:
+        business_settings_id = frappe.db.get_value(
+            'ZATCA Business Settings', filters={'company': company_id, 'status': 'Revoked'}
+        )
+        return bool(business_settings_id)
+
+    @staticmethod
     def is_enabled_for_company(company_id: str) -> bool:
         return bool(
             frappe.db.get_value(
-                'ZATCA Business Settings', filters={'company': company_id, 'enable_zatca_integration': True}
+                'ZATCA Business Settings',
+                filters={'company': company_id, 'status': 'Active', 'enable_zatca_integration': True},
             )
         )
 
@@ -303,7 +328,8 @@ class ZATCABusinessSettings(Document):
     def is_branch_config_enabled(company_id: str) -> bool:
         return bool(
             frappe.db.get_value(
-                'ZATCA Business Settings', filters={'company': company_id, 'enable_branch_configuration': True}
+                'ZATCA Business Settings',
+                filters={'company': company_id, 'status': 'Active', 'enable_branch_configuration': True},
             )
         )
 
@@ -414,3 +440,64 @@ def onboard(business_settings_id: str, otp: str) -> NoReturn:
 def get_production_csid(business_settings_id: str, otp: str) -> NoReturn:
     settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
     settings.get_production_csid(otp)
+
+
+@frappe.whitelist()
+def create_business_settings(source_name: str, target_doc=None):
+    from frappe.model.mapper import get_mapped_doc
+
+    doctype = 'ZATCA Business Settings'
+    doc = get_mapped_doc(
+        doctype,
+        source_name,
+        {
+            doctype: {
+                'doctype': doctype,
+            },
+            'Additional Seller IDs': {
+                'doctype': 'Additional Seller IDs',
+                'field_map': {'type_name': 'type_name', 'type_code': 'type_code', 'value': 'value'},
+            },
+        },
+    )
+    return doc
+
+
+@frappe.whitelist()
+def revoke_business_settings(settings_id: str, company: str):
+    sales_invoice = frappe.qb.DocType('Sales Invoice')
+    pos_invoice = frappe.qb.DocType('POS Invoice')
+    siaf = frappe.qb.DocType('Sales Invoice Additional Fields')
+    q = (
+        frappe.qb.from_(siaf)
+        .select(Count(siaf.name).as_('draft_invoices_count'))
+        .left_join(sales_invoice)
+        .on((sales_invoice.name == siaf.sales_invoice))
+        .left_join(pos_invoice)
+        .on((pos_invoice.name == siaf.sales_invoice))
+        .where(
+            (siaf.invoice_doctype == 'Sales Invoice') & (sales_invoice.company == company)
+            | (siaf.invoice_doctype == 'POS Invoice') & (pos_invoice.company == company)
+        )
+        .where(siaf.docstatus == 0)
+    ).run(as_dict=True)
+
+    _draft_invoices_count = q[0]['draft_invoices_count']
+    if _draft_invoices_count > 0:
+        sync_invoices_url = get_url(uri='/app/e-invoicing-sync')
+        sync_invoices_page = f'<a href="{sync_invoices_url}">{ft("Sync Invoices Page")}</a>'
+        siaf_list_link = get_url_to_list('Sales Invoice Additional Fields')
+        draft_siaf_link = f'<a href="{siaf_list_link + "?docstatus=0"}"> {ft("pending invoice(s)")} </a>'
+        fthrow(
+            msg=ft(
+                'You cannot revoke the CSID due to $num $draft_siaf_link. Please sync pending invoices with ZATCA first; use $sync_invoices_page.',
+                num=_draft_invoices_count,
+                sync_invoices_page=sync_invoices_page,
+                draft_siaf_link=draft_siaf_link,
+            ),
+            title=ft('Cannot Revoke CSID'),
+        )
+
+    frappe.db.set_value('ZATCA Business Settings', settings_id, 'status', 'Revoked')
+
+    frappe.msgprint(ft('CSID and Business Settings is now revoked.'), ft('Successfully Revoked'))

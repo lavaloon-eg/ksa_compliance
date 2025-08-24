@@ -92,6 +92,7 @@
   "invoice_xml",
   "download_xml",
   "download_zatca_pdf",
+  "allow_submit",
   "tab_4_tab",
   "validation_section",
   "validation_messages",
@@ -614,7 +615,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Invoice Doctype",
-   "options": "Sales Invoice\nPOS Invoice",
+   "options": "Sales Invoice\nPOS Invoice\nPayment Entry",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -636,6 +637,14 @@
    "fieldname": "download_zatca_pdf",
    "fieldtype": "Button",
    "label": "Download ZATCA PDF"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_submit",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Allow Submit",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -646,7 +655,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2025-01-08 12:49:11.955579",
+ "modified": "2025-06-03 09:36:36.706287",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
@@ -664,6 +673,7 @@
    "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

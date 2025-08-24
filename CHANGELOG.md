@@ -8,6 +8,93 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.55.3
+
+* Fix permission issue for `ZATCA integration status` in `Sales Invoice` and `Payment Entry` forms.
+
+## 0.55.2
+
+* Fix B2B customer address validation
+  * If B2B customer had a linked address this address was validated against ZATCA requirements, but if B2B customer has no address linked the submission of invoice was not failing.
+* Allow submitting of invoices without stamping and sending to zatca in case of revoked business settings and no re-onboarding.
+
+## 0.55.1
+
+* Recalculated prepayment on Sales Order to include tax in the paid amount.
+
+## 0.55.0
+
+* Added Support to Prepayment Invoices on Sales Order with charge type On Paid Amount
+
+## 0.54.1
+
+* Improved Error Messaging: Enhanced the clarity of the error message shown when a Tax Category is not selected in the Sales Taxes and Charges Template.
+* Prepayment Validation: Added validation to ensure that allocated Prepayment Amounts selected in the Sales Invoice have been properly submitted to ZATCA, While skipping uncompliant prepayment invoices.
+* Fix feedback destination URL formatting.
+
+## 0.54.0
+
+* On Creating Prepayment, This change ensures users manually calculate the tax amount, eliminating reliance on standard Payment Entry tax allocation logic. It prevents unintended tax duplication or misallocation when the prepayment is later linked to a Sales Invoice.
+The prepayment tax line is now strictly enforced with the following settings:
+  * Add or Deduct: Deduct
+  * Considered in Paid Amount: False
+  * Type: Actual
+* Allow overriding feedback destination through site config to enable testing
+
+## 0.53.0
+
+* Use ZATCA CLI 2.8.0
+
+## 0.52.0
+
+* Add `is_b2b_customer` used by other apps to check whether a customer is a business customer
+
+## 0.51.1
+
+* Fix calculation issues related to item, tax, and discount amounts
+
+## 0.51.0
+
+* Update ksa compliance feedback feature:
+  * Enhance the feedback functionality by integrating company details in body.
+  * submit feedback through the LavaLoon system instead of sending it via email.
+  * Add error handling for rate limits.
+* Validate buyer address details on submitting `Standard Tax Invoice`.
+* Fix error on invoice creation showing validation message
+* Support all ZATCA discount reasons.
+* Add `ZATCA Discount Reason` field to `Sales Invoice` and `Sales Invoice Item`.
+
+## 0.50.3
+
+* Fix invoice creation failure when checking for ZATCA CSID revocation
+
+## 0.50.2
+
+* Refactor tax handling and multi-currency support
+
+## 0.50.1
+
+* Fix prepayment issues
+
+## 0.50.0
+
+* (Internal change) Allow retrieval of revoked ZATCA Business Settings
+* Add pre-payment support
+
+## 0.49.1
+
+* Add a feedback dialog to make it easier for users to give feedback.
+    * Add new button in ZATCA Business Settings form to use the new feedback dialog.
+    * Add `Feedback and Links` in zatca workspace.
+
+## 0.48.0
+
+* Prevent manual submission of `Sales Invoice Additional Fields` where user can submit with the intent of resending it ([Issue](https://github.com/lavaloon-eg/ksa_compliance/issues/233))
+  * It should only be submitted by the hourly job or the sync page.
+* Display `ZATCA Integration Status` as Intro in the `Sales Invoice`
+
+* Add revocation option for zatca business settings and CSID.
+
 ## 0.47.0
 
 * Support displaying `Return Against Additional References` in `ZATCA Phase 2 print format`.
@@ -69,7 +156,7 @@ to a section with the version name.
   * Company
   * Address
   * Branch Commercial Registration Number (CRN)
-* When enabling this configuration sales invoice will not be submittable without a branch specified in the sales invoice, 
+* When enabling this configuration sales invoice will not be submittable without a branch specified in the sales invoice,
 this requires manual configuration of an accounting dimension for branch and company.
 
 ## 0.40.1
@@ -140,7 +227,7 @@ this requires manual configuration of an accounting dimension for branch and com
 
 * CLI setup now grabs version 2.2.0
 
-# 0.35.0
+## 0.35.0
 
 * Fix handling of B2B customers
   * A B2B customer has a VAT or at least one of the other IDs (TIN, CRN, etc.)
@@ -150,12 +237,12 @@ this requires manual configuration of an accounting dimension for branch and com
   * When generating XML for ZATCA, we no longer include other IDs as a `CompanyID` inside the `PartyTaxScheme` because 
     it results in validation failure
 
-# 0.34.0
+## 0.34.0
 
 * Fix seller additional ids were returned empty in the xml if not filled.
 * Include buyer additional ids in case if no vat registration number is provided for the buyer.
 
-# 0.33.1
+## 0.33.1
 
 * Fix JRE extraction error if it was previously extracted
 

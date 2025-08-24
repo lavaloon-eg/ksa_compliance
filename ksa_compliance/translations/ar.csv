@@ -293,3 +293,123 @@ National ID,الرقم القومي
 GCC ID, هوية مجلس التعاون الخليجي
 Iqama, الإقامة
 Passport ID, جواز السفر
+Submit Feedback,إرسال الملاحظات
+Subject,الموضوع
+Bug Report,تقرير خطأ
+Feature Request,طلب ميزة
+General Feedback,ملاحظات عامة
+Compliance Issue,مشكلة في الامتثال
+Other,أخرى
+Description,الوصف
+Attachments,المرفقات
+Submit,إرسال
+Cancel,إلغاء
+Upload max 3 files as image PDF or document up to 5MB each,تحميل بحد أقصى 3 ملفات كصورة أو PDF أو مستند حتى 5 ميجابايت لكل منها
+How was your experience configuring these settings?,كيف كانت تجربتك في ضبط الإعدادات؟
+Please create a default outgoing email account,يرجى إنشاء حساب بريد إلكتروني صادر اساسي
+Our Contact Center is here to help you with any questions or issues you may have.,نحن هنا لمساعدتك في أي استفسار أو مشكلة
+Description must be less than {0} characters,يجب أن يكون الوصف أقل من {0} حرفًا
+Maximum {0} characters,الحد الأقصى {0} حرف
+Feedback dialog will not be shown again for this document.,لن يتم عرض مربع حوار الملاحظات مرة أخرى لهذا المستند
+Failed to save preference. Please try again.,فشل في حفظ التفضيل. يرجى المحاولة مرة أخرى
+Failed to submit feedback. Please try again.,فشل في إرسال الملاحظات. يرجى المحاولة مرة أخرى
+Don't Show Again,لا تظهر مرة أخرى
+Please select a subject,يرجى اختيار موضوع
+Please provide a description,يرجى تقديم وصف
+Please upload a file,يرجى تحميل ملف
+Please wait...,يرجى الانتظار...
+Submitting...,جاري الإرسال...
+An error occurred while submitting your feedback,حدث خطأ أثناء إرسال ملاحظاتك
+"Upload up to {0} files (PDF, PNG, JPEG, DOCX), max {1}MB each",تحميل حتى {0} ملفات (PDF، PNG، JPEG، DOCX)، بحد أقصى {1} ميجابايت لكل منها
+File uploaded: {0},تم تحميل الملف: {0}
+Failed to upload file: {0},فشل في تحميل الملف: {0}
+Set all private,تعيين كل ملفات خاصة
+Set all public,تعيين كل ملفات عامة
+Upload Files,تحميل الملفات
+You cannot submit SIAF manually; if you want to resubmit it to ZATCA use $sync_invoices_page, لا يمكنك التسجيل يدويا; اذا كنت ترغب في اعادة تقديم الفاتورة الى  هيئة الزكاة استخدم $sync_invoices_page
+Sync Invoices Page, صفحة مزامنة الفواتير
+This feedback will be sent to the Application vendor.,سيتم إرسال الملاحظات إلى منتج التطبيق
+How was your experience configuring these settings?,كيف كانت تجربتك في ضبط الإعدادات؟
+Need help?,هل تحتاج المساعدة؟
+Visit our Help Center,تصفح مركز الدعم
+CSID Is Revoked,تم إلغاء CSID
+Cannot submit sales invoice to ZATCA, لا يمكن تقديم فاتورة المبيعات إلى ZATCA
+"You cannot revoke CSID, please send not synchronized invoices to ZATCA.", لا يمكنك إلغاء CSID؛ يرجى إرسال الفواتير غير المتزامنة إلى ZATCA
+Cannot Revoke CSID, لا يمكن إلغاء CSID
+CSID and Business Settings is now revoked.,تم الآن إلغاء CSID وإعدادات العمل
+Successfully Revoked,تم الإلغاء بنجاح
+Are you sure you want to revoke this Business Settings and CSID? This cannot be undone.,هل أنت متأكد أنك تريد إلغاء إعدادات العمل وCSID؟ لا يمكن التراجع عن هذا الإجراء
+You cannot revoke the CSID due to $num $draft_siaf_link. Please sync pending invoices with ZATCA first; use $sync_invoices_page.,لا يمكنك إلغاء CSID بسبب $num $draft_siaf_link. يرجى أولاً مزامنة الفواتير المعلّقة مع ZATCA؛ استخدم $sync_invoices_page.
+pending invoice(s),فواتير معلّقة
+You cannot cancel Prepayment Invoice according to ZATCA Regulations.,لا يمكن إلغاء فاتورة الدفع المسبق وفقًا لأنظمة هيئة الزكاة.
+This Action Is Not Allowed,هذا الإجراء غير مسموح به
+Prepayment Invoice is not sent for,فاتورة الدفع المسبق لم يتم إرسالها لـ
+Tax subtotal is mandatory, المجموع الفرعي للضريبة إلزامي
+Taxable amount is mandatory, المبلغ الخاضع للضريبة إلزامي
+Tax amount is mandatory, مبلغ الضريبة إلزامي
+Tax category ID is mandatory, معرف فئة الضريبة إلزامي
+Tax percent is mandatory, نسبة الضريبة إلزامية
+Invoice line ID is mandatory, معرف بند الفاتورة إلزامي
+UUID is mandatory, المعرف الفريد (UUID) إلزامي
+Document reference is mandatory, مرجع المستند إلزامي
+Tax total is mandatory, إجمالي الضريبة إلزامي
+Prepaid amount is mandatory, مبلغ الدفع المقدم إلزامي
+Invoice lines are mandatory, بنود الفاتورة إلزامية
+Item name is mandatory, اسم العنصر إلزامي
+Item tax category is mandatory, فئة ضريبة العنصر إلزامية
+Item tax percent is mandatory, نسبة ضريبة العنصر إلزامية
+Item tax scheme is mandatory, نظام ضريبة العنصر إلزامي
+Document Reference ID is mandatory, معرف وثيقة المرجع إلزامي
+Issue date is mandatory, تاريخ الإصدار إلزامي
+Issue time is mandatory, وقت الإصدار إلزامي
+Document type code is mandatory, كود نوع المستند إلزامي
+Prepayment Invoice Not Sent,فاتورة الدفع المسبق لم يتم إرسالها
+By checking this box, you acknowledge that this Payment Entry will be treated as a Prepayment Invoice and submitted to ZATCA.,باختيار هذا المربع، فإنك تقر بأن إدخال الدفع هذا سيتم معاملته كفاتورة مسبقة وسيتم تقديمه إلى الهيئة العامة للزكاة والدخل (ZATCA).
+Company Name, اسم الشركة
+Notes,ملاحظات
+Uploaded files will be publicly accessible and visible to us from your server. Please do not upload sensitive information.,الملفات المرفوعة ستكون متاحة علنًا ومرئية لنا من خادمك. من فضلك، لا ترفع معلومات حساسة.
+No files uploaded yet.,لم يتم رفع أي ملفات حتى الآن.
+We will use the company phone number and email to contact you regarding your feedback if they are provided.,سنستخدم رقم هاتف الشركة والبريد الإلكتروني للتواصل معك بخصوص ملاحظاتك إذا تم توفيرهما.
+Company Information,معلومات الشركة
+Uploaded Files,الملفات المرفوعة
+Please set Address Line 1 for customer address.,يرجى تعيين Address Line 1 لعنوان العميل.,
+Please make sure that building number is set and is 4 digits exactly in customer address.,يرجى التأكد من تعيين رقم المبنى في عنوان العميل، وأن يتكون من 4 أرقام بالضبط.,
+Please set city for customer address.,يرجى تعيين المدينة لعنوان العميل.,
+Please make sure that postal code is set and is 5 digits exactly in customer address.,يرجى التأكد من تعيين الرمز البريدي في عنوان العميل، وأن يتكون من 5 أرقام بالضبط.,
+Please set district for customer address.,يرجى تعيين الحي لعنوان العميل.,
+Update Address,تعديل العنوان,
+Bonus for works ahead of schedule,مكافأة عن أعمال قبل الموعد المحدد
+Other bonus,مكافأة أخرى
+Manufacturer's consumer discount,خصم مستهلك الشركة المصنعة
+Due to military status,بسبب الحالة العسكرية
+Due to work accident,بسبب حادث عمل
+Special agreement,اتفاق خاص
+Production error discount,خصم خطأ إنتاج
+New outlet discount,خصم منفذ جديد
+Sample discount,خصم عينة
+End of range discount,خصم نهاية المجموعة
+Incoterm discount,خصم شروط التجارة الدولية
+Point of sales threshold allowance,بدل عتبة نقطة البيع
+Material surcharge/deduction,زيادة/خصم المواد
+Discount,خصم
+Special rebate,خصم خاص
+Fixed long term,ثابت طويل الأجل
+Temporary,مؤقت
+Standard,قياسي
+Yearly turnover,معدل دوران سنوي
+You cannot set Included in Paid Amount for Prepayment Invoice.,لا يمكنك تحديد مضمن في المبلغ المدفوع لفاتورة الدفع المسبق.
+You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.,لا يمكنك تحديد نوع الإضافة أو الخصم إلى: إضافة لفاتورة الدفع المسبق. النوع المسموح به هو خصم.
+You cannot set Charge Type to: On Net Total for Prepayment Invoice. Allowed type is Actual.,لا يمكنك تحديد نوع التكلفة إلى: على الإجمالي الصافي لفاتورة الدفع المسبق. النوع المسموح به هو فعلي.
+This Action Is Not Allowed,هذا الإجراء غير مسموح به
+Prepayment Invoice Acknowledgment,إقرار فاتورة الدفع المسبق
+Please set Tax Category on Sales Taxes and Charges Template $sales_taxes_and_charges_template.,الرجاء تعيين فئة الضريبة (Tax Category) في قالب الضرائب والرسوم: $sales_taxes_and_charges_template.
+Please set custom ZATCA category on Tax Category $tax_category_id.,الرجاء تعيين فئة ZATCA المخصصة في فئة الضريبة: $tax_category_id.
+You cannot set Charge Type to anything other than Actual for Prepayment Invoice. If there is no Sales Order; please set Charge Type to Actual.,"لا يمكنك تعيين نوع الرسوم (Charge Type) إلى أي قيمة غير ""Actual"" لفاتورة الدفع المسبق. إذا لم يكن هناك أمر بيع؛ يُرجى تعيين نوع الرسوم إلى ""Actual"".",""
+You cannot set Included in Paid Amount for Prepayment Invoice.,لا يمكنك تحديد "Included in Paid Amount" لفاتورة الدفع المسبق.
+You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.,لا يمكنك تعيين نوع الإضافة أو الخصم (Add Or Deduct) إلى: "Add" لفاتورة الدفع المسبق. النوع المسموح به هو "Deduct".
+You cannot set Charge Type to anything other than Actual or On Paid Amount for Prepayment Invoice.,لا يمكنك تعيين نوع الرسوم (Charge Type) إلى أي قيمة غير "Actual" أو "On Paid Amount" لفاتورة الدفع المسبق.
+This Action Is Not Allowed,هذا الإجراء غير مسموح به.
+Payment Entry $name does not have any taxes. Please add taxes to the Payment Entry.,إدخال الدفع $name لا يحتوي على أي ضرائب. يُرجى إضافة الضرائب إلى إدخال الدفع.
+Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.,عنوان العميل إلزامي للمعاملات بين الشركات (B2B)؛ يرجى تعيين عنوان للعميل $customer.,
+Address Not Found Error,خطأ: لم يتم العثور على عنوان العميل,
+Invalid Address Error,تم إدخال عنوان غير صالح,

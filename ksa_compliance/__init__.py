@@ -6,4 +6,10 @@ logger = get_logger('zatca', max_size=1_000_000)
 logger.setLevel(logging.INFO)
 
 
-__version__ = '0.47.0'
+__version__ = '0.55.3'
+
+
+SALES_INVOICE_CODE = '388'
+DEBIT_NOTE_CODE = '383'
+CREDIT_NOTE_CODE = '381'
+PREPAYMENT_INVOICE_CODE = '386'

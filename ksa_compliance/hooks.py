@@ -11,8 +11,9 @@ app_license = 'Copyright (c) 2023 LavaLoon'
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ksa_compliance/css/ksa_compliance.css"
-# app_include_js = "/assets/ksa_compliance/js/ksa_compliance.js"
-
+app_include_js = [
+    '/assets/ksa_compliance/js/feedback_dialog.js',
+]
 # include js, css files in header of web template
 # web_include_css = "/assets/ksa_compliance/css/ksa_compliance.css"
 # web_include_js = "/assets/ksa_compliance/js/ksa_compliance.js"
@@ -37,6 +38,7 @@ doctype_js = {
     'Customer': 'public/js/customer.js',
     'Branch': 'public/js/branch.js',
     'Sales Invoice': 'public/js/sales_invoice.js',
+    'Payment Entry': 'public/js/payment_entry.js',
 }
 
 # Svg Icons
@@ -77,7 +79,7 @@ jinja = {
 # ------------
 
 # before_install = "ksa_compliance.install.before_install"
-# after_install = "ksa_compliance.install.after_install"
+after_install = 'ksa_compliance.setup.after_install'
 
 # Uninstallation
 # ------------
@@ -149,6 +151,11 @@ doc_events = {
         'on_submit': 'ksa_compliance.standard_doctypes.sales_invoice.create_sales_invoice_additional_fields_doctype',
         'validate': 'ksa_compliance.standard_doctypes.sales_invoice.validate_sales_invoice',
         'before_cancel': 'ksa_compliance.standard_doctypes.sales_invoice.prevent_cancellation_of_sales_invoice',
+    },
+    'Payment Entry': {
+        'validate': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.validate_payment_entry',
+        'on_submit': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.create_prepayment_invoice_additional_fields_doctype',
+        'before_cancel': 'ksa_compliance.standard_doctypes.payment_entry.payment_entry.prevent_cancellation_of_prepayment_invoice',
     },
     'Branch': {
         'validate': 'ksa_compliance.standard_doctypes.branch.validate_branch',
