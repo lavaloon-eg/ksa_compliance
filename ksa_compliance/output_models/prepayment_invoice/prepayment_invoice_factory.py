@@ -7,7 +7,7 @@ from .invoice_line_factory import invoice_line_create
 from .models import PrepaymentInvoice
 
 
-def prepayment_invoice_factory_create(zatca_fields_dto: dict, doc: SalesInvoice) -> PrepaymentInvoice:
+def prepayment_invoice_factory_create(doc: SalesInvoice) -> PrepaymentInvoice:
     prepayment_invoice = PrepaymentInvoice(
         prepaid_amount=_get_prepaid_amount(doc),
         currency=doc.currency,
