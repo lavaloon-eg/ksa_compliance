@@ -1,12 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{company}-{country}-{currency}",
+ "autoname": "format:{company}-{country}-{currency}-{##}",
  "creation": "2024-01-11 15:31:56.241248",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "tab_break_ljdo",
+  "status",
   "company",
   "company_unit",
   "company_unit_serial",
@@ -35,6 +36,7 @@
   "section_break_muug",
   "other_ids",
   "vat_account_configuration_tab",
+  "column_break_izkt",
   "automatic_vat_account_configuration",
   "linked_tax_account",
   "account_name",
@@ -228,6 +230,7 @@
    "fieldname": "compliance_request_id",
    "fieldtype": "Data",
    "label": "Compliance Request ID",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -245,6 +248,7 @@
    "fieldname": "company_unit_serial",
    "fieldtype": "Data",
    "label": "Company Unit Serial",
+   "no_copy": 1,
    "read_only_depends_on": "eval:frappe.user_roles.indexOf('System Manager') === -1 && doc.production_request_id",
    "reqd": 1
   },
@@ -260,18 +264,21 @@
    "fieldname": "csr",
    "fieldtype": "Small Text",
    "label": "CSR",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "security_token",
    "fieldtype": "Small Text",
    "label": "Security Token",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "secret",
    "fieldtype": "Password",
    "label": "Secret",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -288,12 +295,14 @@
    "fieldname": "production_security_token",
    "fieldtype": "Small Text",
    "label": "Production Security Token",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "production_secret",
    "fieldtype": "Password",
    "label": "Production Secret",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -310,6 +319,7 @@
    "fieldname": "production_request_id",
    "fieldtype": "Data",
    "label": "Production Request ID",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -334,6 +344,7 @@
    "fieldname": "zatca_cli_path",
    "fieldtype": "Data",
    "label": "CLI Path",
+   "no_copy": 1,
    "read_only_depends_on": "eval:doc.cli_setup==='Automatic'"
   },
   {
@@ -348,6 +359,7 @@
    "fieldname": "cli_setup",
    "fieldtype": "Select",
    "label": "CLI Setup",
+   "no_copy": 1,
    "options": "Automatic\nManual",
    "reqd": 1
   },
@@ -376,6 +388,7 @@
    "fieldname": "java_home",
    "fieldtype": "Data",
    "label": "Java Home",
+   "no_copy": 1,
    "read_only_depends_on": "eval:doc.cli_setup === 'Automatic'"
   },
   {
@@ -417,6 +430,7 @@
    "fieldtype": "Percent",
    "label": "Tax Rate",
    "mandatory_depends_on": "eval:doc.automatic_vat_account_configuration === 1",
+   "no_copy": 1,
    "set_only_once": 1
   },
   {
@@ -426,6 +440,7 @@
    "fieldtype": "Select",
    "label": "ZATCA Tax Category",
    "mandatory_depends_on": "eval:doc.automatic_vat_account_configuration === 1",
+   "no_copy": 1,
    "options": "\nStandard rate\nServices outside scope of tax / Not subject to VAT || {manual entry}\nExempt from Tax || Financial services mentioned in Article 29 of the VAT Regulations\nExempt from Tax || Life insurance services mentioned in Article 29 of the VAT Regulations\nExempt from Tax || Real estate transactions mentioned in Article 30 of the VAT Regulations\nExempt from Tax || Qualified Supply of Goods in Duty Free area\nZero rated goods || Export of goods\nZero rated goods || Export of services\nZero rated goods || The international transport of Goods\nZero rated goods || International transport of passengers\nZero rated goods || Services directly connected and incidental to a Supply of international passenger transport\nZero rated goods || Supply of a qualifying means of transport\nZero rated goods || Any services relating to Goods or passenger transportation as defined in article twenty five of these Regulations\nZero rated goods || Medicines and medical equipment\nZero rated goods || Qualifying metals\nZero rated goods || Private education to citizen\nZero rated goods || Private healthcare to citizen\nZero rated goods || Supply of qualified military goods",
    "set_only_once": 1
   },
@@ -434,6 +449,7 @@
    "fieldname": "linked_tax_account",
    "fieldtype": "Link",
    "label": "Linked Tax Account",
+   "no_copy": 1,
    "options": "Account",
    "read_only": 1
   },
@@ -444,6 +460,7 @@
    "fieldtype": "Data",
    "label": "Account Name",
    "mandatory_depends_on": "eval:doc.automatic_vat_account_configuration === 1",
+   "no_copy": 1,
    "set_only_once": 1
   },
   {
@@ -453,6 +470,7 @@
    "fieldtype": "Data",
    "label": "Account Number",
    "mandatory_depends_on": "eval:doc.automatic_vat_account_configuration === 1",
+   "no_copy": 1,
    "set_only_once": 1
   },
   {
@@ -469,6 +487,7 @@
    "fieldname": "automatic_vat_account_configuration",
    "fieldtype": "Check",
    "label": "Automatic VAT Account Configuration",
+   "no_copy": 1,
    "set_only_once": 1
   },
   {
@@ -487,6 +506,20 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Active\nRevoked"
+  },
+  {
+   "fieldname": "column_break_izkt",
+   "fieldtype": "Column Break",
+   "no_copy": 1
+  },
+  {
    "default": "0",
    "fieldname": "enable_row_wise_rounding",
    "fieldtype": "Check",
@@ -495,7 +528,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-03 16:22:07.825186",
+ "modified": "2025-09-03 16:47:32.909210",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
@@ -518,7 +551,16 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Active"
+  },
+  {
+   "color": "Red",
+   "title": "Revoked"
+  }
+ ],
  "title_field": "company",
  "track_changes": 1
 }

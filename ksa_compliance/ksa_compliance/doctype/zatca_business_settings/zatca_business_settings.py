@@ -76,6 +76,7 @@ class ZATCABusinessSettings(Document):
         secret: DF.Password | None
         security_token: DF.SmallText | None
         seller_name: DF.Data
+        status: DF.Literal["Active", "Revoked"]
         street: DF.Data | None
         sync_with_zatca: DF.Literal["Live", "Batches"]
         tax_rate: DF.Percent
