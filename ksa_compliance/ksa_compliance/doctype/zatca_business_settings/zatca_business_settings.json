@@ -14,6 +14,7 @@
   "country",
   "country_code",
   "enable_zatca_integration",
+  "enable_row_wise_rounding",
   "sync_with_zatca",
   "type_of_business_transactions",
   "currency",
@@ -484,11 +485,17 @@
   {
    "fieldname": "section_break_muug",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_row_wise_rounding",
+   "fieldtype": "Check",
+   "label": "Enable Row wise Rounding"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-17 16:51:13.936364",
+ "modified": "2025-09-03 15:47:47.952795",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Business Settings",
@@ -508,6 +515,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

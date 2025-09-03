@@ -57,6 +57,7 @@ class ZATCABusinessSettings(Document):
         currency: DF.Link
         district: DF.Data | None
         enable_branch_configuration: DF.Check
+        enable_row_wise_rounding: DF.Check
         enable_zatca_integration: DF.Check
         fatoora_server: DF.Literal["Sandbox", "Simulation", "Production"]
         java_home: DF.Data | None
