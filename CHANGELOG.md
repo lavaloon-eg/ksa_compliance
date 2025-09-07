@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Use ZATCA CLI 2.9.0
+
 ## 0.55.4
 
 Fix error message when fetching prepayment with tax percent zero
