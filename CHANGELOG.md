@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix manual invoice sync failing due to an import error
+
 ## 0.56.0
 
 * Use ZATCA CLI 2.9.0
