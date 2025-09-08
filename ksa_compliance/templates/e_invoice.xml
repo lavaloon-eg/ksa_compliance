@@ -194,6 +194,7 @@
                 </cac:TaxCategory>
             </cac:TaxSubtotal>
         {% endfor %}
+        
     </cac:TaxTotal>
 
     <cac:LegalMonetaryTotal>
@@ -288,7 +289,12 @@
                     <cbc:ID>{{row.tax_total.tax_subtotal.tax_category_id}}</cbc:ID>
 
                     <cbc:Percent>{{row.tax_total.tax_subtotal.tax_percent}}</cbc:Percent>
-
+                    {% if row.tax_category.reason_code %}
+                        <cbc:TaxExemptionReasonCode>{{ row.tax_category.reason_code | escape }}</cbc:TaxExemptionReasonCode>
+                    {% endif %}
+                    {% if row.tax_category.arabic_reason %}
+                        <cbc:TaxExemptionReason>{{ row.tax_category.arabic_reason | escape }}</cbc:TaxExemptionReason>
+                    {% endif %}
                     <cac:TaxScheme>
                         <cbc:ID>{{row.tax_total.tax_subtotal.tax_scheme}}</cbc:ID>
                     </cac:TaxScheme>
@@ -300,6 +306,12 @@
             <cac:ClassifiedTaxCategory>
                 <cbc:ID>{{row.item.tax_category}}</cbc:ID>
                 <cbc:Percent>{{row.item.tax_percent}}</cbc:Percent>
+                {% if row.tax_category.reason_code %}
+                    <cbc:TaxExemptionReasonCode>{{ row.tax_category.reason_code | escape }}</cbc:TaxExemptionReasonCode>
+                {% endif %}
+                {% if row.tax_category.arabic_reason %}
+                    <cbc:TaxExemptionReason>{{ row.tax_category.arabic_reason | escape }}</cbc:TaxExemptionReason>
+                {% endif %}
                 <cac:TaxScheme>
                     <cbc:ID>{{row.item.tax_scheme}}</cbc:ID>
                 </cac:TaxScheme>

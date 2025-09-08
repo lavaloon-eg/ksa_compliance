@@ -9,6 +9,9 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 
 
 from ksa_compliance import logger
+from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
+
 from result import is_ok
 
 
@@ -20,21 +23,21 @@ def validate_payment_entry(self: PaymentEntry, method: str = None):
     if self.taxes:
         for row in self.get('taxes'):
             if row.included_in_paid_amount:
-                frappe.throw(
-                    msg=_('You cannot set Included in Paid Amount for Prepayment Invoice.'),
-                    title=_('This Action Is Not Allowed'),
+                fthrow(
+                    msg=ft('You cannot set Included in Paid Amount for Prepayment Invoice.'),
+                    title=ft('This Action Is Not Allowed'),
                 )
             if row.add_deduct_tax != 'Deduct':
-                frappe.throw(
-                    msg=_('You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.'),
-                    title=_('This Action Is Not Allowed'),
+                fthrow(
+                    msg=ft('You cannot set Add Or Deduct type to: Add for Prepayment Invoice. Allowed type is Deduct.'),
+                    title=ft('This Action Is Not Allowed'),
                 )
-            if row.charge_type != 'Actual':
-                frappe.throw(
-                    msg=_(
-                        'You cannot set Charge Type to: On Net Total for Prepayment Invoice. Allowed type is Actual.'
+            if row.charge_type not in ['Actual', 'On Paid Amount']:
+                fthrow(
+                    msg=ft(
+                        'You cannot set Charge Type to anything other than Actual or On Paid Amount for Prepayment Invoice.'
                     ),
-                    title=_('This Action Is Not Allowed'),
+                    title=ft('This Action Is Not Allowed'),
                 )
 
 
@@ -45,6 +48,9 @@ def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, meth
 
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
+        if ZATCABusinessSettings.is_revoked_for_company(self.company):
+            logger.info(f'Skipping additional fields for {self.name} because of revoked ZATCA settings')
+            return
         logger.info(f'Skipping additional fields for {self.name} because of missing ZATCA settings')
         return
 

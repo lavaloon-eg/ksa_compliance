@@ -10,6 +10,38 @@ to a section with the version name.
 
 * Fix manual invoice sync failing due to an import error
 
+## 0.56.0
+
+* Use ZATCA CLI 2.9.0
+
+## 0.55.4
+
+Fix error message when fetching prepayment with tax percent zero
+
+## 0.55.3
+
+* Fix permission issue for `ZATCA integration status` in `Sales Invoice` and `Payment Entry` forms.
+
+## 0.55.2
+
+* Fix B2B customer address validation
+  * If B2B customer had a linked address this address was validated against ZATCA requirements, but if B2B customer has no address linked the submission of invoice was not failing.
+* Allow submitting of invoices without stamping and sending to zatca in case of revoked business settings and no re-onboarding.
+
+## 0.55.1
+
+* Recalculated prepayment on Sales Order to include tax in the paid amount.
+
+## 0.55.0
+
+* Added Support to Prepayment Invoices on Sales Order with charge type On Paid Amount
+
+## 0.54.1
+
+* Improved Error Messaging: Enhanced the clarity of the error message shown when a Tax Category is not selected in the Sales Taxes and Charges Template.
+* Prepayment Validation: Added validation to ensure that allocated Prepayment Amounts selected in the Sales Invoice have been properly submitted to ZATCA, While skipping uncompliant prepayment invoices.
+* Fix feedback destination URL formatting.
+
 ## 0.54.0
 
 * On Creating Prepayment, This change ensures users manually calculate the tax amount, eliminating reliance on standard Payment Entry tax allocation logic. It prevents unintended tax duplication or misallocation when the prepayment is later linked to a Sales Invoice.

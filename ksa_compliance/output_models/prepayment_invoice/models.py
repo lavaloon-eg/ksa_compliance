@@ -4,6 +4,8 @@ from frappe import _
 from dataclasses import dataclass
 from typing import List, Optional
 
+from ksa_compliance.standard_doctypes.tax_category import ZatcaTaxCategory
+
 
 def validate_mandatory_fields(obj, field_rules: dict) -> None:
     """Generic mandatory field validator"""
@@ -47,7 +49,6 @@ class Item:
             {
                 'name': 'Item name is mandatory',
                 'tax_category': 'Item tax category is mandatory',
-                'tax_percent': 'Item tax percent is mandatory',
                 'tax_scheme': 'Item tax scheme is mandatory',
             },
         )
@@ -67,9 +68,7 @@ class TaxSubtotal:
             self,
             {
                 'taxable_amount': 'Taxable amount is mandatory',
-                'tax_amount': 'Tax amount is mandatory',
                 'tax_category_id': 'Tax category ID is mandatory',
-                'tax_percent': 'Tax percent is mandatory',
                 'tax_scheme': 'Tax scheme is mandatory',
             },
         )
@@ -93,6 +92,7 @@ class InvoiceLine:
     document_reference: DocumentReference
     tax_total: TaxTotal
     item: Item
+    tax_category: ZatcaTaxCategory
     invoice_quantity: Optional[float] = 0.0
     line_extension_amount: Optional[float] = 0.0
     price: Optional[float] = 0.0
@@ -115,13 +115,3 @@ class PrepaymentInvoice:
     prepaid_amount: float
     currency: str
     invoice_lines: List[dict]
-
-    def __post_init__(self):
-        """Validation runs automatically after initialization"""
-        validate_mandatory_fields(
-            self,
-            {
-                'prepaid_amount': 'Prepaid amount is mandatory',
-                'currency': 'Currency is mandatory',
-            },
-        )

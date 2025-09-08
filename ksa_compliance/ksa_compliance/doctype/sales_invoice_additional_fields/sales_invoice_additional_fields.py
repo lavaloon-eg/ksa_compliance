@@ -380,9 +380,10 @@ class SalesInvoiceAdditionalFields(Document):
 
     def _set_buyer_details(self, customer: Customer, invoice_type: InvoiceType):
         self.buyer_vat_registration_number = customer.get('custom_vat_registration_number')
+        _is_b2b_customer = invoice_type == 'Standard'
         if customer.customer_primary_address:
             address_doc = cast(Address, frappe.get_doc('Address', customer.customer_primary_address))
-            self._set_buyer_address(address_doc, invoice_type == 'Standard')
+            self._set_buyer_address(address_doc, _is_b2b_customer)
         else:
             address = frappe.db.get_all(
                 'Dynamic Link',
@@ -396,7 +397,17 @@ class SalesInvoiceAdditionalFields(Document):
             )
             if address:
                 address_doc = cast(Address, frappe.get_doc('Address', address[0]))
-                self._set_buyer_address(address_doc, invoice_type == 'Standard')
+                self._set_buyer_address(address_doc, _is_b2b_customer)
+            else:
+                if _is_b2b_customer:
+                    customer_form = frappe.utils.get_link_to_form('Customer', customer.name)
+                    fthrow(
+                        ft(
+                            'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
+                            customer=customer_form,
+                        ),
+                        title=ft('Address Not Found Error'),
+                    )
 
         for item in customer.get('custom_additional_ids'):
             if strip(item.value):
@@ -701,3 +712,16 @@ def is_b2b_customer(customer: Customer) -> bool:
     return bool(customer.custom_vat_registration_number) or any(
         [strip(x.value) for x in customer.custom_additional_ids]
     )
+
+
+@frappe.whitelist()
+def get_zatca_integration_status(
+    invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']
+) -> str:
+    integration_status = frappe.db.get_value(
+        'Sales Invoice Additional Fields',
+        {'sales_invoice': invoice_id, 'invoice_doctype': doctype, 'is_latest': 1},
+        'integration_status',
+    )
+
+    frappe.response['integration_status'] = integration_status or ''
