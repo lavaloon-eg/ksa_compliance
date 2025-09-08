@@ -8,9 +8,6 @@ from pypika.queries import QueryBuilder
 from result import is_ok
 
 from ksa_compliance import logger
-from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
-    SalesInvoiceAdditionalFields,
-)
 
 
 @frappe.whitelist()
@@ -33,6 +30,24 @@ def add_batch_to_background_queue(check_date=datetime.date.today()):
 def sync_e_invoices(
     check_date: Optional[datetime.datetime | datetime.date] = None, batch_size: int = 100, dry_run: bool = False
 ):
+    # For some reason, having this import at the file/module level results in import errors when the batch is run
+    # manually. The error looks like this:
+    #
+    # ```
+    # File "/home/frappe/erp-rounding-workround/apps/ksa_compliance/ksa_compliance/background_jobs.py", line 11, in <module>
+    #     from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
+    #   File "/home/frappe/erp-rounding-workround/apps/ksa_compliance/ksa_compliance/ksa_compliance/doctype/sales_invoice_additional_fields/sales_invoice_additional_fields.py", line 10, in <module>
+    #     from ksa_compliance import SALES_INVOICE_CODE, DEBIT_NOTE_CODE, CREDIT_NOTE_CODE, PREPAYMENT_INVOICE_CODE
+    # ImportError: cannot import name 'SALES_INVOICE_CODE' from 'ksa_compliance' (/home/frappe/erp-rounding-workround/apps/ksa_compliance/ksa_compliance/__init__.py)
+    # ```
+    #
+    # It can be fixed by either importing the 4 codes (SALES_INVOICE_CODE, etc.) at the module level too, or by making
+    # the import local to this function. We're moving the import to the function to avoid having unused imports at
+    # the module level, which are automatically removed by lints and IDEs.
+    from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
+        SalesInvoiceAdditionalFields,
+    )
+
     prefix = '[Dry run] ' if dry_run else ''
     logger.info(f'{prefix}Syncing with ZATCA in batches of {batch_size}')
     if check_date:
