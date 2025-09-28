@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.57.0
+
+* Use ZATCA CLI 2.10.0
+
 ## 0.56.0
 
 * Use ZATCA CLI 2.9.0
