@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.55.4
+
+Fix error message when fetching prepayment with tax percent zero
+
 ## 0.55.3
 
 * Fix permission issue for `ZATCA integration status` in `Sales Invoice` and `Payment Entry` forms.
