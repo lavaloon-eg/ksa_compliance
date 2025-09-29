@@ -125,9 +125,11 @@ after_install = 'ksa_compliance.setup.after_install'
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# "ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+    "Sales Invoice": "ksa_compliance.overrides.rowwise_rounding.SalesInvoiceKSA",
+    "POS Invoice": "ksa_compliance.overrides.rowwise_rounding.POSInvoiceKSA",
+    "Sales Order": "ksa_compliance.overrides.rowwise_rounding.SalesOrderKSA"
+}
 
 # Document Events
 # ---------------
