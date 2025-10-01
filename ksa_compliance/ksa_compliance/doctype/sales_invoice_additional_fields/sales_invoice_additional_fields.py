@@ -44,7 +44,9 @@ from ksa_compliance.zatca_cli import convert_to_pdf_a3_b, check_pdfa3b_support_o
 
 # These are the possible statuses resulting from a submission to ZATCA. Note that this is a subset of
 # [SalesInvoiceAdditionalFields.integration_status]
-ZatcaIntegrationStatus = Literal['Resend', 'Accepted with warnings', 'Accepted', 'Rejected', 'Clearance switched off']
+ZatcaIntegrationStatus = Literal[
+    'Resend', 'Accepted with warnings', 'Accepted', 'Rejected', 'Clearance switched off', 'Duplicate'
+]
 
 
 class SalesInvoiceAdditionalFields(Document):
@@ -88,6 +90,7 @@ class SalesInvoiceAdditionalFields(Document):
             'Accepted',
             'Rejected',
             'Clearance switched off',
+            'Duplicate',
         ]
         invoice_counter: DF.Int
         invoice_doctype: DF.Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']
@@ -464,7 +467,10 @@ class SalesInvoiceAdditionalFields(Document):
             status = value.status
 
         self._add_integration_log_document(
-            zatca_message=zatca_message, integration_status=integration_status, zatca_status=status
+            zatca_message=zatca_message,
+            integration_status=integration_status,
+            zatca_status=status,
+            status_code=status_code,
         )
         self.integration_status = integration_status
         self.last_attempt = now_datetime()
@@ -507,7 +513,9 @@ class SalesInvoiceAdditionalFields(Document):
             return content
         return content.decode('utf-8')
 
-    def _add_integration_log_document(self, zatca_message, integration_status, zatca_status):
+    def _add_integration_log_document(
+        self, zatca_message: Optional[str], integration_status: str, zatca_status: Optional[str], status_code: int
+    ):
         integration_doc = cast(
             ZATCAIntegrationLog,
             frappe.get_doc(
@@ -519,6 +527,7 @@ class SalesInvoiceAdditionalFields(Document):
                     'zatca_message': zatca_message,
                     'status': integration_status,
                     'zatca_status': zatca_status,
+                    'zatca_http_status_code': status_code,
                 }
             ),
         )
@@ -640,6 +649,7 @@ def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
         {
             200: 'Accepted',
             202: 'Accepted with warnings',
+            208: 'Duplicate',
             303: 'Clearance switched off',
             401: 'Rejected',
             400: 'Rejected',
@@ -652,6 +662,8 @@ def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
     )
     if code and code in status_map:
         return status_map[code]
+    elif code and 200 <= code < 300:
+        return 'Accepted'
     else:
         return 'Resend'
 
@@ -715,9 +727,7 @@ def is_b2b_customer(customer: Customer) -> bool:
 
 
 @frappe.whitelist()
-def get_zatca_integration_status(
-    invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']
-) -> str:
+def get_zatca_integration_status(invoice_id: str, doctype: Literal['Sales Invoice', 'POS Invoice', 'Payment Entry']):
     integration_status = frappe.db.get_value(
         'Sales Invoice Additional Fields',
         {'sales_invoice': invoice_id, 'invoice_doctype': doctype, 'is_latest': 1},

@@ -8,6 +8,13 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix duplicate invoices entering a resend loop. We weren't properly recognizing the HTTP status code 208 returned in 
+  that case.
+  * Both `Sales Invoice Additional Fields` and `ZATCA Integration Log` have a new option for the integration status
+    field: `Duplicate`, which we now map 208 to.
+  * The HTTP status code mapping logic now maps unexpected codes in the 200-299 range to `Accepted` to avoid similar
+    problems in the future if more success codes are used by ZATCA
+
 ## 0.57.0
 
 * Use ZATCA CLI 2.10.0
