@@ -14,7 +14,8 @@
   "status",
   "zatca_status",
   "resend",
-  "zatca_message"
+  "zatca_message",
+  "zatca_http_status_code"
  ],
  "fields": [
   {
@@ -55,7 +56,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nPending\nResend\nAccepted with warnings\nAccepted\nRejected\nClearance switched off",
+   "options": "\nPending\nResend\nAccepted with warnings\nAccepted\nRejected\nClearance switched off\nDuplicate",
    "read_only": 1
   },
   {
@@ -87,11 +88,18 @@
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "zatca_http_status_code",
+   "fieldtype": "Int",
+   "label": "ZATCA HTTP Status Code",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-28 14:48:01.731644",
+ "modified": "2025-10-01 19:31:34.016878",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA Integration Log",
