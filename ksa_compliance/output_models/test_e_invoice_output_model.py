@@ -34,36 +34,29 @@ class TestEinvoice(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company = None
-        cls.customer = None
-        cls.items = []
-
-    def setUp(self):
         # TODO: Create Items and customer and company
         # TODO: Validate inputs
-        if not self.company:
-            self.company = input('Enter Complied Company ID: ') or 'KSA DEmo'
-        if not self.customer:
-            self.customer = input('Enter Customer ID: ') or 'Simplified customer'
+        # Run these only once before all tests
+        cls.company = input('Enter Complied Company ID: ') or 'KSA Demo'
+        cls.customer = input('Enter Customer ID: ') or 'Simplified customer'
 
-        if not self.items:
-            items = []
-            for i in range(1, 3):
-                item_code = input(f'Enter Item {i} Code: ') or 'Demo Item'
-                if item_code in items:
-                    item_code = 'Test5'
-                price = flt(input(f'Enter Item {i} Price: ')) or 57.38
-                items.append(
-                    {
-                        'amount': price,
-                        'base_amount': price,
-                        'base_rate': price,
-                        'item_code': item_code,
-                        'qty': 1.0,
-                        'rate': price,
-                    }
-                )
-            self.items = items
+        items = []
+        for i in range(1, 3):
+            item_code = input(f'Enter Item {i} Code: ') or 'Demo Item'
+            if item_code in items:
+                item_code = 'Test5'
+            price = flt(input(f'Enter Item {i} Price: ') or 57.38)
+            items.append(
+                {
+                    'amount': price,
+                    'base_amount': price,
+                    'base_rate': price,
+                    'item_code': item_code,
+                    'qty': 1.0,
+                    'rate': price,
+                }
+            )
+        cls.items = items
 
     def tearDown(self):
         frappe.db.rollback()
@@ -168,8 +161,10 @@ class TestEinvoice(FrappeTestCase):
 
     def assert_rule_BR_CO_11(self, tree: Et):
         allowance_total_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount', namespaces).text)
-        all_allowance_charges = tree.findall('.//cac:AllowanceCharge/cbc:Amount')
-        sum_allowance_charges = sum(flt(charge.text) for charge in all_allowance_charges)
+        all_allowance_charges = tree.findall('.//cac:AllowanceCharge', namespaces)
+        sum_allowance_charges = sum(
+            flt(charge.find('.//cbc:Amount', namespaces).text) for charge in all_allowance_charges
+        )
         self.assertEqual(allowance_total_amount, sum_allowance_charges)
 
     def assert_rule_BR_CO_14(self, tree: Et):
@@ -177,7 +172,7 @@ class TestEinvoice(FrappeTestCase):
         tax_subtotals = tree.findall('.//cac:TaxTotal/cac:TaxSubtotal', namespaces)
         total_taxes = 0
         for subtotal in tax_subtotals:
-            total_taxes += flt(subtotal.find('.//TaxAmount').text)
+            total_taxes += flt(subtotal.find('.//cbc:TaxAmount', namespaces).text)
         self.assertEqual(tax_amount, total_taxes)
 
     def assert_rule_BR_KSA_51(self, tree: Et):
@@ -185,7 +180,7 @@ class TestEinvoice(FrappeTestCase):
         for item in invoice_lines:
             rounding_amount = flt(item.find('.//cac:TaxTotal/cbc:RoundingAmount', namespaces).text)
             tax_amount = flt(item.find('.//cac:TaxTotal/cbc:TaxAmount', namespaces).text)
-            line_extension_amount = flt(item.find('.//cac:LineExtensionAmount', namespaces).text)
+            line_extension_amount = flt(item.find('.//cbc:LineExtensionAmount', namespaces).text)
             self.assertEqual(rounding_amount, line_extension_amount + tax_amount)
 
 
