@@ -86,8 +86,8 @@ class TestEinvoice(FrappeTestCase):
 
     def test_item_discount(self):
         invoice = self.create_invoice()
-        for it in invoice.items:
-            it.discount_percentage = 1.37
+        invoice.items[0].discount_percentage = 2.362
+        invoice.items[1].discount_percentage = 5.67
 
         ignore_additional_fields_for_invoice(invoice.name)
         invoice.submit()
@@ -97,8 +97,8 @@ class TestEinvoice(FrappeTestCase):
         invoice = self.create_invoice()
         invoice.apply_discount_on = 'Grand Total'
         invoice.additional_discount_percentage = 3.53
-        for it in invoice.items:
-            it.discount_percentage = 1.37
+        invoice.items[0].discount_percentage = 2.362
+        invoice.items[1].discount_percentage = 5.67
 
         ignore_additional_fields_for_invoice(invoice.name)
         invoice.submit()
@@ -106,14 +106,14 @@ class TestEinvoice(FrappeTestCase):
 
     def test_tax_included_standard(self):
         invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate
+        invoice.taxes[0].included_in_print_rate = 1
         ignore_additional_fields_for_invoice(invoice.name)
         invoice.submit()
         self.assert_generated_xml(self.create_additional_fields(invoice.name))
 
     def test_tax_included_invoice_discount(self):
         invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate
+        invoice.taxes[0].included_in_print_rate = 1
         invoice.apply_discount_on = 'Grand Total'
         invoice.additional_discount_percentage = 3.53
         ignore_additional_fields_for_invoice(invoice.name)
@@ -122,9 +122,9 @@ class TestEinvoice(FrappeTestCase):
 
     def test_tax_included_item_discount(self):
         invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate
-        for it in invoice.items:
-            it.discount_percentage = 1.37
+        invoice.taxes[0].included_in_print_rate = 1
+        invoice.items[0].discount_percentage = 2.362
+        invoice.items[1].discount_percentage = 5.67
 
         ignore_additional_fields_for_invoice(invoice.name)
         invoice.submit()
@@ -132,11 +132,11 @@ class TestEinvoice(FrappeTestCase):
 
     def test_tax_included_item_invoice_discount(self):
         invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate
+        invoice.taxes[0].included_in_print_rate = 1
         invoice.apply_discount_on = 'Grand Total'
         invoice.additional_discount_percentage = 3.53
-        for it in invoice.items:
-            it.discount_percentage = 1.37
+        invoice.items[0].discount_percentage = 2.362
+        invoice.items[1].discount_percentage = 5.67
 
         ignore_additional_fields_for_invoice(invoice.name)
         invoice.submit()
@@ -148,16 +148,16 @@ class TestEinvoice(FrappeTestCase):
         self.assert_zatca_rules(xml_tree)
 
     def assert_zatca_rules(self, tree: Et):
-        self.assert_rule_BR_CO_15(tree=tree)
         self.assert_rule_BR_CO_11(tree=tree)
         self.assert_rule_BR_CO_14(tree=tree)
+        self.assert_rule_BR_CO_15(tree=tree)
         self.assert_rule_BR_KSA_51(tree=tree)
 
     def assert_rule_BR_CO_15(self, tree: Et):
         tax_inclusive_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount', namespaces).text)
         tax_exclusive_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount', namespaces).text)
         total_tax_amount = flt(tree.find('.//cac:TaxTotal/cbc:TaxAmount', namespaces).text)
-        self.assertEqual(tax_inclusive_amount, tax_exclusive_amount + total_tax_amount)
+        self.assertEqual(tax_inclusive_amount, round(tax_exclusive_amount + total_tax_amount, 2))
 
     def assert_rule_BR_CO_11(self, tree: Et):
         allowance_total_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount', namespaces).text)
