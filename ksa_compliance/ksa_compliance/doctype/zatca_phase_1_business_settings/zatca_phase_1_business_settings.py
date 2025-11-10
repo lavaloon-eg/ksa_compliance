@@ -25,7 +25,13 @@ class ZATCAPhase1BusinessSettings(Document):
     pass
 
     def validate(self):
-        business_settings_id = frappe.get_value('ZATCA Business Settings', {'company': self.company})
+        business_settings_id = frappe.get_value(
+            'ZATCA Business Settings',
+            {
+                'company': self.company,
+                'status': 'Active',
+            },
+        )
         if business_settings_id and self.status == 'Active':
             link = get_link_to_form('ZATCA Business Settings', business_settings_id)
             frappe.throw(
