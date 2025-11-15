@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.57.3
+
+* Fix Phase 1 validation when Phase 2 settings are revoked
+
 ## 0.57.2
 
 * Enforce uppercase country code in Invoice xml
