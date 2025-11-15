@@ -149,12 +149,14 @@ class Einvoice:
         )
 
         # Allowance on invoice should be only the document level allowance without items allowances.
-        self.get_float_value(
-            field_name='discount_amount',
-            source_doc=self.sales_invoice_doc,
-            xml_name='allowance_total_amount',
-            parent='invoice',
-        )
+        # Note: allowance_total_amount is now calculated from actual allowance_charge list (see get_e_invoice_details)
+        # to ensure BR-CO-11 compliance (sum of allowances must match AllowanceTotalAmount exactly)
+        # self.get_float_value(
+        #     field_name='discount_amount',
+        #     source_doc=self.sales_invoice_doc,
+        #     xml_name='allowance_total_amount',
+        #     parent='invoice',
+        # )
         # self.compute_invoice_discount_amount()
         self.get_e_invoice_details(invoice_type)
 
@@ -896,6 +898,8 @@ class Einvoice:
         self.result['invoice']['tax_total'] = tax_total
         allowance_charge = create_allowance_charge(self.sales_invoice_doc, tax_total)
         self.result['invoice']['allowance_charge'] = allowance_charge
+        # Calculate allowance_total_amount as sum of all allowance charges to ensure BR-CO-11 compliance
+        self.result['invoice']['allowance_total_amount'] = sum(ac.get('amount', 0) for ac in allowance_charge)
 
         # Add invoice total taxes and charges percentage field
         self.result['invoice']['total_taxes_and_charges_percent'] = sum(
@@ -915,7 +919,8 @@ class Einvoice:
 
         self.result['invoice']['item_lines'] = item_lines
         self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
-        self.compute_invoice_discount_amount()
+        # Note: allowance_total_amount is now set from allowance_charge list above to ensure BR-CO-11 compliance
+        # self.compute_invoice_discount_amount()
         self.result['invoice']['net_total'] = (
             self.result['invoice']['line_extension_amount'] - self.result['invoice']['allowance_total_amount']
         )
