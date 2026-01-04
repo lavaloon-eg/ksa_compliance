@@ -653,6 +653,7 @@ def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
             303: 'Clearance switched off',
             401: 'Rejected',
             400: 'Rejected',
+            409: 'Duplicate',
             413: 'Resend',
             429: 'Resend',
             500: 'Resend',

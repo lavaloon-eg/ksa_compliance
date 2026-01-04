@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Handle ZATCA HTTP status code 409 as a duplicate (for resend logic)
+  * They used to return 208 for this, but now it's 409
+
 ## 0.57.3
 
 * Fix Phase 1 validation when Phase 2 settings are revoked
