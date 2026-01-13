@@ -48,7 +48,7 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
             row.tax_category = dataclass_to_frappe_dict(tax_category)
         tax_category_by_items = TaxCategoryByItems(tax_category=tax_category, items=[row for row in item_lines])
         tax_category_by_items_cls = tax_category_map.setdefault(
-            zatca_category + str(tax_category_percent), tax_category_by_items
+            str(zatca_category) + str(tax_category_percent), tax_category_by_items
         )
         return tax_category_map
 
@@ -72,6 +72,7 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
             zatca_category = frappe.db.get_value(
                 'Item Tax Template', row.item_tax_template, 'custom_zatca_item_tax_category'
             )
+        
         tax_category = TaxCategory(
             zatca_tax_category_id=tax_category_id, percent=tax_category_percent, tax_scheme_id='VAT'
         )
@@ -79,7 +80,7 @@ def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is
         row.tax_category = dataclass_to_frappe_dict(tax_category)
         tax_category_by_items = TaxCategoryByItems(tax_category=tax_category, items=[])
         tax_category_by_items_cls = tax_category_map.setdefault(
-            zatca_category + str(tax_category_percent), tax_category_by_items
+            str(zatca_category) + str(tax_category_percent), tax_category_by_items
         )
         tax_category_by_items_cls.items.append(row)
     return tax_category_map
