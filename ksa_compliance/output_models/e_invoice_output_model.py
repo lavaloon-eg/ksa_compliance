@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import cast, Optional, List
 
 import frappe
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.setup.doctype.branch.branch import Branch
 from frappe.model.document import Document
+from frappe.utils import flt
 from frappe.utils import get_date_str, get_time, strip
 from ksa_compliance.invoice import InvoiceType, get_zatca_discount_reason_by_name
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
@@ -16,11 +17,8 @@ from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_
 )
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
-from frappe.utils import flt
-
-from .service import get_right_fieldname, update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
-
+from .service import get_right_fieldname, update_result
 from .tax import create_tax_categories, create_allowance_charge, create_tax_total
 
 
@@ -428,14 +426,14 @@ class Einvoice:
             self.result['invoice']['allowance_total_amount'] = 0
             self.additional_fields_doc.fatoora_invoice_discount_amount = 0
             return
-        discount_amount = abs(self.sales_invoice_doc.discount_amount)
+        discount_amount = flt(abs(self.sales_invoice_doc.discount_amount), 2)
         if self.sales_invoice_doc.apply_discount_on != 'Grand Total' or discount_amount == 0:
             self.additional_fields_doc.fatoora_invoice_discount_amount = discount_amount
             return
 
         applied_discount_percent = self.sales_invoice_doc.additional_discount_percentage
         total_without_vat = self.result['invoice']['line_extension_amount']
-        tax_amount = abs(self.sales_invoice_doc.taxes[0].tax_amount)
+        tax_amount = flt(abs(self.sales_invoice_doc.taxes[0].tax_amount), 2)
         if applied_discount_percent == 0:
             applied_discount_percent = (discount_amount / (total_without_vat + tax_amount)) * 100
         applied_discount_amount = total_without_vat * (applied_discount_percent / 100)
@@ -718,14 +716,14 @@ class Einvoice:
         for item in doc.items:
             has_discount = isinstance(item.discount_amount, float) and item.discount_amount > 0
 
-            tax_percent = abs(item.tax_rate or 0.0)
-            tax_amount_with_qty = abs(item.tax_amount or 0.0)
-            discount_with_qty = abs(item.discount_amount * item.qty) if has_discount else 0.0
+            tax_percent = flt(abs(item.tax_rate or 0.0), 2)
+            tax_amount_with_qty = flt(abs(item.tax_amount or 0.0), 2)
+            discount_with_qty = flt(abs(item.discount_amount * item.qty), 2) if has_discount else 0.0
             amount_with_qty = abs(
-                flt(abs(item.amount) / (1 + (tax_percent / 100)), 2) if is_tax_included else item.amount
+                flt(abs(item.amount) / (1 + (tax_percent / 100)), 2) if is_tax_included else flt(item.amount, 2)
             )
-            net_amount_with_qty = abs(item.net_amount)
-            rate_without_qty = abs(item.rate)
+            net_amount_with_qty = flt(abs(item.net_amount), 2)
+            rate_without_qty = flt(abs(item.rate), 2)
             item_data = {
                 'idx': item.idx,
                 'qty': abs(item.qty),
@@ -734,7 +732,7 @@ class Einvoice:
                 'item_name': item.item_name,
                 'net_amount': net_amount_with_qty,
                 'rate': rate_without_qty,
-                'discount_percentage': abs(item.discount_percentage) if has_discount else 0.0,
+                'discount_percentage': flt(abs(item.discount_percentage), 2) if has_discount else 0.0,
                 'tax_percent': tax_percent,
                 'amount': amount_with_qty,
                 'rounding_amount': tax_amount_with_qty + amount_with_qty,
@@ -901,6 +899,13 @@ class Einvoice:
         self.result['invoice']['total_taxes_and_charges_percent'] = sum(
             it.rate for it in self.sales_invoice_doc.get('taxes', [])
         )
+        self.result['invoice']['total_taxes_and_charges'] = sum(tax.tax_amount for tax in tax_total.tax_subtotal)
+        if self.sales_invoice_doc.doctype == 'Sales Invoice':
+            if self.sales_invoice_doc.currency == 'SAR':
+                self.result['invoice']['base_total_taxes_and_charges'] = self.result['invoice'][
+                    'total_taxes_and_charges'
+                ]
+
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             charge_type = self.sales_invoice_doc.taxes[0].charge_type
             tax_percent = abs(self.sales_invoice_doc.taxes[0].rate) / 100
@@ -915,7 +920,8 @@ class Einvoice:
 
         self.result['invoice']['item_lines'] = item_lines
         self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
-        self.compute_invoice_discount_amount()
+        # self.compute_invoice_discount_amount()
+        self.result['invoice']['allowance_total_amount'] = sum(ch.amount for ch in allowance_charge)
         self.result['invoice']['net_total'] = (
             self.result['invoice']['line_extension_amount'] - self.result['invoice']['allowance_total_amount']
         )

@@ -1,15 +1,12 @@
 import frappe
-
-from ksa_compliance.standard_doctypes.tax_category import map_tax_category
-from .service import get_right_fieldname, dataclass_to_frappe_dict
-from .models import TaxCategory, TaxCategoryByItems, TaxTotal, TaxSubtotal, AllowanceCharge
-
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from ksa_compliance.invoice import get_zatca_discount_reason_by_name
-
-from ksa_compliance.translation import ft
+from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
+from .models import TaxCategory, TaxCategoryByItems, TaxTotal, TaxSubtotal, AllowanceCharge
+from .service import get_right_fieldname, dataclass_to_frappe_dict
 
 
 def create_tax_categories(doc: SalesInvoice | PaymentEntry, item_lines: list, is_tax_included: bool) -> dict:
