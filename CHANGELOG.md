@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add `KSA Compliance Premium` announcement in ZATCA workspace.
+
 ## 0.58.0
 
 * Fix dashboard to work on v16
