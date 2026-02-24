@@ -8,7 +8,7 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Add `KSA Compliance Premium` announcement in ZATCA workspace.
+* Add `KSA Compliance Premium` announcement in ZATCA workspace and as a popup announcement.
 
 ## 0.58.0
 

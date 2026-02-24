@@ -1,5 +1,4 @@
 import frappe
-from ksa_compliance.templates.ksa_compliance_premium_announcement import PREMIUM_ANNOUNCEMENT_HTML
 
 
 def execute():
