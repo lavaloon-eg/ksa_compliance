@@ -2,54 +2,89 @@ import frappe
 
 
 def execute():
-    block_name = "KSA Compliance Premium Announcement"
+    block_name = 'KSA Compliance Premium Announcement'
     html_content = """<div style="
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    background: #FFFFF;
-                    color: #000000;
-                    padding: 28px;
-                    border-radius: 16px;
-                    text-align: center;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-                    max-width: 520px;
-                    margin: 0 auto;
-                ">
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #FFFFFF;
+    color: #000000;
+    padding: 4px 16px;
+    border-radius: 16px;
+    border-left: 4px solid #ED1C24;
+    text-align: left;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+    margin: 0 0;
+">
 
-                <div style="font-size: 26px; font-weight: 700; margin-bottom: 16px;">
-                    🚀 {{ _("Unlock the Full Power of KSA Compliance!") }} 🚀
-                </div>
-            
-                <div style="
-                                    font-size: 16px;
-                                    line-height: 1.7;
-                                    color: #8a929c;
-                                    margin-bottom: 22px;
-                                ">
-                    {{ _("Upgrade to our") }} <span
-                        style="color:#ED1C24; font-weight:600;"><span>&nbsp</span> {{ _("Premium version") }}<span>&nbsp</span></span>
-                    {{ _("for advanced features; priority support and a seamless compliance experience.") }}
-                    <br><br>
-                    {{ _("Take your business to the next level!") }} ✨
-                </div>
-            
-                <a href="https://lavaloon.com/contact-us"
-                   target="_blank"
-                   style="
-                                        display: inline-block;
-                                        background: linear-gradient(135deg, #22c55e, #16a34a);
-                                        color: #ffffff;
-                                        text-decoration: none;
-                                        padding: 14px 28px;
-                                        font-size: 16px;
-                                        font-weight: 600;
-                                        border-radius: 50px;
-                                        box-shadow: 0 6px 15px rgba(34,197,94,0.4);
-                                        transition: all 0.2s ease-in-out;
-                                   ">
-                    {{ _("Learn More & Contact Us") }} &nbsp 📞
-                </a>
-            
-            </div>"""
+    <!-- Header -->
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    "
+    onclick="
+        const body = this.parentElement.querySelector('.premium-body');
+        const icon = this.querySelector('.toggle-icon');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            icon.innerHTML = '−';
+        } else {
+            body.style.display = 'none';
+            icon.innerHTML = '+';
+        }
+    ">
+        <div style="font-size: 14px; font-weight: 700;">
+            🚀 {{ _("Unlock the Full Power of KSA Compliance!") }}
+        </div>
+
+        <div class="toggle-icon" style="
+            font-size: 22px;
+            font-weight: bold;
+            color: #ED1C24;
+            padding-left: 10px;
+        ">
+            −
+        </div>
+    </div>
+
+    <!-- Collapsible Body -->
+    <div class="premium-body" style="margin-top:18px;">
+
+        <div style="
+            font-size: 14px;
+            line-height: 1.7;
+            color: #8a929c;
+            margin-bottom: 22px;
+        ">
+            {{ _("Upgrade to our") }}
+            <span style="color:#ED1C24; font-weight:600;">
+                &nbsp;{{ _("Premium version") }}&nbsp;
+            </span>
+            {{ _("for advanced features; priority support and a seamless compliance experience.") }}
+            <br><br>
+            {{ _("Take your business to the next level!") }} ✨
+        </div>
+
+        <a href="https://lavaloon.com/contact-us"
+           target="_blank"
+           style="
+                display: inline-block;
+                background: linear-gradient(135deg, #22c55e, #16a34a);
+                color: #ffffff;
+                text-decoration: none;
+                padding: 8px 18px;
+                font-size: 12px;
+                font-weight: 600;
+                border-radius: 16px;
+                margin-bottom: 6px;
+                box-shadow: 0 6px 15px rgba(34,197,94,0.4);
+           ">
+            {{ _("Learn More & Contact Us") }} &nbsp;📞
+        </a>
+
+    </div>
+
+</div>"""
 
     js_content = """
     // reference: https://discuss.frappe.io/t/how-does-translation-work-in-html-blocks/135109

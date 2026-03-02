@@ -21,7 +21,7 @@ def execute():
         else:
             fatoora_server = None
         if fatoora_server:
-            print(f"Setting Fatoora Server for {url['name']} to {fatoora_server}")
+            print(f'Setting Fatoora Server for {url["name"]} to {fatoora_server}')
             frappe.db.sql(
                 """
                             UPDATE `tabZATCA Business Settings` SET fatoora_server = %(fatoora_server)s

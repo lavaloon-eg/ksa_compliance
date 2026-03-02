@@ -2,12 +2,8 @@ frappe.provide("ksa_compliance.premium_announcement");
 
 ksa_compliance.premium_announcement = {
     show_announcement(listview) {
-        if (!listview.doctype) {
-            return;
-        }
-
-        let doc_announcement_key = listview.doctype;
-        let popup_dismissed = sessionStorage.getItem(doc_announcement_key);
+        let announcement_key = "premium_announcement";
+        let popup_dismissed = sessionStorage.getItem(announcement_key);
 
         if (!popup_dismissed) {
 
@@ -68,7 +64,7 @@ ksa_compliance.premium_announcement = {
                 indicator: "blue"
             });
 
-            sessionStorage.setItem(doc_announcement_key, "1");
+            sessionStorage.setItem(announcement_key, "1");
         }
     }
 };
