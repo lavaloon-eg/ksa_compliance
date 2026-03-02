@@ -3,7 +3,7 @@ import frappe
 
 def execute():
     block_name = 'KSA Compliance Premium Announcement'
-    html_content = """<div style="
+    html_content = """<div id="premium-announcement" style="
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #FFFFFF;
     color: #000000;
@@ -58,7 +58,7 @@ def execute():
         ">
             {{ _("Upgrade to our") }}
             <span style="color:#ED1C24; font-weight:600;">
-                &nbsp;{{ _("Premium version") }}&nbsp;
+                <span>&nbsp;</span>{{ _("Premium version") }}<span>&nbsp;</span>
             </span>
             {{ _("for advanced features; priority support and a seamless compliance experience.") }}
             <br><br>
@@ -105,6 +105,21 @@ def execute():
             });
         }
     });
+    
+    const container = root_element.querySelector('#premium-announcement');
+
+    if (container) {
+        const is_rtl = frappe.utils.is_rtl
+            ? frappe.utils.is_rtl()
+            : document.documentElement.dir === "rtl";
+    
+        if (is_rtl) {
+            container.setAttribute("dir", "rtl");
+            container.style.textAlign = "right";
+            container.style.borderLeft = "none";
+            container.style.borderRight = "4px solid #ED1C24";
+        }
+    }
     """
 
     if frappe.db.exists('Custom HTML Block', block_name):
