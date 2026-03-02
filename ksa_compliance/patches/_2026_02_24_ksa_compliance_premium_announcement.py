@@ -48,7 +48,7 @@ def execute():
     </div>
 
     <!-- Collapsible Body -->
-    <div class="premium-body" style="margin-top:18px;">
+    <div class="premium-body" style="margin-top:18px;display: none;">
 
         <div style="
             font-size: 14px;
