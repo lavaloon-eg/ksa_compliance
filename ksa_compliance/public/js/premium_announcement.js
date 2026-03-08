@@ -3,6 +3,7 @@ frappe.provide("ksa_compliance.premium_announcement");
 ksa_compliance.premium_announcement = {
     show_announcement(listview) {
         let announcement_key = "premium_announcement";
+
         let popup_dismissed = sessionStorage.getItem(announcement_key);
 
         if (!popup_dismissed) {
