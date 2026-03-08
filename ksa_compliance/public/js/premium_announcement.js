@@ -67,5 +67,54 @@ ksa_compliance.premium_announcement = {
 
             sessionStorage.setItem(announcement_key, "1");
         }
+    },
+    set_announcement_intro(frm) {
+        frm.set_intro(`
+<div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+">
+
+    <div style="display:flex; align-items:center; gap:10px; flex:1;">
+
+        <span style="font-size:12px;">🚀</span>
+
+        <div style="font-size:12px; line-height:1.6;">
+            <strong>${__("Unlock the Full Power of KSA Compliance!")}</strong>:
+            <span style="color:#6b7280;">
+                ${__("Upgrade to our")}
+                <span style="color:#ED1C24; font-weight:600;">
+                    ${__("Premium version")}
+                </span>
+                ${__("for advanced features; priority support and a seamless compliance experience.")}
+            </span>
+        </div>
+
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px;">
+
+        <a href="https://lavaloon.com/contact-us"
+           target="_blank"
+           style="
+                background:#ffffff;
+                border:1px solid #d7d7d9;
+                color:#3b3b3b;
+                text-decoration:none;
+                padding:2px 6px;
+                font-size:12px;
+                border-radius:6px;
+                font-weight:500;
+                white-space:nowrap;
+           ">
+           ${__("Learn More")}
+        </a>
+
+    </div>
+
+</div>
+`, "yellow");
     }
 };
