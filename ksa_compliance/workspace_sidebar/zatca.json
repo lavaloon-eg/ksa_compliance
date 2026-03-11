@@ -1,0 +1,27 @@
+{
+ "app": "ksa_compliance",
+ "creation": "2026-03-12 00:49:31.486599",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "alarm-clock-plus",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Zatca",
+   "link_to": "ZATCA",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-12 00:49:31.486599",
+ "modified_by": "Administrator",
+ "name": "Zatca",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "Zatca"
+}

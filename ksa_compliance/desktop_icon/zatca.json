@@ -1,0 +1,21 @@
+{
+ "app": "ksa_compliance",
+ "creation": "2025-11-17 20:33:43.167514",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Link",
+ "idx": 43,
+ "label": "Zatca",
+ "link": "/desk/zatca",
+ "link_to": "Zatca",
+ "link_type": "Workspace Sidebar",
+ "logo_url": "",
+ "modified": "2026-03-12 00:51:06.617255",
+ "modified_by": "Administrator",
+ "name": "Zatca",
+ "owner": "Administrator",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}
