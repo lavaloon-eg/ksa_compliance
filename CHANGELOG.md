@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add zatca desktop icon and workspace sidebar.
+
 ## 0.58.0
 
 * Fix dashboard to work on v16
