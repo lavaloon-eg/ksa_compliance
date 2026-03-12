@@ -10,7 +10,6 @@ import pyqrcode
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.setup.doctype.branch.branch import Branch
-from frappe import _dict as fdict
 from frappe.utils.data import get_time, getdate
 from semantic_version import Version
 
