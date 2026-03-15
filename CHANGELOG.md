@@ -9,6 +9,7 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Add zatca desktop icon and workspace sidebar.
+* Add business settings and additional fields doctypes in ZATCA workspace sidebar.
 
 ## 0.58.0
 
