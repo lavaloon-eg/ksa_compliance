@@ -5,82 +5,68 @@ def execute():
     block_name = 'KSA Compliance Premium Announcement'
     html_content = """<div id="premium-announcement" style="
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #FFFFFF;
-    color: #000000;
-    padding: 4px 16px;
-    border-radius: 16px;
-    border-left: 4px solid #ED1C24;
+    background: rgb(255 247 211);
+    color: #3b3b3b;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #e2d9b3;
     text-align: left;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
-    margin: 0 0;
+    margin: 0;
 ">
 
-    <!-- Header -->
     <div style="
         display: flex;
         justify-content: space-between;
         align-items: center;
-        cursor: pointer;
-    "
-    onclick="
-        const body = this.parentElement.querySelector('.premium-body');
-        const icon = this.querySelector('.toggle-icon');
-        if (body.style.display === 'none') {
-            body.style.display = 'block';
-            icon.innerHTML = '−';
-        } else {
-            body.style.display = 'none';
-            icon.innerHTML = '+';
-        }
+        gap: 12px;
     ">
-        <div style="font-size: 14px; font-weight: 700;">
-            🚀 {{ _("Unlock the Full Power of KSA Compliance!") }}
+
+        <div style="display:flex; align-items:center; gap:10px; flex:1;">
+
+            <span style="font-size:12px;">🚀</span>
+
+            <div style="font-size:12px; line-height:1.6;">
+                <strong>{{ _("Unlock the Full Power of KSA Compliance!") }}</strong>:
+                <span style="color:#6b7280;">
+                    {{ _("Upgrade to our") }}
+                    <span style="color:#ED1C24; font-weight:600;">
+                        <span></span>{{ _("Premium version") }} <span></span>
+                    </span>
+                    {{ _("for advanced features; priority support and a seamless compliance experience.") }}
+                </span>
+            </div>
+
         </div>
 
-        <div class="toggle-icon" style="
-            font-size: 22px;
-            font-weight: bold;
-            color: #ED1C24;
-            padding-left: 10px;
-        ">
-            −
-        </div>
-    </div>
+        <div style="display:flex; align-items:center; gap:8px;">
 
-    <!-- Collapsible Body -->
-    <div class="premium-body" style="margin-top:18px;display: none;">
+            <a href="https://lavaloon.com/contact-us"
+               target="_blank"
+               style="
+                    background:#ffffff;
+                    border:1px solid #d7d7d9;
+                    color:#3b3b3b;
+                    text-decoration:none;
+                    padding:2px 6px;
+                    font-size:12px;
+                    border-radius:6px;
+                    font-weight:500;
+                    white-space:nowrap;
+               ">
+               {{ _("Learn More") }}
+            </a>
 
-        <div style="
-            font-size: 14px;
-            line-height: 1.7;
-            color: #8a929c;
-            margin-bottom: 22px;
-        ">
-            {{ _("Upgrade to our") }}
-            <span style="color:#ED1C24; font-weight:600;">
-                <span>&nbsp;</span>{{ _("Premium version") }}<span>&nbsp;</span>
+            <span style="
+                cursor:pointer;
+                font-size:18px;
+                color:#6b7280;
+                padding-left:4px;
+            "
+            onclick="this.closest('#premium-announcement').style.display='none'">
+                ×
             </span>
-            {{ _("for advanced features; priority support and a seamless compliance experience.") }}
-            <br><br>
-            {{ _("Take your business to the next level!") }} ✨
-        </div>
 
-        <a href="https://lavaloon.com/contact-us"
-           target="_blank"
-           style="
-                display: inline-block;
-                background: linear-gradient(135deg, #22c55e, #16a34a);
-                color: #ffffff;
-                text-decoration: none;
-                padding: 8px 18px;
-                font-size: 12px;
-                font-weight: 600;
-                border-radius: 16px;
-                margin-bottom: 6px;
-                box-shadow: 0 6px 15px rgba(34,197,94,0.4);
-           ">
-            {{ _("Learn More & Contact Us") }} &nbsp;📞
-        </a>
+        </div>
 
     </div>
 
@@ -117,7 +103,6 @@ def execute():
             container.setAttribute("dir", "rtl");
             container.style.textAlign = "right";
             container.style.borderLeft = "none";
-            container.style.borderRight = "4px solid #ED1C24";
         }
     }
     """
