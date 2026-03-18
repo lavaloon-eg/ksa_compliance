@@ -108,6 +108,7 @@ ksa_compliance.premium_announcement = {
                 border-radius:6px;
                 font-weight:500;
                 white-space:nowrap;
+                margin-right: 20px;
            ">
            ${__("Learn More")}
         </a>
