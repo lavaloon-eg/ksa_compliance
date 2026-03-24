@@ -1,5 +1,5 @@
 from ksa_compliance.patches._2025_05_11_add_feedback_links_block import execute as add_feedback_links_block
-from ksa_compliance.patches._2026_03_16_add_images import execute as add_images
+from ksa_compliance.patches._2026_03_16_add_zatca_images import execute as add_images
 
 
 def after_install():

@@ -4,7 +4,8 @@ import frappe
 
 
 def execute():
-    """Add images from the app's public folder to File Documents."""
+    """Add zatca images from the app's public folder to File Documents."""
+    images = ['zatca-icon.png']
     app_path = frappe.get_app_path('ksa_compliance')
     base_path = os.path.join(app_path, 'public', 'images')
 
@@ -12,7 +13,7 @@ def execute():
         frappe.log_error(message=f'Images folder not found: {base_path}', title='ksa_compliance patch')
         return
 
-    for filename in os.listdir(base_path):
+    for filename in images:
         if frappe.db.exists('File', {'file_name': filename}):
             frappe.log(f'Image "{filename}" already exists. Skipping upload.')
             continue
