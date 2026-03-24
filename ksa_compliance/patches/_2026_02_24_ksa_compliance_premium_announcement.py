@@ -23,7 +23,7 @@ def execute():
 
         <div style="display:flex; align-items:center; gap:10px; flex:1;">
 
-            <span style="font-size:12px;">🚀</span>
+            <span style="font-size:12px;"><img src="/assets/ksa_compliance/images/lavaloon_logo.png" alt="lavaloon-logo" width="60"></span>
 
             <div style="font-size:12px; line-height:1.6;">
                 <strong>{{ _("Unlock the Full Power of KSA Compliance!") }}</strong>:
