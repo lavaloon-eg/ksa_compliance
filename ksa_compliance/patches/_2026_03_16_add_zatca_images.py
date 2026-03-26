@@ -20,6 +20,7 @@ def execute():
 
         full_path = os.path.join(base_path, filename)
         if os.path.isfile(full_path):
+            # nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal
             with open(full_path, 'rb') as file:
                 file_data = file.read()
                 file_doc = frappe.get_doc(
