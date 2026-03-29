@@ -120,7 +120,7 @@ ksa_compliance.premium_announcement = {
     },
     async validate_show_announcement(announcement_key, validate_date = false) {
         const show_announcement_res = await frappe.call({
-            method: "ksa_compliance.premium_announcement.show_announcement",
+            method: "ksa_compliance.premium_announcement.should_show_announcement",
             args: {
                 announcement_key: announcement_key,
                 validate_date: validate_date,
