@@ -5,7 +5,7 @@ import frappe
 
 def execute():
     """Add zatca images from the app's public folder to File Documents."""
-    images = ['zatca-icon.png']
+    images = ['zatca-icon.svg']
     app_path = frappe.get_app_path('ksa_compliance')
     base_path = os.path.join(app_path, 'public', 'images')
 
