@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix ZATCA Images Patch Fails by resize images.
+
 ## 0.60.0
 
 * Add ZATCA desktop icon image.
