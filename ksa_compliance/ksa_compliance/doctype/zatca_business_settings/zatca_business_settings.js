@@ -68,7 +68,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
         }
     },
     create_csr: function (frm) {
-        frappe.prompt(__('OTP'), async ({ value }) => {
+        frappe.prompt(__('OTP'), async ({value}) => {
             await frappe.call({
                 freeze: true,
                 freeze_message: __('Please wait...'),
@@ -103,7 +103,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 get_query: function () {
                     return {
                         query: "ksa_compliance.compliance_checks.customer_query",
-                        filters: { "standard": false },
+                        filters: {"standard": false},
                     }
                 }
             });
@@ -118,10 +118,25 @@ frappe.ui.form.on("ZATCA Business Settings", {
                 get_query: function () {
                     return {
                         query: "ksa_compliance.compliance_checks.customer_query",
-                        filters: { "standard": true },
+                        filters: {"standard": true},
                     }
                 }
             });
+        }
+
+        if (frm.doc.enable_branch_configuration) {
+            customer_fields.push({
+                label: __('Branch'),
+                fieldname: 'branch',
+                fieldtype: 'Link',
+                options: 'Branch',
+                reqd: 1,
+                get_query: function () {
+                    return {
+                        filters: {'custom_company': frm.doc.company}
+                    }
+                },
+            })
         }
 
         let fields = customer_fields.concat([
@@ -150,6 +165,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
                     business_settings_id: frm.doc.name,
                     simplified_customer_id: values.simplified_customer_id || '',
                     standard_customer_id: values.standard_customer_id || '',
+                    branch: values.branch || '',
                     item_id: values.item_id,
                     tax_category_id: values.tax_category_id,
                 },
@@ -162,7 +178,7 @@ frappe.ui.form.on("ZATCA Business Settings", {
             return;
         }
 
-        frappe.prompt(__('OTP'), async ({ value }) => {
+        frappe.prompt(__('OTP'), async ({value}) => {
             const result = await frappe.call({
                 freeze: true,
                 freeze_message: 'Please wait...',
@@ -246,7 +262,7 @@ function add_revoke_button(frm) {
                         settings_id: frm.doc.name,
                         company: frm.doc.company
                     },
-                    callback(r){
+                    callback(r) {
                         frm.refresh()
                     }
                 })
@@ -257,7 +273,7 @@ function add_revoke_button(frm) {
 
 function add_create_business_settings_button(frm) {
     frm.add_custom_button("Create New Business Settings", () => {
-            frappe.model.open_mapped_doc({
+        frappe.model.open_mapped_doc({
             method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.create_business_settings",
             frm: cur_frm,
         });

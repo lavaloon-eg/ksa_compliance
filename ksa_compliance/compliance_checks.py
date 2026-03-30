@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import NoReturn, cast, Optional, Tuple
+from typing import cast, Optional, Tuple
 
 import frappe
 import frappe.utils.background_jobs
@@ -70,14 +70,16 @@ def perform_compliance_checks(
     business_settings_id: str,
     simplified_customer_id: Optional[str],
     standard_customer_id: Optional[str],
+    branch: Optional[str],
     item_id: str,
     tax_category_id: str,
-) -> NoReturn:
+) -> None:
     frappe.utils.background_jobs.enqueue(
         _perform_compliance_checks,
         business_settings_id=business_settings_id,
         simplified_customer_id=simplified_customer_id,
         standard_customer_id=standard_customer_id,
+        branch=branch,
         item_id=item_id,
         tax_category_id=tax_category_id,
     )
@@ -110,9 +112,10 @@ def _perform_compliance_checks(
     business_settings_id: str,
     simplified_customer_id: Optional[str],
     standard_customer_id: Optional[str],
+    branch: Optional[str],
     item_id: str,
     tax_category_id: str,
-) -> NoReturn:
+) -> None:
     # For each invoice type (simplified or standard) we perform three checks: invoice, credit note and debit note
     # For each one of the three checks, we perform three steps (creation, submission, check)
     # So, 9 steps per invoice type. A maximum of 18 steps if we're doing compliance for both. Here we figure out
@@ -136,12 +139,20 @@ def _perform_compliance_checks(
                 settings,
                 item_id,
                 tax_category_id,
+                branch,
             )
             progress += 9 * progress_per_step
 
         if standard_customer_id:
             standard_result = _perform_compliance_for_invoice_type(
-                progress, progress_per_step, ft('Standard'), standard_customer_id, settings, item_id, tax_category_id
+                progress,
+                progress_per_step,
+                ft('Standard'),
+                standard_customer_id,
+                settings,
+                item_id,
+                tax_category_id,
+                branch,
             )
 
         # Submitting the above invoices results in a number of messages about payment reconciliation and the like,
@@ -180,9 +191,10 @@ def _perform_compliance_for_invoice_type(
     settings: ZATCABusinessSettings,
     item_id: str,
     tax_category_id: str,
+    branch: Optional[str],
 ) -> _ComplianceResult:
     _report_progress(ft('Creating $type invoice', type=invoice_type), progress)
-    invoice = _make_invoice(settings.company, customer_id, item_id, tax_category_id)
+    invoice = _make_invoice(settings.company, customer_id, item_id, tax_category_id, branch)
     invoice.save()
     progress += progress_per_step
 
@@ -255,9 +267,11 @@ def _report_progress(description: str, percent: float) -> None:
     frappe.publish_progress(title=ft('Compliance Check'), description=description, percent=percent)
 
 
-def _make_invoice(company: str, customer: str, item: str, tax_category_id: str) -> SalesInvoice:
+def _make_invoice(company: str, customer: str, item: str, tax_category_id: str, branch: Optional[str]) -> SalesInvoice:
     invoice = cast(SalesInvoice, frappe.new_doc('Sales Invoice'))
     invoice.company = company
+    invoice.currency = frappe.db.get_value('Company', company, 'default_currency')
+    invoice.branch = branch
     invoice.customer = customer
     invoice.tax_category = tax_category_id
     invoice.set_taxes()
