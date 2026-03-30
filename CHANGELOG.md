@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.0
+
 * Add `KSA Compliance Premium` announcement in ZATCA workspace and relevant doctypes.
 
 ## 0.60.1
