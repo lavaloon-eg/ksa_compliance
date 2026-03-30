@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add `KSA Compliance Premium` announcement in ZATCA workspace and relevant doctypes.
+
 ## 0.60.1
 
 * Fix ZATCA desktop icon patch failure due to large size (> 1MiB). The image is now a much smaller SVG

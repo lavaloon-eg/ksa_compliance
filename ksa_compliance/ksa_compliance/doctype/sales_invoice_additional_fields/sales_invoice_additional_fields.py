@@ -251,7 +251,7 @@ class SalesInvoiceAdditionalFields(Document):
                     text_message = ''
                     if validation_result.details.errors:
                         text_message += ft('Errors') + '\n'
-                        html_message += f"<h4>{ft('Errors')}</h4>"
+                        html_message += f'<h4>{ft("Errors")}</h4>'
                         html_message += '<ul>'
                         for code, error in validation_result.details.errors.items():
                             html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>'
@@ -260,7 +260,7 @@ class SalesInvoiceAdditionalFields(Document):
 
                     if validation_result.details.warnings:
                         text_message += ft('Warnings') + '\n'
-                        html_message += f"<h4>{ft('Warnings')}</h4>"
+                        html_message += f'<h4>{ft("Warnings")}</h4>'
                         html_message += '<ul>'
                         for code, warning in validation_result.details.warnings.items():
                             html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>'

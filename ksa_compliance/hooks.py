@@ -11,9 +11,7 @@ app_license = 'Copyright (c) 2023 LavaLoon'
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ksa_compliance/css/ksa_compliance.css"
-app_include_js = [
-    '/assets/ksa_compliance/js/feedback_dialog.js',
-]
+app_include_js = 'ksa_compliance.bundle.js'
 # include js, css files in header of web template
 # web_include_css = "/assets/ksa_compliance/css/ksa_compliance.css"
 # web_include_js = "/assets/ksa_compliance/js/ksa_compliance.js"
@@ -30,7 +28,7 @@ app_include_js = [
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {'Sales Invoice': 'public/js/sales_invoice_list.js'}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -39,6 +37,7 @@ doctype_js = {
     'Branch': 'public/js/branch.js',
     'Sales Invoice': 'public/js/sales_invoice.js',
     'Payment Entry': 'public/js/payment_entry.js',
+    'Company': 'public/js/company.js',
 }
 
 # Svg Icons
