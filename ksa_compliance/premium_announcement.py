@@ -15,7 +15,7 @@ def should_show_announcement(announcement_key: str, validate_date: bool = False)
         settings = json.loads(settings)
         if last_shown_date := settings.get(announcement_key):
             if validate_date:
-                older_than_14_days = get_datetime(last_shown_date) > (get_datetime() - timedelta(days=14))
+                older_than_14_days = get_datetime(last_shown_date) < (get_datetime() - timedelta(days=14))
                 return older_than_14_days
             else:
                 return False
