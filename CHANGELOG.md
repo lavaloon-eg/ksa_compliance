@@ -8,6 +8,13 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Improve compliance checks
+  * If branch configuration is enabled, we now require the user to select a branch when performing the compliance
+    check, to be able to create invoices. Previously, we required users to disable branch configuration, perform 
+    compliance, then re-enable it.
+  * We now explicitly set the invoice currency to the company currency, in case the default currency (e.g. in Global 
+    Defaults) is something other than SAR
+
 ## 0.61.0
 
 * Add `KSA Compliance Premium` announcement in ZATCA workspace and relevant doctypes.
