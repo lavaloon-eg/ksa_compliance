@@ -1,0 +1,49 @@
+{
+ "app": "ksa_compliance",
+ "creation": "2026-03-12 15:52:44.014231",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "ZATCA",
+   "link_to": "ZATCA",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "ZATCA Business Settings",
+   "link_to": "ZATCA Business Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Additional Fields",
+   "link_to": "Sales Invoice Additional Fields",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-15 10:27:58.716786",
+ "modified_by": "Administrator",
+ "module": "KSA Compliance",
+ "name": "ZATCA",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "ZATCA"
+}

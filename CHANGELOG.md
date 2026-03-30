@@ -8,7 +8,20 @@ to a section with the version name.
 
 ## Unreleased Changes
 
-* Add `KSA Compliance Premium` announcement in ZATCA workspace and as a popup announcement.
+* Add `KSA Compliance Premium` announcement in ZATCA workspace and relevant doctypes.
+
+## 0.60.1
+
+* Fix ZATCA desktop icon patch failure due to large size (> 1MiB). The image is now a much smaller SVG
+
+## 0.60.0
+
+* Add ZATCA desktop icon image.
+
+## 0.59.0
+
+* Add zatca desktop icon and workspace sidebar.
+* Add business settings and additional fields doctypes in ZATCA workspace sidebar.
 
 ## 0.58.0
 
