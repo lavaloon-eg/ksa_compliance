@@ -14,6 +14,7 @@ to a section with the version name.
     compliance, then re-enable it.
   * We now explicitly set the invoice currency to the company currency, in case the default currency (e.g. in Global 
     Defaults) is something other than SAR
+  * Automatically fix country code to use upper-case in `ZATCA Business Settings` on save
 
 ## 0.61.0
 

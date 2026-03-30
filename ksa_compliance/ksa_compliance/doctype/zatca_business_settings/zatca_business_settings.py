@@ -110,6 +110,10 @@ class ZATCABusinessSettings(Document):
         ]
     # end: auto-generated types
 
+    def before_save(self):
+        if self.country_code and (not self.country_code.isupper()):
+            self.country_code = self.country_code.upper()
+
     def after_insert(self):
         invoice_counting_doc = frappe.new_doc('ZATCA Invoice Counting Settings')
         invoice_counting_doc.business_settings_reference = self.name
