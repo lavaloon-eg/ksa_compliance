@@ -216,7 +216,10 @@ def _perform_compliance_for_invoice_type(
     credit_note_result, credit_note_details = _check_invoice_compliance(return_invoice)
     progress += progress_per_step
 
-    frappe.db.rollback(save_point='before_credit_note')
+    try:
+        frappe.db.rollback(save_point='before_credit_note')
+    except Exception:
+        frappe.db.rollback()
     _report_progress(ft('Creating $type debit note', type=invoice_type), progress)
     debit_invoice = cast(SalesInvoice, make_sales_return(invoice.name))
     debit_invoice.custom_return_reason = 'Goods returned'
