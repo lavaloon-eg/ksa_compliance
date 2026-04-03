@@ -263,6 +263,8 @@ def _make_invoice(company: str, customer: str, item: str, tax_category_id: str) 
     invoice.company = company
     invoice.customer = customer
     invoice.tax_category = tax_category_id
+    invoice.update_stock = 0
+    invoice.is_pos = 0
     invoice.set_taxes()
     invoice.append('items', {'item_code': item, 'qty': 1.0})
     invoice.set_missing_values()
