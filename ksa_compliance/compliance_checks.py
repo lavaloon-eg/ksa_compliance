@@ -219,7 +219,12 @@ def _perform_compliance_for_invoice_type(
     try:
         frappe.db.rollback(save_point='before_credit_note')
     except Exception:
-        frappe.db.rollback()
+        # Savepoint was released by an implicit commit during credit note submission.
+        # Create a fresh invoice for the debit note since the original already has a return.
+        invoice = _make_invoice(settings.company, customer_id, item_id, tax_category_id)
+        invoice.save()
+        ignore_additional_fields_for_invoice(invoice.name)
+        invoice.submit()
     _report_progress(ft('Creating $type debit note', type=invoice_type), progress)
     debit_invoice = cast(SalesInvoice, make_sales_return(invoice.name))
     debit_invoice.custom_return_reason = 'Goods returned'
