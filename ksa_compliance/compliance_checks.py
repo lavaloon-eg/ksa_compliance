@@ -265,9 +265,14 @@ def _make_invoice(company: str, customer: str, item: str, tax_category_id: str) 
     invoice.tax_category = tax_category_id
     invoice.update_stock = 0
     invoice.is_pos = 0
+    invoice.conversion_rate = 1
+    invoice.plc_conversion_rate = 1
+    invoice.currency = frappe.get_cached_value('Company', company, 'default_currency')
+    invoice.debit_to = frappe.get_cached_value('Company', company, 'default_receivable_account')
     invoice.set_taxes()
     invoice.append('items', {'item_code': item, 'qty': 1.0})
     invoice.set_missing_values()
+    invoice.flags.ignore_permissions = True
     invoice.save()
     return invoice
 
