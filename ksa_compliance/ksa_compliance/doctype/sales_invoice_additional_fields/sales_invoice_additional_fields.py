@@ -30,6 +30,7 @@ from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
 from ksa_compliance.generate_xml import generate_xml_file
 from ksa_compliance.invoice import InvoiceMode, InvoiceType
+from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
@@ -195,9 +196,18 @@ class SalesInvoiceAdditionalFields(Document):
 
         buyer_doc = self._get_buyer_doc(sales_invoice)
         invoice_type = self._get_invoice_type(settings, buyer_doc)
-        self._set_buyer_details(buyer_doc, invoice_type)
+        
+        is_export = self._is_export_invoice(sales_invoice)
+        if is_export:
+            invoice_type = 'Standard'
+
+        self._set_buyer_details(buyer_doc, invoice_type, is_export=is_export)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
-        self.invoice_type_transaction = '0100000' if invoice_type == 'Standard' else '0200000'
+        
+        nn = '01' if invoice_type == 'Standard' else '02'
+        e = '1' if is_export else '0'
+        self.invoice_type_transaction = f"{nn}00{e}00"
+        
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
         self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
 
@@ -382,8 +392,65 @@ class SalesInvoiceAdditionalFields(Document):
             customer_name = sales_invoice.customer
         return cast(Customer, frappe.get_doc('Customer', customer_name))
 
-    def _set_buyer_details(self, customer: Customer, invoice_type: InvoiceType):
-        self.buyer_vat_registration_number = customer.get('custom_vat_registration_number')
+    def _is_export_invoice(self, sales_invoice: SalesInvoice | POSInvoice | PaymentEntry) -> bool:
+        """
+        Heuristic to detect if it's an export invoice based on the tax category of its items.
+        Returns True if any item or the overall invoice is linked to an export ZATCA exemption code.
+        """
+        if self.invoice_doctype == 'Payment Entry':
+            # ZATCA Rule BR-KSA-06: Prepayment Export invoice is an undefined combination.
+            return False
+
+        # 1. First check the overall invoice-level tax category
+        tax_category_id = getattr(sales_invoice, 'tax_category', None)
+        if tax_category_id:
+            try:
+                zatca_tax_category = map_tax_category(tax_category_id=tax_category_id)
+                if zatca_tax_category and zatca_tax_category.reason_code in ['VATEX-SA-32', 'VATEX-SA-33']:
+                    return True
+            except Exception:
+                # Fix 3: Handle split errors for standard rates (non-exports)
+                pass
+
+        # 2. Then check each item for mixed templates or specific item layouts
+        for item in sales_invoice.get('items', []):
+            if getattr(item, 'item_tax_template', None):
+                try:
+                    zatca_tax_category = map_tax_category(item_tax_template_id=item.item_tax_template)
+                    if zatca_tax_category and zatca_tax_category.reason_code in ['VATEX-SA-32', 'VATEX-SA-33']:
+                        return True
+                except Exception:
+                    # Fix 3: Silent continue on formatting errors (non-exports)
+                    continue
+
+        # 3. Fallback for Credit/Debit Notes: Check if the original invoice was an export
+        if getattr(sales_invoice, 'is_return', False) and getattr(sales_invoice, 'return_against', None):
+            # Check 1: Invoices submitted after the fix was deployed
+            original_export_flag = frappe.db.get_value(
+                'Sales Invoice Additional Fields',
+                {'sales_invoice': sales_invoice.return_against, 'is_latest': 1},
+                'invoice_type_transaction'
+            )
+            if original_export_flag and len(original_export_flag) >= 5 and original_export_flag[4] == '1':
+                return True
+            
+            # Check 2: Fallback for historical invoices submitted before the fix was deployed
+            try:
+                original_inv_doc = frappe.get_doc('Sales Invoice', sales_invoice.return_against)
+                if self._is_export_invoice(original_inv_doc):
+                    return True
+            except Exception:
+                pass
+
+        return False
+
+    def _set_buyer_details(self, customer: Customer, invoice_type: InvoiceType, is_export: bool = False):
+        if is_export:
+            # Rule BR-KSA-46: If export flag is set, buyer VAT ID must be cleared.
+            self.buyer_vat_registration_number = None
+        else:
+            self.buyer_vat_registration_number = customer.get('custom_vat_registration_number')
+
         _is_b2b_customer = invoice_type == 'Standard'
         if customer.customer_primary_address:
             address_doc = cast(Address, frappe.get_doc('Address', customer.customer_primary_address))
@@ -413,15 +480,30 @@ class SalesInvoiceAdditionalFields(Document):
                         title=ft('Address Not Found Error'),
                     )
 
+        other_ids_present = False
         for item in customer.get('custom_additional_ids'):
             if strip(item.value):
                 self.append(
                     'other_buyer_ids', {'type_name': item.type_name, 'type_code': item.type_code, 'value': item.value}
                 )
+                other_ids_present = True
+
+        # Rule BR-KSA-81: Mandatory Buyer Identification if VAT ID is missing for Standard Exports
+        if is_export and not other_ids_present:
+            customer_form = get_link_to_form('Customer', customer.name)
+            fthrow(
+                ft(
+                    'Standard Export Invoices (without VAT numbers) require at least one alternative identification '
+                    '(CRN, Passport, etc.) as per Rule BR-KSA-81. Please add an Additional ID to customer $customer.',
+                    customer=customer_form,
+                ),
+                title=ft('Missing Mandatory Identification'),
+            )
 
     def _set_buyer_address(self, address: Address, validate: bool = False):
+        self.buyer_country_code = frappe.get_value('Country', address.country, 'code')
         if validate:
-            self.validate_buyer_address(address)
+            self.validate_buyer_address(address, self.buyer_country_code)
         self.buyer_additional_number = 'not available for now'
         self.buyer_street_name = address.address_line1
         self.buyer_additional_street_name = address.address_line2
@@ -430,7 +512,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.buyer_postal_code = address.pincode
         self.buyer_district = address.get('custom_area')
         self.buyer_province_state = address.state
-        self.buyer_country_code = frappe.get_value('Country', address.country, 'code')
 
     def _send_xml_via_api(
         self, invoice_xml: str, invoice_hash: str, invoice_type: InvoiceType, server_url: str, token: str, secret: str
@@ -565,27 +646,40 @@ class SalesInvoiceAdditionalFields(Document):
         )
 
     @staticmethod
-    def validate_buyer_address(address: Address):
+    def validate_buyer_address(address: Address, country_code: str):
         msg_list = []
         if not address.address_line1:
             msg = _('Please set Address Line 1 for customer address.')
             msg_list.append(msg)
 
-        if not address.get('custom_building_number') or len(address.get('custom_building_number')) != 4:
-            msg = _('Please make sure that building number is set and is 4 digits exactly in customer address.')
-            msg_list.append(msg)
+        # Fix 1: Fragile check replaced with ISO Country Code
+        is_saudi = country_code == 'SA'
 
-        if not address.city:
-            msg = _('Please set city for customer address.')
-            msg_list.append(msg)
+        if is_saudi:
+            if not address.get('custom_building_number') or len(address.get('custom_building_number')) != 4:
+                msg = _('Please make sure that building number is set and is 4 digits exactly in customer address.')
+                msg_list.append(msg)
 
-        if not address.pincode or len(address.pincode) != 5:
-            msg = _('Please make sure that postal code is set and is 5 digits exactly in customer address.')
-            msg_list.append(msg)
+            if not address.city:
+                msg = _('Please set city for customer address.')
+                msg_list.append(msg)
 
-        if not address.get('custom_area'):
-            msg = _('Please set district for customer address.')
-            msg_list.append(msg)
+            if not address.pincode or len(address.pincode) != 5:
+                msg = _('Please make sure that postal code is set and is 5 digits exactly in customer address.')
+                msg_list.append(msg)
+
+            if not address.get('custom_area'):
+                msg = _('Please set district for customer address.')
+                msg_list.append(msg)
+        else:
+            # Minimum requirements for International Standard Invoices
+            if not address.city:
+                msg = _('Please set city for customer address.')
+                msg_list.append(msg)
+            
+            if not address.country:
+                msg = _('Please set country for customer address.')
+                msg_list.append(msg)
 
         if msg_list:
             msg_list.append(frappe.utils.get_link_to_form('Address', address.name, _('Update Address')))
