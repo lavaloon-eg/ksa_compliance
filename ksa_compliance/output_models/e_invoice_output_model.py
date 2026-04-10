@@ -932,7 +932,7 @@ class Einvoice:
             flt(row['amount'], 2) for row in self.result['invoice']['allowance_charge']
         )
 
-        self.result['invoice']['net_total'] = (
+        self.result['invoice']['net_total'] = abs(
             self.result['invoice']['line_extension_amount'] - self.result['invoice']['allowance_total_amount']
         )
         if self.sales_invoice_doc.doctype == 'Payment Entry':
@@ -947,8 +947,8 @@ class Einvoice:
         if self.sales_invoice_doc.doctype != 'Payment Entry':
             rounding_adjustment = self.sales_invoice_doc.rounding_adjustment
 
-        self.result['invoice']['payable_amount'] = self.result['invoice']['grand_total'] + rounding_adjustment
-        self.result['invoice']['rounding_adjustment'] = rounding_adjustment
+        self.result['invoice']['payable_amount'] = abs(self.result['invoice']['grand_total'] + rounding_adjustment)
+        self.result['invoice']['rounding_adjustment'] = abs(rounding_adjustment)
 
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             return

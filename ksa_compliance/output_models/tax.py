@@ -146,7 +146,7 @@ def create_allowance_charge(doc: SalesInvoice | PaymentEntry, tax_total: frappe.
             charge_indicator='false',
             allowance_charge_reason=discount_reason,
             allowance_charge_reason_code=discount_reason_code,
-            amount=row.total_discount,
+            amount=abs(row.total_discount),
         )
         allowance_charges.append(dataclass_to_frappe_dict(allowance_charge))
     return allowance_charges
