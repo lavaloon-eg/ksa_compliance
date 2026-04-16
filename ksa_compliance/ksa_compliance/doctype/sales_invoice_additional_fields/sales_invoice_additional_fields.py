@@ -571,15 +571,20 @@ class SalesInvoiceAdditionalFields(Document):
             msg = _('Please set Address Line 1 for customer address.')
             msg_list.append(msg)
 
-        if not address.get('custom_building_number') or len(address.get('custom_building_number')) != 4:
-            msg = _('Please make sure that building number is set and is 4 digits exactly in customer address.')
+        building_number: str | None = address.get('custom_building_number')
+        if not building_number:
+            msg = _('Please set a building number for customer address.')
+            msg_list.append(msg)
+
+        if address.country == 'Saudi Arabia' and building_number and len(building_number) != 4:
+            msg = _('Please make sure that building number is 4 digits exactly in customer address.')
             msg_list.append(msg)
 
         if not address.city:
             msg = _('Please set city for customer address.')
             msg_list.append(msg)
 
-        if not address.pincode or len(address.pincode) != 5:
+        if address.country == 'Saudi Arabia' and (not address.pincode or len(address.pincode) != 5):
             msg = _('Please make sure that postal code is set and is 5 digits exactly in customer address.')
             msg_list.append(msg)
 

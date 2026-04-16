@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Relax address validation for addresses outside Saudi Arabia
+  * Building number does not have to be 4 digits
+  * Postal code is not required, and does not have to be 5 digits
+
 ## 0.61.0
 
 * Add `KSA Compliance Premium` announcement in ZATCA workspace and relevant doctypes.
