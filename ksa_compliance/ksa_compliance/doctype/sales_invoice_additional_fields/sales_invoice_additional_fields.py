@@ -185,7 +185,7 @@ class SalesInvoiceAdditionalFields(Document):
 
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice, self.invoice_doctype)
         if not settings:
-            frappe.throw(f'Missing ZATCA business settings for sales invoice: {self.sales_invoice}')
+            fthrow(f'Missing ZATCA business settings for sales invoice: {self.sales_invoice}')
 
         sales_invoice = cast(
             SalesInvoice | POSInvoice | PaymentEntry, frappe.get_doc(self.invoice_doctype, self.sales_invoice)
@@ -273,7 +273,7 @@ class SalesInvoiceAdditionalFields(Document):
                         reference_doctype=self.invoice_doctype,
                         reference_name=self.sales_invoice,
                     )
-                    frappe.throw(title=ft('ZATCA Validation Error'), msg=html_message)
+                    fthrow(title=ft('ZATCA Validation Error'), msg=html_message)
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
@@ -559,7 +559,7 @@ class SalesInvoiceAdditionalFields(Document):
             return 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode('utf-8')
 
     def before_cancel(self) -> None:
-        frappe.throw(
+        fthrow(
             msg=_('You cannot cancel sales invoice according to ZATCA Regulations.'),
             title=_('This Action Is Not Allowed'),
         )
@@ -620,10 +620,10 @@ def fix_rejection(id: str):
 
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     if siaf.precomputed_invoice:
-        frappe.throw(ft('Cannot fix rejection for a precomputed invoice from Desk'))
+        fthrow(ft('Cannot fix rejection for a precomputed invoice from Desk'))
 
     if not siaf.is_latest:
-        frappe.throw(
+        fthrow(
             ft(
                 'This is not the latest Sales Invoice Additional Fields for invoice $invoice. Please fix '
                 'rejection from the latest',
@@ -633,7 +633,7 @@ def fix_rejection(id: str):
 
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     if not settings:
-        frappe.throw(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
+        fthrow(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
 
     new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     new_siaf.insert()
