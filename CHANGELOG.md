@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.1
+
 * Relax address validation for addresses outside Saudi Arabia
   * Building number does not have to be 4 digits
   * Postal code is not required, and does not have to be 5 digits
