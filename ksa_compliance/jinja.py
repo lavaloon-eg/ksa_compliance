@@ -5,14 +5,14 @@ from base64 import b64encode
 from io import BytesIO
 from typing import cast, TypedDict, Iterable, Callable, TypeVar, Optional
 
-import frappe
 import pyqrcode
+from semantic_version import Version
+
+import frappe
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.setup.doctype.branch.branch import Branch
 from frappe.utils.data import get_time, getdate
-from semantic_version import Version
-
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_phase_1_business_settings.zatca_phase_1_business_settings import (
     ZATCAPhase1BusinessSettings,
