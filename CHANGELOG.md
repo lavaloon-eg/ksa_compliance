@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix sales invoice custom list view settings overriding the standard listview setting causing not showing the status field value correctly in listview.
+
 ## 0.61.1
 
 * Relax address validation for addresses outside Saudi Arabia
