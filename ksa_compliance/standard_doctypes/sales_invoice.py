@@ -134,6 +134,49 @@ def validate_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
             )
             valid = False
 
+        # BR-KSA-56: credit / debit notes must reference an original invoice.
+        # Without this, ZATCA rejects the XML *after* docstatus=1 is committed,
+        # leaving the invoice stuck submitted with no Sales Invoice Additional
+        # Fields row. Block at validate time so the doc stays Draft.
+        if self.is_return or self.is_debit_note:
+            has_direct = bool(self.return_against)
+            addl_rows = self.get('custom_return_against_additional_references') or []
+            has_addl = any(r.sales_invoice for r in addl_rows)
+            if not has_direct and not has_addl:
+                frappe.msgprint(
+                    msg=_(
+                        'Please select the original invoice this return is for. '
+                        'Use <b>Return Against</b> at the top of the form, or add a row '
+                        'in <b>Return Against Additional References</b>. '
+                        'If there is no original invoice (e.g. warranty replacement) '
+                        'do not issue a Credit Note — use a Stock Entry instead.'
+                    ),
+                    title=_('Original invoice is missing'),
+                    indicator='red',
+                )
+                valid = False
+            else:
+                refs = []
+                if has_direct:
+                    refs.append(self.return_against)
+                refs.extend(r.sales_invoice for r in addl_rows if r.sales_invoice)
+                for ref in refs:
+                    ds = frappe.db.get_value('Sales Invoice', ref, 'docstatus')
+                    if ds is None:
+                        frappe.msgprint(
+                            msg=_('Referenced invoice <b>{0}</b> does not exist.').format(ref),
+                            title=_('Invalid reference'),
+                            indicator='red',
+                        )
+                        valid = False
+                    elif ds != 1:
+                        frappe.msgprint(
+                            msg=_('Referenced invoice <b>{0}</b> is still a draft. Submit it first.').format(ref),
+                            title=_('Invalid reference'),
+                            indicator='red',
+                        )
+                        valid = False
+
     if is_phase_2_enabled_for_company:
         settings = ZATCABusinessSettings.for_company(self.company)
         if settings.type_of_business_transactions == 'Standard Tax Invoices':
