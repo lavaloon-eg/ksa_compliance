@@ -124,7 +124,7 @@ def _get_amounts(tax_category: TaxCategoryByItems) -> frappe._dict:
         tax_amount += row.tax_amount
         total_discount += row.amount - row.net_amount
     amounts.taxable_amount = taxable_amount
-    amounts.tax_amount = tax_amount
+    amounts.tax_amount = taxable_amount * tax_category.tax_category.percent / 100
     amounts.total_discount = total_discount
 
     return amounts
