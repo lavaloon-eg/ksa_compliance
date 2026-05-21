@@ -16,7 +16,6 @@ frappe.ui.form.on("ZATCA Business Settings", {
         frm.add_custom_button(__("Submit Feedback"), () => {
             ksa_compliance.feedback_dialog.show_feedback_dialog(__("Submit Feedback"), frm.doc.company);
         });
-        ksa_compliance.premium_announcement.set_announcement_intro(frm)
     },
     company: function (frm) {
         filter_company_address(frm);

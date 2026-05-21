@@ -18,7 +18,6 @@ frappe.ui.form.on('Sales Invoice', {
     async refresh(frm) {
         await set_zatca_integration_status(frm)
         await set_zatca_discount_reason(frm)
-        ksa_compliance.premium_announcement.set_announcement_intro(frm)
     },
 })
 

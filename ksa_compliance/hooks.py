@@ -28,7 +28,7 @@ app_include_js = 'ksa_compliance.bundle.js'
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-doctype_list_js = {'Sales Invoice': 'public/js/sales_invoice_list.js'}
+# doctype_list_js = {"doctype": "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -37,7 +37,6 @@ doctype_js = {
     'Branch': 'public/js/branch.js',
     'Sales Invoice': 'public/js/sales_invoice.js',
     'Payment Entry': 'public/js/payment_entry.js',
-    'Company': 'public/js/company.js',
 }
 
 # Svg Icons

@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.3
+
+* Remove `KSA Compliance Premium Announcement` popup and banners.
+
 ## 0.61.2
 
 * Fix sales invoice custom list view settings overriding the standard listview setting causing not showing the status field value correctly in listview.
