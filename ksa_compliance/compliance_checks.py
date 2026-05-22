@@ -216,7 +216,15 @@ def _perform_compliance_for_invoice_type(
     credit_note_result, credit_note_details = _check_invoice_compliance(return_invoice)
     progress += progress_per_step
 
-    frappe.db.rollback(save_point='before_credit_note')
+    try:
+        frappe.db.rollback(save_point='before_credit_note')
+    except Exception:
+        # Savepoint was released by an implicit commit during credit note submission.
+        # Create a fresh invoice for the debit note since the original already has a return.
+        invoice = _make_invoice(settings.company, customer_id, item_id, tax_category_id)
+        invoice.save()
+        ignore_additional_fields_for_invoice(invoice.name)
+        invoice.submit()
     _report_progress(ft('Creating $type debit note', type=invoice_type), progress)
     debit_invoice = cast(SalesInvoice, make_sales_return(invoice.name))
     debit_invoice.custom_return_reason = 'Goods returned'
@@ -260,9 +268,16 @@ def _make_invoice(company: str, customer: str, item: str, tax_category_id: str) 
     invoice.company = company
     invoice.customer = customer
     invoice.tax_category = tax_category_id
+    invoice.update_stock = 0
+    invoice.is_pos = 0
+    invoice.conversion_rate = 1
+    invoice.plc_conversion_rate = 1
+    invoice.currency = frappe.get_cached_value('Company', company, 'default_currency')
+    invoice.debit_to = frappe.get_cached_value('Company', company, 'default_receivable_account')
     invoice.set_taxes()
     invoice.append('items', {'item_code': item, 'qty': 1.0})
     invoice.set_missing_values()
+    invoice.flags.ignore_permissions = True
     invoice.save()
     return invoice
 
