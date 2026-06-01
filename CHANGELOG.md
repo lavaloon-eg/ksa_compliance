@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix migration failure due to a reference to a non-existent patch in patches.txt
+
 ## 0.61.3
 
 * Remove `KSA Compliance Premium Announcement` popup and banners.
