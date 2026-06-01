@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.4
+
 * Fix migration failure due to a reference to a non-existent patch in patches.txt
 
 ## 0.61.3
