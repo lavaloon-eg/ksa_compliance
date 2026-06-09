@@ -149,12 +149,14 @@ class Einvoice:
         )
 
         # Allowance on invoice should be only the document level allowance without items allowances.
-        self.get_float_value(
-            field_name='discount_amount',
-            source_doc=self.sales_invoice_doc,
-            xml_name='allowance_total_amount',
-            parent='invoice',
-        )
+        # Note: allowance_total_amount is now calculated from actual allowance_charge list (see get_e_invoice_details)
+        # to ensure BR-CO-11 compliance (sum of allowances must match AllowanceTotalAmount exactly)
+        # self.get_float_value(
+        #     field_name='discount_amount',
+        #     source_doc=self.sales_invoice_doc,
+        #     xml_name='allowance_total_amount',
+        #     parent='invoice',
+        # )
         # self.compute_invoice_discount_amount()
         self.get_e_invoice_details(invoice_type)
 
@@ -887,23 +889,22 @@ class Einvoice:
         # --------------------------- END Invoice Basic info ------------------------------
         # --------------------------- Start Getting Invoice's item lines ------------------------------
         item_lines = []
-        if not self.sales_invoice_doc.taxes:
-            fthrow(
-                ft(
-                    'Invoice $name does not have any taxes. Please make sure you have configured a default sales taxes and charges template',
-                    name=self.sales_invoice_doc.name,
-                )
-            )
-
-        is_tax_included = self.sales_invoice_doc.taxes[0].get(
-            get_right_fieldname('included_in_print_rate', self.sales_invoice_doc.doctype)
-        )
+        taxes_table = self.sales_invoice_doc.get('taxes') or []
+        included_field = get_right_fieldname('included_in_print_rate', self.sales_invoice_doc.doctype)
+        if taxes_table:
+            is_tax_included = taxes_table[0].get(included_field)
+        else:
+            # No Sales Taxes and Charges rows: nothing to read "included in print rate" from.
+            # Treat as tax-exclusive line amounts (same as a missing / falsy flag).
+            is_tax_included = False
         self.append_to_item_lines(item_lines, is_tax_included, self.sales_invoice_doc)
         tax_categories = create_tax_categories(self.sales_invoice_doc, item_lines, is_tax_included)
         tax_total = create_tax_total(tax_categories)
         self.result['invoice']['tax_total'] = tax_total
         allowance_charge = create_allowance_charge(self.sales_invoice_doc, tax_total)
         self.result['invoice']['allowance_charge'] = allowance_charge
+        # Calculate allowance_total_amount as sum of all allowance charges to ensure BR-CO-11 compliance
+        self.result['invoice']['allowance_total_amount'] = sum(ac.get('amount', 0) for ac in allowance_charge)
 
         # Add invoice total taxes and charges percentage field
         self.result['invoice']['total_taxes_and_charges_percent'] = sum(
@@ -923,7 +924,8 @@ class Einvoice:
 
         self.result['invoice']['item_lines'] = item_lines
         self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
-        self.compute_invoice_discount_amount()
+        # Note: allowance_total_amount is now set from allowance_charge list above to ensure BR-CO-11 compliance
+        # self.compute_invoice_discount_amount()
         self.result['invoice']['net_total'] = (
             self.result['invoice']['line_extension_amount'] - self.result['invoice']['allowance_total_amount']
         )
