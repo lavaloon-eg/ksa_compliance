@@ -164,6 +164,23 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_qr = precomputed_invoice.invoice_qr
         self.invoice_xml = precomputed_invoice.invoice_xml
 
+    def autoname(self):
+        """Set invoice_counter before naming so {invoice_counter} in the SIAF name is correct."""
+        if self.precomputed:
+            return
+
+        settings = ZATCABusinessSettings.for_invoice(self.sales_invoice, self.invoice_doctype)
+        if not settings:
+            return
+
+        pre_invoice_counter = frappe.db.get_value(
+            'ZATCA Invoice Counting Settings',
+            {'business_settings_reference': settings.name},
+            'invoice_counter',
+        )
+        if pre_invoice_counter is not None:
+            self.invoice_counter = pre_invoice_counter + 1
+
     def before_insert(self):
         self.integration_status = 'Ready For Batch'
         self.is_latest = True
@@ -205,7 +222,9 @@ class SalesInvoiceAdditionalFields(Document):
             for_update=True,
         )[0]
 
-        self.invoice_counter = pre_invoice_counter + 1
+        # invoice_counter is set in autoname() for document naming; backfill only if still empty
+        if not self.invoice_counter:
+            self.invoice_counter = pre_invoice_counter + 1
         self.previous_invoice_hash = pre_invoice_hash
 
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
