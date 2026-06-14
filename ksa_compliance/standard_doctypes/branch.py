@@ -10,6 +10,14 @@ def validate_branch(doc, method):
 
 
 def validate_mandatory_crn(doc):
+    """Validate CRN when present on a branch.
+
+    When branch configuration is enabled, branches may optionally specify their own CRN
+    via ``custom_branch_ids``. If a branch does not have a CRN, invoices for that branch
+    will fall back to the seller IDs from ZATCA Business Settings. This supports the
+    common scenario where most branches share the company's main Commercial Registration
+    while only specific branches operate under a different one.
+    """
     if (
         doc.custom_branch_ids
         and doc.custom_company
