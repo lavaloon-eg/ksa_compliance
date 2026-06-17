@@ -672,6 +672,11 @@ def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
 
 
 def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
+    current_modified = frappe.db.get_value('Sales Invoice Additional Fields', doc.name, 'modified')
+    if current_modified and str(current_modified) != str(doc.modified):
+        logger.info(f'Reloading {doc.name} because it was modified after enqueue')
+        doc.reload()
+
     logger.info(f'Submitting {doc.name}')
     result = doc.submit_to_zatca()
     message = result.ok_value if is_ok(result) else result.err_value
