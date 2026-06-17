@@ -314,8 +314,10 @@ class SalesInvoiceAdditionalFields(Document):
             signed_xml, self.invoice_hash, invoice_type, settings.fatoora_server_url, token, secret
         )
 
-        # Regardless of what happened, save the side effects of the API call
-        self.save()
+        # Regardless of what happened, save the side effects of the API call.
+        # Background jobs run as the invoice submitter; they often lack Write/Submit
+        # on this DocType while still being allowed to post Sales Invoice.
+        self.save(ignore_permissions=True)
 
         # Resend means we keep ourselves as draft to be picked up by the next run of the background job
         if integration_status == 'Resend':
@@ -326,6 +328,9 @@ class SalesInvoiceAdditionalFields(Document):
         else:
             # Any case other than resend is submitted
             self.allow_submit = 1
+            # Document.submit() takes no kwargs in this Frappe version; use flags
+            # so the inner save() skips permission checks (same as save(ignore_permissions=True)).
+            self.flags.ignore_permissions = True
             self.submit()
 
         return Ok(f'Invoice sent to ZATCA. Integration status: {integration_status}')
@@ -632,7 +637,7 @@ def fix_rejection(id: str):
         fthrow(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
 
     new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
-    new_siaf.insert()
+    new_siaf.insert(ignore_permissions=True)
 
     if settings.is_live_sync:
         frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=new_siaf, enqueue_after_commit=True)
