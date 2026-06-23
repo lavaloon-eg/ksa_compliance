@@ -8,6 +8,15 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.5
+
+Contributed by [abdopcnet](https://github.com/abdopcnet)
+* Ignore permissions consistently when saving or submitting `Sales Invoice Additional Fields` documents.
+  This doctype is not meant to be handled by users, and there were a few instances were we relied on a
+  previously set flag to ignore permissions that made the code unclear
+* Reload `Sales Invoice Additional Fields` in live mode if it's been modified after queuing, e.g. due to
+  a hook.
+
 ## 0.61.4
 
 * Fix migration failure due to a reference to a non-existent patch in patches.txt
