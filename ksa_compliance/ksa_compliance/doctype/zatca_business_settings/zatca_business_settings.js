@@ -252,7 +252,7 @@ function add_other_ids_if_new(frm) {
 }
 
 function add_revoke_button(frm) {
-    frm.add_custom_button("Revoke", async () => {
+    frm.add_custom_button(__("Revoke"), async () => {
         frappe.confirm(
             __("Are you sure you want to revoke this Business Settings and CSID? This cannot be undone."),
             () => {
@@ -272,7 +272,7 @@ function add_revoke_button(frm) {
 }
 
 function add_create_business_settings_button(frm) {
-    frm.add_custom_button("Create New Business Settings", () => {
+    frm.add_custom_button(__("Create New Business Settings"), () => {
         frappe.model.open_mapped_doc({
             method: "ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings.create_business_settings",
             frm: cur_frm,
