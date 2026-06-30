@@ -8,6 +8,14 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Improve compliance checks
+  * If branch configuration is enabled, we now require the user to select a branch when performing the compliance
+    check, to be able to create invoices. Previously, we required users to disable branch configuration, perform 
+    compliance, then re-enable it.
+  * We now explicitly set the invoice currency to the company currency, in case the default currency (e.g. in Global 
+    Defaults) is something other than SAR
+  * Automatically fix country code to use upper-case in `ZATCA Business Settings` on save
+
 ## 0.61.5
 
 Contributed by [abdopcnet](https://github.com/abdopcnet)
