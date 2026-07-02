@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits
+
 ## 0.61.5
 
 Contributed by [abdopcnet](https://github.com/abdopcnet)
