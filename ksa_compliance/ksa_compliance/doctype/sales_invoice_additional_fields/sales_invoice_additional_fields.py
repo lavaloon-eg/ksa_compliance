@@ -27,6 +27,7 @@ from result import is_err, Result, Err, Ok, is_ok
 
 from ksa_compliance import SALES_INVOICE_CODE, DEBIT_NOTE_CODE, CREDIT_NOTE_CODE, PREPAYMENT_INVOICE_CODE
 from ksa_compliance import logger
+from ksa_compliance.zatca_live_sync import get_live_zatca_submit_job_id
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
 from ksa_compliance.generate_xml import generate_xml_file
@@ -640,7 +641,12 @@ def fix_rejection(id: str):
     new_siaf.insert(ignore_permissions=True)
 
     if settings.is_live_sync:
-        frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=new_siaf, enqueue_after_commit=True)
+        frappe.utils.background_jobs.enqueue(
+            _submit_additional_fields,
+            doc=new_siaf,
+            enqueue_after_commit=True,
+            job_id=get_live_zatca_submit_job_id(new_siaf.name),
+        )
 
     frappe.msgprint(ft('Created $link', link=get_link_to_form('Sales Invoice Additional Fields', new_siaf.name)))
 

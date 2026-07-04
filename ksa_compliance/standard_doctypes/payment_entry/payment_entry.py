@@ -9,6 +9,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 
 
 from ksa_compliance import logger
+from ksa_compliance.zatca_live_sync import get_live_zatca_submit_job_id
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
 
@@ -66,7 +67,10 @@ def create_prepayment_invoice_additional_fields_doctype(self: PaymentEntry, meth
         # We're running in the context of invoice submission (on_submit hook). We only want to run our ZATCA logic if
         # the invoice submits successfully after on_submit is run successfully from all apps.
         frappe.utils.background_jobs.enqueue(
-            _submit_additional_fields, doc=prepayment_additional_fields_doc, enqueue_after_commit=True
+            _submit_additional_fields,
+            doc=prepayment_additional_fields_doc,
+            enqueue_after_commit=True,
+            job_id=get_live_zatca_submit_job_id(prepayment_additional_fields_doc.name),
         )
 
 
