@@ -181,24 +181,22 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "Zatca Integration Details",
    "link_count": 0,
    "link_to": "Zatca Integration Details",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Sales Invoice",
    "type": "Link"
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "Zatca Integration Summary",
    "link_count": 0,
    "link_to": "Zatca Integration Summary",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Sales Invoice",
    "type": "Link"
   }
  ],
