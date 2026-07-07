@@ -9,6 +9,10 @@ to a section with the version name.
 ## Unreleased Changes
 
 * Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits
+* Use JavaScript (`mandatory_depends_on`) to make ZATCA payment means code field in `Mode of Payment` mandatory only in
+  the form editor
+  * This makes it non-mandatory to programmatic manipulation (e.g. creating it by code directly or through companies).
+    This fixes errors that used to happen when creating a company or running tests.
 
 ## 0.61.5
 
