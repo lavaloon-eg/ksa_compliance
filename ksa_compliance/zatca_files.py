@@ -8,8 +8,11 @@ def get_zatca_tool_path(relative_path: str = '.') -> str:
     Returns the path to use for a ZATCA tools (CLI or JRE). We want these files to
     persist across frappe cloud updates but exclude them from backup, so we use the site directory. Previously, we used
     'sites', which was cleaned up after updates so users had to onboard after every update.
+
+    We always return an absolute path so that external processes (e.g. the ZATCA CLI subprocess) resolve it correctly
+    regardless of their working directory.
     """
-    return frappe.get_site_path(os.path.normpath(os.path.join('zatca-tools', relative_path)))
+    return os.path.abspath(frappe.get_site_path(os.path.normpath(os.path.join('zatca-tools', relative_path))))
 
 
 def get_zatca_file_path(relative_path: str = '.') -> str:
@@ -17,8 +20,11 @@ def get_zatca_file_path(relative_path: str = '.') -> str:
     Returns the path to use for a ZATCA file (certificate, key, etc.). We want these files to
     persist across frappe cloud updates but exclude them from backup, so we use the site directory. Previously, we used
     'sites', which was cleaned up after updates so users had to onboard after every update.
+
+    We always return an absolute path so that external processes (e.g. the ZATCA CLI subprocess) resolve it correctly
+    regardless of their working directory.
     """
-    return frappe.get_site_path(os.path.normpath(os.path.join('zatca-files', relative_path)))
+    return os.path.abspath(frappe.get_site_path(os.path.normpath(os.path.join('zatca-files', relative_path))))
 
 
 def get_sandbox_private_key_path():
