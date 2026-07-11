@@ -49,11 +49,11 @@ def _reason_to_code_and_arabic(reason: str, input_reason: Optional[str] = None) 
     reasons = {
         'Financial services mentioned in Article 29 of the VAT Regulations': {
             'reason_code': 'VATEX-SA-29',
-            'arabic_reason': 'عقد تأمين على الحياة',
+            'arabic_reason': 'الخدمات المالية',
         },
         'Life insurance services mentioned in Article 29 of the VAT Regulations': {
             'reason_code': 'VATEX-SA-29-7',
-            'arabic_reason': 'الخدمات المالية',
+            'arabic_reason': 'عقد تأمين على الحياة',
         },
         'Real estate transactions mentioned in Article 30 of the VAT Regulations': {
             'reason_code': 'VATEX-SA-30',

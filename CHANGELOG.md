@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix swapped Arabic exemption-reason texts for VATEX-SA-29 (Financial services) and VATEX-SA-29-7
+  (Life insurance services), verified against the ZATCA Electronic Invoice XML Implementation Standard
+  v1.2 (2023-05-19)
+
 ## 0.61.7
 
 Contributed by [Saleh](https://github.com/HotSalsa10)
