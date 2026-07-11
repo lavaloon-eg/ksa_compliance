@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Notify System Managers (Error Log + desk notification) when Sales Invoice Additional Fields have
+  been waiting to sync with ZATCA for longer than 6 hours. Runs hourly, independently of the sync
+  job itself, so it still fires when the sync queue is stuck. Closes #332
+* Fix `add_batch_to_background_queue`'s `check_date` default being evaluated once at import time
+  instead of on each call
+
 ## 0.61.6
 
 * Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits

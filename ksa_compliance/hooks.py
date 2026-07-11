@@ -164,7 +164,10 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {'hourly_long': ['ksa_compliance.background_jobs.sync_e_invoices']}
+scheduler_events = {
+    'hourly': ['ksa_compliance.background_jobs.notify_stuck_invoices'],
+    'hourly_long': ['ksa_compliance.background_jobs.sync_e_invoices'],
+}
 # "all": [
 # "ksa_compliance.tasks.all"
 # ],
