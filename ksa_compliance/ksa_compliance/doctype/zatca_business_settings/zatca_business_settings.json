@@ -57,6 +57,7 @@
   "configuration_section",
   "validate_generated_xml",
   "block_invoice_on_invalid_xml",
+  "customer_name_field",
   "column_break_cjdg",
   "fatoora_server",
   "onboarding_section",
@@ -479,6 +480,12 @@
    "fieldname": "block_invoice_on_invalid_xml",
    "fieldtype": "Check",
    "label": "Block Invoice on Invalid XML"
+  },
+  {
+   "description": "Optional fieldname on Customer to use as the buyer's registration name in the ZATCA XML instead of Customer Name (e.g. an Arabic legal name custom field). Falls back to Customer Name if left empty, or if the customer's value in this field is empty.",
+   "fieldname": "customer_name_field",
+   "fieldtype": "Data",
+   "label": "Customer Name Field for XML"
   },
   {
    "default": "0",

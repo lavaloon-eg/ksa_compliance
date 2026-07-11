@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add an optional "Customer Name Field for XML" setting to `ZATCA Business Settings`. When set to a
+  Customer fieldname (e.g. an Arabic legal name custom field) and populated on the buyer, that value is
+  used as the buyer's `RegistrationName` in the ZATCA XML instead of Customer Name. Falls back to
+  Customer Name if left unset or empty for a given customer. Works for Sales Invoice, POS Invoice, and
+  prepayment Payment Entries. Closes #313.
+
 ## 0.61.6
 
 * Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits
