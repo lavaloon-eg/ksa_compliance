@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add a timeout to the ZATCA CLI signing subprocess, and clean up the temp files it uses (invoice XML,
+  signed XML, CSR config, PDF/A-3b conversion inputs/outputs). Previously a hung CLI process could
+  block indefinitely while holding the invoice counter lock, stalling invoice creation for the whole
+  company; temp files were also never deleted and used a deprecated, insecure creation API
+  (`tempfile.mktemp`)
+
 ## 0.61.6
 
 * Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits

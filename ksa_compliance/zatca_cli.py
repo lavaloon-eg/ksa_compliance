@@ -23,6 +23,7 @@ from ksa_compliance.zatca_files import get_csr_path, get_private_key_path, get_z
 DEFAULT_CLI_VERSION = '2.10.0'
 DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
 DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
+ZATCA_CLI_TIMEOUT_SECONDS = 60
 
 
 @dataclass
@@ -208,17 +209,20 @@ def generate_csr(
     Generates a CSR. The given prefix is used to name the resulting CSR and private key files.
     """
     config_path = write_temp_file(config, f'{file_prefix}-csr.properties')
-    csr_path = get_csr_path(file_prefix)
-    private_key_path = get_private_key_path(file_prefix)
-    args = ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path]
-    if simulation:
-        args.append('-s')
-    result = run_command(zatca_cli_path, args, java_home=java_home)
-    logger.info(result.msg)
-    result.throw_if_failure()
-    with open(csr_path, 'rt') as file:
-        csr = file.read()
-    return CsrResult(csr, csr_path, private_key_path)
+    try:
+        csr_path = get_csr_path(file_prefix)
+        private_key_path = get_private_key_path(file_prefix)
+        args = ['csr', '-c', config_path, '-o', csr_path, '-k', private_key_path]
+        if simulation:
+            args.append('-s')
+        result = run_command(zatca_cli_path, args, java_home=java_home)
+        logger.info(result.msg)
+        result.throw_if_failure()
+        with open(csr_path, 'rt') as file:
+            csr = file.read()
+        return CsrResult(csr, csr_path, private_key_path)
+    finally:
+        remove_temp_file(config_path)
 
 
 def sign_invoice(
@@ -226,17 +230,37 @@ def sign_invoice(
 ) -> SigningResult:
     base_path = os.path.normpath(os.path.join(os.path.dirname(zatca_cli_path), '../'))
     invoice_path = write_temp_file(invoice_xml, 'invoice.xml')
-    signed_invoice_path = get_temp_path('signed_invoice.xml')
-    result = run_command(
-        zatca_cli_path,
-        ['sign', '-b', base_path, '-o', signed_invoice_path, '-c', cert_path, '-k', private_key_path, invoice_path],
-        java_home=java_home,
-    )
-    logger.info(result.msg)
-    result.throw_if_failure()
-    with open(signed_invoice_path, 'rt') as file:
-        signed_invoice = file.read()
-    return SigningResult(signed_invoice, signed_invoice_path, result.data['hash'], result.data['qrCode'])
+    # The CLI itself creates signed_invoice_path (via -o), not us, so we only reserve a securely-random
+    # name for it rather than pre-creating the file - see reserve_temp_path's docstring. It's returned
+    # to the caller (still needed for validate_invoice), so cleanup is the caller's responsibility.
+    signed_invoice_path = reserve_temp_path('signed_invoice.xml')
+    try:
+        result = run_command(
+            zatca_cli_path,
+            [
+                'sign',
+                '-b',
+                base_path,
+                '-o',
+                signed_invoice_path,
+                '-c',
+                cert_path,
+                '-k',
+                private_key_path,
+                invoice_path,
+            ],
+            java_home=java_home,
+        )
+        logger.info(result.msg)
+        result.throw_if_failure()
+        with open(signed_invoice_path, 'rt') as file:
+            signed_invoice = file.read()
+        return SigningResult(signed_invoice, signed_invoice_path, result.data['hash'], result.data['qrCode'])
+    except Exception:
+        remove_temp_file(signed_invoice_path)
+        raise
+    finally:
+        remove_temp_file(invoice_path)
 
 
 def validate_invoice(
@@ -274,7 +298,13 @@ def run_command(zatca_cli_path: str, args: List[str], java_home: Optional[str]) 
     if java_home:
         env['JAVA_HOME'] = java_home
     logger.info(f'Running: {full_args}')
-    proc = subprocess.run(full_args, capture_output=True, env=env)
+    try:
+        proc = subprocess.run(full_args, capture_output=True, env=env, timeout=ZATCA_CLI_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        message = f'ZATCA CLI did not respond within {ZATCA_CLI_TIMEOUT_SECONDS} seconds'
+        logger.error(message)
+        return ZatcaResult(is_success=False, msg=message, errors=[message], data=None)
+
     try:
         result = cast(dict, json.loads(proc.stdout))
     except JSONDecodeError:
@@ -304,7 +334,36 @@ def write_binary_temp_file(content: bytes, name: str) -> str:
 
 
 def get_temp_path(name: str) -> str:
-    return tempfile.mktemp(suffix='-' + name)
+    """Reserves a unique path for a temp file that we write ourselves (write_temp_file /
+    write_binary_temp_file open and overwrite it immediately after). Uses tempfile.mkstemp, which
+    creates the file atomically with owner-only (0600) permissions, instead of tempfile.mktemp, which
+    only returns a name - a documented race condition (TOCTOU) between generating the name and
+    creating the file, and no permission guarantee once created via a plain open()."""
+    fd, path = tempfile.mkstemp(suffix='-' + name)
+    os.close(fd)
+    return path
+
+
+def reserve_temp_path(name: str) -> str:
+    """Reserves a securely-random, unique-at-reservation-time path for a file that a subprocess (not
+    us) will create - e.g. the ZATCA CLI's signed-invoice output. We can't pre-create the file the way
+    get_temp_path does here: invoice signing is handled by a closed-source SDK inside the CLI, so we
+    can't confirm it overwrites a pre-existing file rather than erroring on one. Using mkstemp then
+    immediately removing it still gets a cryptographically-unpredictable name (unlike the mktemp() this
+    replaces), even though a narrow creation race remains inherent to handing a path to another
+    process to create."""
+    fd, path = tempfile.mkstemp(suffix='-' + name)
+    os.close(fd)
+    os.remove(path)
+    return path
+
+
+def remove_temp_file(path: str) -> None:
+    """Best-effort removal of a temp file we're done with; a missing file is not an error"""
+    try:
+        os.remove(path)
+    except OSError:
+        pass
 
 
 def convert_to_pdf_a3_b(
@@ -313,11 +372,15 @@ def convert_to_pdf_a3_b(
     pdf = write_binary_temp_file(pdf_content, f'{invoice_id}.pdf')
     invoice_xml = write_temp_file(xml_content, f'{invoice_id}.xml')
 
-    result = run_command(
-        zatca_cli_path,
-        ['convert-pdf', '-i', invoice_id, '-x', invoice_xml, pdf],
-        java_home=java_home,
-    )
-    logger.info(result.msg)
-    result.throw_if_failure()
-    return result.data['filePath']
+    try:
+        result = run_command(
+            zatca_cli_path,
+            ['convert-pdf', '-i', invoice_id, '-x', invoice_xml, pdf],
+            java_home=java_home,
+        )
+        logger.info(result.msg)
+        result.throw_if_failure()
+        return result.data['filePath']
+    finally:
+        remove_temp_file(pdf)
+        remove_temp_file(invoice_xml)
