@@ -13,6 +13,11 @@ from result import Result, Ok, Err
 
 from ksa_compliance import logger
 
+# Timeout (in seconds) for HTTP calls to the ZATCA API. Without this, a hung connection to the Fatoora
+# gateway blocks forever, stalling the batch sync job (and everything queued behind it) or a live-mode
+# worker indefinitely.
+ZATCA_API_TIMEOUT_SECONDS = 30
+
 
 class ZatcaSendMode(Enum):
     """Mode used for sending invoice XML to ZATCA. Compliance is for passing compliance checks. Production is regular
@@ -230,7 +235,7 @@ def api_call(
 
     response: Response | None = None
     try:
-        response = requests.post(url, headers=final_headers, json=body, auth=auth)
+        response = requests.post(url, headers=final_headers, json=body, auth=auth, timeout=ZATCA_API_TIMEOUT_SECONDS)
         response.raise_for_status()
         return Ok(result_builder(response.json(), response.text)), response.status_code
     except HTTPError as e:
