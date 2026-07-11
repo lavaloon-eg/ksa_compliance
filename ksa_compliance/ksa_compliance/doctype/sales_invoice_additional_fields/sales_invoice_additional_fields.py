@@ -216,55 +216,58 @@ class SalesInvoiceAdditionalFields(Document):
             settings.zatca_cli_path, settings.java_home, invoice_xml, cert_path, settings.private_key_path
         )
 
-        if settings.validate_generated_xml and not self.is_compliance_mode:
-            validation_result = cli.validate_invoice(
-                settings.zatca_cli_path,
-                settings.java_home,
-                result.signed_invoice_path,
-                settings.cert_path,
-                self.previous_invoice_hash,
-            )
-            self.validation_messages = '\n'.join(validation_result.messages)
-            self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
-            if validation_result.details:
-                logger.info(f'Validation Errors: {validation_result.details.errors}')
-                logger.info(f'Validation Warnings: {validation_result.details.warnings}')
-
-                # In theory, we shouldn't have an invalid result without errors/warnings, but just in case an unknown
-                # error occurs that isn't captured
-                is_invalid = (
-                    (not validation_result.details.is_valid)
-                    or validation_result.details.errors
-                    or validation_result.details.warnings
+        try:
+            if settings.validate_generated_xml and not self.is_compliance_mode:
+                validation_result = cli.validate_invoice(
+                    settings.zatca_cli_path,
+                    settings.java_home,
+                    result.signed_invoice_path,
+                    settings.cert_path,
+                    self.previous_invoice_hash,
                 )
-                if settings.block_invoice_on_invalid_xml and is_invalid:
-                    html_message = ''
-                    text_message = ''
-                    if validation_result.details.errors:
-                        text_message += ft('Errors') + '\n'
-                        html_message += f'<h4>{ft("Errors")}</h4>'
-                        html_message += '<ul>'
-                        for code, error in validation_result.details.errors.items():
-                            html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>'
-                            text_message += f'{code}: {error}\n'
-                        html_message += '</ul>'
+                self.validation_messages = '\n'.join(validation_result.messages)
+                self.validation_errors = '\n'.join(validation_result.errors_and_warnings)
+                if validation_result.details:
+                    logger.info(f'Validation Errors: {validation_result.details.errors}')
+                    logger.info(f'Validation Warnings: {validation_result.details.warnings}')
 
-                    if validation_result.details.warnings:
-                        text_message += ft('Warnings') + '\n'
-                        html_message += f'<h4>{ft("Warnings")}</h4>'
-                        html_message += '<ul>'
-                        for code, warning in validation_result.details.warnings.items():
-                            html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>'
-                            text_message += f'{code}: {warning}\n'
-                        html_message += '</ul>'
-
-                    frappe.log_error(
-                        title=ft('ZATCA Validation Error'),
-                        message=text_message + '\n\n' + invoice_xml,
-                        reference_doctype=self.invoice_doctype,
-                        reference_name=self.sales_invoice,
+                    # In theory, we shouldn't have an invalid result without errors/warnings, but just in case an
+                    # unknown error occurs that isn't captured
+                    is_invalid = (
+                        (not validation_result.details.is_valid)
+                        or validation_result.details.errors
+                        or validation_result.details.warnings
                     )
-                    fthrow(title=ft('ZATCA Validation Error'), msg=html_message)
+                    if settings.block_invoice_on_invalid_xml and is_invalid:
+                        html_message = ''
+                        text_message = ''
+                        if validation_result.details.errors:
+                            text_message += ft('Errors') + '\n'
+                            html_message += f'<h4>{ft("Errors")}</h4>'
+                            html_message += '<ul>'
+                            for code, error in validation_result.details.errors.items():
+                                html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>'
+                                text_message += f'{code}: {error}\n'
+                            html_message += '</ul>'
+
+                        if validation_result.details.warnings:
+                            text_message += ft('Warnings') + '\n'
+                            html_message += f'<h4>{ft("Warnings")}</h4>'
+                            html_message += '<ul>'
+                            for code, warning in validation_result.details.warnings.items():
+                                html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>'
+                                text_message += f'{code}: {warning}\n'
+                            html_message += '</ul>'
+
+                        frappe.log_error(
+                            title=ft('ZATCA Validation Error'),
+                            message=text_message + '\n\n' + invoice_xml,
+                            reference_doctype=self.invoice_doctype,
+                            reference_name=self.sales_invoice,
+                        )
+                        fthrow(title=ft('ZATCA Validation Error'), msg=html_message)
+        finally:
+            cli.remove_temp_file(result.signed_invoice_path)
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
@@ -719,8 +722,11 @@ def download_zatca_pdf(id: str, print_format: str = 'ZATCA Phase 2 Print Format'
         settings.zatca_cli_path, settings.java_home, siaf.sales_invoice, pdf_file, xml_content
     )
 
-    with open(zatca_pdf_path, 'rb') as f:
-        pdf_content = f.read()
+    try:
+        with open(zatca_pdf_path, 'rb') as f:
+            pdf_content = f.read()
+    finally:
+        cli.remove_temp_file(zatca_pdf_path)
 
     frappe.response.filename = f'{siaf.sales_invoice}_a3b.pdf'
     frappe.response.filecontent = pdf_content
