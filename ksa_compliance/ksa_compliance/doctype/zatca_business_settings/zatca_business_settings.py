@@ -61,6 +61,7 @@ class ZATCABusinessSettings(Document):
         country_code: DF.Data | None
         csr: DF.SmallText | None
         currency: DF.Link
+        customer_name_field: DF.Data | None
         district: DF.Data | None
         enable_branch_configuration: DF.Check
         enable_zatca_integration: DF.Check
@@ -118,6 +119,16 @@ class ZATCABusinessSettings(Document):
             'NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=='
         )
         invoice_counting_doc.insert(ignore_permissions=True)
+
+    def validate(self):
+        if self.customer_name_field and not frappe.get_meta('Customer').has_field(self.customer_name_field):
+            fthrow(
+                ft(
+                    'Field $field does not exist on Customer. Please check the field name in '
+                    '"Customer Name Field for XML".',
+                    field=self.customer_name_field,
+                )
+            )
 
     def before_insert(self):
         if self.automatic_vat_account_configuration == 1:

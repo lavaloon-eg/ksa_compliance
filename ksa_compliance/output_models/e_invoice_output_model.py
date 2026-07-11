@@ -625,14 +625,37 @@ class Einvoice:
             parent='buyer_details',
         )
 
+        self._set_buyer_registration_name()
+
+        # --------------------------- END Buyer Details fields ------------------------------
+
+    def _set_buyer_registration_name(self):
+        """
+        Sets the buyer's XML registration name. If ZATCA Business Settings has a configured customer
+        name field (e.g. an Arabic legal name custom field), and the buyer's Customer has a non-empty
+        value for it, that value is used. Otherwise, falls back to the invoice's customer name, as
+        before. The lookup goes through the Customer doc (not the invoice's own name field) so
+        Payment Entry-based prepayment invoices get the same treatment as Sales/POS Invoices.
+        """
+        custom_field = self.business_settings_doc.customer_name_field
+        if custom_field:
+            customer_id = (
+                self.sales_invoice_doc.party
+                if self.sales_invoice_doc.doctype == 'Payment Entry'
+                else self.sales_invoice_doc.customer
+            )
+            custom_name = frappe.db.get_value('Customer', customer_id, custom_field)
+            custom_name = strip(custom_name) if isinstance(custom_name, str) else custom_name
+            if custom_name:
+                self.set_value('buyer_details', 'registration_name', custom_name)
+                return
+
         self.get_text_value(
             field_name='customer_name',
             source_doc=self.sales_invoice_doc,
             xml_name='registration_name',
             parent='buyer_details',
         )
-
-        # --------------------------- END Buyer Details fields ------------------------------
 
     def append_to_item_lines(self, item_lines: list, is_tax_included: bool, sales_invoice_doc: SalesInvoice) -> None:
         """
