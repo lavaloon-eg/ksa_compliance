@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix `_format_time` hardcoding the seconds component to `00` in a prepayment invoice's document
+  reference `IssueTime`. The referenced prepayment invoice's own submission reports its real issue
+  time (including seconds), so the two records of the same timestamp could disagree
+
 ## 0.61.6
 
 * Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits
