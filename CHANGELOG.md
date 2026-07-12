@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Add a timeout to ZATCA API calls (`requests.post` in `api_call`) so a hung connection to the Fatoora
+  gateway no longer blocks the batch sync job or a live-mode worker indefinitely. Timeouts surface as
+  the existing `Resend` integration status.
+
 ## 0.61.6
 
 * Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits
