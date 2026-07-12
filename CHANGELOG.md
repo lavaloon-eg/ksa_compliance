@@ -11,6 +11,9 @@ to a section with the version name.
 * Fix `_format_time` hardcoding the seconds component to `00` in a prepayment invoice's document
   reference `IssueTime`. The referenced prepayment invoice's own submission reports its real issue
   time (including seconds), so the two records of the same timestamp could disagree
+* Add a timeout to ZATCA API calls (`requests.post` in `api_call`) so a hung connection to the Fatoora
+  gateway no longer blocks the batch sync job or a live-mode worker indefinitely. Timeouts surface as
+  the existing `Resend` integration status.
 
 ## 0.61.6
 
