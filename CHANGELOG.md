@@ -8,6 +8,8 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Retry invoices instead of marking them accepted when a ZATCA response can't be parsed.
+
 ## 0.61.7
 
 Contributed by [Saleh](https://github.com/HotSalsa10)

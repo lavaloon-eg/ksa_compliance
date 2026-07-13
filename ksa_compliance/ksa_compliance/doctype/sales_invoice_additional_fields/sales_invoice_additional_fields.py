@@ -458,6 +458,10 @@ class SalesInvoiceAdditionalFields(Document):
             # The IDE gets confused resolving types, so we help it along
             error = cast(ReportOrClearInvoiceError, result.err_value)
             zatca_message = error.response or error.error
+            if integration_status in ('Accepted', 'Accepted with warnings'):
+                # We got a 2xx but couldn't parse the body, so we don't actually know what ZATCA said.
+                # Resend is safe: if it was accepted, retrying comes back as a duplicate.
+                integration_status = 'Resend'
         else:
             value = cast(ReportOrClearInvoiceResult, result.ok_value)
             zatca_message = value.raw_response
