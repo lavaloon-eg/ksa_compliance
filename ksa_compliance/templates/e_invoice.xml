@@ -119,7 +119,7 @@
             </cac:PostalAddress>
             {% if buyer_details.company_id %}
             <cac:PartyTaxScheme>
-                <cbc:CompanyID>{{ buyer_details.company_id }}</cbc:CompanyID>
+                <cbc:CompanyID>{{ buyer_details.company_id | escape }}</cbc:CompanyID>
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
@@ -152,7 +152,7 @@
         <cbc:AllowanceChargeReasonCode>{{ allowance_charge.allowance_charge_reason_code }}</cbc:AllowanceChargeReasonCode>
         {% endif %}
         {% if allowance_charge.allowance_charge_reason %}
-        <cbc:AllowanceChargeReason>{{ allowance_charge.allowance_charge_reason }}</cbc:AllowanceChargeReason>
+        <cbc:AllowanceChargeReason>{{ allowance_charge.allowance_charge_reason | escape }}</cbc:AllowanceChargeReason>
         {% endif %}
         <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(allowance_charge.amount, 2) }}</cbc:Amount>
             <cac:TaxCategory>
@@ -247,7 +247,7 @@
                 <cbc:AllowanceChargeReasonCode>{{ item.allowance_charge_reason_code }}</cbc:AllowanceChargeReasonCode>
                 {% endif %}
                 {% if item.allowance_charge_reason %}
-                <cbc:AllowanceChargeReason>{{ item.allowance_charge_reason }}</cbc:AllowanceChargeReason>
+                <cbc:AllowanceChargeReason>{{ item.allowance_charge_reason | escape }}</cbc:AllowanceChargeReason>
                 {% endif %}
                 <cbc:Amount currencyID="{{ invoice.currency_code }}">{{ rounded(item.discount_amount, 2) }}</cbc:Amount>
                 <cbc:BaseAmount currencyID="{{ invoice.currency_code }}">{{ rounded(item.base_amount, 2) }}</cbc:BaseAmount>
@@ -302,7 +302,7 @@
             </cac:TaxSubtotal>
         </cac:TaxTotal>
         <cac:Item>
-            <cbc:Name>{{row.item.name}}</cbc:Name>
+            <cbc:Name>{{row.item.name | escape}}</cbc:Name>
             <cac:ClassifiedTaxCategory>
                 <cbc:ID>{{row.item.tax_category}}</cbc:ID>
                 <cbc:Percent>{{row.item.tax_percent}}</cbc:Percent>
