@@ -454,6 +454,16 @@ class SalesInvoiceAdditionalFields(Document):
 
         status = ''
         integration_status = _get_integration_status(status_code)
+        if status_code in (401, 403):
+            frappe.log_error(
+                title='ZATCA Authentication Error',
+                message=(
+                    f'Sending invoice {self.sales_invoice} through {self.name} failed with HTTP '
+                    f'{status_code}. This usually means the CSID or secret configured in ZATCA Business '
+                    f'Settings has expired or been revoked. The invoice will be retried automatically '
+                    f'once credentials are fixed.'
+                ),
+            )
         if is_err(result):
             # The IDE gets confused resolving types, so we help it along
             error = cast(ReportOrClearInvoiceError, result.err_value)
@@ -653,7 +663,10 @@ def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
             202: 'Accepted with warnings',
             208: 'Duplicate',
             303: 'Clearance switched off',
-            401: 'Rejected',
+            # 401/403 mean the CSID credentials failed (expired/revoked cert, bad secret); the invoice
+            # itself was never evaluated, so we retry instead of treating it as a terminal rejection
+            401: 'Resend',
+            403: 'Resend',
             400: 'Rejected',
             409: 'Duplicate',
             413: 'Resend',

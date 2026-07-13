@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Map ZATCA HTTP 401/403 responses to `Resend` instead of `Rejected`. A 401/403 means the CSID
+  credentials failed (expired/revoked cert, bad secret) — the invoice itself was never evaluated, so it
+  should retry once credentials are fixed rather than being submitted as a terminal rejection. Writes an
+  explicit `ZATCA Authentication Error` Error Log entry so operators can tell this apart from a
+  transient `Resend`. HTTP 400 is unaffected and still maps to `Rejected`.
+
 ## 0.61.7
 
 Contributed by [Saleh](https://github.com/HotSalsa10)
