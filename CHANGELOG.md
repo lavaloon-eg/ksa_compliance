@@ -8,6 +8,9 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Escape the buyer VAT registration number, discount reason (header and line level), and prepayment
+  line description in the invoice XML template.
+
 ## 0.61.7
 
 Contributed by [Saleh](https://github.com/HotSalsa10)
