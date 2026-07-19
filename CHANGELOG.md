@@ -8,6 +8,10 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Remove a hardcoded 2024-03-01 start date and a customer-specific `Vehicle Booking Item Info` check
+  that gated whether ZATCA additional fields were created for an invoice at all. Confirmed with the
+  maintainer as leftover customer-specific logic, safe to remove for general use (#376).
+
 ## 0.61.7
 
 Contributed by [Saleh](https://github.com/HotSalsa10)

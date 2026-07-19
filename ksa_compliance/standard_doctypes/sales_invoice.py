@@ -1,4 +1,3 @@
-from datetime import date
 from typing import cast
 
 import frappe
@@ -39,10 +38,6 @@ def clear_additional_fields_ignore_list() -> None:
 
 
 def create_sales_invoice_additional_fields_doctype(self: SalesInvoice | POSInvoice, method):
-    if self.doctype == 'Sales Invoice' and not _should_enable_zatca_for_invoice(self.name):
-        logger.info(f"Skipping additional fields for {self.name} because it's before start date")
-        return
-
     settings = ZATCABusinessSettings.for_invoice(self.name, self.doctype)
     if not settings:
         if ZATCABusinessSettings.is_revoked_for_company(self.company):
@@ -97,25 +92,6 @@ def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
     result = doc.submit_to_zatca()
     message = result.ok_value if is_ok(result) else result.err_value
     logger.info(f'Submission result: {message}')
-
-
-def _should_enable_zatca_for_invoice(invoice_id: str) -> bool:
-    start_date = date(2024, 3, 1)
-
-    if frappe.db.table_exists('Vehicle Booking Item Info'):
-        # noinspection SqlResolve
-        records = frappe.db.sql(
-            'SELECT bv.local_trx_date_time FROM `tabVehicle Booking Item Info` bvii '
-            'JOIN `tabBooking Vehicle` bv ON bvii.parent = bv.name WHERE bvii.sales_invoice = %(invoice)s',
-            {'invoice': invoice_id},
-            as_dict=True,
-        )
-        if records:
-            local_date = records[0]['local_trx_date_time'].date()
-            return local_date >= start_date
-
-    posting_date = frappe.db.get_value('Sales Invoice', invoice_id, 'posting_date')
-    return posting_date >= start_date
 
 
 def prevent_cancellation_of_sales_invoice(self: SalesInvoice | POSInvoice, method) -> None:
