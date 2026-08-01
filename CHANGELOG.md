@@ -8,6 +8,24 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix invoices rejected under `BR-CO-14` (invoice total VAT amount must equal the sum of the VAT category tax amounts)
+  and `BR-CO-15` (invoice total with VAT must equal invoice total without VAT plus total VAT)
+  * ERPNext fills `Sales Invoice Item.tax_amount` through the Saudi regional override, which rounds each line's VAT
+    independently. The sum of those lines can drift a few halalas away from `total_taxes_and_charges`, the amount
+    ERPNext books to the general ledger and the one we render as `BT-110`, so the VAT breakdown disagreed with it.
+    A single halala is enough to be rejected, and the drift runs in both directions
+  * `BR-CO-15` was hit by the same drift: ZATCA resolves `BT-110` for that rule from the VAT breakdown rather than
+    from `cac:TaxTotal/cbc:TaxAmount`, so the invoice was rejected whenever the drift fell on the wrong side. Since
+    the breakdown now always sums to `BT-110`, both readings agree and the rule holds either way
+  * The VAT breakdown is now derived from the invoice-level VAT, in proportion to the VAT each category is expected
+    to carry (taxable amount × rate) so that zero rated and exempt categories keep a VAT amount of 0 (`BR-Z-09`,
+    `BR-E-09`) and every category still satisfies `BR-CO-17`
+  * A difference too large to be rounding (an invoice discount applied on grand total, or a non-VAT charge in the
+    taxes table) is deliberately *not* redistributed, so ZATCA reports the underlying inconsistency instead of the
+    app hiding it behind a `BR-CO-17` violation
+  * Prepayment invoices are unaffected: a `Payment Entry` adjusts its VAT after the breakdown is built
+* Add tests for the VAT breakdown, covering `BR-CO-14`, `BR-CO-17` and `BR-Z-09`/`BR-E-09`
+
 ## 0.61.4
 
 * Fix migration failure due to a reference to a non-existent patch in patches.txt
