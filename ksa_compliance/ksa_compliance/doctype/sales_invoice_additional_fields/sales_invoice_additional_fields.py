@@ -186,7 +186,7 @@ class SalesInvoiceAdditionalFields(Document):
 
         buyer_doc = self._get_buyer_doc(sales_invoice)
         invoice_type = _get_invoice_type(settings, buyer_doc)
-        self._set_buyer_details(buyer_doc, invoice_type)
+        self._set_buyer_details(buyer_doc, invoice_type, sales_invoice)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = _get_invoice_type_transaction(invoice_type, is_export)
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
@@ -373,36 +373,61 @@ class SalesInvoiceAdditionalFields(Document):
             customer_name = sales_invoice.customer
         return cast(Customer, frappe.get_doc('Customer', customer_name))
 
-    def _set_buyer_details(self, customer: Customer, invoice_type: InvoiceType):
+    def _set_buyer_details(
+        self,
+        customer: Customer,
+        invoice_type: InvoiceType,
+        invoice: SalesInvoice | POSInvoice | PaymentEntry | None = None,
+    ):
         self.buyer_vat_registration_number = customer.get('custom_vat_registration_number')
         _is_b2b_customer = invoice_type == 'Standard'
-        if customer.customer_primary_address:
-            address_doc = cast(Address, frappe.get_doc('Address', customer.customer_primary_address))
-            self._set_buyer_address(address_doc, _is_b2b_customer)
-        else:
-            address = frappe.db.get_all(
-                'Dynamic Link',
-                {
-                    'parenttype': 'Address',
-                    'parentfield': 'links',
-                    'link_doctype': 'Customer',
-                    'link_name': customer.name,
-                },
-                pluck='parent',
-            )
-            if address:
-                address_doc = cast(Address, frappe.get_doc('Address', address[0]))
+
+        if invoice is None or invoice.doctype == 'Payment Entry':
+            # Payment Entry: retain existing Customer-master address lookup
+            if customer.customer_primary_address:
+                address_doc = cast(Address, frappe.get_doc('Address', customer.customer_primary_address))
                 self._set_buyer_address(address_doc, _is_b2b_customer)
             else:
-                if _is_b2b_customer:
-                    customer_form = frappe.utils.get_link_to_form('Customer', customer.name)
-                    fthrow(
-                        ft(
-                            'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
-                            customer=customer_form,
-                        ),
-                        title=ft('Address Not Found Error'),
-                    )
+                address = frappe.db.get_all(
+                    'Dynamic Link',
+                    {
+                        'parenttype': 'Address',
+                        'parentfield': 'links',
+                        'link_doctype': 'Customer',
+                        'link_name': customer.name,
+                    },
+                    pluck='parent',
+                )
+                if address:
+                    address_doc = cast(Address, frappe.get_doc('Address', address[0]))
+                    self._set_buyer_address(address_doc, _is_b2b_customer)
+                else:
+                    if _is_b2b_customer:
+                        customer_form = frappe.utils.get_link_to_form('Customer', customer.name)
+                        fthrow(
+                            ft(
+                                'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
+                                customer=customer_form,
+                            ),
+                            title=ft('Address Not Found Error'),
+                        )
+        else:
+            # Sales Invoice / POS Invoice: always use the billing address set on the invoice
+            invoice_address = invoice.get('customer_address')
+            if invoice_address:
+                address_doc = cast(Address, frappe.get_doc('Address', invoice_address))
+                self._set_buyer_address(address_doc, _is_b2b_customer)
+            elif _is_b2b_customer:
+                invoice_form = frappe.utils.get_link_to_form(invoice.doctype, invoice.name)
+                fthrow(
+                    ft(
+                        'Billing address is mandatory for B2B transactions; '
+                        'Please set the Billing Address on invoice $invoice.',
+                        invoice=invoice_form,
+                    ),
+                    title=ft('Address Not Found Error'),
+                )
+            # For B2C (Simplified) invoices, a billing address is not required
 
         for item in customer.get('custom_additional_ids'):
             if strip(item.value):
