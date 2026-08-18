@@ -424,8 +424,9 @@ class SalesInvoiceAdditionalFields(Document):
                     title=ft('Address Not Found Error'),
                 )
 
-        address_doc = cast(Address, frappe.get_doc('Address', address_name))
-        self._set_buyer_address(address_doc, _is_b2b_customer)
+        if address_name:
+            address_doc = cast(Address, frappe.get_doc('Address', address_name))
+            self._set_buyer_address(address_doc, _is_b2b_customer)
 
         for item in customer.get('custom_additional_ids'):
             if strip(item.value):
