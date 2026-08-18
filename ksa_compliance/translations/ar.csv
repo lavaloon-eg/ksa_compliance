@@ -430,3 +430,4 @@ Advanced reporting for review and follow-up,تقارير متقدمة للمرا
 Proactive compliance enablement,تمكين استباقي للامتثال,
 Additional support for teams managing higher compliance complexity,دعم إضافي للفرق التي تدير متطلبات امتثال أكثر تعقيدا,
 This document mixes ZATCA tax categories for export of services or goods with non-export categories,هذه الوثيقة تخلط فئات زاتكا ضريبية لتصدير الخدمات أو السلع بفئات ضريبية لغير التصدير,
+"Billing address is mandatory for B2B transactions; Please set the Billing Address on invoice $invoice.","عنوان الفواتير إلزامي لمعاملات B2B؛ يرجى تعيين عنوان الفواتير في الفاتورة $invoice."

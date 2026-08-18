@@ -382,9 +382,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.buyer_vat_registration_number = customer.get('custom_vat_registration_number')
         _is_b2b_customer = invoice_type == 'Standard'
 
-        address_name = None
-        error_msg = ""
-
         if invoice.doctype == 'Payment Entry':
             # Payment Entry: retain existing Customer-master address lookup
             if customer.customer_primary_address:
@@ -405,9 +402,12 @@ class SalesInvoiceAdditionalFields(Document):
 
             if not address_name and _is_b2b_customer:
                 customer_form = frappe.utils.get_link_to_form('Customer', customer.name)
-                error_msg = ft(
-                    'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
-                    customer=customer_form,
+                fthrow(
+                    ft(
+                        'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
+                        customer=customer_form,
+                    ),
+                    title=ft('Address Not Found Error'),
                 )
         else:
             # Sales Invoice / POS Invoice: always use the billing address set on the invoice
@@ -415,20 +415,17 @@ class SalesInvoiceAdditionalFields(Document):
             
             if not address_name and _is_b2b_customer:
                 invoice_form = frappe.utils.get_link_to_form(invoice.doctype, invoice.name)
-                error_msg = ft(
-                    'Billing address is mandatory for B2B transactions; '
-                    'Please set the Billing Address on invoice $invoice.',
-                    invoice=invoice_form,
+                fthrow(
+                    ft(
+                        'Billing address is mandatory for B2B transactions; '
+                        'Please set the Billing Address on invoice $invoice.',
+                        invoice=invoice_form,
+                    ),
+                    title=ft('Address Not Found Error'),
                 )
 
-        if address_name:
-            address_doc = cast(Address, frappe.get_doc('Address', address_name))
-            self._set_buyer_address(address_doc, _is_b2b_customer)
-        elif error_msg:
-            fthrow(
-                error_msg,
-                title=ft('Address Not Found Error'),
-            )
+        address_doc = cast(Address, frappe.get_doc('Address', address_name))
+        self._set_buyer_address(address_doc, _is_b2b_customer)
 
         for item in customer.get('custom_additional_ids'):
             if strip(item.value):
