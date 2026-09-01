@@ -235,7 +235,37 @@ def api_call(
 
     response: Response | None = None
     try:
-        response = requests.post(url, headers=final_headers, json=body, auth=auth, timeout=ZATCA_API_TIMEOUT_SECONDS)
+        response = requests.post(
+            url,
+            headers=final_headers,
+            json=body,
+            auth=auth,
+            timeout=ZATCA_API_TIMEOUT_SECONDS,
+        )
+
+        # ZATCA may return an HTTP error status while a compliance/production CSID
+        # has actually been issued successfully. Validate the CSID payload before
+        # calling raise_for_status() so a complete ISSUED response is not discarded.
+        if path in ('compliance', 'production/csids'):
+            try:
+                csid_data = response.json()
+            except Exception:
+                csid_data = None
+
+            if (
+                isinstance(csid_data, dict)
+                and csid_data.get('dispositionMessage') == 'ISSUED'
+                and csid_data.get('requestID') is not None
+                and csid_data.get('binarySecurityToken')
+                and csid_data.get('secret')
+            ):
+                logger.warning(
+                    f"ZATCA returned HTTP {response.status_code}, "
+                    "but returned a complete ISSUED CSID. "
+                    "Treating response as successful."
+                )
+                return Ok(result_builder(csid_data, response.text)), response.status_code
+
         response.raise_for_status()
         return Ok(result_builder(response.json(), response.text)), response.status_code
     except HTTPError as e:
@@ -269,7 +299,7 @@ def try_get_csid_error(response: Response | None, exception: Exception | None) -
     try:
         data = response.json()
         if response.status_code == 400:
-            errors = [WarningOrError.from_json(e) for e in cast(List[dict | str], data.get('errors', []))]
+            errors = [WarningOrError.from_json(e) for e in cast(List[dict | str], data.get('errors') or [])]
             if errors:
                 return ', '.join([e.message for e in errors])
 
