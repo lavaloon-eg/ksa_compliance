@@ -15,7 +15,7 @@ from erpnext.selling.doctype.customer.customer import Customer
 from erpnext.setup.doctype.company.company import Company
 from erpnext.setup.doctype.item_group.item_group import ItemGroup
 from erpnext.stock.doctype.item.item import Item
-from frappe.tests import IntegrationTestCase
+from ksa_compliance.tests import FrappeTestCaseClass
 from frappe.utils import flt
 from ksa_compliance.generate_xml import generate_xml_file
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
@@ -38,7 +38,7 @@ from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 """
 
 
-class TestEInvoiceOutputModel(IntegrationTestCase):
+class TestEInvoiceOutputModel(FrappeTestCaseClass):
     """
     This class test class uses the Einvoice output model to generate invoice XML without ZATCA signing or using ZATCA cli
     then validates ZATCA rules that causes rejection or accepting with warnings due to rounding issues.
