@@ -1,12 +1,13 @@
 
+## Test Cases context
 
-#### Item details
+### Item details
 
-2 Items:
-Demo Item Price: 57.38, Vat 15 %
-Test 5 Item Price: 22.89, Vat 5 %
+- Item 1: Demo Item 15% -- Price: 57.38 -- Tax percentage: 15 %
+- Item 2: Demo Item 5% -- Price: 22.89 -- Tax percentage: 5 %
 
 #### No Discount on Item and Invoice
+
 First Scenario: *Passed*
 
 #### Discount On Item
@@ -16,15 +17,17 @@ First Scenario: *Accepted With Warnings*
 > CODE : BR-KSA-51, MESSAGE : [BR-KSA-51]-The line amount with VAT (KSA-12) must be Invoice line net amount (BT-131) + Line VAT amount (KSA-11).
 
 ```xml
-# Line
+<!--this line-->
 <cbc:RoundingAmount currencyID="SAR">25.96</cbc:RoundingAmount>
-# Must be equal sum
+
+<!--Must be equal sum-->
 <cbc:TaxAmount currencyID="SAR">3.39</cbc:TaxAmount>
 <cbc:LineExtensionAmount currencyID="SAR">22.58</cbc:LineExtensionAmount>
 ```
 
 Actual sum = 3.39 + 22.58 = 25.97 != 25.96
 #### Discount On Invoice Grand Total And On Net Total
+
 Percentage: 3.53
 Amount: 3.26
 First Scenario: *Rejected*
@@ -32,9 +35,10 @@ First Scenario: *Rejected*
 > CODE : BR-CO-15, MESSAGE : [BR-CO-15]-Invoice total amount with VAT (BT-112) = Invoice total amount without VAT (BT-109) + Invoice total VAT amount (BT-110).
 
 ```xml
-# Invoice
+<!--Invoice-->
 <cbc:TaxInclusiveAmount currencyID="SAR">89.05</cbc:TaxInclusiveAmount>
-Must be equal Sum
+
+<!--Must be equal Sum-->
 <cbc:TaxExclusiveAmount currencyID="SAR">77.44</cbc:TaxExclusiveAmount>
 <cac:TaxTotal><cbc:TaxAmount currencyID="SAR">11.62</cbc:TaxAmount</cac:TaxTotal>
 ```
@@ -50,7 +54,7 @@ CODE : BR-CO-14, MESSAGE : [BR-CO-14]-Invoice total VAT amount (BT-110) = Σ VAT
 
 ```xml
 <cbc:TaxAmount currencyID="SAR">750.88</cbc:TaxAmount>
-Equal Sum
+<!--Equal Sum-->
 <cac:TaxSubtotal><cbc:TaxAmount> -> 738.14 + 12.73 = 750.87
 ```
 Reason: both earlier errors
@@ -80,8 +84,9 @@ First Scenario: *Rejected*
 > CODE : BR-CO-11, MESSAGE : [BR-CO-11]-Sum of allowances on document level (BT-107) = Σ Document level allowance amount (BT-92).
 
 ```xml
+
 <cbc:AllowanceTotalAmount currencyID="SAR">3.11</cbc:AllowanceTotalAmount>
-must be equal
+<!--must be equal-->
 <cac:AllowanceCharge><cbc:Amount currencyID="SAR">3.10</cbc:Amount>
 ```
 
