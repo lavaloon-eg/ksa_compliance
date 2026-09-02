@@ -206,7 +206,7 @@ def _make_invoice_xml(
                 'item_code': it.name,
                 'discount_percentage': item_discount_percentage[idx],
                 'qty': qty,
-                'item_tax_template': tax_template_map.values()[idx],
+                'item_tax_template': list(tax_template_map.values())[idx],
             },
         )
 
