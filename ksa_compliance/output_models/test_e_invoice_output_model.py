@@ -40,11 +40,8 @@ from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 
 class TestEInvoiceOutputModel(IntegrationTestCase):
     """
-    Steps:
-    1. create invoice
-    2. create output xml
-    3. read xml fields
-    4. validate the rules
+    This class test class uses the Einvoice output model to generate invoice XML without ZATCA signing or using ZATCA cli
+    then validates ZATCA rules that causes rejection or accepting with warnings due to rounding issues.
     """
 
     @classmethod
@@ -181,6 +178,12 @@ def _make_invoice_xml(
 ) -> str:
     item_discount_percentage = item_discount_percentage or [0.0] * len(items)
     assert len(items) == len(item_discount_percentage)
+    tax_template_map = {
+        _TaxTemplate.VAT15: _TaxTemplate.VAT15.value + f' - {company.abbr}',
+        _TaxTemplate.VAT5: _TaxTemplate.VAT5.value + f' - {company.abbr}',
+        _TaxTemplate.VAT0: _TaxTemplate.VAT0.value + f' - {company.abbr}',
+    }
+
     invoice = cast(SalesInvoice, frappe.new_doc('Sales Invoice'))
     invoice.company = company.name
     invoice.currency = 'SAR'
@@ -203,10 +206,11 @@ def _make_invoice_xml(
                 'item_code': it.name,
                 'discount_percentage': item_discount_percentage[idx],
                 'qty': qty,
+                'item_tax_template': tax_template_map.values()[idx],
             },
         )
 
-    invoice.taxes_and_charges = _TaxTemplate.VAT15.value + f' - {company.abbr}'
+    invoice.taxes_and_charges = tax_template_map[_TaxTemplate.VAT15]
     invoice.set_taxes()
     invoice.set_missing_values()
     invoice.taxes[0].included_in_print_rate = included_in_print_rate
@@ -250,7 +254,7 @@ def _make_business_settings(company: str):
     settings.district = 'Dummy District ID'
     settings.seller_name = 'EInvoice Test Company Seller'
     settings.vat_registration_number = '399999999000003'
-    settings.insert(ignore_permissions=True, ignore_mandatory=True, ignore_links=True)
+    settings.insert(ignore_mandatory=True, ignore_links=True)
     return settings
 
 
@@ -283,7 +287,7 @@ def _make_tax_accounts(company: str) -> str:
     account_doc.account_name = account_name
     account_doc.account_number = frappe.generate_hash(length=5)
     account_doc.account_type = 'Tax'
-    account_doc.insert(ignore_permissions=True)
+    account_doc.insert()
     return account_doc.name
 
 
