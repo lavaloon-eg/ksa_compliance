@@ -1,6 +1,7 @@
+import uuid
 import xml.etree.ElementTree as Et
 from enum import Enum
-from typing import cast
+from typing import cast, Literal
 
 import frappe
 from erpnext.accounts.doctype.account.account import Account
@@ -16,10 +17,14 @@ from erpnext.setup.doctype.item_group.item_group import ItemGroup
 from erpnext.stock.doctype.item.item import Item
 from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
+from ksa_compliance.generate_xml import generate_xml_file
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales_invoice_additional_fields import (
     SalesInvoiceAdditionalFields,
+    _get_invoice_type,
+    _get_invoice_type_transaction,
 )
-from ksa_compliance.standard_doctypes.sales_invoice import ignore_additional_fields_for_invoice
+from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
+from ksa_compliance.output_models.e_invoice_output_model import Einvoice
 
 """
     Main rounding scenarios appear in the following XML fields
@@ -45,113 +50,86 @@ class TestEInvoiceOutputModel(IntegrationTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+    def setUp(self):
+        super().setUp()
         frappe.flags.ignore_permissions = True
-        cls.company = _make_company()
-        cls.customer = _make_customer()
-        cls.items = _make_items()
+        self.company = _make_company()
+        self.customer = _make_customer()
+        self.items = _make_items()
 
     def tearDown(self):
         frappe.db.rollback()
         frappe.flags.ignore_permissions = False
+        super().tearDown()
 
-    def create_invoice(self):
-        return _make_invoice(getattr(self, 'company'), getattr(self, 'customer'), getattr(self, 'items'))
-
-    def create_additional_fields(self, invoice_id: str):
-        doc = SalesInvoiceAdditionalFields.create_for_invoice(invoice_id, 'Sales Invoice')
-        doc.insert()
-        return doc
+    def make_invoice_xml(
+        self,
+        *,
+        apply_discount_on: Literal['Grand Total', 'Net Total'] = 'Grand Total',
+        discount_percentage: float = 0.0,
+        item_discount_percentage: list[float] | None = None,
+        included_in_print_rate: int = 0,
+    ) -> str:
+        return _make_invoice_xml(
+            self.company,
+            self.customer,
+            self.items,
+            apply_discount_on,
+            discount_percentage,
+            item_discount_percentage,
+            included_in_print_rate,
+        )
 
     def test_standard_invoice(self):
-        invoice = self.create_invoice()
-        ignore_additional_fields_for_invoice(invoice.name)
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(self.make_invoice_xml())
 
     def test_invoice_discount(self):
-        invoice = self.create_invoice()
-        invoice.apply_discount_on = 'Grand Total'
-        invoice.additional_discount_percentage = 3.53
-
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(self.make_invoice_xml(discount_percentage=3.53))
 
     def test_item_discount(self):
-        invoice = self.create_invoice()
-        invoice.items[0].discount_percentage = 2.362
-        invoice.items[1].discount_percentage = 5.67
-
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(self.make_invoice_xml(item_discount_percentage=[2.362, 5.676, 8.501]))
 
     def test_item_and_invoice_discount(self):
-        invoice = self.create_invoice()
-        invoice.apply_discount_on = 'Grand Total'
-        invoice.additional_discount_percentage = 3.53
-        invoice.items[0].discount_percentage = 2.362
-        invoice.items[1].discount_percentage = 5.67
-
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(
+            self.make_invoice_xml(discount_percentage=3.53, item_discount_percentage=[2.362, 5.676, 8.501])
+        )
 
     def test_tax_included_standard(self):
-        invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate = 1
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(self.make_invoice_xml(included_in_print_rate=1))
 
     def test_tax_included_invoice_discount(self):
-        invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate = 1
-        invoice.apply_discount_on = 'Grand Total'
-        invoice.additional_discount_percentage = 3.53
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(self.make_invoice_xml(discount_percentage=3.53, included_in_print_rate=1))
 
     def test_tax_included_item_discount(self):
-        invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate = 1
-        invoice.items[0].discount_percentage = 2.362
-        invoice.items[1].discount_percentage = 5.67
-
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
+        self.assert_generated_xml(
+            self.make_invoice_xml(item_discount_percentage=[2.362, 5.676, 8.501], included_in_print_rate=1)
+        )
 
     def test_tax_included_item_invoice_discount(self):
-        invoice = self.create_invoice()
-        invoice.taxes[0].included_in_print_rate = 1
-        invoice.apply_discount_on = 'Grand Total'
-        invoice.additional_discount_percentage = 3.53
-        invoice.items[0].discount_percentage = 2.362
-        invoice.items[1].discount_percentage = 5.67
+        self.assert_generated_xml(
+            self.make_invoice_xml(
+                discount_percentage=3.53, item_discount_percentage=[2.362, 5.676, 8.501], included_in_print_rate=1
+            )
+        )
 
-        ignore_additional_fields_for_invoice(invoice.name)
-        invoice.submit()
-        self.assert_generated_xml(self.create_additional_fields(invoice.name))
-
-    def assert_generated_xml(self, additional_fields: SalesInvoiceAdditionalFields):
-        additional_fields.load_from_db()
-        xml_tree = Et.fromstring(additional_fields.invoice_xml)
+    def assert_generated_xml(self, invoice_xml: str):
+        xml_tree = Et.fromstring(invoice_xml)
         self.assert_zatca_rules(xml_tree)
 
-    def assert_zatca_rules(self, tree: Et):
+    def assert_zatca_rules(self, tree: Et.Element):
         self.assert_rule_BR_CO_11(tree=tree)
         self.assert_rule_BR_CO_14(tree=tree)
         self.assert_rule_BR_CO_15(tree=tree)
         self.assert_rule_BR_KSA_51(tree=tree)
 
-    def assert_rule_BR_CO_15(self, tree: Et):
+    def assert_rule_BR_CO_15(self, tree: Et.Element):
         tax_inclusive_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount', namespaces).text)
         tax_exclusive_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount', namespaces).text)
         total_tax_amount = flt(tree.find('.//cac:TaxTotal/cbc:TaxAmount', namespaces).text)
         self.assertEqual(tax_inclusive_amount, round(tax_exclusive_amount + total_tax_amount, 2))
 
-    def assert_rule_BR_CO_11(self, tree: Et):
+    def assert_rule_BR_CO_11(self, tree: Et.Element):
         allowance_total_amount = flt(tree.find('.//cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount', namespaces).text)
         all_allowance_charges = tree.findall('.//cac:AllowanceCharge', namespaces)
         sum_allowance_charges = sum(
@@ -159,7 +137,7 @@ class TestEInvoiceOutputModel(IntegrationTestCase):
         )
         self.assertEqual(allowance_total_amount, sum_allowance_charges)
 
-    def assert_rule_BR_CO_14(self, tree: Et):
+    def assert_rule_BR_CO_14(self, tree: Et.Element):
         tax_amount = flt(tree.find('.//cac:TaxTotal/cbc:TaxAmount', namespaces).text)
         tax_subtotals = tree.findall('.//cac:TaxTotal/cac:TaxSubtotal', namespaces)
         total_taxes = 0
@@ -167,7 +145,7 @@ class TestEInvoiceOutputModel(IntegrationTestCase):
             total_taxes += flt(subtotal.find('.//cbc:TaxAmount', namespaces).text)
         self.assertEqual(tax_amount, total_taxes)
 
-    def assert_rule_BR_KSA_51(self, tree: Et):
+    def assert_rule_BR_KSA_51(self, tree: Et.Element):
         invoice_lines = tree.findall('.//cac:InvoiceLine', namespaces)
         for item in invoice_lines:
             rounding_amount = flt(item.find('.//cac:TaxTotal/cbc:RoundingAmount', namespaces).text)
@@ -192,12 +170,26 @@ class _TaxCategory(Enum):
     standard = 'EInvoice Standard Rate'
 
 
-def _make_invoice(company: Company, customer: Customer, items: list) -> SalesInvoice:
+def _make_invoice_xml(
+    company: Company,
+    customer: Customer,
+    items: list,
+    apply_discount_on: Literal['Grand Total', 'Net Total'] = 'Grand Total',
+    discount_percentage: float = 0.0,
+    item_discount_percentage: list[float] | None = None,
+    included_in_print_rate: int = 0,
+) -> str:
+    item_discount_percentage = item_discount_percentage or [0.0] * len(items)
+    assert len(items) == len(item_discount_percentage)
     invoice = cast(SalesInvoice, frappe.new_doc('Sales Invoice'))
     invoice.company = company.name
     invoice.currency = 'SAR'
     invoice.customer = customer.name
-    for it in items:
+    invoice.apply_discount_on = apply_discount_on
+    invoice.additional_discount_percentage = discount_percentage
+    invoice.disable_rounded_total = 1
+
+    for idx, it in enumerate(items):
         qty = 3
         rate = it.standard_rate
         amount = rate * qty
@@ -209,16 +201,57 @@ def _make_invoice(company: Company, customer: Customer, items: list) -> SalesInv
                 'rate': rate,
                 'base_rate': rate,
                 'item_code': it.name,
+                'discount_percentage': item_discount_percentage[idx],
                 'qty': qty,
             },
         )
 
-    invoice.taxes_and_charges = _TaxTemplate.VAT15.value
-    invoice.insert()
+    invoice.taxes_and_charges = _TaxTemplate.VAT15.value + f' - {company.abbr}'
     invoice.set_taxes()
     invoice.set_missing_values()
+    invoice.taxes[0].included_in_print_rate = included_in_print_rate
+
     invoice.save()
-    return invoice
+
+    # create and generate additional fields
+    additional_fields = SalesInvoiceAdditionalFields.create_for_invoice(invoice.name, invoice.doctype)
+    settings = ZATCABusinessSettings.for_invoice(additional_fields.sales_invoice, additional_fields.invoice_doctype)
+    additional_fields.uuid = str(uuid.uuid4())
+    additional_fields.tax_currency = 'SAR'  # Review: Set as "SAR" as a default tax currency value
+    buyer_doc = additional_fields._get_buyer_doc(invoice)
+    invoice_type = _get_invoice_type(settings, buyer_doc)
+    additional_fields._set_buyer_details(buyer_doc, invoice_type, invoice)
+    additional_fields.sum_of_charges = additional_fields._compute_sum_of_charges(invoice.taxes)
+    additional_fields.invoice_type_transaction = _get_invoice_type_transaction(invoice_type, False)
+    additional_fields.invoice_type_code = additional_fields._get_invoice_type_code(invoice)
+    additional_fields.payment_means_type_code = additional_fields._get_payment_means_type_code(invoice)
+    if settings.enable_branch_configuration:
+        additional_fields._set_branch_details(invoice)
+
+    einvoice = Einvoice(sales_invoice_additional_fields_doc=additional_fields, invoice_type=invoice_type)
+    return generate_xml_file(einvoice.result)
+
+
+def _make_business_settings(company: str):
+    settings = cast(ZATCABusinessSettings, frappe.new_doc('ZATCA Business Settings'))
+    settings.company = company
+    settings.company_unit = 'Einvoice Test Company Unit'
+    settings.company_unit_serial = '1-ERPNext|2-15|3-1'
+    settings.company_category = 'EInvoice Test Company Category'
+    settings.country_code = 'SA'
+    settings.country = 'Saudi Arabia'
+    settings.currency = 'SAR'
+    settings.company_address = 'Dummy Address ID'
+    settings.street = 'Dummy Street ID'
+    settings.additional_street = 'Dummy Additional Street ID'
+    settings.building = '1101'
+    settings.city = 'Dummy City'
+    settings.postal_code = '52342'
+    settings.district = 'Dummy District ID'
+    settings.seller_name = 'EInvoice Test Company Seller'
+    settings.vat_registration_number = '399999999000003'
+    settings.insert(ignore_permissions=True, ignore_mandatory=True, ignore_links=True)
+    return settings
 
 
 def _make_company() -> Company:
@@ -230,6 +263,7 @@ def _make_company() -> Company:
     company.insert()
     _make_tax_categories()
     _make_taxes(company.name)
+    _make_business_settings(company.name)
     return company
 
 
@@ -296,7 +330,7 @@ def _make_taxes(company: str):
                 'description': template.value,
             },
         )
-        sales_template.insert(ignore_permissions=True)
+        sales_template.insert(ignore_permissions=True, ignore_mandatory=True, ignore_links=True)
 
         item_template = cast(ItemTaxTemplate, frappe.new_doc('Item Tax Template'))
         item_template.title = template.value
