@@ -15,6 +15,7 @@ from erpnext.selling.doctype.customer.customer import Customer
 from erpnext.setup.doctype.company.company import Company
 from erpnext.setup.doctype.item_group.item_group import ItemGroup
 from erpnext.stock.doctype.item.item import Item
+from frappe.geo.doctype.country.country import Country
 from ksa_compliance.tests import FrappeTestCaseClass
 from frappe.utils import flt
 from ksa_compliance.generate_xml import generate_xml_file
@@ -259,17 +260,29 @@ def _make_business_settings(company: str):
 
 
 def _make_company() -> Company:
+    country = _make_country()
     company = cast(Company, frappe.new_doc('Company'))
     company.name = 'EInvoice Test Company'
     company.company = 'EInvoice Test Company'
     company.company_name = 'EInvoice Test Company'
     company.default_currency = 'SAR'
-    company.country = 'SA'
+    company.country = country
     company.insert()
     _make_tax_categories()
     _make_taxes(company.name)
     _make_business_settings(company.name)
     return company
+
+
+def _make_country():
+    country = 'Saudi Arabia'
+    if not frappe.db.exists('Country', country):
+        doc = cast(Country, frappe.new_doc('Country'))
+        doc.country = country
+        doc.country_name = country
+        doc.code = 'SA'
+        doc.insert(ignore_mandatory=True, ignore_links=True)
+    return country
 
 
 def _make_tax_accounts(company: str) -> str:
