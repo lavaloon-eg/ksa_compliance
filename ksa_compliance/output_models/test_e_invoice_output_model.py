@@ -264,6 +264,7 @@ def _make_company() -> Company:
     company.company = 'EInvoice Test Company'
     company.company_name = 'EInvoice Test Company'
     company.default_currency = 'SAR'
+    company.country = 'SA'
     company.insert()
     _make_tax_categories()
     _make_taxes(company.name)
