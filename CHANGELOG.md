@@ -8,6 +8,32 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.4
+
+* Fix migration failure due to a reference to a non-existent patch in patches.txt
+
+## 0.61.3
+
+* Remove `KSA Compliance Premium Announcement` popup and banners.
+
+## 0.61.2
+
+* Fix sales invoice custom list view settings overriding the standard listview setting causing not showing the status field value correctly in listview.
+
+## 0.61.1
+
+* Relax address validation for addresses outside Saudi Arabia
+  * Building number does not have to be 4 digits
+  * Postal code is not required, and does not have to be 5 digits
+* Fix invoice transaction code for export invoices
+  * The export flag is now properly set for standard invoices when any taxes and charges template has an export ZATCA
+    tax category (export of goods or services)
+  * An error occurs if an invoice mixes export and non-export ZATCA tax categories through item tax templates
+
+## 0.61.0
+
+* Add `KSA Compliance Premium` announcement in ZATCA workspace and relevant doctypes.
+
 ## 0.60.1
 
 * Fix ZATCA desktop icon patch failure due to large size (> 1MiB). The image is now a much smaller SVG

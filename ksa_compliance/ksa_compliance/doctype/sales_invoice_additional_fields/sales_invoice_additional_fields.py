@@ -7,13 +7,13 @@ import html
 import uuid
 from io import BytesIO
 from typing import cast, Optional, Literal
-from ksa_compliance import SALES_INVOICE_CODE, DEBIT_NOTE_CODE, CREDIT_NOTE_CODE, PREPAYMENT_INVOICE_CODE
+
 import frappe
 import frappe.utils.background_jobs
 import pyqrcode
+from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
-from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
 from erpnext.selling.doctype.customer.customer import Customer
 from frappe import _
 from frappe.contacts.doctype.address.address import Address
@@ -25,6 +25,7 @@ from frappe.utils.pdf import get_file_data_from_writer
 from pypdf import PdfWriter
 from result import is_err, Result, Err, Ok, is_ok
 
+from ksa_compliance import SALES_INVOICE_CODE, DEBIT_NOTE_CODE, CREDIT_NOTE_CODE, PREPAYMENT_INVOICE_CODE
 from ksa_compliance import logger
 from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
@@ -37,8 +38,9 @@ from ksa_compliance.ksa_compliance.doctype.zatca_precomputed_invoice.zatca_preco
     ZATCAPrecomputedInvoice,
 )
 from ksa_compliance.output_models.e_invoice_output_model import Einvoice
-from ksa_compliance.translation import ft
+from ksa_compliance.output_models.service import get_right_fieldname
 from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
 from ksa_compliance.zatca_api import ReportOrClearInvoiceError, ReportOrClearInvoiceResult, ZatcaSendMode
 from ksa_compliance.zatca_cli import convert_to_pdf_a3_b, check_pdfa3b_support_or_throw
 
@@ -162,18 +164,6 @@ class SalesInvoiceAdditionalFields(Document):
         self.invoice_qr = precomputed_invoice.invoice_qr
         self.invoice_xml = precomputed_invoice.invoice_xml
 
-    def _get_invoice_type(self, settings: ZATCABusinessSettings, customer: Customer) -> InvoiceType:
-        if settings.invoice_mode == InvoiceMode.Standard:
-            return 'Standard'
-
-        if settings.invoice_mode == InvoiceMode.Simplified:
-            return 'Simplified'
-
-        if is_b2b_customer(customer):
-            return 'Standard'
-
-        return 'Simplified'
-
     def before_insert(self):
         self.integration_status = 'Ready For Batch'
         self.is_latest = True
@@ -185,19 +175,20 @@ class SalesInvoiceAdditionalFields(Document):
 
         settings = ZATCABusinessSettings.for_invoice(self.sales_invoice, self.invoice_doctype)
         if not settings:
-            frappe.throw(f'Missing ZATCA business settings for sales invoice: {self.sales_invoice}')
+            fthrow(f'Missing ZATCA business settings for sales invoice: {self.sales_invoice}')
 
         sales_invoice = cast(
             SalesInvoice | POSInvoice | PaymentEntry, frappe.get_doc(self.invoice_doctype, self.sales_invoice)
         )
+        is_export = _check_invoice_for_export(sales_invoice)
         self.uuid = str(uuid.uuid4())
         self.tax_currency = 'SAR'  # Review: Set as "SAR" as a default tax currency value
 
         buyer_doc = self._get_buyer_doc(sales_invoice)
-        invoice_type = self._get_invoice_type(settings, buyer_doc)
+        invoice_type = _get_invoice_type(settings, buyer_doc)
         self._set_buyer_details(buyer_doc, invoice_type)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
-        self.invoice_type_transaction = '0100000' if invoice_type == 'Standard' else '0200000'
+        self.invoice_type_transaction = _get_invoice_type_transaction(invoice_type, is_export)
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
         self.payment_means_type_code = self._get_payment_means_type_code(sales_invoice)
 
@@ -251,7 +242,7 @@ class SalesInvoiceAdditionalFields(Document):
                     text_message = ''
                     if validation_result.details.errors:
                         text_message += ft('Errors') + '\n'
-                        html_message += f"<h4>{ft('Errors')}</h4>"
+                        html_message += f'<h4>{ft("Errors")}</h4>'
                         html_message += '<ul>'
                         for code, error in validation_result.details.errors.items():
                             html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(error)}</li>'
@@ -260,7 +251,7 @@ class SalesInvoiceAdditionalFields(Document):
 
                     if validation_result.details.warnings:
                         text_message += ft('Warnings') + '\n'
-                        html_message += f"<h4>{ft('Warnings')}</h4>"
+                        html_message += f'<h4>{ft("Warnings")}</h4>'
                         html_message += '<ul>'
                         for code, warning in validation_result.details.warnings.items():
                             html_message += f'<li><b>{html.escape(code)}</b>: {html.escape(warning)}</li>'
@@ -273,7 +264,7 @@ class SalesInvoiceAdditionalFields(Document):
                         reference_doctype=self.invoice_doctype,
                         reference_name=self.sales_invoice,
                     )
-                    frappe.throw(title=ft('ZATCA Validation Error'), msg=html_message)
+                    fthrow(title=ft('ZATCA Validation Error'), msg=html_message)
 
         self.invoice_hash = result.invoice_hash
         self.qr_code = result.qr_code
@@ -299,7 +290,7 @@ class SalesInvoiceAdditionalFields(Document):
             SalesInvoice | POSInvoice | PaymentEntry, frappe.get_doc(self.invoice_doctype, self.sales_invoice)
         )
         buyer_doc = self._get_buyer_doc(inv_doc)
-        invoice_type = self._get_invoice_type(settings, buyer_doc)
+        invoice_type = _get_invoice_type(settings, buyer_doc)
         signed_xml = self.get_signed_xml()
         if not signed_xml:
             return Err(_('Could not find signed XML'))
@@ -559,7 +550,7 @@ class SalesInvoiceAdditionalFields(Document):
             return 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode('utf-8')
 
     def before_cancel(self) -> None:
-        frappe.throw(
+        fthrow(
             msg=_('You cannot cancel sales invoice according to ZATCA Regulations.'),
             title=_('This Action Is Not Allowed'),
         )
@@ -571,15 +562,20 @@ class SalesInvoiceAdditionalFields(Document):
             msg = _('Please set Address Line 1 for customer address.')
             msg_list.append(msg)
 
-        if not address.get('custom_building_number') or len(address.get('custom_building_number')) != 4:
-            msg = _('Please make sure that building number is set and is 4 digits exactly in customer address.')
+        building_number: str | None = address.get('custom_building_number')
+        if not building_number:
+            msg = _('Please set a building number for customer address.')
+            msg_list.append(msg)
+
+        if address.country == 'Saudi Arabia' and building_number and len(building_number) != 4:
+            msg = _('Please make sure that building number is 4 digits exactly in customer address.')
             msg_list.append(msg)
 
         if not address.city:
             msg = _('Please set city for customer address.')
             msg_list.append(msg)
 
-        if not address.pincode or len(address.pincode) != 5:
+        if address.country == 'Saudi Arabia' and (not address.pincode or len(address.pincode) != 5):
             msg = _('Please make sure that postal code is set and is 5 digits exactly in customer address.')
             msg_list.append(msg)
 
@@ -620,10 +616,10 @@ def fix_rejection(id: str):
 
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     if siaf.precomputed_invoice:
-        frappe.throw(ft('Cannot fix rejection for a precomputed invoice from Desk'))
+        fthrow(ft('Cannot fix rejection for a precomputed invoice from Desk'))
 
     if not siaf.is_latest:
-        frappe.throw(
+        fthrow(
             ft(
                 'This is not the latest Sales Invoice Additional Fields for invoice $invoice. Please fix '
                 'rejection from the latest',
@@ -633,7 +629,7 @@ def fix_rejection(id: str):
 
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     if not settings:
-        frappe.throw(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
+        fthrow(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
 
     new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     new_siaf.insert()
@@ -737,3 +733,56 @@ def get_zatca_integration_status(invoice_id: str, doctype: Literal['Sales Invoic
     )
 
     frappe.response['integration_status'] = integration_status or ''
+
+
+def _get_invoice_type_transaction(invoice_type: InvoiceType, is_export: bool) -> str:
+    result = '0100000' if invoice_type == 'Standard' else '0200000'
+    if is_export:
+        result = result[:4] + '1' + result[5:]
+    return result
+
+
+def _get_invoice_type(settings: ZATCABusinessSettings, customer: Customer) -> InvoiceType:
+    if settings.invoice_mode == InvoiceMode.Standard:
+        return 'Standard'
+
+    if settings.invoice_mode == InvoiceMode.Simplified:
+        return 'Simplified'
+
+    if is_b2b_customer(customer):
+        return 'Standard'
+
+    return 'Simplified'
+
+
+def _check_invoice_for_export(doc: SalesInvoice | POSInvoice | PaymentEntry) -> bool:
+    zatca_categories: set[str] = set()
+
+    tax_template_id = doc.get(get_right_fieldname('taxes_and_charges', doc.doctype))
+    if tax_template_id:
+        tax_category = frappe.db.get_value('Sales Taxes and Charges Template', tax_template_id, 'tax_category')
+        if tax_category:
+            zatca_categories.add(frappe.db.get_value('Tax Category', tax_category, 'custom_zatca_category'))
+
+    if doc.doctype != 'Payment Entry':
+        for item in doc.items:
+            if zatca_category := item.get('custom_zatca_item_tax_category'):
+                zatca_categories.add(zatca_category)
+
+    if not zatca_categories:
+        return False
+
+    export_status = ['Export' in zc for zc in zatca_categories]
+    if any(export_status):
+        # If any template has an export category, the document is marked for export, and all templates
+        # must have an export category
+        if not all(export_status):
+            fthrow(
+                ft(
+                    'This document mixes ZATCA tax categories for export of services or goods with non-export categories'
+                )
+            )
+
+        return True
+
+    return False

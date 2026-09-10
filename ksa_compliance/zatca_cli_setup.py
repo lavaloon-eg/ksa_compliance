@@ -93,7 +93,7 @@ def _extract_filename_from_headers(headers: CaseInsensitiveDict[str]) -> Result[
     content_disposition = headers.get('content-disposition')
     if not content_disposition:
         return Err(
-            ft("Can't figure out file name because the server response is missing the " "'Content-Disposition' header")
+            ft("Can't figure out file name because the server response is missing the 'Content-Disposition' header")
         )
 
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#syntax

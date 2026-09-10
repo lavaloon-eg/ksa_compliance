@@ -1,5 +1,4 @@
 import frappe
-from typing import Literal
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from dataclasses import asdict, is_dataclass
 
@@ -17,7 +16,7 @@ def dataclass_to_frappe_dict(obj) -> frappe._dict:
     return obj
 
 
-def get_right_fieldname(field_name: str, source_doc: Literal['Sales Invoice', 'Payment Entry']):
+def get_right_fieldname(field_name: str, source_doc: str):
     """
     This method is used to get the right field name and value from the source document.
     """

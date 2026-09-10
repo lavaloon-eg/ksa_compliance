@@ -6,3 +6,4 @@ tags
 node_modules
 __pycache__
 .idea/
+ksa_compliance/public/dist/
