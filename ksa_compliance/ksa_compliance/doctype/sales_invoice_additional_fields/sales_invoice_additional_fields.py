@@ -417,7 +417,7 @@ class SalesInvoiceAdditionalFields(Document):
         else:
             # Sales Invoice / POS Invoice: always use the billing address set on the invoice
             address_name = invoice.get('customer_address')
-            
+
             if not address_name and _is_b2b_customer:
                 invoice_form = frappe.utils.get_link_to_form(invoice.doctype, invoice.name)
                 fthrow(
