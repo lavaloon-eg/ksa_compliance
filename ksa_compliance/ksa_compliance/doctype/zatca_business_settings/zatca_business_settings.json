@@ -495,7 +495,7 @@
   },
   {
    "default": "0",
-   "description": "Enable in case of multiple branches with different commercial registration number.\n<br>\n<b>Warning:</b> This requires manual configuration of an Accounting Dimension for company branches.",
+   "description": "Enable in case of multiple branches, whether they share a unified commercial registration number or each has its own.\n<br>\n<b>Warning:</b> This requires manual configuration of an Accounting Dimension for company branches.",
    "fieldname": "enable_branch_configuration",
    "fieldtype": "Check",
    "label": "Enable Branch Configuration"
