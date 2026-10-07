@@ -8,12 +8,18 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.9
+
+Contributed by [Yamen Afifi](https://github.com/yamenafifi)
+
 * Branch Commercial Registration Number (CRN) no longer has to be unique across branches. A shared CRN now
   shows an informational warning instead of blocking the save, to support the unified national commercial
   registration (CR 2.0) in effect from April 2025. A CRN is still required for each branch when
   `Enable Branch Configuration` is on.
 
 ## 0.61.8
+
+Contributed by [Saleh](https://github.com/HotSalsa10)
 
 * Fix swapped Arabic exemption-reason texts for VATEX-SA-29 (Financial services) and VATEX-SA-29-7
   (Life insurance services)
