@@ -28,6 +28,9 @@ to a section with the version name.
     ERPNext books, so no money moves
   * Prepayment invoices are unaffected: a `Payment Entry` adjusts its VAT after the breakdown is built
 * Add tests for the VAT breakdown, covering `BR-CO-14`, `BR-CO-17` and `BR-Z-09`/`BR-E-09`
+* Add `ksa_compliance/tests`, one test module per ZATCA business rule (`BR-CO-14`, `BR-CO-15`, `BR-CO-17`, `BR-Z-09`,
+  `BR-E-09`, `BR-O-09`). Each rule is checked on the XML generated for 44 invoices and credit notes, with prices
+  excluding and including VAT, from one to 22 lines, mixing standard rated, zero rated, exempt and out of scope lines
 
 ## 0.61.9
 
