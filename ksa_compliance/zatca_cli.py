@@ -106,6 +106,8 @@ class ValidationResult:
 @frappe.whitelist()
 def check_setup(zatca_cli_path: str, java_home: Optional[str]) -> NoReturn:
     """Shows a desk dialog with the version of the Lava ZATCA CLI if found, or an error otherwise"""
+    frappe.only_for('System Manager')
+
     result = run_command(zatca_cli_path, ['-v'], java_home=java_home)
     result.throw_if_failure()
     frappe.msgprint(result.msg, ft('ZATCA CLI'))
@@ -113,6 +115,8 @@ def check_setup(zatca_cli_path: str, java_home: Optional[str]) -> NoReturn:
 
 @frappe.whitelist()
 def check_validation_details_support(zatca_cli_path: str, java_home: Optional[str]) -> dict:
+    frappe.only_for('System Manager')
+
     result = run_command(zatca_cli_path, ['-v'], java_home=java_home)
     result.throw_if_failure()
     # Version 2.1.0 is the first version to both support validation and include a 'version' in the data payload
@@ -143,6 +147,8 @@ def setup(override_cli_download_url: str | None, override_jre_download_url: str 
 
     def progress_callback(description: str, percent: float):
         frappe.publish_progress(title=ft('Setting up CLI'), percent=percent, description=description)
+
+    frappe.only_for('System Manager')
 
     try:
         directory = get_zatca_tool_path()

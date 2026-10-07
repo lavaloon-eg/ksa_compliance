@@ -417,7 +417,7 @@ class SalesInvoiceAdditionalFields(Document):
         else:
             # Sales Invoice / POS Invoice: always use the billing address set on the invoice
             address_name = invoice.get('customer_address')
-            
+
             if not address_name and _is_b2b_customer:
                 invoice_form = frappe.utils.get_link_to_form(invoice.doctype, invoice.name)
                 fthrow(
@@ -627,6 +627,8 @@ def download_xml(id: str):
     Frappe doesn't know how to display an XML field without escaping it, so we made the field hidden. The only way
     for users to view the XML is to download it through this endpoint
     """
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
+
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
 
     # Reference: https://frappeframework.com/docs/user/en/python-api/response
@@ -638,10 +640,7 @@ def download_xml(id: str):
 
 @frappe.whitelist()
 def fix_rejection(id: str):
-    import frappe.permissions
-
-    if not frappe.permissions.has_permission('Sales Invoice Additional Fields'):
-        raise PermissionError()
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
 
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     if siaf.precomputed_invoice:
@@ -709,6 +708,8 @@ def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
 
 @frappe.whitelist()
 def check_pdf_a3b_support(id: str):
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
+
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     check_pdfa3b_support_or_throw(settings.zatca_cli_path, settings.java_home)
@@ -716,6 +717,8 @@ def check_pdf_a3b_support(id: str):
 
 @frappe.whitelist()
 def download_zatca_pdf(id: str, print_format: str = 'ZATCA Phase 2 Print Format', lang: str = 'en'):
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
+
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     sales_invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', siaf.sales_invoice))
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)

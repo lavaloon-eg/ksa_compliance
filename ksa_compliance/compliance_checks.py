@@ -73,6 +73,7 @@ def perform_compliance_checks(
     item_id: str,
     tax_category_id: str,
 ) -> NoReturn:
+    frappe.only_for('System Manager')
     frappe.utils.background_jobs.enqueue(
         _perform_compliance_checks,
         business_settings_id=business_settings_id,

@@ -48,6 +48,8 @@ class ZATCAPhase1BusinessSettings(Document):
 
 @frappe.whitelist()
 def get_company_primary_address(company):
+    frappe.only_for('System Manager')
+
     dynamic_link = DocType('Dynamic Link')
     address = DocType('Address')
     query = (
@@ -63,6 +65,8 @@ def get_company_primary_address(company):
 
 @frappe.whitelist()
 def get_all_company_addresses(company):
+    frappe.only_for('System Manager')
+
     return frappe.get_all(
         'Dynamic Link', filters={'link_name': company, 'parenttype': 'Address'}, fields=['parent'], pluck='parent'
     )

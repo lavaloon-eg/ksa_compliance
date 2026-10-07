@@ -47,6 +47,8 @@ def download_xml(id: str):
     Frappe doesn't know how to display an XML field without escaping it, so we made the field hidden. The only way
     for users to view the XML is to download it through this endpoint
     """
+    frappe.has_permission('ZATCA Precomputed Invoice', throw=True)
+
     doc = cast(ZATCAPrecomputedInvoice, frappe.get_doc('ZATCA Precomputed Invoice', id))
 
     # Reference: https://frappeframework.com/docs/user/en/python-api/response
