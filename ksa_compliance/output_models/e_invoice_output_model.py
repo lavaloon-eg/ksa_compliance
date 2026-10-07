@@ -445,25 +445,30 @@ class Einvoice:
     def get_business_settings_and_seller_details(self):
         # TODO: special validations handling
         has_branch_address = False
-        if self.branch_doc:
+        branch_has_crn = (
+            self.branch_doc
+            and getattr(self.branch_doc, 'custom_branch_ids', None)
+            and any(
+                strip(row.value) for row in self.branch_doc.custom_branch_ids if hasattr(row, 'value')
+            )
+        )
+
+        if self.branch_doc and branch_has_crn:
+            # Branch has its own CRN — use branch seller IDs
             if self.branch_doc.custom_company_address:
                 has_branch_address = True
 
-            party_identification = self.get_list_value(
+            self.get_list_value(
                 field_name='custom_branch_ids',
                 source_doc=self.branch_doc,
                 xml_name='party_identifications',
                 parent='seller_details',
             )
-            if not party_identification:
-                fthrow(
-                    msg=ft(
-                        'Commercial registration number is mandatory for branch $branch.',
-                        branch=self.sales_invoice_doc.branch,
-                    ),
-                    title=ft('Mandatory CRN Error'),
-                )
         else:
+            # No branch or branch without its own CRN — fall back to Business Settings seller IDs
+            if self.branch_doc and self.branch_doc.custom_company_address:
+                has_branch_address = True
+
             self.get_list_value(
                 field_name='other_ids',
                 source_doc=self.business_settings_doc,
