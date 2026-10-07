@@ -22,7 +22,10 @@ to a section with the version name.
     `BR-E-09`) and every category still satisfies `BR-CO-17`
   * A difference too large to be rounding (an invoice discount applied on grand total, or a non-VAT charge in the
     taxes table) is deliberately *not* redistributed, so ZATCA reports the underlying inconsistency instead of the
-    app hiding it behind a `BR-CO-17` violation
+    app hiding it behind a `BR-CO-17` violation. Rounding accounts for at most one halala per item line, which is
+    the limit applied
+  * Only the VAT category amounts (`BT-117`) change: the invoice VAT (`BT-110`) and every line's VAT stay the amounts
+    ERPNext books, so no money moves
   * Prepayment invoices are unaffected: a `Payment Entry` adjusts its VAT after the breakdown is built
 * Add tests for the VAT breakdown, covering `BR-CO-14`, `BR-CO-17` and `BR-Z-09`/`BR-E-09`
 

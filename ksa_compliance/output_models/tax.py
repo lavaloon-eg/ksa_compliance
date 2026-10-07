@@ -94,18 +94,15 @@ def check_item_tax_template(doc: SalesInvoice, item_lines: list, sales_taxes_and
         )
 
 
-# These are NOT a tolerance ZATCA grants us: BR-CO-14 is checked for exact equality, and a single
-# halala of difference is rejected. They decide something else entirely, namely whether a gap
+# This is NOT a tolerance ZATCA grants us: BR-CO-14 is checked for exact equality, and a single
+# halala of difference is rejected. It decides something else entirely, namely whether a gap
 # between the invoice-level VAT and the line-derived VAT is small enough to be explained by
 # per-line rounding, in which case the breakdown is safe to re-derive from the invoice-level
 # amount. A wider gap means the lines and the invoice genuinely disagree, and no allocation can
 # rescue that invoice, so we leave it alone rather than corrupt the breakdown.
 #
-# The smallest gap we always treat as rounding drift, however few lines the invoice has:
-MAX_ROUNDING_DRIFT = 0.05
-
-# Plus an allowance per item line, since ERPNext rounds each line's VAT to the currency precision
-# and the error accumulates with the number of lines.
+# One halala per item line, since ERPNext rounds each line's VAT to the currency precision and
+# the error accumulates with the number of lines.
 MAX_ROUNDING_DRIFT_PER_LINE = 0.01
 
 
@@ -130,7 +127,7 @@ def create_tax_total(tax_categories: dict, total_taxes_and_charges: float | None
     exempt category would be handed VAT and fail BR-Z-09/BR-E-09, and the standard rated category
     would fail BR-CO-17.
 
-    A gap too wide to be rounding is left alone; see [MAX_ROUNDING_DRIFT].
+    A gap too wide to be rounding is left alone; see [MAX_ROUNDING_DRIFT_PER_LINE].
     """
     amounts_by_category = {key: _get_amounts(tax_categories[key]) for key in tax_categories}
     tax_amount_by_category = _allocate_tax_amounts(tax_categories, amounts_by_category, total_taxes_and_charges)
@@ -183,8 +180,10 @@ def _allocate_tax_amounts(
         return line_amounts
 
     line_count = sum(len(tax_categories[key].items) for key in tax_categories)
-    max_drift = max(MAX_ROUNDING_DRIFT, MAX_ROUNDING_DRIFT_PER_LINE * line_count)
-    if abs(target - expected_total) > max_drift:
+    # Both sides are rounded: a gap of exactly one halala per line is still rounding, and an
+    # unrounded float difference such as 1.31 - 1.30 = 0.010000000000000009 would exceed it.
+    max_drift = flt(MAX_ROUNDING_DRIFT_PER_LINE * line_count, 2)
+    if flt(abs(target - expected_total), 2) > max_drift:
         return line_amounts
 
     # The residue from rounding each share goes to the category carrying the most VAT, so it can

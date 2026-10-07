@@ -322,6 +322,26 @@ class TestCreateTaxTotal(FrappeTestCase):
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 150.00)
         self.assert_br_co_17(tax_total)
 
+    def test_single_line_gap_of_one_halala_is_absorbed(self):
+        """One line priced 10.01 tax-inclusive: ERPNext books 1.31 (gross - net) while the line VAT
+        is 8.70 x 15% = 1.305 -> 1.30. A one-halala gap on a one-line invoice is rounding and must be
+        absorbed, even though 1.31 - 1.30 is 0.010000000000000009 as a float.
+        """
+        categories = build_categories(('S15', STANDARD, 15.0, [build_item(8.70, 1.30)]))
+
+        tax_total = create_tax_total(categories, 1.31)
+
+        self.assert_all_rules(tax_total, 1.31)
+        self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 1.31)
+
+    def test_single_line_gap_of_two_halalas_is_left_alone(self):
+        """One line can drift by at most one halala, so a two-halala gap is not rounding."""
+        categories = build_categories(('S15', STANDARD, 15.0, [build_item(8.70, 1.30)]))
+
+        tax_total = create_tax_total(categories, 1.32)
+
+        self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 1.30)
+
     def test_drift_absorbed_under_every_rounding_method(self):
         """The XML renders every amount through ``frappe.utils.data.rounded``, which honours the
         system's rounding method, so the breakdown has to agree with that rather than with Python's
