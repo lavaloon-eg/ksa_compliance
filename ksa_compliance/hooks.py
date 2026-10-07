@@ -3,7 +3,7 @@ app_title = 'KSA Compliance'
 app_publisher = 'LavaLoon'
 app_description = 'KSA Compliance app for E-invoice'
 app_email = 'info@lavaloon.com'
-app_license = 'Copyright (c) 2023 LavaLoon'
+app_license = 'GNU Affero General Public License (v3)'
 # required_apps = []
 
 # Includes in <head>

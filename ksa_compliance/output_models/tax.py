@@ -1,4 +1,7 @@
+from math import copysign
+
 import frappe
+from frappe.utils import rounded
 
 from ksa_compliance.standard_doctypes.tax_category import map_tax_category
 from .service import get_right_fieldname, dataclass_to_frappe_dict
@@ -125,7 +128,24 @@ def _get_amounts(tax_category: TaxCategoryByItems) -> frappe._dict:
         total_discount += row.amount - row.net_amount
     amounts.taxable_amount = taxable_amount
     amounts.tax_amount = tax_amount
-    amounts.total_discount = total_discount
+    # In some edge cases, such as invoices generated with precision higher than two digits, total_discount ends up
+    # being `-0.0` after rounding to two-digit precision. As a temporary solution, we detect such cases, log a warning,
+    # and correct the amount manually. Ideally, we should unify number handling over the invoice model since negative
+    # values are prohibited except for the rounding amount.
+    #
+    # Note that `-0.0 == 0.0` is `True` in python, so we can't detect a negative zero with an equality check. We have
+    # to check the sign.
+    #
+    # Also note that we do not blindly `abs` the value here to avoid hiding other bugs or unexpected scenarios that
+    # could produce a negative total discount. We let them through to trigger a ZATCA validation error blocking
+    # submission (if enabled) or a clear ZATCA rejection.
+    if rounded(total_discount, 2) == 0.0 and copysign(1.0, total_discount) == -1.0:
+        from ksa_compliance import logger
+
+        logger.warn(f'Detected a negative discount ({total_discount}) processing {tax_category}')
+        amounts.total_discount = 0.0
+    else:
+        amounts.total_discount = total_discount
 
     return amounts
 

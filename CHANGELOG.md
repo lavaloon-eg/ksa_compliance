@@ -8,6 +8,46 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.61.9
+
+Contributed by [Yamen Afifi](https://github.com/yamenafifi)
+
+* Branch Commercial Registration Number (CRN) no longer has to be unique across branches. A shared CRN now
+  shows an informational warning instead of blocking the save, to support the unified national commercial
+  registration (CR 2.0) in effect from April 2025. A CRN is still required for each branch when
+  `Enable Branch Configuration` is on.
+
+## 0.61.8
+
+Contributed by [Saleh](https://github.com/HotSalsa10)
+
+* Fix swapped Arabic exemption-reason texts for VATEX-SA-29 (Financial services) and VATEX-SA-29-7
+  (Life insurance services)
+
+## 0.61.7
+
+Contributed by [Saleh](https://github.com/HotSalsa10)
+* Fix prepayment invoice document references hard-coding the seconds component of issue-time to 00.
+* Add a timeout to ZATCA API calls so a hung connection to the Fatoora gateway no longer blocks the batch sync job or
+  a live-mode worker indefinitely. Timeouts surface as the existing `Resend` integration status.
+
+## 0.61.6
+
+* Detect and correct negative zero discount (-0.0) for invoices generated with a precision higher than two digits
+* Use JavaScript (`mandatory_depends_on`) to make ZATCA payment means code field in `Mode of Payment` mandatory only in
+  the form editor
+  * This makes it non-mandatory to programmatic manipulation (e.g. creating it by code directly or through companies).
+    This fixes errors that used to happen when creating a company or running tests.
+
+## 0.61.5
+
+Contributed by [abdopcnet](https://github.com/abdopcnet)
+* Ignore permissions consistently when saving or submitting `Sales Invoice Additional Fields` documents.
+  This doctype is not meant to be handled by users, and there were a few instances were we relied on a
+  previously set flag to ignore permissions that made the code unclear
+* Reload `Sales Invoice Additional Fields` in live mode if it's been modified after queuing, e.g. due to
+  a hook.
+
 ## 0.61.4
 
 * Fix migration failure due to a reference to a non-existent patch in patches.txt

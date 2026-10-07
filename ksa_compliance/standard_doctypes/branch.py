@@ -6,7 +6,7 @@ from ksa_compliance.translation import ft
 
 def validate_branch(doc, method):
     validate_mandatory_crn(doc)
-    validate_duplicate_crn(doc)
+    warn_on_duplicate_crn(doc)
 
 
 def validate_mandatory_crn(doc):
@@ -24,7 +24,14 @@ def validate_mandatory_crn(doc):
             )
 
 
-def validate_duplicate_crn(doc):
+def warn_on_duplicate_crn(doc):
+    """
+    Warns, without blocking, if another branch already uses the same CRN.
+
+    Under the unified commercial registration (CR 2.0, in force from April 2025) a company has a single
+    national CR covering all of its branches, so sharing one CRN across branches is expected rather than an
+    error.
+    """
     if doc.custom_branch_ids:
         crn = doc.custom_branch_ids[0].value
         crn_exists = frappe.db.exists(
@@ -33,4 +40,12 @@ def validate_duplicate_crn(doc):
         )
         if crn and crn_exists:
             branch = frappe.get_value('Additional Seller IDs', crn_exists, 'parent')
-            fthrow(msg=ft('This CRN is configured for branch: $branch', branch=branch), title=ft('Duplicate CRN Error'))
+            frappe.msgprint(
+                msg=ft(
+                    'This CRN is also configured for branch: $branch. This is expected if your company uses a '
+                    'single unified commercial registration for all of its branches.',
+                    branch=branch,
+                ),
+                title=ft('Duplicate CRN'),
+                indicator='orange',
+            )

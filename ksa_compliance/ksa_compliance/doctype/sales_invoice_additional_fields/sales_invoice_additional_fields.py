@@ -186,7 +186,7 @@ class SalesInvoiceAdditionalFields(Document):
 
         buyer_doc = self._get_buyer_doc(sales_invoice)
         invoice_type = _get_invoice_type(settings, buyer_doc)
-        self._set_buyer_details(buyer_doc, invoice_type)
+        self._set_buyer_details(buyer_doc, invoice_type, sales_invoice)
         self.sum_of_charges = self._compute_sum_of_charges(sales_invoice.taxes)
         self.invoice_type_transaction = _get_invoice_type_transaction(invoice_type, is_export)
         self.invoice_type_code = self._get_invoice_type_code(sales_invoice)
@@ -314,8 +314,10 @@ class SalesInvoiceAdditionalFields(Document):
             signed_xml, self.invoice_hash, invoice_type, settings.fatoora_server_url, token, secret
         )
 
-        # Regardless of what happened, save the side effects of the API call
-        self.save()
+        # Regardless of what happened, save the side effects of the API call.
+        # Background jobs run as the invoice submitter; they often lack Write/Submit
+        # on this DocType while still being allowed to post Sales Invoice.
+        self.save(ignore_permissions=True)
 
         # Resend means we keep ourselves as draft to be picked up by the next run of the background job
         if integration_status == 'Resend':
@@ -326,6 +328,9 @@ class SalesInvoiceAdditionalFields(Document):
         else:
             # Any case other than resend is submitted
             self.allow_submit = 1
+            # Document.submit() takes no kwargs in this Frappe version; use flags
+            # so the inner save() skips permission checks (same as save(ignore_permissions=True)).
+            self.flags.ignore_permissions = True
             self.submit()
 
         return Ok(f'Invoice sent to ZATCA. Integration status: {integration_status}')
@@ -373,36 +378,60 @@ class SalesInvoiceAdditionalFields(Document):
             customer_name = sales_invoice.customer
         return cast(Customer, frappe.get_doc('Customer', customer_name))
 
-    def _set_buyer_details(self, customer: Customer, invoice_type: InvoiceType):
+    def _set_buyer_details(
+        self,
+        customer: Customer,
+        invoice_type: InvoiceType,
+        invoice: SalesInvoice | POSInvoice | PaymentEntry,
+    ):
         self.buyer_vat_registration_number = customer.get('custom_vat_registration_number')
         _is_b2b_customer = invoice_type == 'Standard'
-        if customer.customer_primary_address:
-            address_doc = cast(Address, frappe.get_doc('Address', customer.customer_primary_address))
-            self._set_buyer_address(address_doc, _is_b2b_customer)
-        else:
-            address = frappe.db.get_all(
-                'Dynamic Link',
-                {
-                    'parenttype': 'Address',
-                    'parentfield': 'links',
-                    'link_doctype': 'Customer',
-                    'link_name': customer.name,
-                },
-                pluck='parent',
-            )
-            if address:
-                address_doc = cast(Address, frappe.get_doc('Address', address[0]))
-                self._set_buyer_address(address_doc, _is_b2b_customer)
+
+        if invoice.doctype == 'Payment Entry':
+            # Payment Entry: retain existing Customer-master address lookup
+            if customer.customer_primary_address:
+                address_name = customer.customer_primary_address
             else:
-                if _is_b2b_customer:
-                    customer_form = frappe.utils.get_link_to_form('Customer', customer.name)
-                    fthrow(
-                        ft(
-                            'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
-                            customer=customer_form,
-                        ),
-                        title=ft('Address Not Found Error'),
-                    )
+                address = frappe.db.get_all(
+                    'Dynamic Link',
+                    {
+                        'parenttype': 'Address',
+                        'parentfield': 'links',
+                        'link_doctype': 'Customer',
+                        'link_name': customer.name,
+                    },
+                    pluck='parent',
+                )
+                if address:
+                    address_name = address[0]
+
+            if not address_name and _is_b2b_customer:
+                customer_form = frappe.utils.get_link_to_form('Customer', customer.name)
+                fthrow(
+                    ft(
+                        'Customer address is mandatory for B2B transactions; Please set a customer address for B2B customer $customer.',
+                        customer=customer_form,
+                    ),
+                    title=ft('Address Not Found Error'),
+                )
+        else:
+            # Sales Invoice / POS Invoice: always use the billing address set on the invoice
+            address_name = invoice.get('customer_address')
+
+            if not address_name and _is_b2b_customer:
+                invoice_form = frappe.utils.get_link_to_form(invoice.doctype, invoice.name)
+                fthrow(
+                    ft(
+                        'Billing address is mandatory for B2B transactions; '
+                        'Please set the Billing Address on invoice $invoice.',
+                        invoice=invoice_form,
+                    ),
+                    title=ft('Address Not Found Error'),
+                )
+
+        if address_name:
+            address_doc = cast(Address, frappe.get_doc('Address', address_name))
+            self._set_buyer_address(address_doc, _is_b2b_customer)
 
         for item in customer.get('custom_additional_ids'):
             if strip(item.value):
@@ -598,6 +627,8 @@ def download_xml(id: str):
     Frappe doesn't know how to display an XML field without escaping it, so we made the field hidden. The only way
     for users to view the XML is to download it through this endpoint
     """
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
+
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
 
     # Reference: https://frappeframework.com/docs/user/en/python-api/response
@@ -609,10 +640,7 @@ def download_xml(id: str):
 
 @frappe.whitelist()
 def fix_rejection(id: str):
-    import frappe.permissions
-
-    if not frappe.permissions.has_permission('Sales Invoice Additional Fields'):
-        raise PermissionError()
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
 
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     if siaf.precomputed_invoice:
@@ -632,7 +660,7 @@ def fix_rejection(id: str):
         fthrow(ft('Missing ZATCA business settings for sales invoice: $invoice', invoice=siaf.sales_invoice))
 
     new_siaf = SalesInvoiceAdditionalFields.create_for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
-    new_siaf.insert()
+    new_siaf.insert(ignore_permissions=True)
 
     if settings.is_live_sync:
         frappe.utils.background_jobs.enqueue(_submit_additional_fields, doc=new_siaf, enqueue_after_commit=True)
@@ -667,6 +695,11 @@ def _get_integration_status(code: int) -> ZatcaIntegrationStatus:
 
 
 def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
+    current_modified = frappe.db.get_value('Sales Invoice Additional Fields', doc.name, 'modified')
+    if current_modified and str(current_modified) != str(doc.modified):
+        logger.info(f'Reloading {doc.name} because it was modified after enqueue')
+        doc.reload()
+
     logger.info(f'Submitting {doc.name}')
     result = doc.submit_to_zatca()
     message = result.ok_value if is_ok(result) else result.err_value
@@ -675,6 +708,8 @@ def _submit_additional_fields(doc: SalesInvoiceAdditionalFields):
 
 @frappe.whitelist()
 def check_pdf_a3b_support(id: str):
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
+
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)
     check_pdfa3b_support_or_throw(settings.zatca_cli_path, settings.java_home)
@@ -682,6 +717,8 @@ def check_pdf_a3b_support(id: str):
 
 @frappe.whitelist()
 def download_zatca_pdf(id: str, print_format: str = 'ZATCA Phase 2 Print Format', lang: str = 'en'):
+    frappe.has_permission('Sales Invoice Additional Fields', throw=True)
+
     siaf = cast(SalesInvoiceAdditionalFields, frappe.get_doc('Sales Invoice Additional Fields', id))
     sales_invoice_doc = cast(SalesInvoice, frappe.get_doc('Sales Invoice', siaf.sales_invoice))
     settings = ZATCABusinessSettings.for_invoice(siaf.sales_invoice, siaf.invoice_doctype)

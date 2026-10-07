@@ -280,8 +280,8 @@ Commercial registration number is mandatory for branch,رقم السجل الت�
 Mandatory CRN Error,رقم السجل التجاري (CRN) إلزامي
 Mandatory CRN,رقم السجل التجاري (CRN) إلزامي
 CRN is mandatory when ZATCA branch configuration is enabled for company,رقم السجل التجاري (CRN) إلزامي عندما تكون إعدادات الفرع الخاصة بـ مؤسسة الزكاة والدخل مفعلة للشركة.
-This CRN is configured for branch,رقم السجل التجاري (CRN) هذا مُعد للفرع.
-Duplicate CRN Error,خطأ: رقم السجل التجاري (CRN) مكرر.
+"This CRN is also configured for branch: $branch. This is expected if your company uses a single unified commercial registration for all of its branches.","رقم السجل التجاري (CRN) هذا مُعد أيضاً للفرع: $branch. هذا متوقع إذا كانت شركتك تستخدم سجلاً تجارياً موحداً لجميع الفروع."
+Duplicate CRN,رقم السجل التجاري (CRN) مكرر
 Please update ZATCA CLI to $version or later to support PDF/A-3b generation,يرجى تحديث ZATCA CLI للإصدار $version أو إصدار لاحق لدعم توليد ملفات PDF/A-3b
 MOMRAH License,رخصة وزارة الشؤون البلدية
 MHRSD License,رخصة وزارة الموارد البشرية
@@ -430,3 +430,4 @@ Advanced reporting for review and follow-up,تقارير متقدمة للمرا
 Proactive compliance enablement,تمكين استباقي للامتثال,
 Additional support for teams managing higher compliance complexity,دعم إضافي للفرق التي تدير متطلبات امتثال أكثر تعقيدا,
 This document mixes ZATCA tax categories for export of services or goods with non-export categories,هذه الوثيقة تخلط فئات زاتكا ضريبية لتصدير الخدمات أو السلع بفئات ضريبية لغير التصدير,
+"Billing address is mandatory for B2B transactions; Please set the Billing Address on invoice $invoice.","عنوان الفواتير إلزامي لمعاملات B2B؛ يرجى تعيين عنوان الفواتير في الفاتورة $invoice."

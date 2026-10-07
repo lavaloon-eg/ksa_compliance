@@ -425,6 +425,8 @@ class ZATCABusinessSettings(Document):
 
 @frappe.whitelist()
 def fetch_company_addresses(company_name):
+    frappe.only_for('System Manager')
+
     company_list_dict = frappe.get_all('Dynamic Link', filters={'link_name': company_name}, fields=['parent'])
     company_list = [address.parent for address in company_list_dict]
     return company_list
@@ -432,12 +434,16 @@ def fetch_company_addresses(company_name):
 
 @frappe.whitelist()
 def onboard(business_settings_id: str, otp: str) -> NoReturn:
+    frappe.only_for('System Manager')
+
     settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
     settings.onboard(otp)
 
 
 @frappe.whitelist()
 def get_production_csid(business_settings_id: str, otp: str) -> NoReturn:
+    frappe.only_for('System Manager')
+
     settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
     settings.get_production_csid(otp)
 
@@ -445,6 +451,8 @@ def get_production_csid(business_settings_id: str, otp: str) -> NoReturn:
 @frappe.whitelist()
 def create_business_settings(source_name: str, target_doc=None):
     from frappe.model.mapper import get_mapped_doc
+
+    frappe.only_for('System Manager')
 
     doctype = 'ZATCA Business Settings'
     doc = get_mapped_doc(
@@ -465,6 +473,8 @@ def create_business_settings(source_name: str, target_doc=None):
 
 @frappe.whitelist()
 def revoke_business_settings(settings_id: str, company: str):
+    frappe.only_for('System Manager')
+
     sales_invoice = frappe.qb.DocType('Sales Invoice')
     pos_invoice = frappe.qb.DocType('POS Invoice')
     siaf = frappe.qb.DocType('Sales Invoice Additional Fields')

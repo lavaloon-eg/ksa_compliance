@@ -73,10 +73,11 @@ def _get_uuid(document_reference: PaymentEntry) -> str:
 
 def _format_time(time_delta: timedelta) -> str:
     """Convert timedelta to HH:MM:SS format"""
-    total_seconds = time_delta.total_seconds()
-    hours = int(total_seconds // 3600)
-    minutes = int((total_seconds % 3600) // 60)
-    return f'{hours:02d}:{minutes:02d}:00'
+    total_seconds = int(time_delta.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return f'{hours:02d}:{minutes:02d}:{seconds:02d}'
 
 
 def _get_tax_info(document_reference: PaymentEntry) -> tuple[float, str]:
