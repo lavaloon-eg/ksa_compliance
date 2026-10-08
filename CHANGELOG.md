@@ -10,12 +10,16 @@ to a section with the version name.
 
 ## 0.61.9
 
-Contributed by [Yamen Afifi](https://github.com/yamenafifi)
+Contributed by [Khaled Rashad](https://github.com/Khaldosh249)
 
 * Branch Commercial Registration Number (CRN) no longer has to be unique across branches. A shared CRN now
   shows an informational warning instead of blocking the save, to support the unified national commercial
   registration (CR 2.0) in effect from April 2025. A CRN is still required for each branch when
   `Enable Branch Configuration` is on.
+
+Contributed by [Yamen Afifi](https://github.com/yamenafifi)
+
+* Read customer billing address from the sales invoice instead of the customer.
 
 ## 0.61.8
 
