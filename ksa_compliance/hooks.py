@@ -6,6 +6,16 @@ app_email = 'info@lavaloon.com'
 app_license = 'GNU Affero General Public License (v3)'
 # required_apps = []
 
+# Each item in the list will be shown as an app in the apps page
+add_to_apps_screen = [
+    {
+        'name': 'ksa_compliance',
+        'logo': '/assets/ksa_compliance/images/zatca-icon.svg',
+        'title': 'ZATCA',
+        'route': '/desk/zatca',
+    }
+]
+
 # Includes in <head>
 # ------------------
 
@@ -42,7 +52,7 @@ doctype_js = {
 # Svg Icons
 # ------------------
 # include app icons in desk
-# app_include_icons = "ksa_compliance/public/icons.svg"
+app_include_icons = ['/assets/ksa_compliance/icons/module-icons.svg']
 
 # Home Pages
 # ----------
