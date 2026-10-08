@@ -1,17 +1,19 @@
-import os
 import json
+import os
 import urllib.parse
 from typing import cast
-import requests
-from requests import HTTPError
 
 import frappe
-from frappe import _
-from frappe.utils import get_url
-from frappe.core.doctype.file.file import File
+import requests
 from erpnext.setup.doctype.company.company import Company
+from frappe import _
+from frappe.core.doctype.file.file import File
+from frappe.utils import get_url
+from requests import HTTPError
 
 from ksa_compliance import logger
+from ksa_compliance.throw import fthrow
+from ksa_compliance.translation import ft
 
 
 @frappe.whitelist(methods=['GET'])
@@ -40,7 +42,7 @@ def get_feedback_settings():
 
 
 @frappe.whitelist()
-def send_feedback_email(company: str, subject: str, description: str, attachments: str = None):
+def send_feedback_email(company: str, subject: str, description: str, attachments: str | None = None):
     """Send feedback email using the default email account"""
     try:
         config = get_feedback_settings()
@@ -51,6 +53,8 @@ def send_feedback_email(company: str, subject: str, description: str, attachment
         """
 
         company_doc = cast(Company, frappe.get_doc('Company', company))
+        company_doc.check_permission('read')
+
         company_email = company_doc.email
         company_phone = company_doc.phone_no
         email_content += f"""
@@ -65,6 +69,19 @@ def send_feedback_email(company: str, subject: str, description: str, attachment
             email_content += '<h4>Attachments:</h4><ul>'
             for attachment in attachments:
                 file_doc = cast(File, frappe.get_doc('File', {'file_url': attachment}))
+                file_doc.check_permission('read')
+
+                if file_doc.owner != frappe.session.user:
+                    fthrow(ft("You're not the owner of this file: '$file'", file=attachment))
+
+                if file_doc.is_private:
+                    fthrow(
+                        ft(
+                            "The file '$file' is private and can't be shared. Please make sure to attach public files only",
+                            file=attachment,
+                        )
+                    )
+
                 file_extension = os.path.splitext(file_doc.file_name)[1].lower()
                 if file_extension not in config['ALLOWED_FILE_TYPES']:
                     frappe.throw(_('Invalid file type: {0}').format(file_extension))
@@ -75,13 +92,6 @@ def send_feedback_email(company: str, subject: str, description: str, attachment
                         )
                     )
 
-                if file_doc.is_private:
-                    existing_file = frappe.db.exists('File', {'content_hash': file_doc.content_hash, 'is_private': 0})
-                    if existing_file:
-                        file_doc = cast(File, frappe.get_doc('File', existing_file))
-                    else:
-                        file_doc.is_private = 0
-                        file_doc.save(ignore_permissions=True)
                 full_url = get_url(file_doc.file_url)
                 email_content += f"<li><a href='{full_url}'>{file_doc.file_name}</a></li>"
             email_content += '</ul>'
@@ -90,7 +100,7 @@ def send_feedback_email(company: str, subject: str, description: str, attachment
         body = {'subject': f'KSA Compliance App Feedback: {subject}', 'content': email_content}
 
         try:
-            response = requests.post(api_url, json=body)
+            response = requests.post(api_url, json=body, timeout=30)
             response.raise_for_status()
             frappe.response['message'] = _('Feedback email sent successfully')
             frappe.response['http_status_code'] = 200
@@ -107,7 +117,7 @@ def send_feedback_email(company: str, subject: str, description: str, attachment
             if e.response.text:
                 logger.info(f'Response: {e.response.text}')
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f'An error occurred while sending feedback email: {e}')
         frappe.log_error(frappe.get_traceback(), 'Feedback Email Error')
         frappe.response['message'] = str(e)
