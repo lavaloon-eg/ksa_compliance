@@ -17,7 +17,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "integration",
+ "icon": "zatca-mark-duotone",
  "idx": 0,
  "indicator_color": "orange",
  "is_hidden": 0,
@@ -202,7 +202,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-05-20 21:30:01.968924",
+ "modified": "2026-10-08 02:22:40.000000",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "ZATCA",
