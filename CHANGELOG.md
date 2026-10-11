@@ -8,6 +8,11 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.62.0
+
+Contributed by [Assem Bahnasy](https://github.com/AssemBahnasy)
+* ZATCA tile, dock, sidebar and icons for v16 desk after Frappe 16.50
+
 ## 0.61.9
 
 Contributed by [Khaled Rashad](https://github.com/Khaldosh249)
