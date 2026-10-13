@@ -1,15 +1,16 @@
 import base64
 import dataclasses
 import traceback
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import cast, List, Dict, Callable, TypeVar, Optional, Tuple
+from typing import TypeVar, cast
 from urllib.parse import urljoin
 
 import requests
-from requests import HTTPError, Response, JSONDecodeError
+from requests import HTTPError, JSONDecodeError, Response
 from requests.auth import HTTPBasicAuth
-from result import Result, Ok, Err
+from result import Err, Ok, Result
 
 from ksa_compliance import logger
 
@@ -66,11 +67,11 @@ class WarningOrError:
 
 @dataclass
 class ReportOrClearInvoiceResult:
-    status: Optional[str]
-    invoice_hash: Optional[str]
-    cleared_invoice: Optional[str]
-    warnings: List[WarningOrError]
-    errors: List[WarningOrError]
+    status: str | None
+    invoice_hash: str | None
+    cleared_invoice: str | None
+    warnings: list[WarningOrError]
+    errors: list[WarningOrError]
     raw_response: str
 
     def to_json(self) -> dict:
@@ -124,7 +125,7 @@ class ReportOrClearInvoiceError:
     error: str
 
 
-def get_compliance_csid(server: str, csr: str, otp: str) -> Tuple[Result[ComplianceResult, str], int]:
+def get_compliance_csid(server: str, csr: str, otp: str) -> tuple[Result[ComplianceResult, str], int]:
     """Gets a compliance CSID from ZATCA using a CSR and OTP."""
     headers = {
         'Accept-Version': 'V2',
@@ -136,7 +137,7 @@ def get_compliance_csid(server: str, csr: str, otp: str) -> Tuple[Result[Complia
 
 def get_production_csid(
     server: str, compliance_request_id: str, otp: str, security_token: str, secret: str
-) -> Tuple[Result[ComplianceResult, str], int]:
+) -> tuple[Result[ComplianceResult, str], int]:
     """Gets a production CSID from ZATCA for a compliance request."""
     headers = {
         'Accept-Version': 'V2',
@@ -157,7 +158,7 @@ def report_invoice(
     security_token: str,
     secret: str,
     mode: ZatcaSendMode,
-) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+) -> tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a simplified invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {'invoiceHash': invoice_hash, 'uuid': invoice_uuid, 'invoice': b64_xml}
@@ -185,7 +186,7 @@ def clear_invoice(
     security_token: str,
     secret: str,
     mode: ZatcaSendMode,
-) -> Tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
+) -> tuple[Result[ReportOrClearInvoiceResult, ReportOrClearInvoiceError], int]:
     """Reports a standard invoice to ZATCA"""
     b64_xml = base64.b64encode(invoice_xml.encode()).decode()
     body = {'invoiceHash': invoice_hash, 'uuid': invoice_uuid, 'invoice': b64_xml}
@@ -213,12 +214,12 @@ TError = TypeVar('TError')
 def api_call(
     server: str,
     path: str,
-    headers: Dict[str, str],
-    body: Dict[str, str],
+    headers: dict[str, str],
+    body: dict[str, str],
     result_builder: Callable[[dict, str], TOk],
     error_builder: Callable[[Response | None, Exception | None], TError],
     auth=None,
-) -> Tuple[Result[TOk, TError], int]:
+) -> tuple[Result[TOk, TError], int]:
     """
     Performs a ZATCA API call and builds a success result using [result_builder]. In case of 400 errors, the
     response is parsed and a combined error is returned.
@@ -235,7 +236,37 @@ def api_call(
 
     response: Response | None = None
     try:
-        response = requests.post(url, headers=final_headers, json=body, auth=auth, timeout=ZATCA_API_TIMEOUT_SECONDS)
+        response = requests.post(
+            url,
+            headers=final_headers,
+            json=body,
+            auth=auth,
+            timeout=ZATCA_API_TIMEOUT_SECONDS,
+        )
+
+        # ZATCA may return an HTTP error status while a compliance/production CSID
+        # has actually been issued successfully. Validate the CSID payload before
+        # calling raise_for_status() so a complete ISSUED response is not discarded.
+        if path in ('compliance', 'production/csids'):
+            try:
+                csid_data = response.json()
+            except Exception:
+                csid_data = None
+
+            if (
+                isinstance(csid_data, dict)
+                and csid_data.get('dispositionMessage') == 'ISSUED'
+                and csid_data.get('requestID') is not None
+                and csid_data.get('binarySecurityToken')
+                and csid_data.get('secret')
+            ):
+                logger.warning(
+                    f'ZATCA returned HTTP {response.status_code}, '
+                    'but returned a complete ISSUED CSID. '
+                    'Treating response as successful.'
+                )
+                return Ok(result_builder(csid_data, response.text)), response.status_code
+
         response.raise_for_status()
         return Ok(result_builder(response.json(), response.text)), response.status_code
     except HTTPError as e:
@@ -269,7 +300,7 @@ def try_get_csid_error(response: Response | None, exception: Exception | None) -
     try:
         data = response.json()
         if response.status_code == 400:
-            errors = [WarningOrError.from_json(e) for e in cast(List[dict | str], data.get('errors', []))]
+            errors = [WarningOrError.from_json(e) for e in cast(list[dict | str], data.get('errors') or [])]
             if errors:
                 return ', '.join([e.message for e in errors])
 
@@ -297,7 +328,7 @@ def try_get_report_or_clear_error(response: Response | None, exception: Exceptio
         if response.status_code == 400:
             if data.get('validationResults'):
                 if data['validationResults'].get('errorMessages'):
-                    errors = cast(List[dict], data['validationResults']['errorMessages'])
+                    errors = cast(list[dict], data['validationResults']['errorMessages'])
                     return ReportOrClearInvoiceError(
                         response.text, '\n'.join([e['code'] + ': ' + e['message'] for e in errors])
                     )
