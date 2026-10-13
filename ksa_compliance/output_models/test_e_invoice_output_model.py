@@ -283,16 +283,21 @@ def _make_business_settings(company: str):
 
 def _make_company() -> Company:
     country = _make_country()
-    company = cast(Company, frappe.new_doc('Company'))
-    company.name = 'EInvoice Test Company'
-    company.company = 'EInvoice Test Company'
-    company.company_name = 'EInvoice Test Company'
-    company.default_currency = 'SAR'
-    company.country = country
-    company.insert()
+    company_name = 'EInvoice Test Company'
+    if frappe.db.exists('Company', company_name):
+        company = cast(Company, frappe.get_doc('Company', company_name))
+    else:
+        company = cast(Company, frappe.new_doc('Company'))
+        company.name = company_name
+        company.company = company_name
+        company.company_name = company_name
+        company.default_currency = 'SAR'
+        company.country = country
+        company.insert()
+
     _make_tax_categories()
-    _make_taxes(company.name)
-    _make_business_settings(company.name)
+    _make_taxes(cast(str, company.name))
+    _make_business_settings(cast(str, company.name))
     return company
 
 
@@ -328,6 +333,9 @@ def _make_tax_accounts(company: str) -> str:
 
 
 def _make_customer() -> Customer:
+    if existing := frappe.db.exists('Customer', {'customer_name': 'EInvoice Test Customer'}):
+        return cast(Customer, frappe.get_doc('Customer', existing))
+
     customer = cast(Customer, frappe.new_doc('Customer'))
     customer.name = 'EInvoice Test Customer'
     customer.customer_name = 'EInvoice Test Customer'
@@ -336,6 +344,9 @@ def _make_customer() -> Customer:
 
 
 def _make_tax_categories():
+    if frappe.db.exists('Tax Category', {'title': _TaxCategory.standard.value}):
+        return
+
     tax_category = cast(TaxCategory, frappe.new_doc('Tax Category'))
     tax_category.title = _TaxCategory.standard.value
     tax_category.custom_zatca_category = 'Standard rate'
@@ -351,48 +362,54 @@ def _make_taxes(company: str):
     }
 
     for template, tax_rate in tax_templates.items():
-        sales_template = cast(SalesTaxesandChargesTemplate, frappe.new_doc('Sales Taxes and Charges Template'))
-        sales_template.title = template.value
-        sales_template.company = company
-        sales_template.is_default = int(template == _TaxTemplate.VAT15)
+        if not frappe.db.exists('Sales Taxes and Charges Template', {'title': template.value, 'company': company}):
+            sales_template = cast(SalesTaxesandChargesTemplate, frappe.new_doc('Sales Taxes and Charges Template'))
+            sales_template.title = template.value
+            sales_template.company = company
+            sales_template.is_default = int(template == _TaxTemplate.VAT15)
 
-        # ERPNext permits only one enabled Sales Taxes and Charges Template per
-        # Tax Category, so the standard category belongs to the default template.
-        if template == _TaxTemplate.VAT15:
-            sales_template.tax_category = _TaxCategory.standard.value
+            # ERPNext permits only one enabled Sales Taxes and Charges Template per
+            # Tax Category, so the standard category belongs to the default template.
+            if template == _TaxTemplate.VAT15:
+                sales_template.tax_category = _TaxCategory.standard.value
 
-        sales_template.append(
-            'taxes',
-            {
-                'charge_type': 'On Net Total',
-                'account_head': account_head,
-                'rate': tax_rate,
-                'description': template.value,
-            },
-        )
-        sales_template.insert(ignore_permissions=True, ignore_mandatory=True, ignore_links=True)
+            sales_template.append(
+                'taxes',
+                {
+                    'charge_type': 'On Net Total',
+                    'account_head': account_head,
+                    'rate': tax_rate,
+                    'description': template.value,
+                },
+            )
+            sales_template.insert(ignore_permissions=True, ignore_mandatory=True, ignore_links=True)
 
-        item_template = cast(ItemTaxTemplate, frappe.new_doc('Item Tax Template'))
-        item_template.title = template.value
-        item_template.company = company
-        item_template.custom_zatca_item_tax_category = 'Standard rate'
-        item_template.append(
-            'taxes',
-            {
-                'tax_type': account_head,
-                'tax_rate': tax_rate,
-            },
-        )
-        item_template.insert(ignore_permissions=True)
+        if not frappe.db.exists('Item Tax Template', {'title': template.value, 'company': company}):
+            item_template = cast(ItemTaxTemplate, frappe.new_doc('Item Tax Template'))
+            item_template.title = template.value
+            item_template.company = company
+            item_template.custom_zatca_item_tax_category = 'Standard rate'
+            item_template.append(
+                'taxes',
+                {
+                    'tax_type': account_head,
+                    'tax_rate': tax_rate,
+                },
+            )
+            item_template.insert(ignore_permissions=True)
 
 
 def _make_items() -> list[Item]:
     def make_item_group() -> str:
         group = 'EInvoice Test Item Group'
+        if frappe.db.exists('Item Group', group):
+            return group
+
         gr = cast(ItemGroup, frappe.new_doc('Item Group'))
         gr.name = group
         gr.item_group_name = group
         gr.save()
+
         return gr.name
 
     item_codes = [
@@ -403,11 +420,15 @@ def _make_items() -> list[Item]:
     item_group = make_item_group()
     output = []
     for it in item_codes:
-        item = cast(Item, frappe.new_doc('Item'))
-        item.name = it['item_code']
-        item.item_code = it['item_code']
-        item.standard_rate = it['rate']
-        item.item_group = item_group
-        item.save()
+        if frappe.db.exists('Item', it['item_code']):
+            item = cast(Item, frappe.get_doc('Item', it['item_code']))
+        else:
+            item = cast(Item, frappe.new_doc('Item'))
+            item.name = it['item_code']
+            item.item_code = it['item_code']
+            item.standard_rate = it['rate']
+            item.item_group = item_group
+            item.save()
+
         output.append(item)
     return output
