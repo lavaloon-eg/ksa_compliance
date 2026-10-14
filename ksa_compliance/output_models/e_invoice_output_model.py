@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import cast, Optional, List
 
 import frappe
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import PaymentEntry
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.setup.doctype.branch.branch import Branch
 from frappe.model.document import Document
+from frappe.utils import flt
 from frappe.utils import get_date_str, get_time, strip
 from ksa_compliance.invoice import InvoiceType, get_zatca_discount_reason_by_name
 from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields import sales_invoice_additional_fields
@@ -16,11 +17,8 @@ from ksa_compliance.ksa_compliance.doctype.zatca_return_against_reference.zatca_
 )
 from ksa_compliance.throw import fthrow
 from ksa_compliance.translation import ft
-from frappe.utils import flt
-
-from .service import get_right_fieldname, update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
-
+from .service import get_right_fieldname, update_result
 from .tax import create_tax_categories, create_allowance_charge, create_tax_total
 
 
