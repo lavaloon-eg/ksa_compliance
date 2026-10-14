@@ -32,14 +32,23 @@ to a section with the version name.
   `BR-E-09`, `BR-O-09`). Each rule is checked on the XML generated for 44 invoices and credit notes, with prices
   excluding and including VAT, from one to 22 lines, mixing standard rated, zero rated, exempt and out of scope lines
 
+## 0.62.0
+
+Contributed by [Assem Bahnasy](https://github.com/AssemBahnasy)
+* ZATCA tile, dock, sidebar and icons for v16 desk after Frappe 16.50
+
 ## 0.61.9
 
-Contributed by [Yamen Afifi](https://github.com/yamenafifi)
+Contributed by [Khaled Rashad](https://github.com/Khaldosh249)
 
 * Branch Commercial Registration Number (CRN) no longer has to be unique across branches. A shared CRN now
   shows an informational warning instead of blocking the save, to support the unified national commercial
   registration (CR 2.0) in effect from April 2025. A CRN is still required for each branch when
   `Enable Branch Configuration` is on.
+
+Contributed by [Yamen Afifi](https://github.com/yamenafifi)
+
+* Read customer billing address from the sales invoice instead of the customer.
 
 ## 0.61.8
 
