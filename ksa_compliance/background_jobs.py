@@ -15,6 +15,7 @@ from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields.sales
 
 @frappe.whitelist()
 def add_batch_to_background_queue(check_date=datetime.date.today()):
+    frappe.only_for('System Manager')
     try:
         logger.info('Start Enqueue E-Invoices')
         frappe.enqueue(
