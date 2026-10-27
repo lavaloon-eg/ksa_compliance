@@ -1,5 +1,6 @@
 import json
 import os.path
+import platform
 import stat
 import subprocess
 import tempfile
@@ -21,7 +22,21 @@ from ksa_compliance.zatca_cli_setup import download_with_progress, extract_archi
 from ksa_compliance.zatca_files import get_csr_path, get_private_key_path, get_zatca_tool_path
 
 DEFAULT_CLI_VERSION = '2.10.0'
-DEFAULT_JRE_URL = 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.23_9.tar.gz'
+JRE_URL_TEMPLATE = (
+    'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/'
+    'OpenJDK11U-jre_{arch}_linux_hotspot_11.0.23_9.tar.gz'
+)
+
+
+def default_jre_url(machine: Optional[str] = None) -> str:
+    """Temurin 11 JRE for this server's CPU. ARM servers (e.g. AWS Graviton) need the aarch64 build;
+    the x64 one fails there with 'Exec format error'."""
+    machine = (machine or platform.machine()).lower()
+    arch = 'aarch64' if machine in ('aarch64', 'arm64') else 'x64'
+    return JRE_URL_TEMPLATE.format(arch=arch)
+
+
+DEFAULT_JRE_URL = default_jre_url()
 DEFAULT_CLI_URL = f'https://github.com/lavaloon-eg/zatca-cli/releases/download/{DEFAULT_CLI_VERSION}/zatca-cli-{DEFAULT_CLI_VERSION}.zip'
 
 
