@@ -8,6 +8,12 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+* Fix compliance check invoices being created without taxes on newer ERPNext versions
+  * `set_taxes` now only picks the company's default Sales Taxes and Charges Template and ignores the tax category,
+    so the compliance invoices ended up without taxes. The template matching the chosen tax category is now
+    selected explicitly (falling back to the default behaviour if none matches)
+* Strip whitespace from the OTP in Onboard and Get Production CSID. OTPs copied from the Fatoora portal often contain
+  spaces, which ZATCA rejects as an invalid OTP
 * Fix invoices rejected under `BR-CO-14` (invoice total VAT amount must equal the sum of the VAT category tax amounts)
   and `BR-CO-15` (invoice total with VAT must equal invoice total without VAT plus total VAT)
   * ERPNext fills `Sales Invoice Item.tax_amount` through the Saudi regional override, which rounds each line's VAT

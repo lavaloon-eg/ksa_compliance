@@ -437,7 +437,8 @@ def onboard(business_settings_id: str, otp: str) -> NoReturn:
     frappe.only_for('System Manager')
 
     settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
-    settings.onboard(otp)
+    # OTPs are often copied from the Fatoora portal with spaces between digits, which ZATCA rejects
+    settings.onboard(''.join(otp.split()))
 
 
 @frappe.whitelist()
@@ -445,7 +446,7 @@ def get_production_csid(business_settings_id: str, otp: str) -> NoReturn:
     frappe.only_for('System Manager')
 
     settings = cast(ZATCABusinessSettings, frappe.get_doc('ZATCA Business Settings', business_settings_id))
-    settings.get_production_csid(otp)
+    settings.get_production_csid(''.join(otp.split()))
 
 
 @frappe.whitelist()
