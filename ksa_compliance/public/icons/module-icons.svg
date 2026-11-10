@@ -1,0 +1,231 @@
+<!-- KSA Compliance's dual-tone module icons for the desk dock, sidebar and header. Each symbol
+     animates while its dock tile is hovered, through two custom properties the tile sets
+     (frappe/public/scss/desk/dock.scss): icon-motion (paused | running) and icon-motion-opacity
+     (0 | 1). Their CSS names carry the usual double-hyphen prefix, which an XML comment can't hold.
+
+     A name must end in `-duotone` for the dock to draw it on the 24px grid with the tile's tones.
+     Every id, class and custom property is prefixed `zatca-` so nothing clashes with another
+     app's sprite.
+
+     This sprite is inserted into the page, so the style block below is a document stylesheet. -->
+
+<svg id="zatca-module-symbols" aria-hidden="true" style="display: none;" class="icon" xmlns="http://www.w3.org/2000/svg">
+	<style>
+		/* Green, from the ZATCA icon (#5ab190). The light tone is the body of a shape, the dark tone
+		   its detail. light-dark() picks per theme: the dark theme swaps to a deeper body and a
+		   brighter detail so the pair still reads on a dark tray.
+		     rest     light: #c2e5d6 / #2e8b68     dark: #1e4a3b / #6fd0a9
+		     active   light: #a1d6bf / #1f6e51     dark: #285e4b / #93dfbf */
+		:root {
+			--zatca-green-light: light-dark(#c2e5d6, #1e4a3b);
+			--zatca-green-dark: light-dark(#2e8b68, #6fd0a9);
+			--zatca-green-light-active: light-dark(#a1d6bf, #285e4b);
+			--zatca-green-dark-active: light-dark(#1f6e51, #93dfbf);
+		}
+		/* Frappe's sprite sets grey tones on every duotone tile and header. These win for KSA
+		   Compliance's icons only, through the symbol the tile holds, so other apps keep their own. */
+		.dock-item--duotone:has(use[href^="#icon-zatca-"]),
+		.shell-header:hover .header-logo:has(use[href^="#icon-zatca-"]),
+		.shell-header.hover .header-logo:has(use[href^="#icon-zatca-"]) {
+			--duotone-light: var(--zatca-green-light);
+			--duotone-dark: var(--zatca-green-dark);
+		}
+		.dock-item--duotone.active:has(use[href^="#icon-zatca-"]) {
+			--duotone-light: var(--zatca-green-light-active);
+			--duotone-dark: var(--zatca-green-dark-active);
+		}
+
+		/* Mark: a shimmer runs across the shield's stripes. */
+		.zatca-stripe {
+			animation: zatca-shimmer 1.4s ease-in-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.zatca-stripe:nth-child(2) { animation-delay: 0.1s; }
+		.zatca-stripe:nth-child(3) { animation-delay: 0.2s; }
+		.zatca-stripe:nth-child(4) { animation-delay: 0.3s; }
+		.zatca-stripe:nth-child(5) { animation-delay: 0.4s; }
+		.zatca-stripe:nth-child(6) { animation-delay: 0.5s; }
+		@keyframes zatca-shimmer {
+			0%, 40%, 100% { opacity: 1; }
+			20% { opacity: 0.2; }
+		}
+		/* Home: the front door swings open on its left hinge. */
+		.zatca-door {
+			transform-box: fill-box;
+			transform-origin: left center;
+			transform: scaleX(calc(1 - 0.7 * var(--icon-motion-opacity, 0)));
+			transition: transform 0.3s ease;
+		}
+		/* Gears and sync arrows turn. */
+		.zatca-gear, .zatca-sync {
+			transform-box: view-box;
+			transform-origin: 12px 12px;
+			animation: zatca-turn 4s linear infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.zatca-sync { animation-duration: 1.6s; }
+		@keyframes zatca-turn { to { transform: rotate(360deg); } }
+		/* EGS: the device prints a receipt. */
+		.zatca-print {
+			animation: zatca-print 1.6s ease-in-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes zatca-print {
+			0%, 100% { transform: translateY(0); }
+			40%, 70% { transform: translateY(-2.4px); }
+		}
+		/* Invoice, log: the lines write themselves in. */
+		.zatca-line {
+			transform-box: fill-box;
+			transform-origin: left center;
+			animation: zatca-write 2s ease-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.zatca-line:nth-child(2) { animation-delay: 0.2s; }
+		.zatca-line:nth-child(3) { animation-delay: 0.4s; }
+		@keyframes zatca-write {
+			0%, 45%, 100% { transform: scaleX(1); }
+			8% { transform: scaleX(0); }
+			30% { transform: scaleX(1); }
+		}
+		/* Invoice: the QR code is stamped. */
+		.zatca-qr {
+			transform-box: fill-box;
+			transform-origin: center;
+			animation: zatca-stamp 2s ease-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes zatca-stamp {
+			0%, 55%, 100% { transform: scale(1); }
+			65% { transform: scale(1.3); }
+			75% { transform: scale(0.9); }
+		}
+		/* Report and dashboard: bars grow, tiles pop. */
+		.zatca-bar {
+			transform-box: fill-box;
+			transform-origin: center bottom;
+			animation: zatca-bar 2s ease-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.zatca-bar:nth-child(2) { animation-delay: 0.15s; }
+		.zatca-bar:nth-child(3) { animation-delay: 0.3s; }
+		@keyframes zatca-bar {
+			0%, 45%, 100% { transform: scaleY(1); }
+			8% { transform: scaleY(0.15); }
+			30% { transform: scaleY(1); }
+		}
+		.zatca-pop {
+			transform-box: fill-box;
+			transform-origin: center;
+			animation: zatca-pop 1.8s ease-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		.zatca-pop:nth-child(2) { animation-delay: 0.15s; }
+		.zatca-pop:nth-child(3) { animation-delay: 0.3s; }
+		.zatca-pop:nth-child(4) { animation-delay: 0.45s; }
+		@keyframes zatca-pop {
+			0%, 45%, 100% { transform: scale(1); }
+			10% { transform: scale(0.3); }
+			25% { transform: scale(1.15); }
+		}
+		/* Masters: the top lifts. */
+		.zatca-lift {
+			animation: zatca-lift 1.6s ease-in-out infinite;
+			animation-play-state: var(--icon-motion, paused);
+		}
+		@keyframes zatca-lift {
+			0%, 60%, 100% { transform: translateY(0); }
+			25% { transform: translateY(-2px); }
+		}
+	</style>
+
+	<!-- Mark: the striped ZATCA shield. The stripes are cut to the shield by hand: a clipPath in a
+	     display:none sprite is not applied in Chrome. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-mark-duotone" stroke="none" style="overflow: visible">
+		<path d="M12 2.6 20 5.8v5.6c0 5.3-3.4 9.3-8 11-4.6-1.7-8-5.7-8-11V5.8z" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<g style="fill: none; stroke: var(--duotone-dark, var(--zatca-green-dark)); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round">
+			<path class="zatca-stripe" d="M5.4 8.6 9.6 4.4" />
+			<path class="zatca-stripe" d="M5.6 12.4l7.8-7.8" />
+			<path class="zatca-stripe" d="M6.8 15.2l10-10" />
+			<path class="zatca-stripe" d="M8.8 17.2 19 7" />
+			<path class="zatca-stripe" d="M11 19l8-8" />
+			<path class="zatca-stripe" d="M14.2 19.8l2.4-2.4" />
+		</g>
+	</symbol>
+
+	<!-- Home: a house with a door. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-home-duotone" stroke="none" style="overflow: visible">
+		<path d="M4.5 10.2 12 4.3l7.5 5.9V20a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20z" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<path d="M2.6 11 12 3.3l9.4 7.7" style="fill: none; stroke: var(--duotone-dark, var(--zatca-green-dark)); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round" />
+		<rect class="zatca-door" x="9.8" y="14" width="4.4" height="7.5" rx="1" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+	</symbol>
+
+	<!-- Settings: a gear. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-settings-duotone" stroke="none" style="overflow: visible">
+		<g class="zatca-gear"><g style="fill: var(--duotone-light, var(--zatca-green-light))"><circle cx="12" cy="12" r="6.6" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(45 12 12)" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(90 12 12)" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(135 12 12)" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(180 12 12)" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(225 12 12)" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(270 12 12)" /><rect x="10.4" y="2.4000000000000004" width="3.2" height="3.6" rx="0.5" transform="rotate(315 12 12)" /></g></g>
+		<circle cx="12" cy="12" r="2.8" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+	</symbol>
+
+	<!-- EGS: an e-invoicing device printing a receipt. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-egs-duotone" stroke="none" style="overflow: visible">
+		<rect class="zatca-print" x="7" y="2.6" width="10" height="6" rx="1" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+		<rect x="3.5" y="7.4" width="17" height="14" rx="2.4" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<rect x="6" y="10" width="12" height="4.2" rx="1" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+		<g style="fill: var(--duotone-dark, var(--zatca-green-dark))"><circle cx="7.6" cy="17.6" r="1" /><circle cx="11" cy="17.6" r="1" /><circle cx="14.4" cy="17.6" r="1" /></g>
+		<rect x="16.6" y="16.6" width="1.8" height="2" rx="0.5" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+	</symbol>
+
+	<!-- Invoice: a document with a QR code. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-invoice-duotone" stroke="none" style="overflow: visible">
+		<rect x="4.5" y="2.5" width="15" height="19" rx="2" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<g style="fill: var(--duotone-dark, var(--zatca-green-dark))"><rect class="zatca-line" x="7.4" y="6" width="9" height="1.6" rx="0.8" /><rect class="zatca-line" x="7.4" y="9.2" width="6" height="1.6" rx="0.8" /></g>
+		<g class="zatca-qr" style="fill: var(--duotone-dark, var(--zatca-green-dark))">
+			<rect x="10.8" y="13" width="5.6" height="5.6" rx="0.8" />
+			<rect x="12.1" y="14.3" width="1.3" height="1.3" style="fill: var(--duotone-light, var(--zatca-green-light))" /><rect x="13.8" y="16" width="1.3" height="1.3" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		</g>
+	</symbol>
+
+	<!-- Log: a list of entries. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-log-duotone" stroke="none" style="overflow: visible">
+		<rect x="3.5" y="3" width="17" height="18" rx="2.4" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<g style="fill: var(--duotone-dark, var(--zatca-green-dark))"><circle cx="7.4" cy="8" r="1.2" /><circle cx="7.4" cy="12" r="1.2" /><circle cx="7.4" cy="16" r="1.2" /></g>
+		<g style="fill: var(--duotone-dark, var(--zatca-green-dark))"><rect class="zatca-line" x="10" y="7.2" width="7.4" height="1.6" rx="0.8" /><rect class="zatca-line" x="10" y="11.2" width="7.4" height="1.6" rx="0.8" /><rect class="zatca-line" x="10" y="15.2" width="5" height="1.6" rx="0.8" /></g>
+	</symbol>
+
+	<!-- Sync: two arrows chasing each other. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-sync-duotone" stroke="none" style="overflow: visible">
+		<circle cx="12" cy="12" r="9.2" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<g class="zatca-sync" style="fill: none; stroke: var(--duotone-dark, var(--zatca-green-dark)); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round">
+			<path d="M7.2 10.4A5.2 5.2 0 0 1 16.6 9.6" /><path d="M16.8 13.6a5.2 5.2 0 0 1-9.4.8" />
+			<path d="M16.9 6.6v3.2h-3.2" /><path d="M7.1 17.4v-3.2h3.2" />
+		</g>
+	</symbol>
+
+	<!-- Report: a sheet with a bar chart. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-report-duotone" stroke="none" style="overflow: visible">
+		<rect x="3.5" y="3" width="17" height="18" rx="2.5" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<g style="fill: var(--duotone-dark, var(--zatca-green-dark))"><rect class="zatca-bar" x="7" y="12" width="2.7" height="6" rx="0.8" /><rect class="zatca-bar" x="10.65" y="7.5" width="2.7" height="10.5" rx="0.8" /><rect class="zatca-bar" x="14.3" y="10" width="2.7" height="8" rx="0.8" /></g>
+	</symbol>
+
+	<!-- Dashboard: four tiles. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-dashboard-duotone" stroke="none" style="overflow: visible">
+		<rect class="zatca-pop" x="3" y="3" width="8" height="10" rx="2" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<rect class="zatca-pop" x="13" y="3" width="8" height="6" rx="2" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+		<rect class="zatca-pop" x="13" y="11" width="8" height="10" rx="2" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<rect class="zatca-pop" x="3" y="15" width="8" height="6" rx="2" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+	</symbol>
+
+	<!-- Premium: a crown. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-premium-duotone" stroke="none" style="overflow: visible">
+		<path d="M3.6 8.6l4.3 3.8L12 5.6l4.1 6.8 4.3-3.8-1.6 9.6H5.2z" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<rect x="5" y="19.4" width="14" height="2.2" rx="1.1" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+		<g style="fill: var(--duotone-dark, var(--zatca-green-dark))"><circle class="zatca-pop" cx="3.6" cy="8.4" r="1.5" /><circle class="zatca-pop" cx="12" cy="4.6" r="1.6" /><circle class="zatca-pop" cx="20.4" cy="8.4" r="1.5" /></g>
+	</symbol>
+
+	<!-- Masters: a stack of records. -->
+	<symbol viewBox="0 0 24 24" id="icon-zatca-masters-duotone" stroke="none" style="overflow: visible">
+		<path d="M4 6v12.5c0 1.7 3.6 3 8 3s8-1.3 8-3V6z" style="fill: var(--duotone-light, var(--zatca-green-light))" />
+		<g style="fill: none; stroke: var(--duotone-dark, var(--zatca-green-dark)); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round"><path d="M4 11.4c0 1.7 3.6 3 8 3s8-1.3 8-3" /><path d="M4 16.4c0 1.7 3.6 3 8 3s8-1.3 8-3" /></g>
+		<ellipse class="zatca-lift" cx="12" cy="6" rx="8" ry="3" style="fill: var(--duotone-dark, var(--zatca-green-dark))" />
+	</symbol>
+</svg>
