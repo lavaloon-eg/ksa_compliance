@@ -79,6 +79,7 @@ jinja = {
 
 # before_install = "ksa_compliance.install.before_install"
 after_install = 'ksa_compliance.setup.after_install'
+after_migrate = 'ksa_compliance.setup.after_migrate'
 
 # Uninstallation
 # ------------

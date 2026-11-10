@@ -62,6 +62,7 @@
   "onboarding_section",
   "create_csr",
   "csr",
+  "private_key",
   "compliance_request_id",
   "security_token",
   "secret",
@@ -263,6 +264,15 @@
    "fieldname": "csr",
    "fieldtype": "Small Text",
    "label": "CSR",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Generated during onboarding and stored encrypted, so ZATCA files can be restored when the site is moved to another bench.",
+   "fieldname": "private_key",
+   "fieldtype": "Password",
+   "hidden": 1,
+   "label": "Private Key",
    "no_copy": 1,
    "read_only": 1
   },

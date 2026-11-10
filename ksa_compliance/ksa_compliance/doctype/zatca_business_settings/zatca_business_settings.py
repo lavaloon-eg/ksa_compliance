@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 import base64
 import os
-from typing import Optional, NoReturn, cast, Literal
+from typing import Optional, NoReturn, Union, cast, Literal
 
 from pypika.functions import Count
 
@@ -71,6 +71,7 @@ class ZATCABusinessSettings(Document):
         override_cli_download_url: DF.Data | None
         override_jre_download_url: DF.Data | None
         postal_code: DF.Data | None
+        private_key: DF.Password | None
         production_request_id: DF.Data | None
         production_secret: DF.Password | None
         production_security_token: DF.SmallText | None
@@ -153,18 +154,71 @@ class ZATCABusinessSettings(Document):
 
     @property
     def cert_path(self) -> str:
-        return ksa_compliance.zatca_files.get_cert_path(self.file_prefix)
+        return self._ensure_file(
+            ksa_compliance.zatca_files.get_cert_path(self.file_prefix),
+            self._certificate_pem(self.production_security_token),
+        )
 
     @property
     def compliance_cert_path(self) -> str:
-        return ksa_compliance.zatca_files.get_compliance_cert_path(self.file_prefix)
+        return self._ensure_file(
+            ksa_compliance.zatca_files.get_compliance_cert_path(self.file_prefix),
+            self._certificate_pem(self.security_token),
+        )
 
     @property
     def private_key_path(self) -> str:
         if self.is_sandbox_server:
             return self._sandbox_private_key_path
 
-        return ksa_compliance.zatca_files.get_private_key_path(self.file_prefix)
+        return self._ensure_file(
+            ksa_compliance.zatca_files.get_private_key_path(self.file_prefix),
+            self.get_password('private_key', raise_exception=False),
+        )
+
+    @staticmethod
+    def _certificate_pem(security_token: Optional[str]) -> Optional[bytes]:
+        """Builds the PEM certificate from the (base64 encoded) security token ZATCA returned, if there is one"""
+        if not security_token:
+            return None
+
+        return b'-----BEGIN CERTIFICATE-----\n' + base64.b64decode(security_token) + b'\n-----END CERTIFICATE-----'
+
+    @staticmethod
+    def _ensure_file(path: str, content: Union[str, bytes, None]) -> str:
+        """
+        Returns [path], first recreating the file from [content] if it's missing.
+
+        The CLI needs these files on disk, but they live under the site directory, which isn't part of site backups.
+        Whatever we can derive from the database is restored lazily so a site moved to another bench keeps working
+        without re-onboarding.
+        """
+        if content and not os.path.isfile(path):
+            logger.info(f'Restoring missing ZATCA file {path}')
+            ksa_compliance.zatca_files.write_private_file(path, content)
+        return path
+
+    def rebase_automatic_tool_paths(self) -> dict[str, str]:
+        """
+        Points the CLI and Java paths of an automatic setup at this site's tools directory, returning the fields that
+        changed. Automatic setup saves absolute paths, which are stale once the site is moved to another bench.
+        """
+        if self.cli_setup != 'Automatic':
+            return {}
+
+        changes = {}
+        for fieldname in ('zatca_cli_path', 'java_home'):
+            current = self.get(fieldname)
+            rebased = ksa_compliance.zatca_files.rebase_zatca_tool_path(current) if current else current
+            if rebased != current:
+                changes[fieldname] = rebased
+        return changes
+
+    def restore_missing_files(self) -> None:
+        """Recreates any certificate or private key files missing from disk (e.g. after a site transfer)"""
+        self.cert_path, self.compliance_cert_path  # noqa: B018 - properties restore their file as a side effect
+        if not self.is_sandbox_server:
+            self.private_key_path  # noqa: B018
 
     @property
     def is_sandbox_server(self) -> bool:
@@ -218,15 +272,16 @@ class ZATCABusinessSettings(Document):
             fthrow(compliance_result.err_value, title=_('Compliance API Error'))
 
         self.csr = csr_result.csr
+        with open(csr_result.private_key_path, 'rt') as key_file:
+            self.private_key = key_file.read()
         self.security_token = compliance_result.ok_value.security_token
         self.secret = compliance_result.ok_value.secret
         self.compliance_request_id = compliance_result.ok_value.request_id
         self.save()
 
-        with open(self.compliance_cert_path, 'wb+') as cert:
-            cert.write(b'-----BEGIN CERTIFICATE-----\n')
-            cert.write(base64.b64decode(compliance_result.ok_value.security_token))
-            cert.write(b'\n-----END CERTIFICATE-----')
+        ksa_compliance.zatca_files.write_private_file(
+            self.compliance_cert_path, self._certificate_pem(compliance_result.ok_value.security_token)
+        )
 
         frappe.msgprint(_('Onboarding completed successfully'), title=_('Success'))
 
@@ -250,10 +305,9 @@ class ZATCABusinessSettings(Document):
         self.production_secret = csid_result.ok_value.secret
         self.save()
 
-        with open(self.cert_path, 'wb+') as cert:
-            cert.write(b'-----BEGIN CERTIFICATE-----\n')
-            cert.write(base64.b64decode(csid_result.ok_value.security_token))
-            cert.write(b'\n-----END CERTIFICATE-----')
+        ksa_compliance.zatca_files.write_private_file(
+            self.cert_path, self._certificate_pem(csid_result.ok_value.security_token)
+        )
 
         frappe.msgprint(_('Production CSID generated successfully'), title=_('Success'))
 
