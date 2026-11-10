@@ -1,9 +1,3 @@
-"""The amounts ZATCA's business rules compare, read from a generated invoice XML as exact decimals.
-
-Decimals rather than floats: the rules compare two-decimal amounts for exact equality, and a float sum
-such as 62.70 + 9.40 = 72.10000000000001 would fail a comparison the XML actually satisfies.
-"""
-
 import xml.etree.ElementTree as Et
 from decimal import Decimal
 from typing import NamedTuple
@@ -15,6 +9,12 @@ NAMESPACES = {
 
 
 class VatBreakdown(NamedTuple):
+    """The amounts ZATCA's business rules compare, read from a generated invoice XML as exact decimals.
+
+    The rules compare two-decimal amounts for exact equality, and a float sum
+    such as 62.70 + 9.40 = 72.10000000000001 would fail a comparison the XML actually satisfies.
+    """
+
     category: str
     """BT-118"""
     rate: Decimal
@@ -33,17 +33,17 @@ class InvoiceXml:
         return Decimal((self.tree if element is None else element).findtext(path, namespaces=NAMESPACES))
 
     @property
-    def bt109(self) -> Decimal:
+    def bt109_tax_exclusive_amount(self) -> Decimal:
         """Invoice total amount without VAT."""
         return self._amount('cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount')
 
     @property
-    def bt110(self) -> Decimal:
-        """Invoice total VAT amount, from the tax total that carries the VAT breakdown."""
+    def bt110_total_vat_amount(self) -> Decimal:
+        """Invoice total VAT amount."""
         return self._amount('cac:TaxTotal[cac:TaxSubtotal]/cbc:TaxAmount')
 
     @property
-    def bt112(self) -> Decimal:
+    def bt112_tax_inclusive_amount(self) -> Decimal:
         """Invoice total amount with VAT."""
         return self._amount('cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount')
 
@@ -61,7 +61,7 @@ class InvoiceXml:
         ]
 
     @property
-    def sum_bt117(self) -> Decimal:
+    def sum_bt117_tax_subtotals(self) -> Decimal:
         """Sum of the VAT category tax amounts in the VAT breakdown (BG-23)."""
         return sum((row.tax_amount for row in self.vat_breakdown), Decimal(0))
 

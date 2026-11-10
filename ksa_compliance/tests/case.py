@@ -25,9 +25,12 @@ class ZatcaTestCase(FrappeTestCaseClass):
         super().setUpClass()
         cls.tax_templates = make_test_data()
         # Pinned after the test data: creating a company can run DDL, which commits the transaction.
+        allow_multiple_items = change_settings('Selling Settings', allow_multiple_items=True)
         rounding = change_settings('System Settings', rounding_method=ROUNDING_METHOD)
         rounding.__enter__()
+        allow_multiple_items.__enter__()
         cls.addClassCleanup(rounding.__exit__, None, None, None)
+        cls.addClassCleanup(allow_multiple_items.__exit__, None, None, None)
 
     def for_each_scenario(
         self,

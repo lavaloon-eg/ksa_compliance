@@ -1,4 +1,4 @@
-"""Test data for the ZATCA rule tests: a company set up the way ksa_compliance needs, and its invoices."""
+"""Test data for the ZATCA rule tests."""
 
 from dataclasses import dataclass
 
@@ -38,7 +38,8 @@ class TaxTemplates:
 def make_test_data() -> TaxTemplates:
     if not frappe.db.exists('Country', 'Saudi Arabia'):
         _insert('Country', country_name='Saudi Arabia', code='sa')
-    _insert('Company', company_name=COMPANY, abbr='ZRT', default_currency='SAR', country='Saudi Arabia')
+    if not frappe.db.exists('Company', COMPANY):
+        _insert('Company', company_name=COMPANY, abbr='ZRT', default_currency='SAR', country='Saudi Arabia')
     _insert('Customer', customer_name=CUSTOMER)
     for item_code in ITEMS.values():
         _insert('Item', item_code=item_code, item_group='All Item Groups', is_stock_item=0, stock_uom='Nos')
