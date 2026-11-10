@@ -1,10 +1,3 @@
-"""Invoices the rule tests run through ERPNext and the XML output model.
-
-Every set of lines is billed four times: as an invoice and as a credit note, each with prices excluding
-and including VAT. Many of them drift: rounding each line's VAT gives a different total than the VAT
-ERPNext books for the invoice, which is what ZATCA rejected under BR-CO-14/15 in production.
-"""
-
 from dataclasses import dataclass
 
 STANDARD, ZERO_RATED, EXEMPT, OUT_OF_SCOPE = 'S', 'Z', 'E', 'O'
@@ -26,7 +19,6 @@ class Scenario:
     drifts: bool
 
 
-# ACC-SINV-2025-03078 (without its 0.01 workaround discount), 04085 and 05378
 ONE_LINE = (Line(1, 10.01),)
 TWO_LINES = (Line(50, 9.00), Line(30, 9.00))
 THREE_LINES = (Line(5, 8.70), Line(1, 145.00), Line(1, 208.00))
@@ -42,6 +34,7 @@ MANY_LINES = tuple(
 ZERO_RATED_LINE = Line(2, 75.50, ZERO_RATED)
 EXEMPT_LINE = Line(1, 100.00, EXEMPT)
 
+# A set of lines, each representing an invoice or credit note. See [SCENARIOS] below
 LINE_SETS = {
     'one_line': ONE_LINE,
     'two_lines': TWO_LINES,
@@ -57,12 +50,11 @@ LINE_SETS = {
     'out_of_scope_only': (Line(1, 250.00, OUT_OF_SCOPE), Line(2, 33.30, OUT_OF_SCOPE)),
 }
 
-# The rounding method of the production site the drifting invoices come from. Under half-up rounding, a line
+# The rounding method of the site the drifting invoices come from. Under half-up rounding, a line
 # VAT ending in exactly half a halala (5 x 8.70 x 15% = 6.525) rounds up, and some of these stop drifting.
 ROUNDING_METHOD = "Banker's Rounding"
 
-# Invoices where the sum of the rounded line VAT differs from the VAT ERPNext books, under ROUNDING_METHOD.
-# A credit note drifts exactly like the invoice it mirrors.
+# Invoices where the sum of the rounded line VAT differs from the VAT ERPNext books, under [ROUNDING_METHOD].
 DRIFTING = {
     'one_line_including_vat',
     'two_lines_including_vat',
@@ -86,6 +78,8 @@ def _scenario(set_name: str, lines: tuple[Line, ...], tax_included: bool, is_ret
     return Scenario(name, lines, tax_included, is_return, drifts=invoice_name in DRIFTING)
 
 
+# Every set of lines is used four times: An invoice and credit note with tax exclusive prices, then with tax inclusive
+# prices.
 SCENARIOS = tuple(
     _scenario(set_name, lines, tax_included, is_return)
     for set_name, lines in LINE_SETS.items()

@@ -13,11 +13,11 @@ def booked(amount: float) -> Decimal:
 
 
 class TestBookedAmounts(ZatcaTestCase):
-    """Not a ZATCA rule: the XML reports the VAT ERPNext books, so fixing the VAT breakdown moves no money."""
-
     def test_invoice_vat_is_the_booked_vat(self):
         self.for_each_scenario(
-            lambda scenario, invoice, xml: self.assertEqual(xml.bt110, booked(invoice.total_taxes_and_charges))
+            lambda scenario, invoice, xml: self.assertEqual(
+                xml.bt110_total_vat_amount, booked(invoice.total_taxes_and_charges)
+            )
         )
 
     def test_line_vat_is_the_booked_line_vat(self):

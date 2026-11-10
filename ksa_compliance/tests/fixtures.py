@@ -1,4 +1,4 @@
-"""Test data for the ZATCA rule tests: a company set up the way ksa_compliance needs, and its invoices."""
+"""Test data for the ZATCA rule tests."""
 
 from dataclasses import dataclass
 
