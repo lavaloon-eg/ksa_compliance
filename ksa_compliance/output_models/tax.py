@@ -95,7 +95,7 @@ def check_item_tax_template(doc: SalesInvoice, item_lines: list, sales_taxes_and
 
 
 # When calculating tax subtotals (tax amount per tax category), we sum up line-level taxes for each category. The sum of
-# subtotals should equal the total taxes nad charges. However, we sometimes get a mismatch due to floating point
+# subtotals should equal the total taxes and charges. However, we sometimes get a mismatch due to floating point
 # rounding. This constant describes the maximum drift we allow per line while still considering the invoice to be
 # correct. I.e., If we have four lines across two categories, we allow for up to 0.04 difference between the sum of
 # subtotals and the total taxes and charges, and correct the tax subtotals (see [_allocate_tax_amounts] below)
