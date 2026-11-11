@@ -104,6 +104,12 @@ jobs:
         env:
           CI: 'Yes'
 
+      - name: Bootstrap test data
+        working-directory: /home/ubuntu/frappe-bench
+        run: bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+        env:
+          TYPE: server
+
       - name: Run Tests
         working-directory: /home/runner/frappe-bench
         run: |
