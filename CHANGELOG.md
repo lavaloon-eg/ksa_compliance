@@ -13,6 +13,10 @@ Contributed by [Assem Bahnasy](https://github.com/AssemBahnasy)
   and `BR-CO-15` (invoice total with VAT must equal invoice total without VAT plus total VAT)
   * A workaround was added to adjust VAT subtotals to ensure they sum up to the invoice total VAT
 
+* The supply date (KSA-5) can be read from a configurable Sales Invoice field through the `zatca_supply_date_field`
+  hook (default: `due_date`, unchanged behaviour). A supply end date (KSA-24, `cbc:LatestDeliveryDate`) is emitted
+  when the `zatca_supply_end_date_field` hook names a field that has a value.
+
 ## 0.62.0
 
 Contributed by [Assem Bahnasy](https://github.com/AssemBahnasy)

@@ -135,6 +135,9 @@
     {% if invoice.delivery_date %}
     <cac:Delivery>
         <cbc:ActualDeliveryDate>{{ invoice.delivery_date }}</cbc:ActualDeliveryDate>
+        {% if invoice.latest_delivery_date %}
+        <cbc:LatestDeliveryDate>{{ invoice.latest_delivery_date }}</cbc:LatestDeliveryDate>
+        {% endif %}
     </cac:Delivery>
     {% endif %}
     {% if invoice.payment_means_type_code or invoice.instruction_note %}
