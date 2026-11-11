@@ -21,6 +21,7 @@ from frappe.utils import flt
 from .service import get_right_fieldname, update_result
 from .prepayment_invoice.prepayment_invoice_factory import prepayment_invoice_factory_create
 
+from .supply_dates import get_supply_date_field, get_supply_end_date_field
 from .tax import create_tax_categories, create_allowance_charge, create_tax_total
 
 
@@ -771,10 +772,22 @@ class Einvoice:
         )
 
         if is_standard:
-            # TODO: Review this with business and finalize
+            # Supply date (KSA-5) defaults to due_date; see supply_dates.py to configure it
             self.get_date_value(
-                field_name='due_date', source_doc=self.sales_invoice_doc, xml_name='delivery_date', parent='invoice'
+                field_name=get_supply_date_field(),
+                source_doc=self.sales_invoice_doc,
+                xml_name='delivery_date',
+                parent='invoice',
             )
+            supply_end_date_field = get_supply_end_date_field()
+            if supply_end_date_field:
+                # Supply end date (KSA-24)
+                self.get_date_value(
+                    field_name=supply_end_date_field,
+                    source_doc=self.sales_invoice_doc,
+                    xml_name='latest_delivery_date',
+                    parent='invoice',
+                )
 
         self.get_text_value(
             field_name='invoice_type_code',
