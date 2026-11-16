@@ -261,6 +261,14 @@ def _make_invoice(company: str, customer: str, item: str, tax_category_id: str) 
     invoice.company = company
     invoice.customer = customer
     invoice.tax_category = tax_category_id
+    # Newer ERPNext versions of set_taxes only pick the company's default template, ignoring tax category, so we
+    # explicitly select the template matching the chosen tax category
+    invoice.taxes_and_charges = frappe.db.get_value(
+        'Sales Taxes and Charges Template',
+        {'company': company, 'tax_category': tax_category_id, 'disabled': 0},
+        'name',
+        order_by='is_default desc',
+    )
     invoice.set_taxes()
     invoice.append('items', {'item_code': item, 'qty': 1.0})
     invoice.set_missing_values()
