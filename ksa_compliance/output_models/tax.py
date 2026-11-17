@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 from math import copysign
+from typing import Tuple
 
 import frappe
 from frappe.utils import flt, rounded
@@ -104,7 +106,16 @@ def check_item_tax_template(doc: SalesInvoice, item_lines: list, sales_taxes_and
 MAX_ROUNDING_DRIFT_PER_LINE = 0.01
 
 
-def create_tax_total(tax_categories: dict, total_taxes_and_charges: float | None = None) -> dict:
+@dataclass
+class TaxCorrection:
+    category: str
+    before: float
+    after: float
+
+
+def create_tax_total(
+    tax_categories: dict, total_taxes_and_charges: float | None = None
+) -> Tuple[frappe._dict, list[TaxCorrection]]:
     """Build the invoice's VAT breakdown (``cac:TaxTotal``).
 
     Line-level VAT comes from `Sales Invoice Item.tax_amount`, which the Saudi regional override
@@ -122,15 +133,17 @@ def create_tax_total(tax_categories: dict, total_taxes_and_charges: float | None
         tax_categories, amounts_by_category, total_taxes_and_charges
     )
 
-    tax_sub_totals = []
+    tax_corrections: list[TaxCorrection] = []
+    tax_sub_totals: list[TaxSubtotal] = []
     tax_amount = 0
     taxable_amount = 0
     total_discount = 0
     for category in tax_categories:
         amounts = amounts_by_category[category]
+        corrected_tax_amount = corrected_tax_amounts_by_category[category]
         tax_sub_total = TaxSubtotal(
             taxable_amount=amounts.taxable_amount,
-            tax_amount=corrected_tax_amounts_by_category[category],
+            tax_amount=corrected_tax_amount,
             tax_category=tax_categories[category].tax_category,
             total_discount=amounts.total_discount,
         )
@@ -139,9 +152,13 @@ def create_tax_total(tax_categories: dict, total_taxes_and_charges: float | None
         total_discount += amounts.total_discount
         tax_sub_totals.append(tax_sub_total)
 
-    return dataclass_to_frappe_dict(
+        if amounts.tax_amount != corrected_tax_amount:
+            tax_corrections.append(TaxCorrection(category, amounts.tax_amount, corrected_tax_amount))
+
+    tax_total = dataclass_to_frappe_dict(
         TaxTotal(tax_amount=tax_amount, taxable_amount=taxable_amount, tax_subtotal=tax_sub_totals)
     )
+    return tax_total, tax_corrections
 
 
 def _allocate_tax_amounts(

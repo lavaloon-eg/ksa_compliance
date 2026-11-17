@@ -197,7 +197,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
                 )
 
                 categories = build_categories(('S', STANDARD, rate, [build_item(net, vat) for net, vat in lines]))
-                tax_total = create_tax_total(categories, invoice_vat)
+                tax_total, _ = create_tax_total(categories, invoice_vat)
 
                 net_total = flt(sum(net for net, _ in lines), 2)
                 self.assert_all_rules(tax_total, invoice_vat)
@@ -208,7 +208,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
         """Baseline: when the line VAT already agrees with the invoice VAT, nothing moves."""
         categories = build_categories(('S15', STANDARD, 15.0, [build_item(1000.00, 150.00)]))
 
-        tax_total = create_tax_total(categories, 150.00)
+        tax_total, _ = create_tax_total(categories, 150.00)
 
         self.assert_all_rules(tax_total, 150.00)
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).taxable_amount, 2), 1000.00)
@@ -227,7 +227,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
             )
         )
 
-        tax_total = create_tax_total(categories, 4.54)
+        tax_total, _ = create_tax_total(categories, 4.54)
 
         self.assert_all_rules(tax_total, 4.54)
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 4.54)
@@ -243,7 +243,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
             ('Z0', ZERO_RATED, 0.0, [build_item(1000.00, 0.00)]),
         )
 
-        tax_total = create_tax_total(categories, 150.00)
+        tax_total, _ = create_tax_total(categories, 150.00)
 
         self.assert_all_rules(tax_total, 150.00)
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 150.00)
@@ -260,7 +260,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
             ('E0', EXEMPT, 0.0, [build_item(50.00, 0.00)]),
         )
 
-        tax_total = create_tax_total(categories, 15.00)
+        tax_total, _ = create_tax_total(categories, 15.00)
 
         self.assert_all_rules(tax_total, 15.00)
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 15.00)
@@ -276,7 +276,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
             ('S5', STANDARD, 5.0, [build_item(1000.00, 50.00)]),
         )
 
-        tax_total = create_tax_total(categories, 199.99)
+        tax_total, _ = create_tax_total(categories, 199.99)
 
         self.assert_br_co_14(tax_total, 199.99)
         self.assert_br_co_17(tax_total)
@@ -293,7 +293,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
             ('S15', STANDARD, 15.0, [build_item(10.10, 1.52), build_item(10.10, 1.52), build_item(10.10, 1.52)])
         )
 
-        tax_total = create_tax_total(categories)
+        tax_total, _ = create_tax_total(categories)
 
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 4.56)
 
@@ -304,7 +304,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
             ('E0', EXEMPT, 0.0, [build_item(500.00, 0.00)]),
         )
 
-        tax_total = create_tax_total(categories, 0.00)
+        tax_total, _ = create_tax_total(categories, 0.00)
 
         self.assert_all_rules(tax_total, 0.00)
 
@@ -317,7 +317,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
         """
         categories = build_categories(('S15', STANDARD, 15.0, [build_item(1000.00, 150.00)]))
 
-        tax_total = create_tax_total(categories, 100.00)
+        tax_total, _ = create_tax_total(categories, 100.00)
 
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 150.00)
         self.assert_br_co_17(tax_total)
@@ -329,7 +329,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
         """
         categories = build_categories(('S15', STANDARD, 15.0, [build_item(8.70, 1.30)]))
 
-        tax_total = create_tax_total(categories, 1.31)
+        tax_total, _ = create_tax_total(categories, 1.31)
 
         self.assert_all_rules(tax_total, 1.31)
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 1.31)
@@ -338,7 +338,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
         """One line can drift by at most one halala, so a two-halala gap is not rounding."""
         categories = build_categories(('S15', STANDARD, 15.0, [build_item(8.70, 1.30)]))
 
-        tax_total = create_tax_total(categories, 1.32)
+        tax_total, _ = create_tax_total(categories, 1.32)
 
         self.assertEqual(flt(self.subtotal_for(tax_total, STANDARD).tax_amount, 2), 1.30)
 
@@ -360,7 +360,7 @@ class TestCreateTaxTotal(FrappeTestCaseClass):
                     )
                 )
 
-                tax_total = create_tax_total(categories, 4.54)
+                tax_total, _ = create_tax_total(categories, 4.54)
 
                 self.assert_all_rules(tax_total, 4.54)
 
@@ -449,7 +449,7 @@ class TestTax(FrappeTestCaseClass):
                 ),
             ],
         )
-        totals = create_tax_total({'S15': taxes})
+        totals, _ = create_tax_total({'S15': taxes})
         subtotals = cast(List[TaxSubtotal], totals['tax_subtotal'])
         discount = rounded(subtotals[0].total_discount, 2)
         self.assertEqual(0.0, discount, 'Expected total_discount to be 0.0')
