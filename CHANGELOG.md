@@ -8,11 +8,15 @@ to a section with the version name.
 
 ## Unreleased Changes
 
+## 0.63.0
+
 Contributed by [Assem Bahnasy](https://github.com/AssemBahnasy)
 * Fix invoices rejected under `BR-CO-14` (invoice total VAT amount must equal the sum of the VAT category tax amounts)
   and `BR-CO-15` (invoice total with VAT must equal invoice total without VAT plus total VAT)
   * A workaround was added to adjust VAT subtotals to ensure they sum up to the invoice total VAT
-  * The tax corrections are recorded in `Sales Invoice Additional Fields` in a newly added 'Correction' tab
+
+By LavaLoon
+* Record tax subtotal corrections in `Sales Invoice Additional Fields` in a newly added 'Correction' tab
 
 ## 0.62.0
 
