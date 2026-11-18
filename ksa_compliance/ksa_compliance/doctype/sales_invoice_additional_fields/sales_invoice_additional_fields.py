@@ -31,6 +31,9 @@ from ksa_compliance import zatca_api as api
 from ksa_compliance import zatca_cli as cli
 from ksa_compliance.generate_xml import generate_xml_file
 from ksa_compliance.invoice import InvoiceMode, InvoiceType
+from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields_tax_subtotal_correction.sales_invoice_additional_fields_tax_subtotal_correction import (
+    SalesInvoiceAdditionalFieldsTaxSubtotalCorrection,
+)
 from ksa_compliance.ksa_compliance.doctype.zatca_business_settings.zatca_business_settings import ZATCABusinessSettings
 from ksa_compliance.ksa_compliance.doctype.zatca_egs.zatca_egs import ZATCAEGS
 from ksa_compliance.ksa_compliance.doctype.zatca_integration_log.zatca_integration_log import ZATCAIntegrationLog
@@ -61,6 +64,9 @@ class SalesInvoiceAdditionalFields(Document):
         from frappe.types import DF
         from ksa_compliance.ksa_compliance.doctype.additional_seller_ids.additional_seller_ids import (
             AdditionalSellerIDs,
+        )
+        from ksa_compliance.ksa_compliance.doctype.sales_invoice_additional_fields_tax_subtotal_correction.sales_invoice_additional_fields_tax_subtotal_correction import (
+            SalesInvoiceAdditionalFieldsTaxSubtotalCorrection,
         )
 
         allow_submit: DF.Check
@@ -130,6 +136,7 @@ class SalesInvoiceAdditionalFields(Document):
         sum_of_charges: DF.Float
         supply_end_date: DF.Data | None
         tax_currency: DF.Data | None
+        tax_subtotal_corrections: DF.Table[SalesInvoiceAdditionalFieldsTaxSubtotalCorrection]
         uuid: DF.Data | None
         validation_errors: DF.SmallText | None
         validation_messages: DF.SmallText | None
@@ -209,6 +216,15 @@ class SalesInvoiceAdditionalFields(Document):
         self.previous_invoice_hash = pre_invoice_hash
 
         einvoice = Einvoice(sales_invoice_additional_fields_doc=self, invoice_type=invoice_type)
+        for correction in einvoice.tax_corrections:
+            correction_doc = cast(
+                SalesInvoiceAdditionalFieldsTaxSubtotalCorrection,
+                frappe.new_doc('Sales Invoice Additional Fields Tax Subtotal Correction'),
+            )
+            correction_doc.category = correction.category
+            correction_doc.original_amount = correction.before
+            correction_doc.corrected_amount = correction.after
+            self.append('tax_subtotal_corrections', correction_doc)
 
         cert_path = settings.compliance_cert_path if self.is_compliance_mode else settings.cert_path
         invoice_xml = generate_xml_file(einvoice.result)

@@ -96,7 +96,10 @@
   "validation_section",
   "validation_messages",
   "column_break_daqi",
-  "validation_errors"
+  "validation_errors",
+  "column_break_qbcl",
+  "correction_tab",
+  "tax_subtotal_corrections"
  ],
  "fields": [
   {
@@ -643,6 +646,18 @@
    "hidden": 1,
    "label": "Allow Submit",
    "read_only": 1
+  },
+  {
+   "fieldname": "correction_tab",
+   "fieldtype": "Tab Break",
+   "label": "Correction"
+  },
+  {
+   "fieldname": "tax_subtotal_corrections",
+   "fieldtype": "Table",
+   "label": "Tax Subtotal Correction",
+   "options": "Sales Invoice Additional Fields Tax Subtotal Correction",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -653,7 +668,7 @@
    "link_fieldname": "invoice_additional_fields_reference"
   }
  ],
- "modified": "2026-02-03 15:16:56.510792",
+ "modified": "2026-11-17 19:43:17.384557",
  "modified_by": "Administrator",
  "module": "KSA Compliance",
  "name": "Sales Invoice Additional Fields",
