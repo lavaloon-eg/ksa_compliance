@@ -924,7 +924,15 @@ class Einvoice:
         self.result['invoice']['item_lines'] = item_lines
         self.result['invoice']['line_extension_amount'] = sum(it['amount'] for it in item_lines)
         self.compute_invoice_discount_amount()
-        self.result['invoice']['net_total'] = (
+
+        # To avoid rejection code: BR-CO-11
+        # Rejection message: Sum of allowances on document level (BT-107) = Σ Document level allowance amount (BT-92)
+        # We need to ensure that the total document level allowance amount is equal to the sum of all document level allowance amounts.
+        self.result['invoice']['allowance_total_amount'] = sum(
+            flt(row['amount'], 2) for row in self.result['invoice']['allowance_charge']
+        )
+
+        self.result['invoice']['net_total'] = abs(
             self.result['invoice']['line_extension_amount'] - self.result['invoice']['allowance_total_amount']
         )
         if self.sales_invoice_doc.doctype == 'Payment Entry':
@@ -939,8 +947,8 @@ class Einvoice:
         if self.sales_invoice_doc.doctype != 'Payment Entry':
             rounding_adjustment = self.sales_invoice_doc.rounding_adjustment
 
-        self.result['invoice']['payable_amount'] = self.result['invoice']['grand_total'] + rounding_adjustment
-        self.result['invoice']['rounding_adjustment'] = rounding_adjustment
+        self.result['invoice']['payable_amount'] = abs(self.result['invoice']['grand_total'] + rounding_adjustment)
+        self.result['invoice']['rounding_adjustment'] = abs(rounding_adjustment)
 
         if self.sales_invoice_doc.doctype == 'Payment Entry':
             return
